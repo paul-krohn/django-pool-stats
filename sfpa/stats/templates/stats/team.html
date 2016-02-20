@@ -1,5 +1,10 @@
-<h1>Team Index</h1>
+{% extends "stats/base.html" %}
+
+{% block title %}SFPA :: {{ team.season }} :: {{ team }}{% endblock %}
+
+{% block content %}
 {% if team %}
-<h2>{{ team }}</h2>
+<h1>{{ team }}</h1>
 <p>{{ team.season }}</p>
 {% endif %}
+{% endblock %}

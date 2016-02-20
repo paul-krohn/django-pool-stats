@@ -20,5 +20,11 @@ def team(request, team_id):
     }
     return render(request, 'stats/team.html', context)
 
+def seasons(request):
+    seasons = Season.objects.all()
+    context = {
+        'seasons': seasons
+    }
+    return render(request, 'stats/seasons.html', context)
 
 
