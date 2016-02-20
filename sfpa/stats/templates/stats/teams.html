@@ -1,0 +1,9 @@
+<h1>Teams</h1>
+{% if teams %}
+<ul>
+{% for team in teams %}
+<li><a href="{% url 'team' team.id %}">{{ team }}</a></li>
+{% endfor %}
+</ul>
+
+{% endif %}
