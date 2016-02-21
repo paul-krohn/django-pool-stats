@@ -1,11 +1,24 @@
 from django.shortcuts import render
-
-from django.http import HttpResponse
 from .models import Season, Team
 
 
+def set_season(request, season_id=None):
+    if season_id is None:
+        season_id = Season.objects.get(is_default=True).id
+    request.session['season_id'] = season_id
+    request.session.save()
+
+
+def check_season(request):
+    if 'season_id' in request.session:
+        return
+    else:
+        set_season(request)
+
+
 def index(request):
-    team_list = Team.objects.all()
+    check_season(request)
+    team_list = Team.objects.filter(season=request.session['season_id'])
     context = {
         'teams': team_list
     }
@@ -20,11 +33,10 @@ def team(request, team_id):
     }
     return render(request, 'stats/team.html', context)
 
+
 def seasons(request):
-    seasons = Season.objects.all()
+    _seasons = Season.objects.all()
     context = {
-        'seasons': seasons
+        'seasons': _seasons
     }
     return render(request, 'stats/seasons.html', context)
-
-
