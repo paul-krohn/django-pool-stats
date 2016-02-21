@@ -6,5 +6,6 @@
 {% if team %}
 <h1>{{ team }}</h1>
 <p>{{ team.season }}</p>
+<p><a href="{% url 'sponsor' team.sponsor.id %}">{{ team.sponsor }}</a></p>
 {% endif %}
 {% endblock %}

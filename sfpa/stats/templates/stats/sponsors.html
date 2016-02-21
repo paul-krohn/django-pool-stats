@@ -1,0 +1,15 @@
+{% extends "stats/base.html" %}
+
+{% block title %}SFPA :: Sponsors{% endblock %}
+
+{% block content %}
+
+{% if sponsors %}
+<ul>
+{% for sponsor in sponsors %}
+<li><a href="{% url 'sponsor' sponsor.id %}">{{ sponsor }}</a></li>
+{% endfor %}
+</ul>
+
+{% endif %}
+{% endblock %}

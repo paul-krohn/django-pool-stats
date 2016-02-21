@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Season, Team
+from .models import Season, Sponsor, Team
 
 
 def set_season(request, season_id=None):
@@ -47,3 +47,19 @@ def seasons(request):
         'seasons': _seasons
     }
     return render(request, 'stats/seasons.html', context)
+
+
+def sponsor(request, sponsor_id):
+    _sponsor = Sponsor.objects.get(id=sponsor_id)
+    context = {
+        'sponsor': _sponsor
+    }
+    return render(request, 'stats/sponsor.html', context)
+
+
+def sponsors(request):
+    _sponsors = Sponsor.objects.all()
+    context = {
+        'sponsors': _sponsors
+    }
+    return render(request, 'stats/sponsors.html', context)
