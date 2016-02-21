@@ -1,0 +1,11 @@
+{% extends "stats/base.html" %}
+
+{% block title %}SFPA :: {{ team.season }} :: {{ team }}{% endblock %}
+
+{% block content %}
+
+{% for player in players %}
+<li><a href="{% url 'player' player.id %}">{{ player }}</a></li>
+{% endfor %}
+
+{% endblock %}
