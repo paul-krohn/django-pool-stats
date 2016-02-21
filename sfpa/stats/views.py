@@ -43,7 +43,9 @@ def player(request, player_id):
 
 
 def players(request):
-    _players = Player.objects.all()
+    #  filter on membership in a team in the current season
+    check_season(request)
+    _players = Player.objects.filter(team__season=request.session['season_id'])
     context = {
         'players': _players
     }
