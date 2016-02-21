@@ -1,12 +1,19 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from .models import Season, Team
 
 
 def set_season(request, season_id=None):
+    """
+    Allow the user to set their season to a value other than the default.
+    :param request:
+    :return: bool
+    """
     if season_id is None:
         season_id = Season.objects.get(is_default=True).id
     request.session['season_id'] = season_id
     request.session.save()
+    # hard-coded urls are bad okay?
+    return redirect(to='/stats/')
 
 
 def check_season(request):
