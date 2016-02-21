@@ -43,11 +43,11 @@ def player(request, player_id):
 
 
 def players(request):
-    _sponsors = Sponsor.objects.all()
+    _players = Player.objects.all()
     context = {
-        'sponsors': _sponsors
+        'players': _players
     }
-    return render(request, 'stats/sponsors.html', context)
+    return render(request, 'stats/players.html', context)
 
 
 def team(request, team_id):
