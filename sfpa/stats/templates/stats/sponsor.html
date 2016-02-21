@@ -4,7 +4,7 @@
 
 {% block content %}
 {% if sponsor %}
-<h1>{{ sponsor }}</h1>
+<h1><a href="{{ sponsor.link }}">{{ sponsor }}</a></h1>
 <p>{{ sponsor.address }}</p>
 {% endif %}
 {% endblock %}
