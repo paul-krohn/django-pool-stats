@@ -87,7 +87,7 @@ def sponsors(request):
 
 def divisions(request):
     check_season(request)
-    _divisions = Division.objects.filter(team__season=request.session['season_id'])
+    _divisions = Division.objects.filter(season=request.session['season_id'])
     context = {
         'divisions': _divisions
     }
