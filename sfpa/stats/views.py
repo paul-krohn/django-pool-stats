@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Player, Season, Sponsor, Team
+from .models import Division, Player, Season, Sponsor, Team
 
 
 def set_season(request, season_id=None):
@@ -83,3 +83,12 @@ def sponsors(request):
         'sponsors': _sponsors
     }
     return render(request, 'stats/sponsors.html', context)
+
+
+def divisions(request):
+    check_season(request)
+    _divisions = Division.objects.filter(team__season=request.session['season_id'])
+    context = {
+        'divisions': _divisions
+    }
+    return render(request, 'stats/divisions.html', context)

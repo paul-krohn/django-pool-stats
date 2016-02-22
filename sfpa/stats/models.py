@@ -29,11 +29,20 @@ class Player(models.Model):
         return self.display_name or "%s %s" % (self.first_name, self.last_name)
 
 
+class Division(models.Model):
+    season = models.ForeignKey(Season)
+    name = models.CharField(max_length=64)
+
+    def __str__(self):
+        return self.name
+
+
 class Team(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     sponsor = models.ForeignKey(Sponsor, null=True)
+    division = models.ForeignKey(Division, null=True)
     name = models.CharField(max_length=200)
-    players = models.ManyToManyField(Player)
+    players = models.ManyToManyField(Player, blank=True)
 
     def __str__(self):
         return self.name
