@@ -1,11 +1,12 @@
 from django.contrib import admin
 
-from .models import Division, Player, Season, Team, Sponsor
+from .models import Division, Player, Season, Sponsor, Team, Week
 
 admin.site.register(Division)
 admin.site.register(Player)
 admin.site.register(Season)
 admin.site.register(Sponsor)
+admin.site.register(Week)
 
 
 class TeamAdmin(admin.ModelAdmin):

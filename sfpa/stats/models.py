@@ -20,7 +20,6 @@ class Season(models.Model):
 
 
 class Player(models.Model):
-    # team = models.ManyToManyField(Team)
     first_name = models.CharField(max_length=64)
     last_name = models.CharField(max_length=64)
     display_name = models.CharField(max_length=128, null=True, blank=True)
@@ -43,6 +42,12 @@ class Team(models.Model):
     division = models.ForeignKey(Division, null=True)
     name = models.CharField(max_length=200)
     players = models.ManyToManyField(Player, blank=True)
+
+
+class Week(models.Model):
+    season = models.ForeignKey(Season)
+    date = models.DateField(null=True, blank=True)
+    name = models.CharField(max_length=32, null=True)
 
     def __str__(self):
         return self.name
