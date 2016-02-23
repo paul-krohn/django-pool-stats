@@ -16,3 +16,18 @@ class TeamAdmin(admin.ModelAdmin):
     filter_horizontal = ['players']
 
 admin.site.register(Team, TeamAdmin)
+
+# TODO: 
+# It would be pretty to have, in the match admin, the teams filtered by season
+# formfield_for_foreignkey seems to be the way to go?
+# class MatchAdmin(admin.ModelAdmin):
+#     list_filter = ['season', 'week']
+#
+#     # def formfield_for_foreignkey(db_field, request, **kwargs):
+#     # def formfield_for_foreignkey(self, db_field, request, **kwargs):
+#     def formfield_for_foreignkey(self, db_field, request, **kwargs):
+#         if db_field.name == "team":
+#             kwargs["queryset"] = Team.objects.filter(owner=request.session['season_id'])
+#         return super(MatchAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
+
+# admin.site.register(Match, MatchAdmin)
