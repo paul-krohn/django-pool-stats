@@ -43,6 +43,9 @@ class Team(models.Model):
     name = models.CharField(max_length=200)
     players = models.ManyToManyField(Player, blank=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Week(models.Model):
     season = models.ForeignKey(Season)
@@ -51,3 +54,24 @@ class Week(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class AwayTeam(Team):
+    class Meta:
+        proxy = True
+
+
+class HomeTeam(Team):
+    class Meta:
+        proxy = True
+
+
+class Match(models.Model):
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
+    week = models.ForeignKey(Week)
+    home_team = models.ForeignKey(HomeTeam)
+    away_team = models.ForeignKey(AwayTeam)
+
+    def __str__(self):
+        return "{} @ {}".format(self.away_team, self.home_team)
+

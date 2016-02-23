@@ -1,8 +1,9 @@
 from django.contrib import admin
 
-from .models import Division, Player, Season, Sponsor, Team, Week
+from .models import Division, Match, Player, Season, Sponsor, Team, Week
 
 admin.site.register(Division)
+admin.site.register(Match)
 admin.site.register(Player)
 admin.site.register(Season)
 admin.site.register(Sponsor)

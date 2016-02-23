@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
-from .models import Division, Player, Season, Sponsor, Team, Week
+from .models import Division, Match, Player, Season, Sponsor, Team, Week
+# from .models import Division, Player, Season, Sponsor, Team, Week
 
 
 def set_season(request, season_id=None):
@@ -95,7 +96,6 @@ def divisions(request):
 
 
 def week(request, week_id):
-    check_season(request)
     _week = Week.objects.get(id=week_id)
     context = {
         'week': _week
@@ -110,3 +110,20 @@ def weeks(request):
         'weeks': _weeks
     }
     return render(request, 'stats/weeks.html', context)
+
+
+def match(request, match_id):
+    _match = Match.objects.get(id=match_id)
+    context = {
+        'match': _match
+    }
+    return render(request, 'stats/match.html', context)
+
+
+def matches(request):
+    _matches = Match.objects.filter(season=request.session['season_id'])
+    context = {
+        'matches': _matches
+    }
+    return render(request, 'stats/matches.html', context)
+

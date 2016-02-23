@@ -1,0 +1,9 @@
+{% extends "stats/base.html" %}
+
+{% block title %}SFPA :: {{ match.season }} :: Week {{ match.week }}{% endblock %}
+
+{% block content %}
+{% if match %}
+<h1>{{ match.away_team }} @ {{ match.home_team }}</h1>
+{% endif %}
+{% endblock %}
