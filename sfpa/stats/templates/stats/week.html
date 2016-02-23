@@ -1,0 +1,11 @@
+{% extends "stats/base.html" %}
+
+{% block title %}SFPA :: {{ week.season }} :: Week {{ week }}{% endblock %}
+
+{% block content %}
+{% if week %}
+<h1>{{ week.name }}</h1>
+<p>{{ week.season }}</p>
+
+{% endif %}
+{% endblock %}
