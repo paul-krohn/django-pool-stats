@@ -6,6 +6,9 @@
 {% if week %}
 <h1>{{ week.name }}</h1>
 <p>{{ week.season }}</p>
-
+<ul>{% for match in week.match_set.all %}
+    <li><a href="{% url 'match' match.id %}">{{ match }}</a></li>
+{% endfor %}
+</ul>
 {% endif %}
 {% endblock %}

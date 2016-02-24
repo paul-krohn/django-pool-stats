@@ -17,7 +17,7 @@ class TeamAdmin(admin.ModelAdmin):
 
 admin.site.register(Team, TeamAdmin)
 
-# TODO: 
+# TODO:
 # It would be pretty to have, in the match admin, the teams filtered by season
 # formfield_for_foreignkey seems to be the way to go?
 # class MatchAdmin(admin.ModelAdmin):
