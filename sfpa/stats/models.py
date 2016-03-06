@@ -75,3 +75,28 @@ class Match(models.Model):
     def __str__(self):
         return "{} @ {}".format(self.away_team, self.home_team)
 
+
+class PlayPosition(models.Model):
+    home_name = models.CharField(max_length=16)
+    away_name = models.CharField(max_length=16)
+    name = models.CharField(max_length=16)
+
+    def __str__(self):
+        return self.name
+
+
+class AwayPlayPosition(PlayPosition):
+    class Meta:
+        proxy = True
+
+    def __str__(self):
+        return self.away_name
+
+
+class HomPlayPosition(PlayPosition):
+    class Meta:
+        proxy = True
+
+    def __str__(self):
+        return self.home_name
+
