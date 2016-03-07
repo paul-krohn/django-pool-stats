@@ -1,0 +1,14 @@
+{% extends "stats/base.html" %}
+
+{% block title %}SFPA :: Add Player{% endblock %}
+
+{% block content%}
+<form action="{% url 'player_create' %}" method="post">
+{% csrf_token %}
+
+{{ form.as_p }}
+<input type="submit"/>
+</form>
+
+
+{% endblock %}

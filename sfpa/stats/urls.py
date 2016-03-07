@@ -18,6 +18,7 @@ urlpatterns = [
 
     url(r'^players/', views.players, name='players'),
     url(r'^player/(?P<player_id>[0-9]+)/$', views.player, name='player'),
+    url(r'^player_create/', views.player_create, name='player_create'),
 
     url(r'^sponsors/', views.sponsors, name='sponsors'),
     url(r'^sponsor/(?P<sponsor_id>[0-9]+)/$', views.sponsor, name='sponsor'),
