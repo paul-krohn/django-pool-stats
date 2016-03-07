@@ -1,10 +1,13 @@
 from django.contrib import admin
 
-from .models import Division, Match, Player, PlayPosition, Season, Sponsor, Team, Week
+from .models import Division, GameOrder, LineupEntry, Match, Player, PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
 
 admin.site.register(Division)
+admin.site.register(GameOrder)
+admin.site.register(LineupEntry)
 admin.site.register(Match)
 admin.site.register(Player)
+admin.site.register(ScoreSheet)
 admin.site.register(Season)
 admin.site.register(Sponsor)
 admin.site.register(Week)

@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect
-from .models import Division, Match, Player, Season, Sponsor, Team, Week
+from .models import Division, AwayLineupEntry, Game, GameOrder, HomeLineupEntry, Match, Player, PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
 # from .models import Division, Player, Season, Sponsor, Team, Week
 
 
@@ -126,4 +126,58 @@ def matches(request):
         'matches': _matches
     }
     return render(request, 'stats/matches.html', context)
+
+
+def score_sheets(request):
+    pass
+
+
+def score_sheet(request, score_sheet_id):
+    s = ScoreSheet.objects.get(id=score_sheet_id)
+
+    context = {}
+    return render(request, 'stats/score_sheet.html', context)
+
+
+def score_sheet_edit(request, score_sheet_id):
+    s = ScoreSheet.objects.get(id=score_sheet_id)
+
+    context = {
+        'score_sheet': s
+    }
+    return render(request, 'stats/score_sheet_edit.html', context)
+
+
+def score_sheet_create(request, match_id):
+    m = Match.objects.get(id=match_id)
+    s = ScoreSheet(match=m)
+    s.save()
+    for lineup_position in PlayPosition.objects.all():
+        ale = AwayLineupEntry(position=lineup_position)
+        ale.save()
+        hle = HomeLineupEntry(position=lineup_position)
+        hle.save()
+        s.away_lineup.add(ale)
+        s.home_lineup.add(hle)
+    s.save()
+
+    # now create games, per the game order table
+    for g in GameOrder.objects.all():
+        game = Game()
+        game.table_run = False
+        game.forfeit = False
+        game.save()
+        s.games.add(game)
+    s.save()
+
+    return redirect('score_sheet_edit', score_sheet_id=s.id)
+
+
+def lineup_edit(request):
+    pass
+
+
+def lineup_create(request, scoresheet):
+    pass
+
 

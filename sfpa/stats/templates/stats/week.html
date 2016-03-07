@@ -7,7 +7,7 @@
 <h1>{{ week.name }}</h1>
 <p>{{ week.season }}</p>
 <ul>{% for match in week.match_set.all %}
-    <li><a href="{% url 'match' match.id %}">{{ match }}</a></li>
+    <li><a href="{% url 'match' match.id %}">{{ match }}</a> <a href="{% url 'score_sheet_create' match.id %}">Create Score Sheet</a></li>
 {% endfor %}
 </ul>
 {% endif %}

@@ -53,7 +53,7 @@ class Week(models.Model):
     name = models.CharField(max_length=32, null=True)
 
     def __str__(self):
-        return self.name
+        return "Week {}".format(self.name)
 
 
 class AwayTeam(Team):
@@ -73,7 +73,8 @@ class Match(models.Model):
     away_team = models.ForeignKey(AwayTeam)
 
     def __str__(self):
-        return "{} @ {}".format(self.away_team, self.home_team)
+        # return "{} @ {}".format(self.away_team, self.home_team)
+        return "{} @ {} ({} {})".format(self.away_team, self.home_team, self.season, self.week)
 
 
 class PlayPosition(models.Model):
@@ -93,10 +94,62 @@ class AwayPlayPosition(PlayPosition):
         return self.away_name
 
 
-class HomPlayPosition(PlayPosition):
+class HomePlayPosition(PlayPosition):
     class Meta:
         proxy = True
 
     def __str__(self):
         return self.home_name
 
+
+class AwayPlayer(Player):
+    class Meta:
+        proxy = True
+
+
+class HomePlayer(Player):
+    class Meta:
+        proxy = True
+
+
+class Game(models.Model):
+    away_player = models.ForeignKey(AwayPlayer, null=True, blank=True)
+    home_player = models.ForeignKey(HomePlayer, null=True, blank=True)
+    winner = models.CharField(max_length=4, blank=True)
+    table_run = models.BooleanField()
+    forfeit = models.BooleanField()
+
+
+class LineupEntry(models.Model):
+    player = models.ForeignKey(Player, null=True)
+    position = models.ForeignKey(PlayPosition, null=True)
+
+
+class AwayLineupEntry(LineupEntry):
+    class Meta:
+        proxy = True
+
+
+class HomeLineupEntry(LineupEntry):
+    class Meta:
+        proxy = True
+
+
+class ScoreSheet(models.Model):
+    match = models.ForeignKey(Match)
+    away_lineup = models.ManyToManyField(AwayLineupEntry, blank=True)
+    home_lineup = models.ManyToManyField(HomeLineupEntry, blank=True)
+    games = models.ManyToManyField(Game, blank=True)
+
+    def __str__(self):
+        return "{} ({})".format(self.match, self.id)
+
+
+class GameOrder(models.Model):
+
+    away_position = models.ForeignKey(AwayPlayPosition)
+    home_position = models.ForeignKey(HomePlayPosition)
+    name = models.CharField(max_length=8)
+
+    def __str__(self):
+        return "{} ({} vs {})".format(self.name, self.away_position, self.home_position)
