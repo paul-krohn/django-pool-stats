@@ -1,9 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import Division, Match, Player, Season, Sponsor, Team, Week
-# from .models import Division, Player, Season, Sponsor, Team, Week
-import django.forms
-
 from .forms import PlayerForm
+
 
 def set_season(request, season_id=None):
     """
@@ -56,18 +54,19 @@ def players(request):
 
 
 def player_create(request):
-    # season = Season.objects.get(id=request.session['season_id'])
-    # teams = season.teams.all()
     if request.method == 'POST':
         player_form = PlayerForm(request.POST)
         if player_form.is_valid():
             p = Player()
+            print(player_form.cleaned_data['team'])
+            t = player_form.cleaned_data['team']
             if player_form.cleaned_data['display_name'] is not '':
                 p.display_name = player_form.cleaned_data['display_name']
             p.first_name = player_form.cleaned_data['first_name']
             p.last_name = player_form.cleaned_data['last_name']
             p.save()
-            return redirect('player', p.id)
+            t.players.add(p)
+            return redirect('team', t.id)
     else:
         player_form = PlayerForm()
     context = {
