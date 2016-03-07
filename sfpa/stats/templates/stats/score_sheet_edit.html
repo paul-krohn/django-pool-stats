@@ -1,0 +1,19 @@
+{% extends "stats/base.html" %}
+
+{% block title %}SFPA :: Score Sheet :: {{ score_sheet.match }} {% endblock %}
+
+{% block content %}
+<h5>Away</h5>
+<ul>
+{% for position in score_sheet.away_lineup.all %}
+<li>{{ position.position.away_name }}: {{ position.player }}</li>
+{% endfor %}
+</ul>
+<h5>Home</h5>
+<ul>
+{% for position in score_sheet.home_lineup.all %}
+<li>{{ position.position.home_name }}: {{ position.player }}</li>
+{% endfor %}
+</ul>
+
+{% endblock %}
