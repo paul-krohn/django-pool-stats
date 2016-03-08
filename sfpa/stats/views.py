@@ -199,6 +199,7 @@ def score_sheet_create(request, match_id):
 def score_sheet_away_lineup(request, score_sheet_id):
     s = ScoreSheet.objects.get(id=score_sheet_id)
     away_lineup_formset_f = modelformset_factory(
+        # '6' really ought to be 'len(something)'
         model=AwayLineupEntry, exclude=[], extra=0, max_num=6
     )
     if request.method == 'POST':
@@ -208,7 +209,6 @@ def score_sheet_away_lineup(request, score_sheet_id):
     else:
         # this way, we get the right number of forms, with the right position choices,
         # but with *every* player listed
-        # '6' really ought to be 'len(something)'
         away_lineup_formset = away_lineup_formset_f(queryset=s.away_lineup.all())
 
     context = {
