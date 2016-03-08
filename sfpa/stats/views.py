@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import Division, AwayLineupEntry, Game, GameOrder, HomeLineupEntry, Match, Player, PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
 from .forms import PlayerForm
+from django.forms import modelformset_factory
 
 
 def set_season(request, season_id=None):
@@ -195,7 +196,29 @@ def score_sheet_create(request, match_id):
     return redirect('score_sheet_edit', score_sheet_id=s.id)
 
 
-def lineup_edit(request):
+def score_sheet_away_lineup(request, score_sheet_id):
+    s = ScoreSheet.objects.get(id=score_sheet_id)
+    away_lineup_formset_f = modelformset_factory(
+        model=AwayLineupEntry, exclude=[], extra=0, max_num=6
+    )
+    if request.method == 'POST':
+        away_lineup_formset = away_lineup_formset_f(request.POST, queryset=s.away_lineup.all())
+        if away_lineup_formset.is_valid():
+            away_lineup_formset.save()
+    else:
+        # this way, we get the right number of forms, with the right position choices,
+        # but with *every* player listed
+        # '6' really ought to be 'len(something)'
+        away_lineup_formset = away_lineup_formset_f(queryset=s.away_lineup.all())
+
+    context = {
+        'score_sheet': s,
+        'away_form': away_lineup_formset,
+    }
+    return render(request, 'stats/lineup_edit.html', context)
+
+
+def lineup_edit(request, lineup_id):
     pass
 
 
