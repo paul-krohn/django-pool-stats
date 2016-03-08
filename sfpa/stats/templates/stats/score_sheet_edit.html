@@ -4,12 +4,14 @@
 
 {% block content %}
 <h5>Away</h5>
+<p><a href="{% url 'score_sheet_away_lineup' score_sheet.id%}">Edit Lineup</a></p>
 <ul>
 {% for position in score_sheet.away_lineup.all %}
 <li>{{ position.position.away_name }}: {{ position.player }}</li>
 {% endfor %}
 </ul>
 <h5>Home</h5>
+<p><a href="{% url 'score_sheet_home_lineup' score_sheet.id%}">Edit Lineup</a></p>
 <ul>
 {% for position in score_sheet.home_lineup.all %}
 <li>{{ position.position.home_name }}: {{ position.player }}</li>

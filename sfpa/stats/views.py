@@ -199,13 +199,13 @@ def score_sheet_create(request, match_id):
 def score_sheet_away_lineup(request, score_sheet_id):
     s = ScoreSheet.objects.get(id=score_sheet_id)
     away_lineup_formset_f = modelformset_factory(
-        # '6' really ought to be 'len(something)'
-        model=AwayLineupEntry, exclude=[], extra=0, max_num=6
+        model=AwayLineupEntry, exclude=[], extra=0, max_num=len(PlayPosition.objects.all())
     )
     if request.method == 'POST':
         away_lineup_formset = away_lineup_formset_f(request.POST, queryset=s.away_lineup.all())
         if away_lineup_formset.is_valid():
             away_lineup_formset.save()
+        return redirect('score_sheet_edit', score_sheet_id=s.id)
     else:
         # this way, we get the right number of forms, with the right position choices,
         # but with *every* player listed
@@ -215,7 +215,29 @@ def score_sheet_away_lineup(request, score_sheet_id):
         'score_sheet': s,
         'away_form': away_lineup_formset,
     }
-    return render(request, 'stats/lineup_edit.html', context)
+    return render(request, 'stats/score_sheet_away_lineup_edit.html', context)
+
+
+def score_sheet_home_lineup(request, score_sheet_id):
+    s = ScoreSheet.objects.get(id=score_sheet_id)
+    home_lineup_formset_f = modelformset_factory(
+        model=HomeLineupEntry, exclude=[], extra=0, max_num=len(PlayPosition.objects.all())
+    )
+    if request.method == 'POST':
+        home_lineup_formset = home_lineup_formset_f(request.POST, queryset=s.home_lineup.all())
+        if home_lineup_formset.is_valid():
+            home_lineup_formset.save()
+        return redirect('score_sheet_edit', score_sheet_id=s.id)
+    else:
+        # this way, we get the right number of forms, with the right position choices,
+        # but with *every* player listed
+        home_lineup_formset = home_lineup_formset_f(queryset=s.home_lineup.all())
+
+    context = {
+        'score_sheet': s,
+        'home_form': home_lineup_formset,
+    }
+    return render(request, 'stats/score_sheet_home_lineup_edit.html', context)
 
 
 def lineup_edit(request, lineup_id):

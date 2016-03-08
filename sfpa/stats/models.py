@@ -44,7 +44,7 @@ class Team(models.Model):
     players = models.ManyToManyField(Player, blank=True)
 
     def __str__(self):
-        return "{} ({})".format(self.name, self.season)
+        return "{}".format(self.name)
 
 
 class Week(models.Model):
