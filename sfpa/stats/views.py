@@ -209,16 +209,14 @@ def score_sheet_away_lineup(request, score_sheet_id):
         # http://stackoverflow.com/questions/1982025/django-form-from-related-model
         player = django.forms.ModelChoiceField(
             queryset=s.match.away_team.players.all(),
+            required=False,
         )
-
-        class Meta:
-            model = AwayLineupEntry
-            fields = ['player']
 
     away_lineup_formset_f = modelformset_factory(
         model=AwayLineupEntry, fields=['player'], form=AwayLineupForm,
         extra=0, max_num=len(PlayPosition.objects.all())
     )
+
     if request.method == 'POST':
         away_lineup_formset = away_lineup_formset_f(request.POST, queryset=s.away_lineup.all())
         if away_lineup_formset.is_valid():
@@ -229,29 +227,40 @@ def score_sheet_away_lineup(request, score_sheet_id):
 
     context = {
         'score_sheet': s,
-        'away_form': away_lineup_formset,
+        'lineup_form': away_lineup_formset,
     }
     return render(request, 'stats/score_sheet_away_lineup_edit.html', context)
 
 
 def score_sheet_home_lineup(request, score_sheet_id):
     s = ScoreSheet.objects.get(id=score_sheet_id)
+
+    # it would be prettier to do this by passing kwargs but,
+    # it seems you can't do that with a ModelForm so, the ugly is here.
+    class HomeLineupForm(django.forms.ModelForm):
+        # thanks to stack overflow for this, from here:
+        # http://stackoverflow.com/questions/1982025/django-form-from-related-model
+        player = django.forms.ModelChoiceField(
+            queryset=s.match.home_team.players.all(),
+            required=False,
+        )
+
     home_lineup_formset_f = modelformset_factory(
-        model=HomeLineupEntry, exclude=[], extra=0, max_num=len(PlayPosition.objects.all())
+        model=HomeLineupEntry, fields=['player'], form=HomeLineupForm,
+        extra=0, max_num=len(PlayPosition.objects.all())
     )
+
     if request.method == 'POST':
         home_lineup_formset = home_lineup_formset_f(request.POST, queryset=s.home_lineup.all())
         if home_lineup_formset.is_valid():
             home_lineup_formset.save()
             return redirect('score_sheet_edit', score_sheet_id=s.id)
     else:
-        # this way, we get the right number of forms, with the right position choices,
-        # but with *every* player listed
         home_lineup_formset = home_lineup_formset_f(queryset=s.home_lineup.all())
 
     context = {
         'score_sheet': s,
-        'home_form': home_lineup_formset,
+        'lineup_form': home_lineup_formset,
     }
     return render(request, 'stats/score_sheet_home_lineup_edit.html', context)
 
