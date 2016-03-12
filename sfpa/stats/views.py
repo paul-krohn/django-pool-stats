@@ -238,6 +238,7 @@ def score_sheet_away_lineup(request, score_sheet_id):
         away_lineup_formset = away_lineup_formset_f(request.POST, queryset=s.away_lineup.all())
         if away_lineup_formset.is_valid():
             away_lineup_formset.save()
+            set_games_for_score_sheet(s.id)
             return redirect('score_sheet_edit', score_sheet_id=s.id)
     else:
         away_lineup_formset = away_lineup_formset_f(queryset=s.away_lineup.all())
@@ -271,6 +272,7 @@ def score_sheet_home_lineup(request, score_sheet_id):
         home_lineup_formset = home_lineup_formset_f(request.POST, queryset=s.home_lineup.all())
         if home_lineup_formset.is_valid():
             home_lineup_formset.save()
+            set_games_for_score_sheet(s.id)
             return redirect('score_sheet_edit', score_sheet_id=s.id)
     else:
         home_lineup_formset = home_lineup_formset_f(queryset=s.home_lineup.all())
@@ -280,6 +282,30 @@ def score_sheet_home_lineup(request, score_sheet_id):
         'lineup_form': home_lineup_formset,
     }
     return render(request, 'stats/score_sheet_home_lineup_edit.html', context)
+
+
+# ugly, ugly hack
+def set_games_for_score_sheet(score_sheet_id):
+    s = ScoreSheet.objects.get(id=score_sheet_id)
+    for game in s.games.all():
+        print("working on game {} from {}".format(game.order, s.match))
+
+        # set the players for the game; have to convert Player instances to Home/AwayPlayer instances
+        away_player_position = s.away_lineup.filter(position_id__exact=game.order.away_position.id)[0]
+        if away_player_position.player is not None:
+            game.away_player = AwayPlayer.objects.get(id=away_player_position.player.id)
+        home_player_position = s.home_lineup.filter(position_id__exact=game.order.home_position.id)[0]
+        if home_player_position.player is not None:
+            game.home_player = HomePlayer.objects.get(id=home_player_position.player.id)
+
+        # check substitutions based on their being for <= this lineup position; over-ride the player
+        for away_substitution in s.away_substitutions.all():
+            if away_substitution.game_order.id <= game.order.id and away_substitution.play_position == game.order.away_position:
+                game.away_player = AwayPlayer.objects.get(id=away_substitution.player.id)
+        for home_substitution in s.home_substitutions.all():
+            if home_substitution.game_order.id <= game.order.id and home_substitution.play_position == game.order.home_position:
+                game.home_player = HomePlayer.objects.get(id=home_substitution.player.id)
+        game.save()
 
 
 def score_sheet_away_substitutions(request, score_sheet_id):
@@ -307,6 +333,7 @@ def score_sheet_away_substitutions(request, score_sheet_id):
             for substitution in away_substitution_formset.save():
                 print('adding {} as {} in game {}'.format(substitution.player, substitution.play_position, substitution.game_order))
                 s.away_substitutions.add(substitution)
+            set_games_for_score_sheet(s.id)
             return redirect('score_sheet_edit', score_sheet_id=s.id)
     else:
         away_substitution_formset = away_substitution_formset_f(queryset=s.home_substitutions.all())
