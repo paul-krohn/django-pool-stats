@@ -1,5 +1,7 @@
 from django.shortcuts import render, redirect
 from .models import Division, AwayLineupEntry, Game, GameOrder, HomeLineupEntry, Match, Player, PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
+from .models import AwayPlayer, HomePlayer
+from .models import AwaySubstitution, HomeSubstitution
 from .forms import PlayerForm
 from django.forms import modelformset_factory
 
@@ -168,8 +170,22 @@ def score_sheet(request, score_sheet_id):
 def score_sheet_edit(request, score_sheet_id):
     s = ScoreSheet.objects.get(id=score_sheet_id)
 
+    score_sheet_game_formset_f = modelformset_factory(
+        model=Game, exclude=['home_player', 'away_player', 'order'], form=django.forms.ModelForm,
+        extra=0, max_num=len(s.games.all()),
+        # widgets={'winner': django.forms.ChoiceField(choices=((0, 'home'), (1, 'away')))}
+    )
+    if request.method == 'POST':
+        score_sheet_game_formset = score_sheet_game_formset_f(
+            request.POST, queryset=s.games.all()
+        )
+    else:
+        score_sheet_game_formset = score_sheet_game_formset_f(
+            queryset=s.games.all()
+        )
     context = {
-        'score_sheet': s
+        'score_sheet': s,
+        'games_form': score_sheet_game_formset,
     }
     return render(request, 'stats/score_sheet_edit.html', context)
 
@@ -190,6 +206,7 @@ def score_sheet_create(request, match_id):
     # now create games, per the game order table
     for g in GameOrder.objects.all():
         game = Game()
+        game.order = g
         game.table_run = False
         game.forfeit = False
         game.save()
@@ -263,6 +280,77 @@ def score_sheet_home_lineup(request, score_sheet_id):
         'lineup_form': home_lineup_formset,
     }
     return render(request, 'stats/score_sheet_home_lineup_edit.html', context)
+
+
+def score_sheet_away_substitutions(request, score_sheet_id):
+    s = ScoreSheet.objects.get(id=score_sheet_id)
+
+    class AwaySubstitutionForm(django.forms.ModelForm):
+        player = django.forms.ModelChoiceField(
+            queryset=s.match.away_team.players.all(),
+            required=False,
+        )
+
+    away_substitution_formset_f = modelformset_factory(
+        model=AwaySubstitution,
+        form=AwaySubstitutionForm,
+        # exclude=['home_player'],
+        exclude=[],
+        max_num=2
+    )
+    if request.method == 'POST':
+        away_substitution_formset = away_substitution_formset_f(
+            request.POST, queryset=s.away_substitutions.all()
+        )
+        if away_substitution_formset.is_valid():
+            print('saving away subs for {}'.format(s.match))
+            for substitution in away_substitution_formset.save():
+                print('adding {} as {} in game {}'.format(substitution.player, substitution.play_position, substitution.game_order))
+                s.away_substitutions.add(substitution)
+            return redirect('score_sheet_edit', score_sheet_id=s.id)
+    else:
+        away_substitution_formset = away_substitution_formset_f(queryset=s.home_substitutions.all())
+        context = {
+            'score_sheet': s,
+            'substitutions_form': away_substitution_formset
+        }
+        return render(request, 'stats/score_sheet_away_substitutions.html', context)
+
+
+def score_sheet_home_substitutions(request, score_sheet_id):
+    s = ScoreSheet.objects.get(id=score_sheet_id)
+
+    class HomeSubstitutionForm(django.forms.ModelForm):
+        player = django.forms.ModelChoiceField(
+            queryset=s.match.home_team.players.all(),
+            required=False,
+        )
+
+    home_substitution_formset_f = modelformset_factory(
+        model=HomeSubstitution,
+        # exclude=['away_player'],
+        exclude=[],
+        form=HomeSubstitutionForm,
+        max_num=2
+    )
+    if request.method == 'POST':
+        home_substitution_formset = home_substitution_formset_f(
+            request.POST, queryset=s.home_substitutions.all()
+        )
+        if home_substitution_formset.is_valid():
+            print('saving home subs for {}'.format(s.match))
+            substitutions = home_substitution_formset.save()
+            for substitution in substitutions:
+                s.home_substitutions.add(substitution)
+            set_games_for_score_sheet(s.id)
+            return redirect('score_sheet_edit', score_sheet_id=s.id)
+    else:
+        home_substitution_formset = home_substitution_formset_f(queryset=s.home_substitutions.all())
+        context = {
+            'score_sheet': s,
+            'substitutions_form': home_substitution_formset
+        }
+        return render(request, 'stats/score_sheet_home_substitutions.html', context)
 
 
 def lineup_edit(request, lineup_id):

@@ -112,10 +112,21 @@ class HomePlayer(Player):
         proxy = True
 
 
+class GameOrder(models.Model):
+
+    away_position = models.ForeignKey(AwayPlayPosition)
+    home_position = models.ForeignKey(HomePlayPosition)
+    name = models.CharField(max_length=8)
+
+    def __str__(self):
+        return "{} ({} vs {})".format(self.name, self.away_position, self.home_position)
+
+
 class Game(models.Model):
     away_player = models.ForeignKey(AwayPlayer, null=True, blank=True)
     home_player = models.ForeignKey(HomePlayer, null=True, blank=True)
     winner = models.CharField(max_length=4, blank=True)
+    order = models.ForeignKey(GameOrder, null=True)
     table_run = models.BooleanField()
     forfeit = models.BooleanField()
 
@@ -135,21 +146,43 @@ class HomeLineupEntry(LineupEntry):
         proxy = True
 
 
+class Substitution(models.Model):
+    game_order = models.ForeignKey(GameOrder)
+    # away_player = models.ForeignKey(AwayPlayer, null=True, blank=True)
+    # home_player = models.ForeignKey(HomePlayer, null=True, blank=True)
+    player = models.ForeignKey(Player, null=True, blank=True)
+    play_position = models.ForeignKey(PlayPosition)
+
+
+class AwaySubstitution(Substitution):
+    class Meta:
+        proxy = True
+
+    def __str__(self):
+        return "{} enters as {} starting with game {}".format(
+            self.player, self.play_position, self.game_order
+        )
+
+
+class HomeSubstitution(Substitution):
+    class Meta:
+        proxy = True
+
+    def __str__(self):
+        return "{} enters as {} starting with game {}".format(
+            self.player, self.play_position, self.game_order
+        )
+
+
 class ScoreSheet(models.Model):
     match = models.ForeignKey(Match)
     away_lineup = models.ManyToManyField(AwayLineupEntry, blank=True)
     home_lineup = models.ManyToManyField(HomeLineupEntry, blank=True)
     games = models.ManyToManyField(Game, blank=True)
+    away_substitutions = models.ManyToManyField(AwaySubstitution)
+    home_substitutions = models.ManyToManyField(HomeSubstitution)
 
     def __str__(self):
         return "{} ({})".format(self.match, self.id)
 
 
-class GameOrder(models.Model):
-
-    away_position = models.ForeignKey(AwayPlayPosition)
-    home_position = models.ForeignKey(HomePlayPosition)
-    name = models.CharField(max_length=8)
-
-    def __str__(self):
-        return "{} ({} vs {})".format(self.name, self.away_position, self.home_position)

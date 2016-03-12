@@ -10,6 +10,13 @@
 <li>{{ position.position.away_name }}: {{ position.player }}</li>
 {% endfor %}
 </ul>
+<h6><a href="{% url 'score_sheet_away_substitutions' score_sheet.id%}">Away Substitutions</a></h6>
+<ol>
+{% for sub in score_sheet.away_substitutions.all %}
+    <li>{{ sub }}</li>
+{% endfor %}
+</ol>
+
 <h5>Home</h5>
 <p><a href="{% url 'score_sheet_home_lineup' score_sheet.id%}">Edit Lineup</a></p>
 <ul>
@@ -17,5 +24,15 @@
 <li>{{ position.position.home_name }}: {{ position.player }}</li>
 {% endfor %}
 </ul>
+<h6><a href="{% url 'score_sheet_home_substitutions' score_sheet.id%}">Home Substitutions</a></h6>
+<ol>
+{% for sub in score_sheet.home_substitutions.all %}
+    <li>{{ sub }}</li>
+{% endfor %}
+</ol>
 
+<h3>The Games Whee</h3>
+<table>
+    {{ games_form.as_table }}
+</table>
 {% endblock %}

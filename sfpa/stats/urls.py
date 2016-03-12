@@ -28,6 +28,11 @@ urlpatterns = [
         views.score_sheet_away_lineup, name='score_sheet_away_lineup'),
     url(r'^score_sheet_home_lineup/(?P<score_sheet_id>[0-9]+)/$',
         views.score_sheet_home_lineup, name='score_sheet_home_lineup'),
+    url(r'^score_sheet_away_substitutions/(?P<score_sheet_id>[0-9]+)/$',
+        views.score_sheet_away_substitutions, name='score_sheet_away_substitutions'),
+    url(r'^score_sheet_home_substitutions/(?P<score_sheet_id>[0-9]+)/$',
+        views.score_sheet_home_substitutions, name='score_sheet_home_substitutions'),
+
     url(r'^score_sheet_edit/(?P<score_sheet_id>[0-9]+)/$', views.score_sheet_edit, name='score_sheet_edit'),
 
     url(r'^seasons/', views.seasons, name='seasons'),
