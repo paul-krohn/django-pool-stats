@@ -148,8 +148,6 @@ class HomeLineupEntry(LineupEntry):
 
 class Substitution(models.Model):
     game_order = models.ForeignKey(GameOrder)
-    # away_player = models.ForeignKey(AwayPlayer, null=True, blank=True)
-    # home_player = models.ForeignKey(HomePlayer, null=True, blank=True)
     player = models.ForeignKey(Player, null=True, blank=True)
     play_position = models.ForeignKey(PlayPosition)
 

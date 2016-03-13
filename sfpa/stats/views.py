@@ -167,25 +167,49 @@ def score_sheet(request, score_sheet_id):
     return render(request, 'stats/score_sheet.html', context)
 
 
+WINNER_CHOICES = (
+    ('', '---'),
+    ('home', 'Home'),
+    ('away', 'Away')
+)
+
+
 def score_sheet_edit(request, score_sheet_id):
     s = ScoreSheet.objects.get(id=score_sheet_id)
 
+    class ScoreSheetGameForm(django.forms.ModelForm):
+        pass
+        # .. does NOT work to suppress the label, suppresses the choices as well
+        # winner = django.forms.ChoiceField(label='')
+
     score_sheet_game_formset_f = modelformset_factory(
-        model=Game, exclude=['home_player', 'away_player', 'order'], form=django.forms.ModelForm,
+        model=Game, exclude=['order', 'home_player', 'away_player'],
+        form=ScoreSheetGameForm,
         extra=0, max_num=len(s.games.all()),
-        # widgets={'winner': django.forms.ChoiceField(choices=((0, 'home'), (1, 'away')))}
+        widgets={
+            'winner': django.forms.Select(
+                choices=WINNER_CHOICES
+            )
+        },
+        labels={
+            'winner': '',
+            'table_run': '',
+            'forfeit': '',
+        }
     )
     if request.method == 'POST':
         score_sheet_game_formset = score_sheet_game_formset_f(
             request.POST, queryset=s.games.all()
         )
+        if score_sheet_game_formset.is_valid():
+            score_sheet_game_formset.save()
     else:
         score_sheet_game_formset = score_sheet_game_formset_f(
-            queryset=s.games.all()
+            queryset=s.games.all(),
         )
     context = {
         'score_sheet': s,
-        'games_form': score_sheet_game_formset,
+        'games_formset': score_sheet_game_formset,
     }
     return render(request, 'stats/score_sheet_edit.html', context)
 
@@ -378,13 +402,4 @@ def score_sheet_home_substitutions(request, score_sheet_id):
             'substitutions_form': home_substitution_formset
         }
         return render(request, 'stats/score_sheet_home_substitutions.html', context)
-
-
-def lineup_edit(request, lineup_id):
-    pass
-
-
-def lineup_create(request, scoresheet):
-    pass
-
 
