@@ -9,7 +9,7 @@
 <ul>
 {% for score_sheet in score_sheets %}
 <li><a href="{% url 'score_sheet' score_sheet.sheet.id %}">{{ score_sheet.sheet.match.away_team }}:
-    {{ score_sheet.away_wins }} @ {{ score_sheet.sheet.match.home_team }}: {{ score_sheet.home_wins }}</a></li>
+    {{ score_sheet.sheet.away_wins }} @ {{ score_sheet.sheet.match.home_team }}: {{ score_sheet.sheet.home_wins }}</a></li>
 {% endfor %}
 </ul>
 

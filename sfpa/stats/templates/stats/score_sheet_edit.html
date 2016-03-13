@@ -36,6 +36,7 @@
 {% csrf_token %}
 {{ games_formset.management_form }}
 {% include "stats/score_sheet_games_form.html" %}
+<tr><td colspan="3"></td><td><b>{{ score_sheet.home_wins }}</b></td><td><b>{{ score_sheet.away_wins }}</b></td></tr>
 <input type="submit"/>
 
 </form>

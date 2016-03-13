@@ -3,7 +3,7 @@
 {% block title %}SFPA :: Unoffical Results :: {{ season }}{% endblock %}
 
 {% block content %}
-<h4>{{ score_sheet.match.away_team }}: {{ away_wins }} {{ score_sheet.match.home_team }}: {{ home_wins }}</h4>
+<h4>{{ score_sheet.match.away_team }}: {{ score_sheet.away_wins }} {{ score_sheet.match.home_team }}: {{ score_sheet.home_wins }}</h4>
 <h5>{{ score_sheet.match.week }}, {{ score_sheet.match.week.date }}</h5>
 {% include "stats/score_sheet_games_form.html" %}
 

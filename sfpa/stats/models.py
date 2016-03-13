@@ -184,4 +184,10 @@ class ScoreSheet(models.Model):
     def __str__(self):
         return "{} ({})".format(self.match, self.id)
 
+    def away_wins(self):
+        return len(self.games.filter(winner='away'))
+
+    def home_wins(self):
+        return len(self.games.filter(winner='home'))
+
 
