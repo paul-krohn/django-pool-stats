@@ -2,7 +2,6 @@
     <tr><th></th><th>Home</th><th>Away</th><th>H</th><th>A</th><th colspan="2">TR?</th><th colspan="2">Forfeit?</th> </tr>
     {% for game_form in games_formset %}
         {{ game_form.id }}
-
         <tr>
             <td>{{ game_form.instance.order }}</td>
             <td>{{ game_form.instance.home_player }}</td>

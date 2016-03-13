@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect
 from .models import Division, AwayLineupEntry, Game, GameOrder, HomeLineupEntry, Match, Player, PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
 from .models import AwayPlayer, HomePlayer
 from .models import AwaySubstitution, HomeSubstitution
-from .forms import PlayerForm
-from django.forms import modelformset_factory
+from .forms import PlayerForm, ScoreSheetGameForm
+from django.forms import formset_factory, modelformset_factory
 
 import django.forms
 import django.db.models
@@ -145,21 +145,9 @@ def match(request, match_id):
     match_score_sheets = ScoreSheet.objects.filter(match_id__exact=_match.id, official=True)
 
     score_sheet_game_formset_f = modelformset_factory(
-        model=Game, exclude=['order', 'home_player', 'away_player'],
-        # form=ScoreSheetGameForm,
-        extra=0,
-        # TODO de-hard-code this
-        max_num=16,
-        widgets={
-            'winner': django.forms.RadioSelect(
-                choices=WINNER_CHOICES
-            )
-        },
-        labels={
-            'winner': '',
-            'table_run': '',
-            'forfeit': '',
-        }
+        model=Game,
+        form=ScoreSheetGameForm,
+        max_num=len(match_score_sheets[0].games.all())
     )
     score_sheet_game_formsets = []
     for a_score_sheet in match_score_sheets:
@@ -184,45 +172,51 @@ def matches(request):
 
 
 def score_sheets(request):
-    pass
+    sheets = ScoreSheet.objects.filter(official=False)
+
+    sheets_with_scores = []
+    for sheet in sheets:
+        away_wins = len(sheet.games.filter(winner='away'))
+        home_wins = len(sheet.games.filter(winner='home'))
+        sheets_with_scores.append({
+            'sheet': sheet,
+            'away_wins': away_wins,
+            'home_wins': home_wins
+        })
+
+    context = {
+        'score_sheets': sheets_with_scores
+    }
+    return render(request, 'stats/score_sheets.html', context)
 
 
 def score_sheet(request, score_sheet_id):
     s = ScoreSheet.objects.get(id=score_sheet_id)
+    score_sheet_game_formset_f = modelformset_factory(
+        Game,
+        form=ScoreSheetGameForm,
+        max_num=len(s.games.all())
+    )
+    score_sheet_game_formset = score_sheet_game_formset_f(
+        queryset=s.games.all(),
+    )
 
-    context = {}
+    context = {
+        'score_sheet': s,
+        'away_wins': len(s.games.filter(winner='away')),
+        'home_wins': len(s.games.filter(winner='home')),
+        'games_formset': score_sheet_game_formset
+    }
     return render(request, 'stats/score_sheet.html', context)
-
-
-WINNER_CHOICES = (
-    # ('', '---'),
-    ('home', 'Home'),
-    ('away', 'Away'),
-)
 
 
 def score_sheet_edit(request, score_sheet_id):
     s = ScoreSheet.objects.get(id=score_sheet_id)
 
-    class ScoreSheetGameForm(django.forms.ModelForm):
-        pass
-        # .. does NOT work to suppress the label, suppresses the choices as well
-        # winner = django.forms.ChoiceField(label='')
-
     score_sheet_game_formset_f = modelformset_factory(
-        model=Game, exclude=['order', 'home_player', 'away_player'],
+        Game,
         form=ScoreSheetGameForm,
-        extra=0, max_num=len(s.games.all()),
-        widgets={
-            'winner': django.forms.RadioSelect(
-                choices=WINNER_CHOICES
-            )
-        },
-        labels={
-            'winner': '',
-            'table_run': '',
-            'forfeit': '',
-        }
+        max_num=len(s.games.all())
     )
     if request.method == 'POST':
         score_sheet_game_formset = score_sheet_game_formset_f(
