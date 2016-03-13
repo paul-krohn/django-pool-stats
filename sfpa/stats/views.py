@@ -142,8 +142,35 @@ def weeks(request):
 
 def match(request, match_id):
     _match = Match.objects.get(id=match_id)
+    match_score_sheets = ScoreSheet.objects.filter(match_id__exact=_match.id, official=True)
+
+    score_sheet_game_formset_f = modelformset_factory(
+        model=Game, exclude=['order', 'home_player', 'away_player'],
+        # form=ScoreSheetGameForm,
+        extra=0,
+        # TODO de-hard-code this
+        max_num=16,
+        widgets={
+            'winner': django.forms.RadioSelect(
+                choices=WINNER_CHOICES
+            )
+        },
+        labels={
+            'winner': '',
+            'table_run': '',
+            'forfeit': '',
+        }
+    )
+    score_sheet_game_formsets = []
+    for a_score_sheet in match_score_sheets:
+        score_sheet_game_formsets.append(
+            score_sheet_game_formset_f(
+                queryset=a_score_sheet.games.all(),
+            )
+        )
     context = {
-        'match': _match
+        'match': _match,
+        'score_sheets': score_sheet_game_formsets
     }
     return render(request, 'stats/match.html', context)
 

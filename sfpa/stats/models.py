@@ -173,6 +173,7 @@ class HomeSubstitution(Substitution):
 
 
 class ScoreSheet(models.Model):
+    official = models.BooleanField(default=False)
     match = models.ForeignKey(Match)
     away_lineup = models.ManyToManyField(AwayLineupEntry, blank=True)
     home_lineup = models.ManyToManyField(HomeLineupEntry, blank=True)

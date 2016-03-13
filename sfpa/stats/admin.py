@@ -7,7 +7,6 @@ admin.site.register(GameOrder)
 admin.site.register(LineupEntry)
 admin.site.register(Match)
 admin.site.register(Player)
-admin.site.register(ScoreSheet)
 admin.site.register(Season)
 admin.site.register(Sponsor)
 admin.site.register(Week)
@@ -25,6 +24,14 @@ class PlayPositionAdmin(admin.ModelAdmin):
     list_display = ('name', 'home_name', 'away_name')
 
 admin.site.register(PlayPosition, PlayPositionAdmin)
+
+
+class ScoreSheetAdmin(admin.ModelAdmin):
+    list_display = ['match', 'official']
+    fields = ['official']
+    list_filter = ['official']
+
+admin.site.register(ScoreSheet, ScoreSheetAdmin)
 
 # TODO:
 # It would be pretty to have, in the match admin, the teams filtered by season
