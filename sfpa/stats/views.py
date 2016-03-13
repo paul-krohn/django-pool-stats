@@ -144,18 +144,21 @@ def match(request, match_id):
     _match = Match.objects.get(id=match_id)
     match_score_sheets = ScoreSheet.objects.filter(match_id__exact=_match.id, official=True)
 
-    score_sheet_game_formset_f = modelformset_factory(
-        model=Game,
-        form=ScoreSheetGameForm,
-        max_num=len(match_score_sheets[0].games.all())
-    )
-    score_sheet_game_formsets = []
-    for a_score_sheet in match_score_sheets:
-        score_sheet_game_formsets.append(
-            score_sheet_game_formset_f(
-                queryset=a_score_sheet.games.all(),
-            )
+    score_sheet_game_formsets = None
+
+    if len(match_score_sheets):
+        score_sheet_game_formset_f = modelformset_factory(
+            model=Game,
+            form=ScoreSheetGameForm,
+            max_num=len(match_score_sheets[0].games.all())
         )
+        score_sheet_game_formsets = []
+        for a_score_sheet in match_score_sheets:
+            score_sheet_game_formsets.append(
+                score_sheet_game_formset_f(
+                    queryset=a_score_sheet.games.all(),
+                )
+            )
     context = {
         'match': _match,
         'score_sheets': score_sheet_game_formsets
@@ -176,12 +179,8 @@ def score_sheets(request):
 
     sheets_with_scores = []
     for sheet in sheets:
-        away_wins = len(sheet.games.filter(winner='away'))
-        home_wins = len(sheet.games.filter(winner='home'))
         sheets_with_scores.append({
             'sheet': sheet,
-            'away_wins': away_wins,
-            'home_wins': home_wins
         })
 
     context = {
@@ -203,8 +202,6 @@ def score_sheet(request, score_sheet_id):
 
     context = {
         'score_sheet': s,
-        'away_wins': len(s.games.filter(winner='away')),
-        'home_wins': len(s.games.filter(winner='home')),
         'games_formset': score_sheet_game_formset
     }
     return render(request, 'stats/score_sheet.html', context)

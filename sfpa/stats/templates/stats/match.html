@@ -8,7 +8,9 @@
 {% endif %}
 
 {% for games_formset in score_sheets %}
+<table class="table table-striped">
 {% include "stats/score_sheet_games_form.html" %}
+</table>
 {% endfor %}
 
 {% endblock %}
