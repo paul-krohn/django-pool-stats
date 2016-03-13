@@ -168,9 +168,9 @@ def score_sheet(request, score_sheet_id):
 
 
 WINNER_CHOICES = (
-    ('', '---'),
+    # ('', '---'),
     ('home', 'Home'),
-    ('away', 'Away')
+    ('away', 'Away'),
 )
 
 
@@ -187,7 +187,7 @@ def score_sheet_edit(request, score_sheet_id):
         form=ScoreSheetGameForm,
         extra=0, max_num=len(s.games.all()),
         widgets={
-            'winner': django.forms.Select(
+            'winner': django.forms.RadioSelect(
                 choices=WINNER_CHOICES
             )
         },
