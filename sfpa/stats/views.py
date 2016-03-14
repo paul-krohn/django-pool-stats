@@ -33,7 +33,7 @@ def check_season(request):
 
 def index(request):
     check_season(request)
-    team_list = Team.objects.filter(season=request.session['season_id'])
+    team_list = Team.objects.filter(season=request.session['season_id']).order_by('-win_percentage')
     season = Season.objects.get(id=request.session['season_id'])
     context = {
         'teams': team_list,
@@ -431,6 +431,7 @@ def _count_games(this_team):
     this_team.away_losses = 0
     this_team.home_wins = 0
     this_team.home_losses = 0
+    this_team.win_percentage = 0.0
 
     # first, matches involving the team as away team
     away_score_sheets = ScoreSheet.objects.filter(match__away_team__exact=this_team, official__exact=True)
@@ -441,6 +442,12 @@ def _count_games(this_team):
     for home_score_sheet in home_score_sheets:
         this_team.home_wins += len(home_score_sheet.games.filter(winner='home'))
         this_team.home_losses += len(home_score_sheet.games.filter(winner='away'))
+    denominator = this_team.home_losses + this_team.home_wins + this_team.away_losses + this_team.away_wins
+    if denominator > 0:
+        this_team.win_percentage = (this_team.home_wins + this_team.away_wins) / denominator
+    # return "{:.3f}".format(self.wins() / denominator)
+
+
     this_team.save()
 
 

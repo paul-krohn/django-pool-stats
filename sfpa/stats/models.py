@@ -46,6 +46,7 @@ class Team(models.Model):
     away_losses = models.IntegerField(verbose_name='Away Losses', default=0)
     home_wins = models.IntegerField(verbose_name='Home Wins', default=0)
     home_losses = models.IntegerField(verbose_name='Home Losses', default=0)
+    win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0)
 
     def __str__(self):
         return "{}".format(self.name)
@@ -55,12 +56,6 @@ class Team(models.Model):
 
     def losses(self):
         return self.away_losses + self.home_losses
-
-    def win_percentage(self):
-        denom = self.wins() + self.losses()
-        if denom == 0:
-            return 0
-        return "{:.3f}".format(self.wins() / denom)
 
 
 class Week(models.Model):
