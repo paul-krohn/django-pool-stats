@@ -425,48 +425,38 @@ def score_sheet_home_substitutions(request, score_sheet_id):
         return render(request, 'stats/score_sheet_home_substitutions.html', context)
 
 
-    #
-    # def _count_games(self, home_away, win_loss):
-    #     matching_games = 0
-    #
-    #     switch = {
-    #         'win': 'home',
-    #         'loss': 'away,'
-    #     }
-    #     if win_loss == 'win':
-    #         switch = {
-    #             'win': 'away',
-    #             'loss': 'home,'
-    #         }
-    #
-    #     # all the matches ...
-    #     match_filter_args = {
-    #         'season__exact': self.season,
-    #         '{}_team__exact'.format(home_away): self.id
-    #     }
-    #
-    #     game_filter_args = {
-    #         'winner__exact': switch[win_loss]
-    #     }
-    #     # print('game filter args: {}'.format(game_filter_args))
-    #     # print('match filter args: {}'.format(match_filter_args))
-    #     matches = Match.objects.filter(**match_filter_args)
-    #     for match in matches:
-    #         score_sheets = ScoreSheet.objects.filter(match__exact=match.id, official__exact=True)
-    #         # you expect exactly one scoresheet; the loop protects against zero
-    #         for score_sheet in score_sheets:
-    #             matching_games += len(score_sheet.games.filter(**game_filter_args))
-    #     return matching_games
+def _count_games(this_team):
 
-    # def away_wins(self):
-    #     return self._count_games('away', 'win')
-    #
-    # def home_wins(self):
-    #     return self._count_games('home', 'win')
-    #
-    # def away_losses(self):
-    #     return self._count_games('away', 'loss')
-    #
-    # def home_losses(self):
-    #     return self._count_games('home', 'loss')
+    this_team.away_wins = 0
+    this_team.away_losses = 0
+    this_team.home_wins = 0
+    this_team.home_losses = 0
+
+    # first, matches involving the team as away team
+    away_score_sheets = ScoreSheet.objects.filter(match__away_team__exact=this_team, official__exact=True)
+    for away_score_sheet in away_score_sheets:
+        this_team.away_wins += len(away_score_sheet.games.filter(winner='away'))
+        this_team.away_losses += len(away_score_sheet.games.filter(winner='home'))
+    home_score_sheets = ScoreSheet.objects.filter(match__home_team__exact=this_team, official__exact=True)
+    for home_score_sheet in home_score_sheets:
+        this_team.home_wins += len(home_score_sheet.games.filter(winner='home'))
+        this_team.home_losses += len(home_score_sheet.games.filter(winner='away'))
+    this_team.save()
+
+
+def update_teams_stats(request):
+
+    # be sure about what season we are working on
+    check_season(request)
+
+    # get teams for the current season
+    teams = Team.objects.filter(season=request.session['season_id'])
+    for this_team in teams:
+        _count_games(this_team=this_team)
+    return redirect('teams')
+
+
+def update_stats(request):
+    pass
+
 

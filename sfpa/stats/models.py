@@ -42,9 +42,25 @@ class Team(models.Model):
     division = models.ForeignKey(Division, null=True)
     name = models.CharField(max_length=200)
     players = models.ManyToManyField(Player, blank=True)
+    away_wins = models.IntegerField(verbose_name='Away Wins', default=0)
+    away_losses = models.IntegerField(verbose_name='Away Losses', default=0)
+    home_wins = models.IntegerField(verbose_name='Home Wins', default=0)
+    home_losses = models.IntegerField(verbose_name='Home Losses', default=0)
 
     def __str__(self):
         return "{}".format(self.name)
+
+    def wins(self):
+        return self.away_wins + self.home_wins
+
+    def losses(self):
+        return self.away_losses + self.home_losses
+
+    def win_percentage(self):
+        denom = self.wins() + self.losses()
+        if denom == 0:
+            return 0
+        return "{:.3f}".format(self.wins() / denom)
 
 
 class Week(models.Model):

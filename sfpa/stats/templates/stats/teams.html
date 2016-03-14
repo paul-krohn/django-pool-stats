@@ -3,11 +3,15 @@
 {% block content %}
 <h1>Teams {{ season }}</h1>
 {% if teams %}
-<ul>
-{% for team in teams %}
-<li><a href="{% url 'team' team.id %}">{{ team }}</a></li>
+<table>
+<tr><th></th><th>Wins</th><th>Losses</th><th>Percent</th></tr>
+    {% for team in teams %}
+<tr><td><a href="{% url 'team' team.id %}">{{ team }}</a></td>
+    <td>{{ team.wins }}</td>
+    <td>{{ team.losses }}</td>
+    <td>{{ team.win_percentage }}</td></tr>
 {% endfor %}
-</ul>
+</table>
 
 {% endif %}
 

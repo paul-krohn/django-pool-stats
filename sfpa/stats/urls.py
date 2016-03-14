@@ -41,4 +41,6 @@ urlpatterns = [
     url(r'^seasons/', views.seasons, name='seasons'),
     url(r'^set_season/(?P<season_id>[0-9]+)/$', views.set_season, name='set_season'),
 
+    url(r'^update_teams_stats/', views.update_teams_stats, name='update_teams_stats'),
+
 ]
