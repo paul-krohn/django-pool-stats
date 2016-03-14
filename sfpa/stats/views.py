@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
-from .models import Division, AwayLineupEntry, Game, GameOrder, HomeLineupEntry, Match, Player, PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
+from .models import Division, AwayLineupEntry, Game, GameOrder, HomeLineupEntry, Match, Player, \
+    PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
 from .models import AwayPlayer, HomePlayer
 from .models import AwaySubstitution, HomeSubstitution
 from .forms import PlayerForm, ScoreSheetGameForm
-from django.forms import formset_factory, modelformset_factory
+from django.forms import modelformset_factory
 
 import django.forms
 import django.db.models
@@ -342,10 +343,12 @@ def set_games_for_score_sheet(score_sheet_id):
 
         # check substitutions based on their being for <= this lineup position; over-ride the player
         for away_substitution in s.away_substitutions.all():
-            if away_substitution.game_order.id <= game.order.id and away_substitution.play_position == game.order.away_position:
+            if away_substitution.game_order.id <= game.order.id and \
+                    away_substitution.play_position == game.order.away_position:
                 game.away_player = AwayPlayer.objects.get(id=away_substitution.player.id)
         for home_substitution in s.home_substitutions.all():
-            if home_substitution.game_order.id <= game.order.id and home_substitution.play_position == game.order.home_position:
+            if home_substitution.game_order.id <= game.order.id and \
+                    home_substitution.play_position == game.order.home_position:
                 game.home_player = HomePlayer.objects.get(id=home_substitution.player.id)
         game.save()
 
@@ -362,8 +365,7 @@ def score_sheet_away_substitutions(request, score_sheet_id):
     away_substitution_formset_f = modelformset_factory(
         model=AwaySubstitution,
         form=AwaySubstitutionForm,
-        # exclude=['home_player'],
-        exclude=[],
+        fields=['game_order', 'player', 'play_position'],
         max_num=2
     )
     if request.method == 'POST':
@@ -373,7 +375,8 @@ def score_sheet_away_substitutions(request, score_sheet_id):
         if away_substitution_formset.is_valid():
             print('saving away subs for {}'.format(s.match))
             for substitution in away_substitution_formset.save():
-                print('adding {} as {} in game {}'.format(substitution.player, substitution.play_position, substitution.game_order))
+                print('adding {} as {} in game {}'.format(
+                    substitution.player, substitution.play_position, substitution.game_order))
                 s.away_substitutions.add(substitution)
             set_games_for_score_sheet(s.id)
             return redirect('score_sheet_edit', score_sheet_id=s.id)
@@ -420,4 +423,50 @@ def score_sheet_home_substitutions(request, score_sheet_id):
             'substitutions_form': home_substitution_formset
         }
         return render(request, 'stats/score_sheet_home_substitutions.html', context)
+
+
+    #
+    # def _count_games(self, home_away, win_loss):
+    #     matching_games = 0
+    #
+    #     switch = {
+    #         'win': 'home',
+    #         'loss': 'away,'
+    #     }
+    #     if win_loss == 'win':
+    #         switch = {
+    #             'win': 'away',
+    #             'loss': 'home,'
+    #         }
+    #
+    #     # all the matches ...
+    #     match_filter_args = {
+    #         'season__exact': self.season,
+    #         '{}_team__exact'.format(home_away): self.id
+    #     }
+    #
+    #     game_filter_args = {
+    #         'winner__exact': switch[win_loss]
+    #     }
+    #     # print('game filter args: {}'.format(game_filter_args))
+    #     # print('match filter args: {}'.format(match_filter_args))
+    #     matches = Match.objects.filter(**match_filter_args)
+    #     for match in matches:
+    #         score_sheets = ScoreSheet.objects.filter(match__exact=match.id, official__exact=True)
+    #         # you expect exactly one scoresheet; the loop protects against zero
+    #         for score_sheet in score_sheets:
+    #             matching_games += len(score_sheet.games.filter(**game_filter_args))
+    #     return matching_games
+
+    # def away_wins(self):
+    #     return self._count_games('away', 'win')
+    #
+    # def home_wins(self):
+    #     return self._count_games('home', 'win')
+    #
+    # def away_losses(self):
+    #     return self._count_games('away', 'loss')
+    #
+    # def home_losses(self):
+    #     return self._count_games('home', 'loss')
 
