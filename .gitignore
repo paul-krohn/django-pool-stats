@@ -68,3 +68,5 @@ target/
 # pyenv
 .python-version
 
+# migrations, for better or worse
+sfpa/stats/migrations

@@ -42,9 +42,20 @@ class Team(models.Model):
     division = models.ForeignKey(Division, null=True)
     name = models.CharField(max_length=200)
     players = models.ManyToManyField(Player, blank=True)
+    away_wins = models.IntegerField(verbose_name='Away Wins', default=0)
+    away_losses = models.IntegerField(verbose_name='Away Losses', default=0)
+    home_wins = models.IntegerField(verbose_name='Home Wins', default=0)
+    home_losses = models.IntegerField(verbose_name='Home Losses', default=0)
+    win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0)
 
     def __str__(self):
-        return "{} ({})".format(self.name, self.season)
+        return "{}".format(self.name)
+
+    def wins(self):
+        return self.away_wins + self.home_wins
+
+    def losses(self):
+        return self.away_losses + self.home_losses
 
 
 class Week(models.Model):
@@ -53,7 +64,7 @@ class Week(models.Model):
     name = models.CharField(max_length=32, null=True)
 
     def __str__(self):
-        return self.name
+        return "Week {}".format(self.name)
 
 
 class AwayTeam(Team):
@@ -73,5 +84,121 @@ class Match(models.Model):
     away_team = models.ForeignKey(AwayTeam)
 
     def __str__(self):
-        return "{} @ {}".format(self.away_team, self.home_team)
+        # return "{} @ {}".format(self.away_team, self.home_team)
+        return "{} @ {} ({} {})".format(self.away_team, self.home_team, self.season, self.week)
+
+
+class PlayPosition(models.Model):
+    home_name = models.CharField(max_length=16)
+    away_name = models.CharField(max_length=16)
+    name = models.CharField(max_length=16)
+
+    def __str__(self):
+        return self.name
+
+
+class AwayPlayPosition(PlayPosition):
+    class Meta:
+        proxy = True
+
+    def __str__(self):
+        return self.away_name
+
+
+class HomePlayPosition(PlayPosition):
+    class Meta:
+        proxy = True
+
+    def __str__(self):
+        return self.home_name
+
+
+class AwayPlayer(Player):
+    class Meta:
+        proxy = True
+
+
+class HomePlayer(Player):
+    class Meta:
+        proxy = True
+
+
+class GameOrder(models.Model):
+
+    away_position = models.ForeignKey(AwayPlayPosition)
+    home_position = models.ForeignKey(HomePlayPosition)
+    name = models.CharField(max_length=8)
+
+    def __str__(self):
+        return "{} ({} vs {})".format(self.name, self.away_position, self.home_position)
+
+
+class Game(models.Model):
+    away_player = models.ForeignKey(AwayPlayer, null=True, blank=True)
+    home_player = models.ForeignKey(HomePlayer, null=True, blank=True)
+    winner = models.CharField(max_length=4, blank=True)
+    order = models.ForeignKey(GameOrder, null=True)
+    table_run = models.BooleanField()
+    forfeit = models.BooleanField()
+
+
+class LineupEntry(models.Model):
+    player = models.ForeignKey(Player, null=True)
+    position = models.ForeignKey(PlayPosition, null=True)
+
+
+class AwayLineupEntry(LineupEntry):
+    class Meta:
+        proxy = True
+
+
+class HomeLineupEntry(LineupEntry):
+    class Meta:
+        proxy = True
+
+
+class Substitution(models.Model):
+    game_order = models.ForeignKey(GameOrder)
+    player = models.ForeignKey(Player, null=True, blank=True)
+    play_position = models.ForeignKey(PlayPosition)
+
+
+class AwaySubstitution(Substitution):
+    class Meta:
+        proxy = True
+
+    def __str__(self):
+        return "{} enters as {} starting with game {}".format(
+            self.player, self.play_position, self.game_order
+        )
+
+
+class HomeSubstitution(Substitution):
+    class Meta:
+        proxy = True
+
+    def __str__(self):
+        return "{} enters as {} starting with game {}".format(
+            self.player, self.play_position, self.game_order
+        )
+
+
+class ScoreSheet(models.Model):
+    official = models.BooleanField(default=False)
+    match = models.ForeignKey(Match)
+    away_lineup = models.ManyToManyField(AwayLineupEntry, blank=True)
+    home_lineup = models.ManyToManyField(HomeLineupEntry, blank=True)
+    games = models.ManyToManyField(Game, blank=True)
+    away_substitutions = models.ManyToManyField(AwaySubstitution)
+    home_substitutions = models.ManyToManyField(HomeSubstitution)
+
+    def __str__(self):
+        return "{} ({})".format(self.match, self.id)
+
+    def away_wins(self):
+        return len(self.games.filter(winner='away'))
+
+    def home_wins(self):
+        return len(self.games.filter(winner='home'))
+
 

@@ -1,0 +1,15 @@
+{% extends "stats/base.html" %}
+
+{% block title %}SFPA :: Home Lineup {% endblock %}
+
+{% block content%}
+<h4>{{ score_sheet.match }}</h4>
+<h5>Home Lineup</h5>
+<form action="{% url 'score_sheet_home_lineup' score_sheet.id %}" method="post">
+{% csrf_token %}
+<table>
+{{ lineup_form.as_table }}
+</table><input type="submit"/>
+</form>
+
+{% endblock %}

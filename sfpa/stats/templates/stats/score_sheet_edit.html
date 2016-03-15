@@ -1,0 +1,44 @@
+{% extends "stats/base.html" %}
+
+{% block title %}SFPA :: Score Sheet :: {{ score_sheet.match }} {% endblock %}
+
+{% block content %}
+<h5>Away</h5>
+<p><a href="{% url 'score_sheet_away_lineup' score_sheet.id%}">Edit Lineup</a></p>
+<ul>
+{% for position in score_sheet.away_lineup.all %}
+<li>{{ position.position.away_name }}: {{ position.player }}</li>
+{% endfor %}
+</ul>
+<h6><a href="{% url 'score_sheet_away_substitutions' score_sheet.id%}">Away Substitutions</a></h6>
+<ol>
+{% for sub in score_sheet.away_substitutions.all %}
+    <li>{{ sub }}</li>
+{% endfor %}
+</ol>
+
+<h5>Home</h5>
+<p><a href="{% url 'score_sheet_home_lineup' score_sheet.id%}">Edit Lineup</a></p>
+<ul>
+{% for position in score_sheet.home_lineup.all %}
+<li>{{ position.position.home_name }}: {{ position.player }}</li>
+{% endfor %}
+</ul>
+<h6><a href="{% url 'score_sheet_home_substitutions' score_sheet.id%}">Home Substitutions</a></h6>
+<ol>
+{% for sub in score_sheet.home_substitutions.all %}
+    <li>{{ sub }}</li>
+{% endfor %}
+</ol>
+
+<h3>Games</h3>
+<form action="{% url 'score_sheet_edit' score_sheet.id %}" method="post">
+{% csrf_token %}
+{{ games_formset.management_form }}
+<table class="table table-striped">
+{% include "stats/score_sheet_games_form.html" %}
+<tr><td colspan="3"></td><td><b>{{ score_sheet.home_wins }}</b></td><td><b>{{ score_sheet.away_wins }}</b></td></tr>
+</table>
+<input type="submit" value="Save"/>
+</form>
+{% endblock %}
