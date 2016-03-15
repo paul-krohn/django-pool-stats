@@ -4,11 +4,23 @@
 
 {% block content %}
 {% if week %}
-<h1>{{ week.name }}</h1>
-<p>{{ week.season }}</p>
-<ul>{% for match in week.match_set.all %}
-    <li><a href="{% url 'match' match.id %}">{{ match }}</a> <a href="{% url 'score_sheet_create' match.id %}">Create Score Sheet</a></li>
+<h4>{{ week.season }}</h4>
+<h2>Week {{ week.name }}</h2>
+<p>{{ week.date}}</p>
+{% for match in week.match_set.all %}
+    <h4><a href="{% url 'match' match.id %}">{{ match.away_team }} @ {{ match.home_team }}</a></h4>
+    {% if match.scoresheet_set.all %}
+    <h5>Score Sheets</h5>
+        <ul>
+        {% for score_sheet in match.scoresheet_set.all %}
+        <li><a href="{% url 'score_sheet' score_sheet.id %}">{{ score_sheet.id }}</a></li>
+        {% endfor %}
+        </ul>
+    {% endif %}
+    <h5><a href="{% url 'score_sheet_create' match.id %}">Create Score Sheet</a></h5>
+
+
 {% endfor %}
-</ul>
+
 {% endif %}
 {% endblock %}
