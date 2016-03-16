@@ -1,13 +1,15 @@
 from django.shortcuts import render, redirect
 from .models import Division, AwayLineupEntry, Game, GameOrder, HomeLineupEntry, Match, Player, \
     PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
-from .models import AwayPlayer, HomePlayer
+from .models import AwayPlayer, HomePlayer, PlayerSeasonSummary
 from .models import AwaySubstitution, HomeSubstitution
 from .forms import PlayerForm, ScoreSheetGameForm
 from django.forms import modelformset_factory
 
 import django.forms
 import django.db.models
+
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def set_season(request, season_id=None):
@@ -44,16 +46,19 @@ def index(request):
 
 def player(request, player_id):
     _player = Player.objects.get(id=player_id)
+    summaries = PlayerSeasonSummary.objects.filter(player__exact=_player).order_by('-season')
     context = {
+        'summaries': summaries,
         'player': _player
     }
     return render(request, 'stats/player.html', context)
 
 
 def players(request):
-    #  filter on membership in a team in the current season
     check_season(request)
-    _players = Player.objects.filter(team__season=request.session['season_id'])
+    _players = PlayerSeasonSummary.objects.filter(
+        season=request.session['season_id']).order_by('-win_percentage', '-wins')
+
     context = {
         'players': _players
     }
@@ -80,6 +85,39 @@ def player_create(request):
         'form': player_form
     }
     return render(request, 'stats/player_create.html', context)
+
+
+def update_players_stats(request):
+    check_season(request)
+    team_list = Team.objects.filter(season=request.session['season_id'])
+    for a_team in team_list:
+        away_score_sheets = ScoreSheet.objects.filter(match__away_team__exact=a_team, official__exact=True)
+        home_score_sheets = ScoreSheet.objects.filter(match__home_team__exact=a_team, official__exact=True)
+        for team_player in a_team.players.all():
+            try:
+                team_player_summary = PlayerSeasonSummary.objects.get(player__exact=team_player)
+            except ObjectDoesNotExist:
+                team_player_summary = PlayerSeasonSummary(player=team_player, season_id=request.session['season_id'])
+            team_player_summary.wins = 0
+            team_player_summary.losses = 0
+
+            for away_score_sheet in away_score_sheets:
+                team_player_summary.wins += len(away_score_sheet.games.filter(
+                    away_player__exact=team_player, winner='away'))
+                team_player_summary.losses += len(away_score_sheet.games.filter(
+                    away_player__exact=team_player, winner='home'))
+
+            for home_score_sheet in home_score_sheets:
+                team_player_summary.wins += len(home_score_sheet.games.filter(
+                    home_player__exact=team_player, winner='home'))
+                team_player_summary.losses += len(home_score_sheet.games.filter(
+                    home_player__exact=team_player, winner='away'))
+            denominator = team_player_summary.losses + team_player_summary.wins
+            if denominator > 0:
+                team_player_summary.win_percentage = team_player_summary.wins / denominator
+
+            team_player_summary.save()
+    return redirect('/stats/players')
 
 
 def team(request, team_id):
@@ -445,8 +483,6 @@ def _count_games(this_team):
     denominator = this_team.home_losses + this_team.home_wins + this_team.away_losses + this_team.away_wins
     if denominator > 0:
         this_team.win_percentage = (this_team.home_wins + this_team.away_wins) / denominator
-    # return "{:.3f}".format(self.wins() / denominator)
-
 
     this_team.save()
 

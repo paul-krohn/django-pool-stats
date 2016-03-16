@@ -28,6 +28,14 @@ class Player(models.Model):
         return self.display_name or "%s %s" % (self.first_name, self.last_name)
 
 
+class PlayerSeasonSummary(models.Model):
+    player = models.ForeignKey(Player)
+    season = models.ForeignKey(Season)
+    wins = models.IntegerField(verbose_name='Wins', default=0)
+    losses = models.IntegerField(verbose_name='Losses', default=0)
+    win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0)
+
+
 class Division(models.Model):
     season = models.ForeignKey(Season)
     name = models.CharField(max_length=64)

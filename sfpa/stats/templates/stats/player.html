@@ -5,5 +5,17 @@
 {% block content %}
 {% if player %}
 <h1>{{ player }}</h1>
+<table class="table">
+    <tr><th>Season</th><th>Wins</th><th>Losses</th><th>Percentage</th></tr>
+    {% for summary in summaries %}
+    <tr>
+        <td>{{ summary.season }}</td>
+        <td>{{ summary.wins }}</td>
+        <td>{{ summary.losses }}</td>
+        <td>{{ summary.win_percentage|floatformat:3 }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{{ player.season_summary_set }}
 {% endif %}
 {% endblock %}

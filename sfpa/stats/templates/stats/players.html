@@ -4,8 +4,15 @@
 
 {% block content %}
 
-{% for player in players %}
-<li><a href="{% url 'player' player.id %}">{{ player }}</a></li>
+<table class="table">
+    <tr><th></th><th>Wins</th><th>Losses</th><th>Percent</th></tr>
+{% for player_summary in players %}
+<tr>
+    <td><a href="{% url 'player' player_summary.player.id %}">{{ player_summary.player }}</a></td>
+    <td>{{ player_summary.wins }}</td>
+    <td>{{ player_summary.losses }}</td>
+    <td>{{ player_summary.win_percentage|floatformat:3 }}</td>
+</tr>
 {% endfor %}
-
+</table>
 {% endblock %}
