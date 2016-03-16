@@ -31,6 +31,15 @@
         <li><a href="{% url 'players' %}">Players</a></li>
         <li><a href="{% url 'seasons' %}">Seasons</a></li>
         <li><a href="{% url 'weeks' %}">Weeks</a></li>
+        {% if request.user %}
+        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown">Admin</a>
+          <ul class="dropdown-menu">
+              <li><a href="{% url 'update_teams_stats' %}">Update team stats</a></li>
+              <li><a href="{% url 'update_players_stats' %}">Update player stats</a></li>
+              <li><a href="{% url 'admin:index' %}">Admin Site</a></li>
+          </ul>
+        </li>
+        {% endif %}
       </ul>
       </div>
   </nav>
