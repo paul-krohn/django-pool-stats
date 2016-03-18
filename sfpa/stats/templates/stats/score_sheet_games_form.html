@@ -3,8 +3,16 @@
         {{ game_form.id }}
         <tr>
             <td>{{ game_form.instance.order }}</td>
+            {% if game_form.instance.home_player.id  %}
             <td><a href="{% url 'player' game_form.instance.home_player.id %}">{{ game_form.instance.home_player }}</a></td>
+            {% else %}
+            <td>--</td>
+            {% endif %}
+            {% if game_form.instance.away_player.id %}
             <td><a href="{% url 'player' game_form.instance.away_player.id %}">{{ game_form.instance.away_player }}</a></td>
+            {% else %}
+            <td>--</td>
+            {% endif %}
             {% for radio in game_form.winner %}
                 <td>{{ radio.tag }}</td>
             {% endfor %}
