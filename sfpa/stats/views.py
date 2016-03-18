@@ -45,8 +45,10 @@ def index(request):
 
 
 def player(request, player_id):
+    check_season(request)
     _player = Player.objects.get(id=player_id)
     summaries = PlayerSeasonSummary.objects.filter(player__exact=_player).order_by('-season')
+    this_season_games = Game.objects.filter(Q(home_player=_player) | Q(away_player=player))
     context = {
         'summaries': summaries,
         'player': _player
@@ -100,16 +102,28 @@ def update_players_stats(request):
                 team_player_summary = PlayerSeasonSummary(player=team_player, season_id=request.session['season_id'])
             team_player_summary.wins = 0
             team_player_summary.losses = 0
+            team_player_summary.four_ohs = 0
+            team_player_summary.table_runs = 0
 
             for away_score_sheet in away_score_sheets:
-                team_player_summary.wins += len(away_score_sheet.games.filter(
+                score_sheet_wins = len(away_score_sheet.games.filter(
                     away_player__exact=team_player, winner='away'))
+                if score_sheet_wins == 4:  # TODO: fix hard-coding of sweep win number
+                    team_player_summary.four_ohs += 1
+                team_player_summary.wins += score_sheet_wins
+                team_player_summary.table_runs += len(away_score_sheet.games.filter(
+                    away_player__exact=team_player, winner='away', table_run=True))
                 team_player_summary.losses += len(away_score_sheet.games.filter(
                     away_player__exact=team_player, winner='home'))
 
             for home_score_sheet in home_score_sheets:
-                team_player_summary.wins += len(home_score_sheet.games.filter(
+                score_sheet_wins = len(home_score_sheet.games.filter(
                     home_player__exact=team_player, winner='home'))
+                if score_sheet_wins == 4:  # TODO: fix hard-coding of sweep win number
+                    team_player_summary.four_ohs += 1
+                team_player_summary.wins += score_sheet_wins
+                team_player_summary.table_runs += len(home_score_sheet.games.filter(
+                    home_player__exact=team_player, winner='home', table_run=True))
                 team_player_summary.losses += len(home_score_sheet.games.filter(
                     home_player__exact=team_player, winner='away'))
             denominator = team_player_summary.losses + team_player_summary.wins

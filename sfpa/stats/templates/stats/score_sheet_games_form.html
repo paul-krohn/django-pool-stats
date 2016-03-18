@@ -3,8 +3,8 @@
         {{ game_form.id }}
         <tr>
             <td>{{ game_form.instance.order }}</td>
-            <td>{{ game_form.instance.home_player }}</td>
-            <td>{{ game_form.instance.away_player }}</td>
+            <td><a href="{% url 'player' game_form.instance.home_player.id %}">{{ game_form.instance.home_player }}</a></td>
+            <td><a href="{% url 'player' game_form.instance.away_player.id %}">{{ game_form.instance.away_player }}</a></td>
             {% for radio in game_form.winner %}
                 <td>{{ radio.tag }}</td>
             {% endfor %}
