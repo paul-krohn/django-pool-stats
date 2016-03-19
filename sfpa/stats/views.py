@@ -51,6 +51,7 @@ def player(request, player_id):
 
     _score_sheets = ScoreSheet.objects.filter(official=True)
 
+    # the set() is necessary to remove the dupes apparently created by the or clause
     _score_sheets = set(_score_sheets.filter(
         django.db.models.Q(away_lineup__player=_player)
         |
