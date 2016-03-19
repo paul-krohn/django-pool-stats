@@ -5,6 +5,37 @@
 {% block content %}
 {% if player %}
 <h1>{{ player }}</h1>
+<h3>{{ request.session.season }}</h3>
+
+<table class="table">
+{% for score_sheet in score_sheets %}
+    <tr>
+        <th colspan="4"><a href="{% url 'score_sheet' score_sheet.id %}">{{ score_sheet.match }}</a></th>
+    </tr>
+    <tr>
+        <th>home</th>
+        <th>away</th>
+        <th>table run</th>
+    </tr>
+    {% for game in score_sheet.games.all %}
+    {% if game.away_player == player %}
+    <tr>
+        <td>{% if game.winner == "home" %}<b>{{ game.home_player }}</b>{% else %}{{ game.home_player }}{% endif %}</td>
+        <td>{% if game.winner == "away" %}<b>{{ game.away_player }}</b>{% else %}{{ game.away_player }}{% endif %}</td>
+        <td>{{ game.table_run }}</td>
+    </tr>
+    {% endif %}
+    {% if game.home_player == player %}
+    <tr>
+        <td>{% if game.winner == "home" %}<b>{{ game.home_player }}</b>{% else %}{{ game.home_player }}{% endif %}</td>
+        <td>{% if game.winner == "away" %}<b>{{ game.away_player }}</b>{% else %}{{ game.away_player }}{% endif %}</td>
+        <td>{{ game.table_run }}</td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+
+{% endfor %}
+</table>
 <table class="table">
     <tr><th>Season</th><th>Wins</th><th>Losses</th><th>Percentage</th></tr>
     {% for summary in summaries %}

@@ -48,8 +48,17 @@ def player(request, player_id):
     check_season(request)
     _player = Player.objects.get(id=player_id)
     summaries = PlayerSeasonSummary.objects.filter(player__exact=_player).order_by('-season')
-    this_season_games = Game.objects.filter(Q(home_player=_player) | Q(away_player=player))
+
+    _score_sheets = ScoreSheet.objects.filter(official=True)
+
+    _score_sheets = set(_score_sheets.filter(
+        django.db.models.Q(away_lineup__player=_player)
+        |
+        django.db.models.Q(home_lineup__player=_player)
+    ))
+
     context = {
+        'score_sheets': _score_sheets,
         'summaries': summaries,
         'player': _player
     }
