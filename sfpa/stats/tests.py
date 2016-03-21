@@ -3,6 +3,7 @@ from num2words import num2words
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.test import TestCase
+from django.test import Client
 
 from .models import Season, Player, PlayerSeasonSummary, GameOrder, Match, ScoreSheet, Week
 from .models import PlayPosition, AwayPlayPosition, HomePlayPosition
@@ -24,13 +25,13 @@ match_ups = [
 ]
 
 
-def create_test_season():
+def create_season():
     a_season = Season(name='Some Future Season', pub_date=timezone.now(), is_default=True)
     a_season.save()
     return a_season
 
 
-def create_test_players(count, start_position):
+def create_players(count, start_position):
     inc = 0
     start_position += 65
     players = []
@@ -42,7 +43,7 @@ def create_test_players(count, start_position):
     return players
 
 
-def create_test_teams(a_season):
+def create_teams(a_season):
     """
     14 players to populate 2 teams
     :return:
@@ -50,17 +51,17 @@ def create_test_teams(a_season):
 
     team_a = Team(name="Team A", season=a_season)
     team_a.save()
-    for p in create_test_players(7, 0):
+    for p in create_players(7, 0):
         team_a.players.add(p)
     team_a.save()
     team_b = Team(name="Team B", season=a_season)
     team_b.save()
-    for p in create_test_players(7, 16):
+    for p in create_players(7, 16):
         team_b.players.add(p)
     team_b.save()
 
 
-def create_test_weeks(a_season, count):
+def create_weeks(a_season, count):
     weeks = []
     inc = 0
     while inc < count:
@@ -112,25 +113,36 @@ def create_game_order():
     return game_match_ups
 
 
-class SeasonMethodTests(TestCase):
+def create_data():
+    """
+    Create a season, players, 2 teams, and a match, as mock data for many of the tests
+    """
+    a_season = create_season()
+    create_teams(a_season)  # we know they are called Team A and Team B
+    create_play_positions()  # we need these in place to test the score sheet creation
+    create_game_order()  # these too ...
+    (week_one, week_two) = create_weeks(a_season, 2)
+    match_one = Match(
+        week=week_one,
+        season=a_season,
+        away_team=AwayTeam.objects.get(name='Team A'),
+        home_team=HomeTeam.objects.get(name='Team B'),
+    )
+    match_one.save()
+    return match_one.id
 
-    def test_was_published_recently_with_future_question(self):
-        """
-        was_published_recently() should return False for questions whose
-        pub_date is in the future.
-        """
-        future_season = Season(name='Some Future Season', pub_date=timezone.now() + datetime.timedelta(days=180))
-        self.assertEqual(future_season.name, 'Some Future Season')
 
+class ScoreSheetTests(TestCase):
 
-class PlayerViewTests(TestCase):
+    def setUp(self):
+        self.sample_match_id = create_data()
 
     def test_player_index(self):
         """
         Test that a created player is *not* in the player index; as in many
         cases, a default season is required
         """
-        create_test_season()
+        # create_test_season()
 
         player = Player(first_name='George', last_name='Smith')
         player.save()
@@ -138,41 +150,34 @@ class PlayerViewTests(TestCase):
         self.assertQuerysetEqual(response.context['players'], [])
 
     def test_player_season_summary(self):
-        a_season = create_test_season()
+        # a_season = create_test_season()
         player = Player(first_name='George', last_name='Smith')
         player.save()
         summary = PlayerSeasonSummary(
             player=player,
-            season=a_season
+            season=Season.objects.get(is_default=True)
         )
         summary.save()
         response = self.client.get(reverse('players'))
         self.assertQuerysetEqual(response.context['players'], ['<PlayerSeasonSummary: PlayerSeasonSummary object>'])
 
-    def test_player_stats(self):
+    def test_score_sheet_create(self):
         """
-        Create a season, players, 2 teams, a match, a scoresheet, the lineups,
-        then run the team and player updates, then verify the team and player stats are correct
-        :return:
+        Create a score sheet, verify you get a redirect to the edit page,
+        and that there are the correct number of games attached, and that
+        trying to access it via a different session returns a redirect
+
         """
-        a_season = create_test_season()
-        create_test_teams(a_season)  # we know they are called Team A and Team B
-        create_play_positions()  # we need these in place to test the score sheet creation
-        create_game_order()  # these too ...
-        (week_one, week_two) = create_test_weeks(a_season, 2)
-        match_one = Match(
-            week=week_one,
-            season=a_season,
-            away_team=AwayTeam.objects.get(name='Team A'),
-            home_team=HomeTeam.objects.get(name='Team B'),
-        )
-        match_one.save()
-        response = self.client.get(reverse('score_sheet_create', kwargs={'match_id': match_one.id}))
+
+        response = self.client.get(reverse('score_sheet_create', kwargs={'match_id': self.sample_match_id}))
         # since we have a fresh DB, assume this will be score sheet number 1 ...
         self.assertRedirects(response, expected_url=reverse('score_sheet_edit', kwargs={'score_sheet_id': 1}))
 
-        score_sheet = ScoreSheet.objects.get(id=1)
-
         # the number of games should match the match_ups matrix in create_game_order(), ie 9
+        score_sheet = ScoreSheet.objects.get(id=1)
         self.assertEqual(len(score_sheet.games.all()), 9)
 
+        # a second client to test the redirect from another session
+        c = Client()
+        test_redirect_response = c.get(response.url)
+        self.assertRedirects(test_redirect_response, expected_url=reverse('score_sheet', kwargs={'score_sheet_id': 1}))
