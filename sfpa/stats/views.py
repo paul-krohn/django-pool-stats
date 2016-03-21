@@ -1,3 +1,5 @@
+import time
+
 from django.shortcuts import render, redirect
 from .models import Division, AwayLineupEntry, Game, GameOrder, HomeLineupEntry, Match, Player, \
     PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
@@ -10,6 +12,12 @@ import django.forms
 import django.db.models
 
 from django.core.exceptions import ObjectDoesNotExist
+
+
+def session_uid(request):
+    if 'uid' not in request.session.keys():
+        request.session['uid'] = str(hash(time.time()))[0:15]
+    return request.session['uid']
 
 
 def set_season(request, season_id=None):
@@ -272,7 +280,9 @@ def score_sheet(request, score_sheet_id):
 
 def score_sheet_edit(request, score_sheet_id):
     s = ScoreSheet.objects.get(id=score_sheet_id)
-
+    if session_uid(request) != s.creator_session:
+        if not request.user.is_superuser:
+            return redirect('score_sheet', s.id)
     score_sheet_game_formset_f = modelformset_factory(
         Game,
         form=ScoreSheetGameForm,
@@ -295,9 +305,15 @@ def score_sheet_edit(request, score_sheet_id):
     return render(request, 'stats/score_sheet_edit.html', context)
 
 
+# def create_scoresheet(request, match_id):
+#     # create a scoresheet and games for the teams in the match, red
+#     s = ScoreSheet.objects.create(match_id=match_id)
+#     s.creator_session = session_uid(request)
+
 def score_sheet_create(request, match_id):
     m = Match.objects.get(id=match_id)
     s = ScoreSheet(match=m)
+    s.creator_session = session_uid(request)
     s.save()
     for lineup_position in PlayPosition.objects.all():
         ale = AwayLineupEntry(position=lineup_position)
