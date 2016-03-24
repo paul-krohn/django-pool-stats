@@ -14,7 +14,6 @@ urlpatterns = [
     url(r'^weeks/', views.weeks, name='weeks'),
 
     url(r'^match/(?P<match_id>[0-9]+)/$', views.match, name='match'),
-    url(r'^matches/', views.matches, name='matches'),
 
     url(r'^players/', views.players, name='players'),
     url(r'^player/(?P<player_id>[0-9]+)/$', views.player, name='player'),

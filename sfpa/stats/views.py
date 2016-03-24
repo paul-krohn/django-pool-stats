@@ -237,14 +237,6 @@ def match(request, match_id):
     return render(request, 'stats/match.html', context)
 
 
-def matches(request):
-    _matches = Match.objects.filter(season=request.session['season_id'])
-    context = {
-        'matches': _matches
-    }
-    return render(request, 'stats/matches.html', context)
-
-
 def score_sheets(request):
     sheets = ScoreSheet.objects.filter(official=False)
 
