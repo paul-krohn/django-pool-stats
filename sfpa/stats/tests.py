@@ -65,7 +65,7 @@ def create_weeks(a_season, count):
     weeks = []
     inc = 0
     while inc < count:
-        week = Week(
+        (week, created) = Week.objects.get_or_create(
             season=a_season,
             date=timezone.now() + datetime.timedelta(days=7 * inc),
             name='Week {}'.format(chr(65 + inc))
