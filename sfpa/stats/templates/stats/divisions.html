@@ -6,11 +6,9 @@
 
 {% for division in divisions %}
 <h4>{{ division }}</h4>
-    <ul>
-    {% for team in division.team_set.all %}
-        <li><a href="{% url 'team' team.id %}">{{ team }}</a></li>
-    {% endfor %}
-    </ul>
+{% with teams=division.team_set.all %}
+{% include "stats/team_table.html" %}
+{% endwith %}
 {% endfor %}
 
 {% endblock %}

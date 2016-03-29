@@ -37,6 +37,9 @@ class PlayerSeasonSummary(models.Model):
     table_runs = models.IntegerField(verbose_name='Table Runs', default=0)
     win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0)
 
+    class Meta:
+        ordering = ['-win_percentage']
+
 
 class Division(models.Model):
     season = models.ForeignKey(Season)
@@ -57,6 +60,9 @@ class Team(models.Model):
     home_wins = models.IntegerField(verbose_name='Home Wins', default=0)
     home_losses = models.IntegerField(verbose_name='Home Losses', default=0)
     win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0)
+
+    class Meta:
+        ordering = ['-win_percentage']
 
     def __str__(self):
         return "{}".format(self.name)
