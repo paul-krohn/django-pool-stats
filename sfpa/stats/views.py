@@ -155,8 +155,11 @@ def update_players_stats(request):
 def team(request, team_id):
 
     _team = Team.objects.get(id=team_id)
+    _players = PlayerSeasonSummary.objects.filter(player_id__in=list([x.id for x in _team.players.all()]))
+
     context = {
-        'team': _team
+        'team': _team,
+        'players': _players
     }
     return render(request, 'stats/team.html', context)
 

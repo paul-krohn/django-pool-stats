@@ -8,9 +8,6 @@
 <p>{{ team.season }}</p>
 <h3><a href="{% url 'sponsor' team.sponsor.id %}">{{ team.sponsor }}</a></h3>
 
-{% for player in team.players.all %}
-<p><a href="{% url 'player' player.id %}">{{ player }}</a></p>
-{% endfor %}
-
+{% include "stats/player_table.html" %}
 {% endif %}
 {% endblock %}
