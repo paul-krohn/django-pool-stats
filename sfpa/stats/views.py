@@ -124,8 +124,11 @@ def update_players_stats(request):
             team_player_summary.table_runs = 0
 
             for away_score_sheet in away_score_sheets:
-                score_sheet_wins = len(away_score_sheet.games.filter(
-                    away_player__exact=team_player, winner='away'))
+                score_sheet_wins = len(
+                    away_score_sheet.games.filter(
+                        away_player__exact=team_player, winner='away'
+                    ).exclude(home_player__exact=None)
+                )
                 if score_sheet_wins == 4:  # TODO: fix hard-coding of sweep win number
                     team_player_summary.four_ohs += 1
                 team_player_summary.wins += score_sheet_wins
@@ -135,8 +138,11 @@ def update_players_stats(request):
                     away_player__exact=team_player, winner='home'))
 
             for home_score_sheet in home_score_sheets:
-                score_sheet_wins = len(home_score_sheet.games.filter(
-                    home_player__exact=team_player, winner='home'))
+                score_sheet_wins = len(
+                    home_score_sheet.games.filter(
+                        home_player__exact=team_player, winner='home'
+                    ).exclude(away_player__exact=None)
+                )
                 if score_sheet_wins == 4:  # TODO: fix hard-coding of sweep win number
                     team_player_summary.four_ohs += 1
                 team_player_summary.wins += score_sheet_wins
@@ -299,11 +305,6 @@ def score_sheet_edit(request, score_sheet_id):
     }
     return render(request, 'stats/score_sheet_edit.html', context)
 
-
-# def create_scoresheet(request, match_id):
-#     # create a scoresheet and games for the teams in the match, red
-#     s = ScoreSheet.objects.create(match_id=match_id)
-#     s.creator_session = session_uid(request)
 
 def score_sheet_create(request, match_id):
     m = Match.objects.get(id=match_id)
