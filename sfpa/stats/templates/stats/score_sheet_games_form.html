@@ -2,34 +2,34 @@
     {% for game_form in games_formset %}
         {{ game_form.id }}
     <tr>
-            <td>{{ game_form.instance.order }}</td>
-            {% if game_form.instance.home_player.id  %}
-            <td>
-                <a href="{% url 'player' game_form.instance.home_player.id %}">
-                    {% if game_form.instance.order.home_breaks %}<strong>{% endif%}
-                    {{ game_form.instance.home_player }}
-                    {% if game_form.instance.order.home_breaks %}</strong>{% endif%}
-                </a>
-            </td>
-            {% else %}
-            <td>--</td>
-            {% endif %}
-            {% if game_form.instance.away_player.id %}
-            <td>
-                <a href="{% url 'player' game_form.instance.away_player.id %}">
-                    {% if not game_form.instance.order.home_breaks %}<strong>{% endif%}
-                    {{ game_form.instance.away_player }}
-                    {% if game_form.instance.order.home_breaks %}</strong>{% endif%}
-                </a>
-            </td>
-            {% else %}
-            <td>--</td>
-            {% endif %}
-            {% for radio in game_form.winner %}
-                <td>{{ radio.tag }}</td>
-            {% endfor %}
-            <td>{{ game_form.table_run }}</td>
-            <td></td>
-            <td>{{ game_form.forfeit }}</td>
-        </tr>
+        <td>{{ game_form.instance.order }}</td>
+        {% if game_form.instance.home_player.id  %}
+        <td>
+            <a href="{% url 'player' game_form.instance.home_player.id %}">
+                {% if game_form.instance.order.home_breaks %}<strong>{% endif%}
+                {{ game_form.instance.home_player }}
+                {% if game_form.instance.order.home_breaks %}</strong>{% endif%}
+            </a>
+        </td>
+        {% else %}
+        <td>--</td>
+        {% endif %}
+        {% if game_form.instance.away_player.id %}
+        <td>
+            <a href="{% url 'player' game_form.instance.away_player.id %}">
+                {% if not game_form.instance.order.home_breaks %}<strong>{% endif%}
+                {{ game_form.instance.away_player }}
+                {% if game_form.instance.order.home_breaks %}</strong>{% endif%}
+            </a>
+        </td>
+        {% else %}
+        <td>--</td>
+        {% endif %}
+        {% for radio in game_form.winner %}
+            <td>{{ radio.tag }}</td>
+        {% endfor %}
+        <td>{{ game_form.table_run }}</td>
+        <td></td>
+        <td>{{ game_form.forfeit }}</td>
+    </tr>
     {% endfor %}
