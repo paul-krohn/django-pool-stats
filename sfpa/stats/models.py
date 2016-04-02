@@ -143,6 +143,7 @@ class GameOrder(models.Model):
 
     away_position = models.ForeignKey(AwayPlayPosition)
     home_position = models.ForeignKey(HomePlayPosition)
+    home_breaks = models.BooleanField(default=True)
     name = models.CharField(max_length=8)
 
     def __str__(self):
