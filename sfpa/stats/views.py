@@ -364,7 +364,7 @@ def score_sheet_away_lineup(request, score_sheet_id):
 
     context = {
         'score_sheet': s,
-        'lineup_form': away_lineup_formset,
+        'lineup_formset': away_lineup_formset,
     }
     return render(request, 'stats/score_sheet_away_lineup_edit.html', context)
 
