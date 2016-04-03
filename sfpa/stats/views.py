@@ -405,76 +405,51 @@ def set_games_for_score_sheet(score_sheet_id):
         game.save()
 
 
-def score_sheet_away_substitutions(request, score_sheet_id):
+def score_sheet_substitutions(request, score_sheet_id, away_home):
     s = ScoreSheet.objects.get(id=score_sheet_id)
 
-    class AwaySubstitutionForm(django.forms.ModelForm):
+    substitution_players_queryset = s.match.away_team.players.all()
+    substitution_queryset = s.away_substitutions.all()
+    substitution_model = AwaySubstitution
+    add_substitution_function = s.away_substitutions.add
+    if away_home == 'home':
+        substitution_players_queryset = s.match.home_team.players.all()
+        substitution_queryset = s.home_substitutions.all()
+        substitution_model = HomeSubstitution
+        add_substitution_function = s.home_substitutions.add
+
+    class SubstitutionForm(django.forms.ModelForm):
         player = django.forms.ModelChoiceField(
-            queryset=s.match.away_team.players.all(),
+            queryset=substitution_players_queryset,
             required=False,
         )
 
-    away_substitution_formset_f = modelformset_factory(
-        model=AwaySubstitution,
-        form=AwaySubstitutionForm,
+    substitution_formset_f = modelformset_factory(
+        model=substitution_model,
+        form=SubstitutionForm,
         fields=['game_order', 'player', 'play_position'],
         max_num=2
     )
     if request.method == 'POST':
-        away_substitution_formset = away_substitution_formset_f(
-            request.POST, queryset=s.away_substitutions.all()
+        substitution_formset = substitution_formset_f(
+            request.POST, queryset=substitution_queryset
         )
-        if away_substitution_formset.is_valid():
+        if substitution_formset.is_valid():
             print('saving away subs for {}'.format(s.match))
-            for substitution in away_substitution_formset.save():
+            for substitution in substitution_formset.save():
                 print('adding {} as {} in game {}'.format(
                     substitution.player, substitution.play_position, substitution.game_order))
-                s.away_substitutions.add(substitution)
+                add_substitution_function(substitution)
             set_games_for_score_sheet(s.id)
             return redirect('score_sheet_edit', score_sheet_id=s.id)
     else:
-        away_substitution_formset = away_substitution_formset_f(queryset=s.home_substitutions.all())
+        substitution_formset = substitution_formset_f(queryset=substitution_queryset)
         context = {
             'score_sheet': s,
-            'substitutions_form': away_substitution_formset
+            'substitutions_form': substitution_formset,
+            'away_home': away_home,
         }
-        return render(request, 'stats/score_sheet_away_substitutions.html', context)
-
-
-def score_sheet_home_substitutions(request, score_sheet_id):
-    s = ScoreSheet.objects.get(id=score_sheet_id)
-
-    class HomeSubstitutionForm(django.forms.ModelForm):
-        player = django.forms.ModelChoiceField(
-            queryset=s.match.home_team.players.all(),
-            required=False,
-        )
-
-    home_substitution_formset_f = modelformset_factory(
-        model=HomeSubstitution,
-        # exclude=['away_player'],
-        exclude=[],
-        form=HomeSubstitutionForm,
-        max_num=2
-    )
-    if request.method == 'POST':
-        home_substitution_formset = home_substitution_formset_f(
-            request.POST, queryset=s.home_substitutions.all()
-        )
-        if home_substitution_formset.is_valid():
-            print('saving home subs for {}'.format(s.match))
-            substitutions = home_substitution_formset.save()
-            for substitution in substitutions:
-                s.home_substitutions.add(substitution)
-            set_games_for_score_sheet(s.id)
-            return redirect('score_sheet_edit', score_sheet_id=s.id)
-    else:
-        home_substitution_formset = home_substitution_formset_f(queryset=s.home_substitutions.all())
-        context = {
-            'score_sheet': s,
-            'substitutions_form': home_substitution_formset
-        }
-        return render(request, 'stats/score_sheet_home_substitutions.html', context)
+        return render(request, 'stats/score_sheet_substitutions.html', context)
 
 
 def _count_games(this_team):
@@ -511,9 +486,3 @@ def update_teams_stats(request):
     for this_team in teams:
         _count_games(this_team=this_team)
     return redirect('teams')
-
-
-def update_stats(request):
-    pass
-
-
