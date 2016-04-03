@@ -4,7 +4,7 @@
 
 {% block content %}
 <table class="table table-striped">
-    <tr><td colspan="2"><a href="{% url 'score_sheet_away_lineup' score_sheet.id%}"><h4>Away Lineup</h4></a></td></tr>    <tr><th>Position</th><th>Player</th></tr>
+    <tr><td colspan="2"><a href="{% url 'score_sheet_lineup' score_sheet.id 'away' %}"><h4>Away Lineup</h4></a></td></tr>    <tr><th>Position</th><th>Player</th></tr>
     {% for position in score_sheet.away_lineup.all %}
     <tr><td>{{ position.position.away_name }}</td><td>{{ position.player }}</td></tr>
     {% endfor %}
@@ -17,7 +17,7 @@
 </ol>
 
 <table class="table table-striped">
-    <tr><td colspan="2"><h4><a href="{% url 'score_sheet_home_lineup' score_sheet.id%}">Home Lineup</a></h4></td></tr>
+    <tr><td colspan="2"><h4><a href="{% url 'score_sheet_lineup' score_sheet.id 'home' %}">Home Lineup</a></h4></td></tr>
     <tr><th>Position</th><th>Player</th></tr>
     {% for position in score_sheet.home_lineup.all %}
     <tr><td>{{ position.position.home_name }}</td><td>{{ position.player }}</td></tr>

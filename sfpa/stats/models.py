@@ -140,7 +140,6 @@ class HomePlayer(Player):
 
 
 class GameOrder(models.Model):
-
     away_position = models.ForeignKey(AwayPlayPosition)
     home_position = models.ForeignKey(HomePlayPosition)
     home_breaks = models.BooleanField(default=True)

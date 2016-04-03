@@ -2,7 +2,8 @@ import time
 
 from django.shortcuts import render, redirect
 from .models import Division, AwayLineupEntry, Game, GameOrder, HomeLineupEntry, Match, Player, \
-    PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
+    ScoreSheet, Season, Sponsor, Team, Week
+from .models import PlayPosition
 from .models import AwayPlayer, HomePlayer, PlayerSeasonSummary
 from .models import AwaySubstitution, HomeSubstitution
 from .forms import PlayerForm, ScoreSheetGameForm
@@ -335,72 +336,47 @@ def score_sheet_create(request, match_id):
     return redirect('score_sheet_edit', score_sheet_id=s.id)
 
 
-def score_sheet_away_lineup(request, score_sheet_id):
+def score_sheet_lineup(request, score_sheet_id, away_home):
     s = ScoreSheet.objects.get(id=score_sheet_id)
 
     # it would be prettier to do this by passing kwargs but,
     # it seems you can't do that with a ModelForm so, the ugly is here.
-    class AwayLineupForm(django.forms.ModelForm):
+    lineup_players_queryset = s.match.away_team.players.all()
+    lineup_queryset = s.away_lineup.all()
+    lineup_model = AwayLineupEntry
+    if away_home == 'home':
+        lineup_players_queryset = s.match.home_team.players.all()
+        lineup_queryset = s.home_lineup.all()
+        lineup_model = HomeLineupEntry
+
+    class LineupForm(django.forms.ModelForm):
         # thanks to stack overflow for this, from here:
         # http://stackoverflow.com/questions/1982025/django-form-from-related-model
         player = django.forms.ModelChoiceField(
-            queryset=s.match.away_team.players.all(),
+            queryset=lineup_players_queryset,
             required=False,
         )
 
-    away_lineup_formset_f = modelformset_factory(
-        model=AwayLineupEntry, fields=['player'], form=AwayLineupForm,
+    lineup_formset_f = modelformset_factory(
+        model=lineup_model, fields=['player'], form=LineupForm,
         extra=0, max_num=len(PlayPosition.objects.all())
     )
 
     if request.method == 'POST':
-        away_lineup_formset = away_lineup_formset_f(request.POST, queryset=s.away_lineup.all())
-        if away_lineup_formset.is_valid():
-            away_lineup_formset.save()
+        lineup_formset = lineup_formset_f(request.POST, queryset=lineup_queryset)
+        if lineup_formset.is_valid():
+            lineup_formset.save()
             set_games_for_score_sheet(s.id)
             return redirect('score_sheet_edit', score_sheet_id=s.id)
     else:
-        away_lineup_formset = away_lineup_formset_f(queryset=s.away_lineup.all())
+        lineup_formset = lineup_formset_f(queryset=lineup_queryset)
 
     context = {
         'score_sheet': s,
-        'lineup_formset': away_lineup_formset,
+        'lineup_formset': lineup_formset,
+        'away_home': away_home
     }
-    return render(request, 'stats/score_sheet_away_lineup_edit.html', context)
-
-
-def score_sheet_home_lineup(request, score_sheet_id):
-    s = ScoreSheet.objects.get(id=score_sheet_id)
-
-    # it would be prettier to do this by passing kwargs but,
-    # it seems you can't do that with a ModelForm so, the ugly is here.
-    class HomeLineupForm(django.forms.ModelForm):
-        # thanks to stack overflow for this, from here:
-        # http://stackoverflow.com/questions/1982025/django-form-from-related-model
-        player = django.forms.ModelChoiceField(
-            queryset=s.match.home_team.players.all(),
-            required=False,
-        )
-
-    home_lineup_formset_f = modelformset_factory(
-        model=HomeLineupEntry, fields=['player'], form=HomeLineupForm,
-        extra=0, max_num=len(PlayPosition.objects.all())
-    )
-
-    if request.method == 'POST':
-        home_lineup_formset = home_lineup_formset_f(request.POST, queryset=s.home_lineup.all())
-        if home_lineup_formset.is_valid():
-            home_lineup_formset.save()
-            set_games_for_score_sheet(s.id)
-            return redirect('score_sheet_edit', score_sheet_id=s.id)
-    else:
-        home_lineup_formset = home_lineup_formset_f(queryset=s.home_lineup.all())
-
-    context = {
-        'score_sheet': s,
-        'lineup_form': home_lineup_formset,
-    }
-    return render(request, 'stats/score_sheet_home_lineup_edit.html', context)
+    return render(request, 'stats/score_sheet_lineup_edit.html', context)
 
 
 # ugly, ugly hack

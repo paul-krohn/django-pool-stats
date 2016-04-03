@@ -1,20 +1,23 @@
 {% extends "stats/base.html" %}
 
-{% block title %}SFPA :: Away Lineup {% endblock %}
+{% block title %}SFPA :: {{ away_home|capfirst }} Lineup {% endblock %}
 
 {% block content %}
 
 <h4>{{ score_sheet.match }}</h4>
-<h5>Away Lineup</h5>
-<form action="{% url 'score_sheet_away_lineup' score_sheet.id %}" method="post">
+<h5>{{ away_home|capfirst }} Lineup</h5>
+<form action="{% url 'score_sheet_lineup' score_sheet.id away_home %}" method="post">
 {% csrf_token %}
 {{ lineup_formset.management_form }}
 <table class="table">
-{# lineup_formset.as_table #}
 {% for lineup_form in lineup_formset %}
 {{ lineup_form.id }}
 <tr>
+    {% if away_home == 'away' %}
     <td>{{ lineup_form.instance.position.away_name }}</td>
+    {% else %}
+    <td>{{ lineup_form.instance.position.home_name }}</td>
+    {% endif %}
     <td>{{ lineup_form.player }}</td>
 </tr>
 {% endfor %}
