@@ -100,7 +100,6 @@ class Match(models.Model):
     away_team = models.ForeignKey(AwayTeam)
 
     def __str__(self):
-        # return "{} @ {}".format(self.away_team, self.home_team)
         return "{} @ {} ({} {})".format(self.away_team, self.home_team, self.season, self.week)
 
 
@@ -217,5 +216,3 @@ class ScoreSheet(models.Model):
 
     def home_wins(self):
         return len(self.games.filter(winner='home'))
-
-

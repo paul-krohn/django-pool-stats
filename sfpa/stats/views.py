@@ -6,7 +6,7 @@ from .models import Division, AwayLineupEntry, Game, GameOrder, HomeLineupEntry,
 from .models import PlayPosition
 from .models import AwayPlayer, HomePlayer, PlayerSeasonSummary
 from .models import AwaySubstitution, HomeSubstitution
-from .forms import PlayerForm, ScoreSheetGameForm
+from .forms import PlayerForm, ScoreSheetGameForm, DisabledScoreSheetGameForm
 from django.forms import modelformset_factory
 
 import django.forms
@@ -206,8 +206,29 @@ def divisions(request):
 
 def week(request, week_id):
     _week = Week.objects.get(id=week_id)
+
+    official_matches = []
+    unofficial_matches = []
+
+    for a_match in _week.match_set.all():
+        # an 'official' match has exactly one score sheet, which has been marked official;
+        # also in the template, official matches are represented by their score sheet,
+        # unofficial matches by the match
+        match_score_sheets = ScoreSheet.objects.filter(match=a_match)
+        if len(match_score_sheets.filter(official=True)) == 1:
+            official_matches.append(match_score_sheets.filter(official=True)[0])
+        else:
+            print('oh yes and the len() thing worked out to {}'.format(match_score_sheets.filter(official=True)))
+            unofficial_matches.append(a_match)
+
+    print('hey there are some matches in week {}'.format(_week))
+    print('official matches (score sheets really): {}'.format(official_matches))
+    print('unofficial matches (score sheets really): {}'.format(unofficial_matches))
+
     context = {
-        'week': _week
+        'week': _week,
+        'unofficial_matches': unofficial_matches,
+        'official_matches': official_matches
     }
     return render(request, 'stats/week.html', context)
 
@@ -232,7 +253,7 @@ def match(request, match_id):
     if len(match_score_sheets):
         score_sheet_game_formset_f = modelformset_factory(
             model=Game,
-            form=ScoreSheetGameForm,
+            form=DisabledScoreSheetGameForm,
             max_num=len(match_score_sheets[0].games.all())
         )
         score_sheet_game_formsets = []
@@ -268,8 +289,8 @@ def score_sheet(request, score_sheet_id):
     s = ScoreSheet.objects.get(id=score_sheet_id)
     score_sheet_game_formset_f = modelformset_factory(
         Game,
-        form=ScoreSheetGameForm,
-        max_num=len(s.games.all())
+        form=DisabledScoreSheetGameForm,
+        max_num=len(s.games.all()),
     )
     score_sheet_game_formset = score_sheet_game_formset_f(
         queryset=s.games.all(),
@@ -486,3 +507,13 @@ def update_teams_stats(request):
     for this_team in teams:
         _count_games(this_team=this_team)
     return redirect('teams')
+
+
+def unofficial_results(request):
+    sheets = ScoreSheet.objects.filter(official=False)
+
+    context = {
+        'score_sheets': sheets,
+    }
+
+    return render(request, 'stats/unofficial_results.html', context)

@@ -1,0 +1,18 @@
+{% extends "stats/base.html" %}
+
+{% block title %}SFPA :: Unofficial Results :: {{ season }}{% endblock %}
+
+{% block content %}
+<table class="table">
+    <tr><th align="right">Away</th><th></th><th></th><th>Home</th></tr>
+{% for score_sheet in score_sheets %}
+    <tr>
+        <td align="right">{{ score_sheet.match.away_team }}</td>
+        <td>{{ score_sheet.away_wins }}</td>
+        <td>{{ score_sheet.home_wins }}</td>
+        <td>{{ score_sheet.match.home_team }}</td>
+    </tr>
+{% endfor %}
+</table>
+
+{% endblock %}

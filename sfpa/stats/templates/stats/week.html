@@ -7,26 +7,51 @@
 <h4>{{ week.season }}</h4>
 <h2>Week {{ week.name }}</h2>
 <p>{{ week.date}}</p>
-{% for match in week.match_set.all %}
-    <h4><a href="{% url 'match' match.id %}">{{ match.away_team }} @ {{ match.home_team }}</a></h4>
-    {% if match.scoresheet_set.all %}
-    <h5>Score Sheets</h5>
-        <ul>
-        {% for score_sheet in match.scoresheet_set.all %}
-        <li>
-            {% if score_sheet.creator_session == request.session.uid and not score_sheet.official %}
-            <a href="{% url 'score_sheet' score_sheet.id %}">{{ score_sheet.id }}</a>
-            {% else %}
-            edit : <a href="{% url 'score_sheet_edit' score_sheet.id %}">{{ score_sheet.id }}</a>
-            {% endif %}
-        </li>
-        {% endfor %}
-        </ul>
-    {% endif %}
-    <h5><a href="{% url 'score_sheet_create' match.id %}">Create Score Sheet</a></h5>
 
 
+{% if official_matches|length %}
+
+<table class="table">
+    <tr><th align="right">Away</th><th>Score</th><th>Home</th></tr>
+{% for score_sheet in official_matches %}
+    <tr>
+        <td align="right"><a href="{% url 'team' score_sheet.match.away_team.id %}">{{ score_sheet.match.away_team }}</a></td>
+        <td><a href="{% url 'score_sheet' score_sheet.id %}"><b>{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</b></a></td>
+        <td><a href="{% url 'team' score_sheet.match.home_team.id %}">{{ score_sheet.match.home_team }}</a></td>
+    </tr>
 {% endfor %}
+</table>
+{% endif %}
 
+{% if unofficial_matches|length %}
+<h4>Unofficial Results</h4>
+<table class="table">
+    <tr>
+        <th align="right">Away</th><th></th><th>Home</th>
+    </tr>
+    {% for match in unofficial_matches %}
+    <tr>
+        <td align="right"><a href="{% url 'team' match.away_team.id %}">{{ match.away_team }}</a></td>
+        <td><a href="{% url 'team' match.home_team.id %}">{{ match.home_team }}</a></td>
+        <td><a href="{% url 'score_sheet_create' match.id %}">Create Score Sheet</a></td>
+    </tr>
+    {% for score_sheet in match.scoresheet_set.all %}
+    <tr>
+        <td colspan="3" align="center">
+            <b>
+            {% if score_sheet.creator_session == request.session.uid and not score_sheet.official %}
+            <a href="{% url 'score_sheet' score_sheet.id %}">
+                {{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}
+            </a>
+            {% else %}
+            <a href="{% url 'score_sheet' score_sheet.id %}">{{ score_sheet.id }}</a>
+            {% endif %}
+            </b>
+        </td>
+    </tr>
+    {% endfor %}
+    {% endfor %}
+</table>
+{% endif %}
 {% endif %}
 {% endblock %}
