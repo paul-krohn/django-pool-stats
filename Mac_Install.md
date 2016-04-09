@@ -8,8 +8,7 @@ $ brew install mysql56
 ```
 
 There is nothing about the code that requires a specific version of MySQL. MySQL 5.6 is widely supported and hosted, so I've stuck with that; much easier to upgrade than downgrade due to the hosting environment.
-$ cd ~/Documents
-$ git clone git@github.com:paul-krohn/django-pool-stats.git
+
 #### Create a MySQL user ####
 There is a default user the application uses to connect to mysql, you should over-ride that as described in the *Environment* section of the README for any environment other than your workstation.
 ```mysql
@@ -55,4 +54,4 @@ Now you can start it up in development mode:
 $ cd ~/Documents/django-pool-stats/sfpa
 $ python manage.py runserver
 ```
-Now open your browser and got to http://localhost:8000/stats
+Now open your browser and go to http://localhost:8000/stats/
