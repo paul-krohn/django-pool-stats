@@ -1,0 +1,17 @@
+<table class="table">
+    <tr>
+        <th>Player</th>
+        <th>Wins</th>
+        <th>Losses</th>
+        <th>Table Runs</th>
+    </tr>
+    {% for player_score_sheet_summary in player_score_sheet_summaries %}
+    <tr>
+        <td><a href="{% url 'player' player_score_sheet_summary.player.id %}">{{ player_score_sheet_summary.player }}</a></td>
+        <td>{{ player_score_sheet_summary.wins }}</td>
+        <td>{{ player_score_sheet_summary.losses }}</td>
+        <td>{{ player_score_sheet_summary.table_runs }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
