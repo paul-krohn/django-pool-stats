@@ -249,6 +249,28 @@ class ScoreSheet(models.Model):
     def home_wins(self):
         return len(self.games.filter(winner='home'))
 
+    def initialize_lineup(self):
+        for lineup_position in PlayPosition.objects.all():
+            ale = AwayLineupEntry(position=lineup_position)
+            ale.save()
+            hle = HomeLineupEntry(position=lineup_position)
+            hle.save()
+            self.away_lineup.add(ale)
+            self.home_lineup.add(hle)
+        self.save()
+
+    def initialize_games(self):
+        # now create games, per the game order table
+        for g in GameOrder.objects.all():
+            game = Game()
+            game.order = g
+            game.table_run = False
+            game.forfeit = False
+            game.save()
+            self.games.add(game)
+        self.save()
+
+
     def set_games(self):
         for game in self.games.all():
             print("working on game {} from {}".format(game.order, self.match))

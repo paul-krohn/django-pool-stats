@@ -369,28 +369,12 @@ def score_sheet_edit(request, score_sheet_id):
 
 
 def score_sheet_create(request, match_id):
-    m = Match.objects.get(id=match_id)
-    s = ScoreSheet(match=m)
+    # m = Match.objects.get(id=match_id)
+    s = ScoreSheet(match=Match.objects.get(id=match_id))
     s.creator_session = session_uid(request)
     s.save()
-    for lineup_position in PlayPosition.objects.all():
-        ale = AwayLineupEntry(position=lineup_position)
-        ale.save()
-        hle = HomeLineupEntry(position=lineup_position)
-        hle.save()
-        s.away_lineup.add(ale)
-        s.home_lineup.add(hle)
-    s.save()
-
-    # now create games, per the game order table
-    for g in GameOrder.objects.all():
-        game = Game()
-        game.order = g
-        game.table_run = False
-        game.forfeit = False
-        game.save()
-        s.games.add(game)
-    s.save()
+    s.initialize_lineup()
+    s.initialize_games()
 
     return redirect('score_sheet_edit', score_sheet_id=s.id)
 
