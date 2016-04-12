@@ -248,3 +248,27 @@ class ScoreSheet(models.Model):
 
     def home_wins(self):
         return len(self.games.filter(winner='home'))
+
+    def set_games(self):
+        for game in self.games.all():
+            print("working on game {} from {}".format(game.order, self.match))
+
+            # set the players for the game; have to convert Player instances to Home/AwayPlayer instances
+            away_player_position = self.away_lineup.filter(position_id__exact=game.order.away_position.id)[0]
+            if away_player_position.player is not None:
+                game.away_player = AwayPlayer.objects.get(id=away_player_position.player.id)
+            home_player_position = self.home_lineup.filter(position_id__exact=game.order.home_position.id)[0]
+            if home_player_position.player is not None:
+                game.home_player = HomePlayer.objects.get(id=home_player_position.player.id)
+
+            # check substitutions based on their being for <= this lineup position; over-ride the player
+            for away_substitution in self.away_substitutions.all():
+                if away_substitution.game_order.id <= game.order.id and \
+                        away_substitution.play_position == game.order.away_position:
+                    game.away_player = AwayPlayer.objects.get(id=away_substitution.player.id)
+            for home_substitution in self.home_substitutions.all():
+                if home_substitution.game_order.id <= game.order.id and \
+                        home_substitution.play_position == game.order.home_position:
+                    game.home_player = HomePlayer.objects.get(id=home_substitution.player.id)
+            game.save()
+

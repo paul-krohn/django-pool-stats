@@ -9,7 +9,7 @@ from .models import Game, Season, Player, PlayerSeasonSummary, GameOrder, Match,
 from .models import PlayPosition, AwayPlayPosition, HomePlayPosition, AwayLineupEntry, HomeLineupEntry
 from .models import Team, AwayTeam, HomeTeam
 
-from .views import set_games_for_score_sheet, update_players_stats
+from .views import update_players_stats
 
 import random
 
@@ -220,7 +220,7 @@ class ScoreSheetTests(TestCase):
         # creating the score sheet above creates the lineup entries, now we need to populate them
         populate_lineup_entries(score_sheet)
         # and the games
-        set_games_for_score_sheet(score_sheet.id)
+        score_sheet.set_games()
         # now we are ready to test some things
         # in the first game away player should be the team's first player
         self.assertEqual(score_sheet.games.all()[0].away_player, score_sheet.match.away_team.players.all()[0])
