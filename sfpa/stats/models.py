@@ -73,6 +73,38 @@ class Team(models.Model):
     def losses(self):
         return self.away_losses + self.home_losses
 
+    def count_games(self):
+        """
+        Count the summary stats for a team
+        :return:
+        """
+        self.away_wins = 0
+        self.away_losses = 0
+        self.home_wins = 0
+        self.home_losses = 0
+        self.win_percentage = 0.0
+
+        # first, matches involving the team as away team
+        away_score_sheets = ScoreSheet.objects.filter(match__away_team__exact=self, official__exact=True)
+        for away_score_sheet in away_score_sheets:
+            self.away_wins += len(away_score_sheet.games.filter(winner='away'))
+            self.away_losses += len(away_score_sheet.games.filter(winner='home'))
+        home_score_sheets = ScoreSheet.objects.filter(match__home_team__exact=self, official__exact=True)
+        for home_score_sheet in home_score_sheets:
+            self.home_wins += len(home_score_sheet.games.filter(winner='home'))
+            self.home_losses += len(home_score_sheet.games.filter(winner='away'))
+        denominator = self.home_losses + self.home_wins + self.away_losses + self.away_wins
+        if denominator > 0:
+            self.win_percentage = (self.home_wins + self.away_wins) / denominator
+
+        self.save()
+
+    @classmethod
+    def update_teams_stats(cls, season_id):
+        teams = cls.objects.filter(season=season_id)
+        for this_team in teams:
+            this_team.count_games()
+
 
 class Week(models.Model):
     season = models.ForeignKey(Season)

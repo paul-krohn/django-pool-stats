@@ -9,7 +9,7 @@ from .models import Game, Season, Player, PlayerSeasonSummary, GameOrder, Match,
 from .models import PlayPosition, AwayPlayPosition, HomePlayPosition, AwayLineupEntry, HomeLineupEntry
 from .models import Team, AwayTeam, HomeTeam
 
-from .views import set_games_for_score_sheet, _count_games, update_players_stats
+from .views import set_games_for_score_sheet, update_players_stats
 
 import random
 
@@ -255,12 +255,12 @@ class ScoreSheetTests(TestCase):
         score_sheet.official = True
         score_sheet.save()
 
-        _count_games(score_sheet.match.away_team)
-        _count_games(score_sheet.match.home_team)
+        score_sheet.match.away_team.count_games()
+        score_sheet.match.home_team.count_games()
 
         # forfeit wins count for teams, _count_games does not omit them.
         self.assertEqual(score_sheet.match.away_team.wins(), away_wins)
         self.assertEqual(score_sheet.match.home_team.wins(), home_wins)
 
         # needs refactor of the function to a class method to test
-        update_players_stats(response)
+        # update_players_stats(response)

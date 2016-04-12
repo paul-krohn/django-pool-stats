@@ -511,39 +511,10 @@ def score_sheet_substitutions(request, score_sheet_id, away_home):
         return render(request, 'stats/score_sheet_substitutions.html', context)
 
 
-def _count_games(this_team):
-
-    this_team.away_wins = 0
-    this_team.away_losses = 0
-    this_team.home_wins = 0
-    this_team.home_losses = 0
-    this_team.win_percentage = 0.0
-
-    # first, matches involving the team as away team
-    away_score_sheets = ScoreSheet.objects.filter(match__away_team__exact=this_team, official__exact=True)
-    for away_score_sheet in away_score_sheets:
-        this_team.away_wins += len(away_score_sheet.games.filter(winner='away'))
-        this_team.away_losses += len(away_score_sheet.games.filter(winner='home'))
-    home_score_sheets = ScoreSheet.objects.filter(match__home_team__exact=this_team, official__exact=True)
-    for home_score_sheet in home_score_sheets:
-        this_team.home_wins += len(home_score_sheet.games.filter(winner='home'))
-        this_team.home_losses += len(home_score_sheet.games.filter(winner='away'))
-    denominator = this_team.home_losses + this_team.home_wins + this_team.away_losses + this_team.away_wins
-    if denominator > 0:
-        this_team.win_percentage = (this_team.home_wins + this_team.away_wins) / denominator
-
-    this_team.save()
-
-
 def update_teams_stats(request):
-
     # be sure about what season we are working on
     check_season(request)
-
-    # get teams for the current season
-    teams = Team.objects.filter(season=request.session['season_id'])
-    for this_team in teams:
-        _count_games(this_team=this_team)
+    Team.update_teams_stats(season_id=request.session['season_id'])
     return redirect('teams')
 
 
