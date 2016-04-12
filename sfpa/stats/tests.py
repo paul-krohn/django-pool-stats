@@ -178,7 +178,7 @@ class ScoreSheetTests(TestCase):
         )
         summary.save()
         response = self.client.get(reverse('players'))
-        self.assertQuerysetEqual(response.context['players'], ['<PlayerSeasonSummary: PlayerSeasonSummary object>'])
+        self.assertQuerysetEqual(response.context['players'], ['<PlayerSeasonSummary: George Smith Some Future Season>'])
 
     def test_score_sheet_create(self):
         """
