@@ -438,32 +438,6 @@ def score_sheet_lineup(request, score_sheet_id, away_home):
     return render(request, 'stats/score_sheet_lineup_edit.html', context)
 
 
-# ugly, ugly hack
-# def set_games_for_score_sheet(score_sheet_id):
-#     s = ScoreSheet.objects.get(id=score_sheet_id)
-#     for game in s.games.all():
-#         print("working on game {} from {}".format(game.order, s.match))
-#
-#         # set the players for the game; have to convert Player instances to Home/AwayPlayer instances
-#         away_player_position = s.away_lineup.filter(position_id__exact=game.order.away_position.id)[0]
-#         if away_player_position.player is not None:
-#             game.away_player = AwayPlayer.objects.get(id=away_player_position.player.id)
-#         home_player_position = s.home_lineup.filter(position_id__exact=game.order.home_position.id)[0]
-#         if home_player_position.player is not None:
-#             game.home_player = HomePlayer.objects.get(id=home_player_position.player.id)
-#
-#         # check substitutions based on their being for <= this lineup position; over-ride the player
-#         for away_substitution in s.away_substitutions.all():
-#             if away_substitution.game_order.id <= game.order.id and \
-#                     away_substitution.play_position == game.order.away_position:
-#                 game.away_player = AwayPlayer.objects.get(id=away_substitution.player.id)
-#         for home_substitution in s.home_substitutions.all():
-#             if home_substitution.game_order.id <= game.order.id and \
-#                     home_substitution.play_position == game.order.home_position:
-#                 game.home_player = HomePlayer.objects.get(id=home_substitution.player.id)
-#         game.save()
-#
-
 def score_sheet_substitutions(request, score_sheet_id, away_home):
     s = ScoreSheet.objects.get(id=score_sheet_id)
 
