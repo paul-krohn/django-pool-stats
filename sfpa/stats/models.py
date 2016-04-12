@@ -37,8 +37,54 @@ class PlayerSeasonSummary(models.Model):
     table_runs = models.IntegerField(verbose_name='Table Runs', default=0)
     win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0)
 
+    def __str__(self):
+        return "{} {}".format(self.player, self.season)
+
     class Meta:
         ordering = ['-win_percentage']
+
+    def update_sweeps(self):
+        # the occasional player may have played for more than one
+        # team in a season ...
+        score_sheets = ScoreSheet.objects.filter(
+            models.Q(match__away_team__in=self.player.team_set.filter(season=self.season))
+            |
+            models.Q(match__home_team__in=self.player.team_set.filter(season=self.season))
+        ).filter(official=True)
+        table_runs = 0
+
+        for score_sheet in score_sheets:
+            if len(score_sheet.games.filter(
+                home_player=self.player
+            ).filter(
+                winner='home'
+            )) == 4:
+                table_runs += 1
+        self.table_runs = table_runs
+        self.save()
+
+    def update(self):
+        games = Game.objects.filter(
+            scoresheet__match__season_id=self.season
+        ).filter(
+            scoresheet__official=True
+        ).filter(
+            forfeit=False
+        )
+        self.wins = len(games.filter(away_player=self.player).filter(winner='away')) + \
+            len(games.filter(home_player=self.player).filter(winner='home'))
+        self.losses = len(games.filter(away_player=self.player).filter(winner='home')) + \
+            len(games.filter(home_player=self.player).filter(winner='away'))
+        self.table_runs = len(games.filter(away_player=self.player).filter(winner='away').filter(table_run=True)) + \
+            len(games.filter(home_player=self.player).filter(winner='home').filter(table_run=True))
+        self.update_sweeps()
+
+        self.save()
+
+    @classmethod
+    def update_all(cls, season_id):
+        for summary in cls.objects.filter(season=season_id):
+            summary.update()
 
 
 class Division(models.Model):
@@ -270,7 +316,6 @@ class ScoreSheet(models.Model):
             self.games.add(game)
         self.save()
 
-
     def set_games(self):
         for game in self.games.all():
             print("working on game {} from {}".format(game.order, self.match))
@@ -293,4 +338,3 @@ class ScoreSheet(models.Model):
                         home_substitution.play_position == game.order.home_position:
                     game.home_player = HomePlayer.objects.get(id=home_substitution.player.id)
             game.save()
-

@@ -1,18 +1,16 @@
 import time
 
 from django.shortcuts import render, redirect
-from .models import Division, AwayLineupEntry, Game, GameOrder, HomeLineupEntry, Match, Player, \
+from .models import Division, AwayLineupEntry, Game, HomeLineupEntry, Match, Player, \
     ScoreSheet, Season, Sponsor, Team, Week
 from .models import PlayPosition
-from .models import AwayPlayer, HomePlayer, PlayerSeasonSummary
+from .models import PlayerSeasonSummary
 from .models import AwaySubstitution, HomeSubstitution
 from .forms import PlayerForm, ScoreSheetGameForm, DisabledScoreSheetGameForm
 from django.forms import modelformset_factory
 
 import django.forms
 import django.db.models
-
-from django.core.exceptions import ObjectDoesNotExist
 
 
 def session_uid(request):
@@ -109,53 +107,9 @@ def player_create(request):
 
 
 def update_players_stats(request):
-    check_season(request)
-    team_list = Team.objects.filter(season=request.session['season_id'])
-    for a_team in team_list:
-        away_score_sheets = ScoreSheet.objects.filter(match__away_team__exact=a_team, official__exact=True)
-        home_score_sheets = ScoreSheet.objects.filter(match__home_team__exact=a_team, official__exact=True)
-        for team_player in a_team.players.all():
-            try:
-                team_player_summary = PlayerSeasonSummary.objects.get(player__exact=team_player)
-            except ObjectDoesNotExist:
-                team_player_summary = PlayerSeasonSummary(player=team_player, season_id=request.session['season_id'])
-            team_player_summary.wins = 0
-            team_player_summary.losses = 0
-            team_player_summary.four_ohs = 0
-            team_player_summary.table_runs = 0
 
-            for away_score_sheet in away_score_sheets:
-                score_sheet_wins = len(
-                    away_score_sheet.games.filter(
-                        away_player__exact=team_player, winner='away'
-                    ).exclude(home_player__exact=None)
-                )
-                if score_sheet_wins == 4:  # TODO: fix hard-coding of sweep win number
-                    team_player_summary.four_ohs += 1
-                team_player_summary.wins += score_sheet_wins
-                team_player_summary.table_runs += len(away_score_sheet.games.filter(
-                    away_player__exact=team_player, winner='away', table_run=True))
-                team_player_summary.losses += len(away_score_sheet.games.filter(
-                    away_player__exact=team_player, winner='home'))
+    PlayerSeasonSummary.update_all(season_id=request.session['season_id'])
 
-            for home_score_sheet in home_score_sheets:
-                score_sheet_wins = len(
-                    home_score_sheet.games.filter(
-                        home_player__exact=team_player, winner='home'
-                    ).exclude(away_player__exact=None)
-                )
-                if score_sheet_wins == 4:  # TODO: fix hard-coding of sweep win number
-                    team_player_summary.four_ohs += 1
-                team_player_summary.wins += score_sheet_wins
-                team_player_summary.table_runs += len(home_score_sheet.games.filter(
-                    home_player__exact=team_player, winner='home', table_run=True))
-                team_player_summary.losses += len(home_score_sheet.games.filter(
-                    home_player__exact=team_player, winner='away'))
-            denominator = team_player_summary.losses + team_player_summary.wins
-            if denominator > 0:
-                team_player_summary.win_percentage = team_player_summary.wins / denominator
-
-            team_player_summary.save()
     return redirect('/stats/players')
 
 
