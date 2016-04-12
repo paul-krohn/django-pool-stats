@@ -457,7 +457,7 @@ def score_sheet_substitutions(request, score_sheet_id, away_home):
                 print('adding {} as {} in game {}'.format(
                     substitution.player, substitution.play_position, substitution.game_order))
                 add_substitution_function(substitution)
-            set_games_for_score_sheet(s.id)
+            s.set_games()
             return redirect('score_sheet_edit', score_sheet_id=s.id)
     else:
         substitution_formset = substitution_formset_f(queryset=substitution_queryset)
