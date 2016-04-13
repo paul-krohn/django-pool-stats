@@ -78,16 +78,17 @@ WSGI_APPLICATION = 'sfpa.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'sfpa_stats',
-        'USER': 'sfpa_django',
-        'PASSWORD': 'isysroot',
+        'NAME': os.getenv('DJANGO_DB_NAME', 'sfpa_stats'),
+        'USER': os.getenv('DJANGO_DB_USER', 'sfpa_django'),
+        'PASSWORD': os.getenv('DJANGO_DB_PASS', False),
+        'HOST': os.getenv('DJANGO_DB_HOST', 'localhost'),
     }
 }
 
 CACHES = {
     'default': {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
-        'LOCATION': '127.0.0.1:11211'
+        'LOCATION': os.getenv('DJANGO_MEMCACHED', '127.0.0.1:11211')
     }
 }
 
