@@ -24,11 +24,17 @@ fi
 . ${VE_DIR}/bin/activate
 pip install -r /vagrant/requirements.pip
 
+
+# set up mysql user
 cat <<MYSQL_USER | mysql -u root -pjanet
 GRANT ALL ON sfpa_stats.* TO 'sfpa_django'@'localhost' identified by 'isysroot';
 create database if not exists sfpa_stats;
+GRANT ALL ON test_sfpa_stats.* TO 'sfpa_django'@'localhost' identified by 'isysroot';
 flush privileges;
 MYSQL_USER
+
+# allow access from not-localhost, so a dev has a chance
+sed -i 's/bind-address.*/bind-address = 0.0.0.0/' /etc/mysql/my.cnf
 
 cat <<EOF > ~vagrant/runserver.sh
 cd /vagrant/sfpa

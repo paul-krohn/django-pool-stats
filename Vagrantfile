@@ -14,5 +14,6 @@ Vagrant.configure(2) do |config|
     inline: "/bin/bash /vagrant/provision.sh"
 
   config.vm.network "forwarded_port", guest: 8000, host: 8000
+  config.vm.network "forwarded_port", guest: 3306, host: 13306
 
 end
