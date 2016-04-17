@@ -27,21 +27,22 @@ pip install -r /vagrant/requirements.pip
 
 # set up mysql user
 cat <<MYSQL_USER | mysql -u root -pjanet
-GRANT ALL ON sfpa_stats.* TO 'sfpa_django'@'localhost' identified by 'isysroot';
-create database if not exists sfpa_stats;
-GRANT ALL ON test_sfpa_stats.* TO 'sfpa_django'@'localhost' identified by 'isysroot';
+create database if not exists pool_stats;
+GRANT ALL ON pool_stats.* TO 'pool_stats'@'localhost' identified by 'isysroot';
+GRANT ALL ON test_pool_stats.* TO 'pool_stats'@'localhost' identified by 'isysroot';
 flush privileges;
 MYSQL_USER
 
 # allow access from not-localhost, so a dev has a chance
 sed -i 's/bind-address.*/bind-address = 0.0.0.0/' /etc/mysql/my.cnf
 
+
+# teensy wrapper to start the app in development mode
 cat <<EOF > ~vagrant/runserver.sh
-cd /vagrant/sfpa
+cd /vagrant/pool
 python manage.py runserver 0.0.0.0:8000
 EOF
 
-#echo ${RUNIT} >> ~vagrant/runserver.sh
 chown vagrant:vagrant ~vagrant/runserver.sh
 chmod +x ~vagrant/runserver.sh
 
