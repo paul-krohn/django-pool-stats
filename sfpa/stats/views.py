@@ -239,42 +239,6 @@ def score_sheets(request):
     return render(request, 'stats/score_sheets.html', context)
 
 
-def player_score_sheet_summary(games, a_player):
-
-    away_wins = games.filter(winner='away', away_player=a_player)
-    away_losses = games.filter(winner='home', away_player=a_player)
-
-    home_wins = games.filter(winner='home', home_player=a_player)
-    home_losses = games.filter(winner='away', home_player=a_player)
-
-    return {
-        'wins': len(away_wins.all()) + len(home_wins.all()),
-        'losses': len(away_losses.all()) + len(home_losses.all()),
-        'table_runs': len(away_wins.filter(table_run=True)) + len(home_wins.filter(table_run=True)),
-    }
-
-
-def get_score_sheet_player_summaries(a_score_sheet, away_home):
-
-    player_score_sheet_summaries = []
-    if away_home == 'away':
-        lineup_entries = a_score_sheet.away_lineup.all()
-    else:
-        lineup_entries = a_score_sheet.home_lineup.all()
-    for lineup_entry in lineup_entries:
-        if lineup_entry.player is None:
-            continue
-        summary = {
-            'player': lineup_entry.player,
-        }
-        summary.update(player_score_sheet_summary(
-            games=a_score_sheet.games.filter(forfeit=False),
-            a_player=lineup_entry.player
-        ))
-        player_score_sheet_summaries.append(summary)
-    return player_score_sheet_summaries
-
-
 def score_sheet(request, score_sheet_id):
     s = ScoreSheet.objects.get(id=score_sheet_id)
     score_sheet_game_formset_f = modelformset_factory(
@@ -289,8 +253,8 @@ def score_sheet(request, score_sheet_id):
     context = {
         'score_sheet': s,
         'games_formset': score_sheet_game_formset,
-        'away_player_score_sheet_summaries': get_score_sheet_player_summaries(s, 'away'),
-        'home_player_score_sheet_summaries': get_score_sheet_player_summaries(s, 'home')
+        'away_player_score_sheet_summaries': s.player_summaries('away'),
+        'home_player_score_sheet_summaries': s.player_summaries('home')
     }
     return render(request, 'stats/score_sheet.html', context)
 

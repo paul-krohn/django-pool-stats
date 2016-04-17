@@ -338,3 +338,36 @@ class ScoreSheet(models.Model):
                         home_substitution.play_position == game.order.home_position:
                     game.home_player = HomePlayer.objects.get(id=home_substitution.player.id)
             game.save()
+
+    def player_summary(self, a_player):
+
+        away_wins = self.games.filter(winner='away', away_player=a_player, forfeit=False)
+        away_losses = self.games.filter(winner='home', away_player=a_player, forfeit=False)
+
+        home_wins = self.games.filter(winner='home', home_player=a_player, forfeit=False)
+        home_losses = self.games.filter(winner='away', home_player=a_player, forfeit=False)
+
+        return {
+            'wins': len(away_wins.all()) + len(home_wins.all()),
+            'losses': len(away_losses.all()) + len(home_losses.all()),
+            'table_runs': len(away_wins.filter(table_run=True)) + len(home_wins.filter(table_run=True)),
+        }
+
+    def player_summaries(self, away_home):
+
+        player_score_sheet_summaries = []
+        if away_home == 'away':
+            lineup_entries = self.away_lineup.all()
+        else:
+            lineup_entries = self.home_lineup.all()
+        for lineup_entry in lineup_entries:
+            if lineup_entry.player is None:
+                continue
+            summary = {
+                'player': lineup_entry.player,
+            }
+            summary.update(self.player_summary(
+                a_player=lineup_entry.player
+            ))
+            player_score_sheet_summaries.append(summary)
+        return player_score_sheet_summaries
