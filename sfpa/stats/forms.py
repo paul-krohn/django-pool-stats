@@ -15,13 +15,11 @@ class PlayerForm(django.forms.ModelForm):
 
 
 class ScoreSheetGameForm(django.forms.ModelForm):
+
     class Meta:
         model = Game
-        # exclude = ['order', 'home_player', 'away_player']
         fields = ['winner', 'table_run', 'forfeit']
         extra = 0
-        # TODO: de-hard-code this
-        # max_num = 16
         widgets = {
             'winner': django.forms.RadioSelect(
                 choices=WINNER_CHOICES
@@ -32,3 +30,12 @@ class ScoreSheetGameForm(django.forms.ModelForm):
             'table_run': '',
             'forfeit': '',
         }
+
+
+class DisabledScoreSheetGameForm(ScoreSheetGameForm):
+
+    def __init__(self, *args, **kwargs):
+        super(DisabledScoreSheetGameForm, self).__init__(*args, **kwargs)
+        self.fields['winner'].widget.attrs['disabled'] = 'disabled'
+        self.fields['table_run'].widget.attrs['disabled'] = 'disabled'
+        self.fields['forfeit'].widget.attrs['disabled'] = 'disabled'

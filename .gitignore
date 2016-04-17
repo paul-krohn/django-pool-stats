@@ -70,3 +70,5 @@ target/
 
 # migrations, for better or worse
 sfpa/stats/migrations
+
+.vagrant

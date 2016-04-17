@@ -7,7 +7,6 @@ admin.AdminSite.site_header = "SFPA stats admin"
 
 
 admin.site.register(Division)
-admin.site.register(GameOrder)
 admin.site.register(Match)
 admin.site.register(Player)
 admin.site.register(Season)
@@ -35,6 +34,13 @@ class ScoreSheetAdmin(admin.ModelAdmin):
     list_filter = ['official']
 
 admin.site.register(ScoreSheet, ScoreSheetAdmin)
+
+
+class GameOrderAdmin(admin.ModelAdmin):
+    list_display = ['name', 'away_position', 'home_position', 'home_breaks']
+
+admin.site.register(GameOrder, GameOrderAdmin)
+
 
 # TODO:
 # It would be pretty to have, in the match admin, the teams filtered by season

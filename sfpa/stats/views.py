@@ -2,10 +2,11 @@ import time
 
 from django.shortcuts import render, redirect
 from .models import Division, AwayLineupEntry, Game, GameOrder, HomeLineupEntry, Match, Player, \
-    PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
+    ScoreSheet, Season, Sponsor, Team, Week
+from .models import PlayPosition
 from .models import AwayPlayer, HomePlayer, PlayerSeasonSummary
 from .models import AwaySubstitution, HomeSubstitution
-from .forms import PlayerForm, ScoreSheetGameForm
+from .forms import PlayerForm, ScoreSheetGameForm, DisabledScoreSheetGameForm
 from django.forms import modelformset_factory
 
 import django.forms
@@ -124,8 +125,11 @@ def update_players_stats(request):
             team_player_summary.table_runs = 0
 
             for away_score_sheet in away_score_sheets:
-                score_sheet_wins = len(away_score_sheet.games.filter(
-                    away_player__exact=team_player, winner='away'))
+                score_sheet_wins = len(
+                    away_score_sheet.games.filter(
+                        away_player__exact=team_player, winner='away'
+                    ).exclude(home_player__exact=None)
+                )
                 if score_sheet_wins == 4:  # TODO: fix hard-coding of sweep win number
                     team_player_summary.four_ohs += 1
                 team_player_summary.wins += score_sheet_wins
@@ -135,8 +139,11 @@ def update_players_stats(request):
                     away_player__exact=team_player, winner='home'))
 
             for home_score_sheet in home_score_sheets:
-                score_sheet_wins = len(home_score_sheet.games.filter(
-                    home_player__exact=team_player, winner='home'))
+                score_sheet_wins = len(
+                    home_score_sheet.games.filter(
+                        home_player__exact=team_player, winner='home'
+                    ).exclude(away_player__exact=None)
+                )
                 if score_sheet_wins == 4:  # TODO: fix hard-coding of sweep win number
                     team_player_summary.four_ohs += 1
                 team_player_summary.wins += score_sheet_wins
@@ -155,8 +162,11 @@ def update_players_stats(request):
 def team(request, team_id):
 
     _team = Team.objects.get(id=team_id)
+    _players = PlayerSeasonSummary.objects.filter(player_id__in=list([x.id for x in _team.players.all()]))
+
     context = {
-        'team': _team
+        'team': _team,
+        'players': _players
     }
     return render(request, 'stats/team.html', context)
 
@@ -196,17 +206,40 @@ def divisions(request):
 
 def week(request, week_id):
     _week = Week.objects.get(id=week_id)
+
+    official_matches = []
+    unofficial_matches = []
+
+    for a_match in _week.match_set.all():
+        # an 'official' match has exactly one score sheet, which has been marked official;
+        # also in the template, official matches are represented by their score sheet,
+        # unofficial matches by the match
+        match_score_sheets = ScoreSheet.objects.filter(match=a_match)
+        if len(match_score_sheets.filter(official=True)) == 1:
+            official_matches.append(match_score_sheets.filter(official=True)[0])
+        else:
+            print('oh yes and the len() thing worked out to {}'.format(match_score_sheets.filter(official=True)))
+            unofficial_matches.append(a_match)
+
+    print('hey there are some matches in week {}'.format(_week))
+    print('official matches (score sheets really): {}'.format(official_matches))
+    print('unofficial matches (score sheets really): {}'.format(unofficial_matches))
+
     context = {
-        'week': _week
+        'week': _week,
+        'unofficial_matches': unofficial_matches,
+        'official_matches': official_matches
     }
     return render(request, 'stats/week.html', context)
 
 
 def weeks(request):
     check_season(request)
+    _season = Season.objects.get(id=request.session['season_id'])
     _weeks = Week.objects.filter(season=request.session['season_id'])
     context = {
-        'weeks': _weeks
+        'weeks': _weeks,
+        'season': _season
     }
     return render(request, 'stats/weeks.html', context)
 
@@ -220,7 +253,7 @@ def match(request, match_id):
     if len(match_score_sheets):
         score_sheet_game_formset_f = modelformset_factory(
             model=Game,
-            form=ScoreSheetGameForm,
+            form=DisabledScoreSheetGameForm,
             max_num=len(match_score_sheets[0].games.all())
         )
         score_sheet_game_formsets = []
@@ -252,12 +285,48 @@ def score_sheets(request):
     return render(request, 'stats/score_sheets.html', context)
 
 
+def player_score_sheet_summary(games, a_player):
+
+    away_wins = games.filter(winner='away', away_player=a_player)
+    away_losses = games.filter(winner='home', away_player=a_player)
+
+    home_wins = games.filter(winner='home', home_player=a_player)
+    home_losses = games.filter(winner='away', home_player=a_player)
+
+    return {
+        'wins': len(away_wins.all()) + len(home_wins.all()),
+        'losses': len(away_losses.all()) + len(home_losses.all()),
+        'table_runs': len(away_wins.filter(table_run=True)) + len(home_wins.filter(table_run=True)),
+    }
+
+
+def get_score_sheet_player_summaries(a_score_sheet, away_home):
+
+    player_score_sheet_summaries = []
+    if away_home == 'away':
+        lineup_entries = a_score_sheet.away_lineup.all()
+    else:
+        lineup_entries = a_score_sheet.home_lineup.all()
+    for lineup_entry in lineup_entries:
+        if lineup_entry.player is None:
+            continue
+        summary = {
+            'player': lineup_entry.player,
+        }
+        summary.update(player_score_sheet_summary(
+            games=a_score_sheet.games.filter(forfeit=False),
+            a_player=lineup_entry.player
+        ))
+        player_score_sheet_summaries.append(summary)
+    return player_score_sheet_summaries
+
+
 def score_sheet(request, score_sheet_id):
     s = ScoreSheet.objects.get(id=score_sheet_id)
     score_sheet_game_formset_f = modelformset_factory(
         Game,
-        form=ScoreSheetGameForm,
-        max_num=len(s.games.all())
+        form=DisabledScoreSheetGameForm,
+        max_num=len(s.games.all()),
     )
     score_sheet_game_formset = score_sheet_game_formset_f(
         queryset=s.games.all(),
@@ -265,7 +334,9 @@ def score_sheet(request, score_sheet_id):
 
     context = {
         'score_sheet': s,
-        'games_formset': score_sheet_game_formset
+        'games_formset': score_sheet_game_formset,
+        'away_player_score_sheet_summaries': get_score_sheet_player_summaries(s, 'away'),
+        'home_player_score_sheet_summaries': get_score_sheet_player_summaries(s, 'home')
     }
     return render(request, 'stats/score_sheet.html', context)
 
@@ -297,11 +368,6 @@ def score_sheet_edit(request, score_sheet_id):
     return render(request, 'stats/score_sheet_edit.html', context)
 
 
-# def create_scoresheet(request, match_id):
-#     # create a scoresheet and games for the teams in the match, red
-#     s = ScoreSheet.objects.create(match_id=match_id)
-#     s.creator_session = session_uid(request)
-
 def score_sheet_create(request, match_id):
     m = Match.objects.get(id=match_id)
     s = ScoreSheet(match=m)
@@ -329,72 +395,47 @@ def score_sheet_create(request, match_id):
     return redirect('score_sheet_edit', score_sheet_id=s.id)
 
 
-def score_sheet_away_lineup(request, score_sheet_id):
+def score_sheet_lineup(request, score_sheet_id, away_home):
     s = ScoreSheet.objects.get(id=score_sheet_id)
 
     # it would be prettier to do this by passing kwargs but,
     # it seems you can't do that with a ModelForm so, the ugly is here.
-    class AwayLineupForm(django.forms.ModelForm):
+    lineup_players_queryset = s.match.away_team.players.all()
+    lineup_queryset = s.away_lineup.all()
+    lineup_model = AwayLineupEntry
+    if away_home == 'home':
+        lineup_players_queryset = s.match.home_team.players.all()
+        lineup_queryset = s.home_lineup.all()
+        lineup_model = HomeLineupEntry
+
+    class LineupForm(django.forms.ModelForm):
         # thanks to stack overflow for this, from here:
         # http://stackoverflow.com/questions/1982025/django-form-from-related-model
         player = django.forms.ModelChoiceField(
-            queryset=s.match.away_team.players.all(),
+            queryset=lineup_players_queryset,
             required=False,
         )
 
-    away_lineup_formset_f = modelformset_factory(
-        model=AwayLineupEntry, fields=['player'], form=AwayLineupForm,
+    lineup_formset_f = modelformset_factory(
+        model=lineup_model, fields=['player'], form=LineupForm,
         extra=0, max_num=len(PlayPosition.objects.all())
     )
 
     if request.method == 'POST':
-        away_lineup_formset = away_lineup_formset_f(request.POST, queryset=s.away_lineup.all())
-        if away_lineup_formset.is_valid():
-            away_lineup_formset.save()
+        lineup_formset = lineup_formset_f(request.POST, queryset=lineup_queryset)
+        if lineup_formset.is_valid():
+            lineup_formset.save()
             set_games_for_score_sheet(s.id)
             return redirect('score_sheet_edit', score_sheet_id=s.id)
     else:
-        away_lineup_formset = away_lineup_formset_f(queryset=s.away_lineup.all())
+        lineup_formset = lineup_formset_f(queryset=lineup_queryset)
 
     context = {
         'score_sheet': s,
-        'lineup_form': away_lineup_formset,
+        'lineup_formset': lineup_formset,
+        'away_home': away_home
     }
-    return render(request, 'stats/score_sheet_away_lineup_edit.html', context)
-
-
-def score_sheet_home_lineup(request, score_sheet_id):
-    s = ScoreSheet.objects.get(id=score_sheet_id)
-
-    # it would be prettier to do this by passing kwargs but,
-    # it seems you can't do that with a ModelForm so, the ugly is here.
-    class HomeLineupForm(django.forms.ModelForm):
-        # thanks to stack overflow for this, from here:
-        # http://stackoverflow.com/questions/1982025/django-form-from-related-model
-        player = django.forms.ModelChoiceField(
-            queryset=s.match.home_team.players.all(),
-            required=False,
-        )
-
-    home_lineup_formset_f = modelformset_factory(
-        model=HomeLineupEntry, fields=['player'], form=HomeLineupForm,
-        extra=0, max_num=len(PlayPosition.objects.all())
-    )
-
-    if request.method == 'POST':
-        home_lineup_formset = home_lineup_formset_f(request.POST, queryset=s.home_lineup.all())
-        if home_lineup_formset.is_valid():
-            home_lineup_formset.save()
-            set_games_for_score_sheet(s.id)
-            return redirect('score_sheet_edit', score_sheet_id=s.id)
-    else:
-        home_lineup_formset = home_lineup_formset_f(queryset=s.home_lineup.all())
-
-    context = {
-        'score_sheet': s,
-        'lineup_form': home_lineup_formset,
-    }
-    return render(request, 'stats/score_sheet_home_lineup_edit.html', context)
+    return render(request, 'stats/score_sheet_lineup_edit.html', context)
 
 
 # ugly, ugly hack
@@ -423,76 +464,51 @@ def set_games_for_score_sheet(score_sheet_id):
         game.save()
 
 
-def score_sheet_away_substitutions(request, score_sheet_id):
+def score_sheet_substitutions(request, score_sheet_id, away_home):
     s = ScoreSheet.objects.get(id=score_sheet_id)
 
-    class AwaySubstitutionForm(django.forms.ModelForm):
+    substitution_players_queryset = s.match.away_team.players.all()
+    substitution_queryset = s.away_substitutions.all()
+    substitution_model = AwaySubstitution
+    add_substitution_function = s.away_substitutions.add
+    if away_home == 'home':
+        substitution_players_queryset = s.match.home_team.players.all()
+        substitution_queryset = s.home_substitutions.all()
+        substitution_model = HomeSubstitution
+        add_substitution_function = s.home_substitutions.add
+
+    class SubstitutionForm(django.forms.ModelForm):
         player = django.forms.ModelChoiceField(
-            queryset=s.match.away_team.players.all(),
+            queryset=substitution_players_queryset,
             required=False,
         )
 
-    away_substitution_formset_f = modelformset_factory(
-        model=AwaySubstitution,
-        form=AwaySubstitutionForm,
+    substitution_formset_f = modelformset_factory(
+        model=substitution_model,
+        form=SubstitutionForm,
         fields=['game_order', 'player', 'play_position'],
         max_num=2
     )
     if request.method == 'POST':
-        away_substitution_formset = away_substitution_formset_f(
-            request.POST, queryset=s.away_substitutions.all()
+        substitution_formset = substitution_formset_f(
+            request.POST, queryset=substitution_queryset
         )
-        if away_substitution_formset.is_valid():
+        if substitution_formset.is_valid():
             print('saving away subs for {}'.format(s.match))
-            for substitution in away_substitution_formset.save():
+            for substitution in substitution_formset.save():
                 print('adding {} as {} in game {}'.format(
                     substitution.player, substitution.play_position, substitution.game_order))
-                s.away_substitutions.add(substitution)
+                add_substitution_function(substitution)
             set_games_for_score_sheet(s.id)
             return redirect('score_sheet_edit', score_sheet_id=s.id)
     else:
-        away_substitution_formset = away_substitution_formset_f(queryset=s.home_substitutions.all())
+        substitution_formset = substitution_formset_f(queryset=substitution_queryset)
         context = {
             'score_sheet': s,
-            'substitutions_form': away_substitution_formset
+            'substitutions_form': substitution_formset,
+            'away_home': away_home,
         }
-        return render(request, 'stats/score_sheet_away_substitutions.html', context)
-
-
-def score_sheet_home_substitutions(request, score_sheet_id):
-    s = ScoreSheet.objects.get(id=score_sheet_id)
-
-    class HomeSubstitutionForm(django.forms.ModelForm):
-        player = django.forms.ModelChoiceField(
-            queryset=s.match.home_team.players.all(),
-            required=False,
-        )
-
-    home_substitution_formset_f = modelformset_factory(
-        model=HomeSubstitution,
-        # exclude=['away_player'],
-        exclude=[],
-        form=HomeSubstitutionForm,
-        max_num=2
-    )
-    if request.method == 'POST':
-        home_substitution_formset = home_substitution_formset_f(
-            request.POST, queryset=s.home_substitutions.all()
-        )
-        if home_substitution_formset.is_valid():
-            print('saving home subs for {}'.format(s.match))
-            substitutions = home_substitution_formset.save()
-            for substitution in substitutions:
-                s.home_substitutions.add(substitution)
-            set_games_for_score_sheet(s.id)
-            return redirect('score_sheet_edit', score_sheet_id=s.id)
-    else:
-        home_substitution_formset = home_substitution_formset_f(queryset=s.home_substitutions.all())
-        context = {
-            'score_sheet': s,
-            'substitutions_form': home_substitution_formset
-        }
-        return render(request, 'stats/score_sheet_home_substitutions.html', context)
+        return render(request, 'stats/score_sheet_substitutions.html', context)
 
 
 def _count_games(this_team):
@@ -531,7 +547,11 @@ def update_teams_stats(request):
     return redirect('teams')
 
 
-def update_stats(request):
-    pass
+def unofficial_results(request):
+    sheets = ScoreSheet.objects.filter(official=False)
 
+    context = {
+        'score_sheets': sheets,
+    }
 
+    return render(request, 'stats/unofficial_results.html', context)

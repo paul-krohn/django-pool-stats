@@ -1,13 +1,14 @@
 {% extends "stats/base.html" %}
 
 {% block content %}
-<h1>Weeks{{ season }}</h1>
+<h2>Weeks {{ season }}</h2>
+<h4></h4>
 {% if weeks %}
-<ul>
+<table class="table table-striped">
 {% for week in weeks %}
-<li><a href="{% url 'week' week.id %}">{{ week }}</a></li>
+<tr><td><a href="{% url 'week' week.id %}">{{ week }}</a></td><td>{{ week.date }}</td></tr>
 {% endfor %}
-</ul>
+</table>
 
 {% endif %}
 {% endblock %}

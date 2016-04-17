@@ -8,5 +8,13 @@
 <table class="table table-striped">
 {% include "stats/score_sheet_games_form.html" %}
 </table>
+<h3>Away Player Summaries</h3>
+{% with player_score_sheet_summaries=away_player_score_sheet_summaries %}
+{% include "stats/player_match_summary.html" %}
+{% endwith %}
 
+<h3>Home Player Summaries</h3>
+{% with player_score_sheet_summaries=home_player_score_sheet_summaries %}
+{% include "stats/player_match_summary.html" %}
+{% endwith %}
 {% endblock %}

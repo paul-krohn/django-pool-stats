@@ -37,6 +37,9 @@ class PlayerSeasonSummary(models.Model):
     table_runs = models.IntegerField(verbose_name='Table Runs', default=0)
     win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0)
 
+    class Meta:
+        ordering = ['-win_percentage']
+
 
 class Division(models.Model):
     season = models.ForeignKey(Season)
@@ -57,6 +60,9 @@ class Team(models.Model):
     home_wins = models.IntegerField(verbose_name='Home Wins', default=0)
     home_losses = models.IntegerField(verbose_name='Home Losses', default=0)
     win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0)
+
+    class Meta:
+        ordering = ['-win_percentage']
 
     def __str__(self):
         return "{}".format(self.name)
@@ -94,7 +100,6 @@ class Match(models.Model):
     away_team = models.ForeignKey(AwayTeam)
 
     def __str__(self):
-        # return "{} @ {}".format(self.away_team, self.home_team)
         return "{} @ {} ({} {})".format(self.away_team, self.home_team, self.season, self.week)
 
 
@@ -134,9 +139,9 @@ class HomePlayer(Player):
 
 
 class GameOrder(models.Model):
-
     away_position = models.ForeignKey(AwayPlayPosition)
     home_position = models.ForeignKey(HomePlayPosition)
+    home_breaks = models.BooleanField(default=True)
     name = models.CharField(max_length=8)
 
     def __str__(self):
@@ -211,5 +216,3 @@ class ScoreSheet(models.Model):
 
     def home_wins(self):
         return len(self.games.filter(winner='home'))
-
-
