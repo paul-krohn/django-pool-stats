@@ -18,14 +18,18 @@
         <th>table run</th>
     </tr>
     {% for game in score_sheet.games.all %}
-    {% if game.away_player == player %}
+    {% comment %}
+    This defensive check for a null opponent (ie a forfeit game) really should be
+    in the model, or failing that, the view, but here it is.
+    {% endcomment %}
+    {% if game.away_player == player and game.home_player %}
     <tr>
         <td><a href="{% url 'player' game.home_player.id %}">{% if game.winner == "home" %}<b>{{ game.home_player }}</b>{% else %}{{ game.home_player }}{% endif %}</a></td>
         <td><a href="{% url 'player' game.away_player.id %}">{% if game.winner == "away" %}<b>{{ game.away_player }}</b>{% else %}{{ game.away_player }}{% endif %}</a></td>
         <td>{{ game.table_run }}</td>
     </tr>
     {% endif %}
-    {% if game.home_player == player %}
+    {% if game.home_player == player and game.away_player %}
     <tr>
         <td><a href="{% url 'player' game.home_player.id %}">{% if game.winner == "home" %}<b>{{ game.home_player }}</b>{% else %}{{ game.home_player }}{% endif %}</a></td>
         <td><a href="{% url 'player' game.away_player.id %}">{% if game.winner == "away" %}<b>{{ game.away_player }}</b>{% else %}{{ game.away_player }}{% endif %}</a></td>
