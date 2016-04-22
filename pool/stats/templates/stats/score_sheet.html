@@ -17,4 +17,9 @@
 {% with player_score_sheet_summaries=home_player_score_sheet_summaries %}
 {% include "stats/player_match_summary.html" %}
 {% endwith %}
+{% block completion_block %}
+{% if score_sheet.complete and score_sheet.comment %}
+<p>{{ score_sheet.comment }}</p>
+{% endif %}
+{% endblock %}
 {% endblock %}

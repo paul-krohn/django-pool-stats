@@ -1,5 +1,5 @@
 import django.forms
-from .models import Player, Team, Game
+from .models import Player, Team, Game, ScoreSheet
 
 WINNER_CHOICES = (
     ('home', 'Home'),
@@ -39,3 +39,10 @@ class DisabledScoreSheetGameForm(ScoreSheetGameForm):
         self.fields['winner'].widget.attrs['disabled'] = 'disabled'
         self.fields['table_run'].widget.attrs['disabled'] = 'disabled'
         self.fields['forfeit'].widget.attrs['disabled'] = 'disabled'
+
+
+class ScoreSheetCompletionForm(django.forms.ModelForm):
+
+    class Meta:
+        model = ScoreSheet
+        fields = ['complete', 'comment']

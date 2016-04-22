@@ -29,9 +29,9 @@ admin.site.register(PlayPosition, PlayPositionAdmin)
 
 
 class ScoreSheetAdmin(admin.ModelAdmin):
-    list_display = ['match', 'official']
-    fields = ['official']
-    list_filter = ['official']
+    list_display = ['match', 'official', 'complete', 'comment']
+    fields = ['official', 'complete', 'comment']
+    list_filter = ['official', 'complete']
 
 admin.site.register(ScoreSheet, ScoreSheetAdmin)
 

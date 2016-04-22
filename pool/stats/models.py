@@ -285,6 +285,8 @@ class ScoreSheet(models.Model):
     games = models.ManyToManyField(Game, blank=True)
     away_substitutions = models.ManyToManyField(AwaySubstitution)
     home_substitutions = models.ManyToManyField(HomeSubstitution)
+    comment = models.TextField(max_length=500, blank=True)
+    complete = models.BooleanField(default=False)
 
     def __str__(self):
         return "{} ({})".format(self.match, self.id)

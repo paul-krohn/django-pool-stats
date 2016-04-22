@@ -30,6 +30,8 @@ urlpatterns = [
 
     url(r'^score_sheet_edit/(?P<score_sheet_id>[0-9]+)/$', views.score_sheet_edit, name='score_sheet_edit'),
 
+    url(r'^score_sheet_complete/(?P<score_sheet_id>[0-9]+)/$', views.score_sheet_complete, name='score_sheet_complete'),
+
     url(r'^score_sheet/(?P<score_sheet_id>[0-9]+)/$', views.score_sheet, name='score_sheet'),
     url(r'^score_sheets/', views.score_sheets, name='score_sheets'),
 
