@@ -1,0 +1,17 @@
+{% extends "stats/score_sheet.html" %}
+
+{% block completion_block %}
+<h4>
+    Confirm & Comment
+</h4>
+<form action="{% url 'score_sheet_complete' score_sheet.id %}" method="post">
+
+{% csrf_token %}
+
+<table class="table">
+{{ score_sheet_completion_form.as_table }}
+
+</table>
+<input type="submit" value="Save"/>
+</form>
+{% endblock %}
