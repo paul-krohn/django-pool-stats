@@ -4,6 +4,6 @@ Django==1.9.2
 # CFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform
 mysqlclient==1.3.7
 python3-memcached==1.51
-
+uWSGI==2.0.12
 # for tests
 num2words

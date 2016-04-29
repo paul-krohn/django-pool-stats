@@ -172,12 +172,12 @@ def week(request, week_id):
         if len(match_score_sheets.filter(official=True)) == 1:
             official_matches.append(match_score_sheets.filter(official=True)[0])
         else:
-            print('oh yes and the len() thing worked out to {}'.format(match_score_sheets.filter(official=True)))
+            # print('oh yes and the len() thing worked out to {}'.format(match_score_sheets.filter(official=True)))
             unofficial_matches.append(a_match)
 
-    print('hey there are some matches in week {}'.format(_week))
-    print('official matches (score sheets really): {}'.format(official_matches))
-    print('unofficial matches (score sheets really): {}'.format(unofficial_matches))
+    # print('hey there are some matches in week {}'.format(_week))
+    # print('official matches (score sheets really): {}'.format(official_matches))
+    # print('unofficial matches (score sheets really): {}'.format(unofficial_matches))
 
     context = {
         'week': _week,
