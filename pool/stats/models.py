@@ -41,6 +41,7 @@ class PlayerSeasonSummary(models.Model):
     four_ohs = models.IntegerField(verbose_name='4-0s', default=0)
     table_runs = models.IntegerField(verbose_name='Table Runs', default=0)
     win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0)
+    ranking = models.IntegerField(null=True)
 
     def __str__(self):
         return "{} {}".format(self.player, self.season)
@@ -68,6 +69,23 @@ class PlayerSeasonSummary(models.Model):
         self.table_runs = table_runs
         self.save()
 
+    @classmethod
+    def update_rankings(cls, season_id):
+        summaries = cls.objects.filter(season=season_id).order_by('-win_percentage')
+        inc = 0
+        while inc < len(summaries) - 1:
+            offset = 1
+            summaries[inc].ranking = inc + 1
+            summaries[inc].save()
+            print("{} gets ranking {}".format(summaries[inc], summaries[inc].ranking))
+            while inc + offset < len(summaries) and \
+                    summaries[inc].win_percentage == summaries[inc+offset].win_percentage:
+                summaries[inc+offset].ranking = inc + 1
+                summaries[inc+offset].save()
+                print("{} gets ranking {}".format(summaries[inc+offset], summaries[inc].ranking))
+                offset += 1
+            inc += offset
+
     def update(self):
         games = Game.objects.filter(
             scoresheet__match__season_id=self.season
@@ -90,6 +108,7 @@ class PlayerSeasonSummary(models.Model):
     def update_all(cls, season_id):
         for summary in cls.objects.filter(season=season_id):
             summary.update()
+        cls.update_rankings(season_id)
 
 
 class Division(models.Model):
@@ -111,9 +130,10 @@ class Team(models.Model):
     home_wins = models.IntegerField(verbose_name='Home Wins', default=0)
     home_losses = models.IntegerField(verbose_name='Home Losses', default=0)
     win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0)
+    ranking = models.IntegerField(null=True)
 
     class Meta:
-        ordering = ['-win_percentage']
+        ordering = ['-ranking']
 
     def __str__(self):
         return "{}".format(self.name)
@@ -151,10 +171,30 @@ class Team(models.Model):
         self.save()
 
     @classmethod
+    def rank_teams(cls, season_id):
+        teams = cls.objects.filter(season=season_id).order_by('-win_percentage')
+        # sorted(teams, key=attrgetter('win_percentage'))
+        print(teams)
+        print("there are {} teams to rank ".format(len(teams)))
+        inc = 0
+        while inc < len(teams) - 1:
+            offset = 1
+            teams[inc].ranking = inc + 1
+            teams[inc].save()
+            print("{} gets ranking {}".format(teams[inc], teams[inc].ranking))
+            while inc + offset < len(teams) and teams[inc].win_percentage == teams[inc+offset].win_percentage:
+                teams[inc+offset].ranking = inc + 1
+                teams[inc+offset].save()
+                print("{} gets ranking {}".format(teams[inc+offset], teams[inc].ranking))
+                offset += 1
+            inc += offset
+
+    @classmethod
     def update_teams_stats(cls, season_id):
         teams = cls.objects.filter(season=season_id)
         for this_team in teams:
             this_team.count_games()
+        cls.rank_teams(season_id)
 
 
 class Week(models.Model):
