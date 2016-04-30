@@ -68,6 +68,10 @@ target/
 # pyenv
 .python-version
 
+# environment settings file
+
+pool/pool/override_settings.py
+
 # migrations, for better or worse
 sfpa/stats/migrations
 
