@@ -14,6 +14,7 @@ class Season(models.Model):
     name = models.CharField(max_length=200)
     pub_date = models.DateTimeField('date of first week')
     is_default = models.BooleanField(default=False)
+    minimum_games = models.IntegerField(null=True)
 
     def __str__(self):
         return self.name
@@ -57,21 +58,31 @@ class PlayerSeasonSummary(models.Model):
             |
             models.Q(match__home_team__in=self.player.team_set.filter(season=self.season))
         ).filter(official=True)
-        table_runs = 0
+        sweeps = 0
 
         for score_sheet in score_sheets:
-            if len(score_sheet.games.filter(
-                home_player=self.player
-            ).filter(
-                winner='home'
-            )) == 4:
-                table_runs += 1
-        self.table_runs = table_runs
+            for away_home in ['away', 'home']:
+                score_sheet_filter_args = {'{}_player'.format(away_home): self.player}
+                if len(score_sheet.games.filter(
+                    **score_sheet_filter_args
+                ).filter(
+                    winner=away_home
+                )) == 4:
+                    sweeps += 1
+        self.four_ohs = sweeps
         self.save()
 
     @classmethod
     def update_rankings(cls, season_id):
-        summaries = cls.objects.filter(season=season_id).order_by('-win_percentage')
+        all_summaries = cls.objects.filter(season=season_id).order_by('-win_percentage')
+        # remove the players with < the minimum number of games in the current season
+        summaries = []
+        for summary in all_summaries:
+            if summary.wins + summary.losses >= summary.season.minimum_games:
+                summaries.append(summary)
+            else:
+                summary.ranking = 0
+                summary.save()
         inc = 0
         while inc < len(summaries) - 1:
             offset = 1
@@ -94,12 +105,21 @@ class PlayerSeasonSummary(models.Model):
         ).filter(
             forfeit=False
         )
-        self.wins = len(games.filter(away_player=self.player).filter(winner='away')) + \
-            len(games.filter(home_player=self.player).filter(winner='home'))
-        self.losses = len(games.filter(away_player=self.player).filter(winner='home')) + \
-            len(games.filter(home_player=self.player).filter(winner='away'))
-        self.table_runs = len(games.filter(away_player=self.player).filter(winner='away').filter(table_run=True)) + \
-            len(games.filter(home_player=self.player).filter(winner='home').filter(table_run=True))
+        away_wins = games.filter(away_player=self.player).filter(winner='away')
+        home_wins = games.filter(home_player=self.player).filter(winner='home')
+
+        away_losses = games.filter(away_player=self.player).filter(winner='home')
+        home_losses = games.filter(home_player=self.player).filter(winner='away')
+
+        print("{} has {} wins and {} losses".format(self, self.wins, self.losses))
+        self.wins = len(away_wins) + len(home_wins)
+        self.losses = len(away_losses) + len(home_losses)
+        self.win_percentage = None
+        if self.wins + self.losses > 0:
+            self.win_percentage = self.wins / (self.wins + self.losses)
+
+        self.table_runs = len(away_wins.filter(table_run=True)) + len(home_wins.filter(table_run=True))
+
         self.update_sweeps()
 
         self.save()

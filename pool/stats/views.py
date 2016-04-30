@@ -76,7 +76,9 @@ def player(request, player_id):
 def players(request):
     check_season(request)
     _players = PlayerSeasonSummary.objects.filter(
-        season=request.session['season_id']).order_by('-win_percentage', '-wins')
+        season=request.session['season_id'],
+        ranking__gt=0
+    ).order_by('-win_percentage', '-wins')
 
     context = {
         'players': _players
