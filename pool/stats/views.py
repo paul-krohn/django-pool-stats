@@ -23,6 +23,7 @@ def set_season(request, season_id=None):
     """
     Allow the user to set their season to a value other than the default.
     :param request:
+    :param season_id: the season id to set as the one to view
     :return: bool
     """
     if season_id is None:
@@ -42,7 +43,7 @@ def check_season(request):
 
 def index(request):
     check_season(request)
-    team_list = Team.objects.filter(season=request.session['season_id']).order_by('-win_percentage')
+    team_list = Team.objects.filter(season=request.session['season_id']).order_by('-win_percentage', 'ranking', 'name')
     season = Season.objects.get(id=request.session['season_id'])
     context = {
         'teams': team_list,

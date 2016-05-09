@@ -1,23 +1,37 @@
 from django.db import models
+import itertools
 
 
-def tie_break_teams(teams):
-    """
-    Given two teams, tie-break them. Return the teams in the ranking order based on
-    head-to-head matches, or ... just return them
-    :param teams:
-    :return: sorted list of teams
-    """
-    print("tie_break_teams was passed: {}".format(teams))
-    # all the matches involving the teams
+def count_forfeit_wins(team):
+    # we need the games where this team is the away_home team, where
+    # this team 'won' the game, and where the game was a forfeit
+    forfeit_wins = 0
+    for away_home in ['away', 'home']:
+        match_args = {
+            "scoresheet__match__{}_team".format(away_home): team
+        }
+        games = Game.objects.filter(
+            scoresheet__match__season_id=team.season
+        ).filter(
+            **match_args
+        ).filter(
+            scoresheet__official=True
+        ).filter(
+            forfeit=True
+        ).filter(
+            winner=away_home
+        )
+        forfeit_wins += len(games)
+        print("{} had {} {} forfeit wins".format(team, len(games), away_home))
+    return forfeit_wins
+
+
+def tie_break_team_pair(teams):
     score_sheets = ScoreSheet.objects.filter(
         models.Q(match__away_team__in=[teams[0], teams[1]])
         &
         models.Q(match__home_team__in=[teams[0], teams[1]])
     ).filter(official=True)
-    # we don't need to handle the case of no matches between the teams;
-    # a_wins and b_wins will remain 0 and the forfeit tiebreaker will
-    # decide.
     a_wins = 0
     b_wins = 0
     for score_sheet in score_sheets:
@@ -35,11 +49,45 @@ def tie_break_teams(teams):
                 a_wins += 1
     if a_wins == b_wins:
         # do the forfeit comparison, but for now, return them in the order they were passed in
-        return teams
+        print("can't rank these teams based on head-to-head; wins are {} to {}".format(a_wins, b_wins))
+        a_forfeit_wins = count_forfeit_wins(teams[0])
+        b_forfeit_wins = count_forfeit_wins(teams[1])
+        if a_forfeit_wins == b_forfeit_wins:
+            return None
+        elif a_forfeit_wins > b_forfeit_wins:
+            return teams
+        else:
+            return [teams[1], teams[0]]
     elif a_wins > b_wins:
         return teams
     else:
         return [teams[1], teams[0]]
+
+
+def tie_break_teams(teams):
+    """
+    Given a queryset of teams, tie-break them. Return the teams in the ranking order based on
+    head-to-head matches.
+    Detect when a>b, b>c, and c>a, in which case return None.
+    :param teams:
+    :return: sorted list of teams
+    """
+    print("tie_break_teams was passed: {}".format(teams))
+
+    combination_count = 0
+    print("the possible combinations are:")
+    for subset in itertools.combinations(teams, 2):
+        print(subset)
+        combination_count += 1
+    print("there are {} combinations".format(combination_count))
+    for subset in itertools.combinations(teams, 2):
+        ordered_teams = tie_break_team_pair(subset)
+        if ordered_teams is not None:
+            print("the tie-broken pair is: {}".format(ordered_teams))
+        else:
+            print("{} and {} are tied".format(subset[0], subset[1]))
+
+    return teams
 
 
 class Sponsor(models.Model):
@@ -183,21 +231,32 @@ class Division(models.Model):
         teams = self.team_set.order_by('-win_percentage')
         print("there are {} teams to rank in division {}: {}".format(len(teams), self, teams))
         inc = 0
-        while inc < len(teams) - 1:
-            offset = 1
-            teams[inc].ranking_division = inc + 1
-            teams[inc].save()
-            while inc + offset < len(teams) and teams[inc].win_percentage == teams[inc + offset].win_percentage:
-                print("tie-breaking {} and {}".format(teams[inc], teams[inc+1]))
-                # ordered_teams = tie_break_teams(teams[inc:2])
-                ordered_teams = tie_break_teams([teams[inc], teams[inc+1]])
-                print("the tie-broken teams are: {}".format(ordered_teams))
-                ordered_teams[0].ranking_division = inc + 1 + offset
-                ordered_teams[0].save()
-                offset += 1
-                ordered_teams[1].ranking_division = inc + 1 + offset
-                ordered_teams[1].save()
-            inc += 1
+        offset = 0
+        while inc <= len(teams) - 1:
+            print("inc is {}".format(inc))
+            if teams[inc].win_percentage == 0.0:
+                print("{} has no record, not ranking them".format(teams[inc]))
+                teams[inc].ranking_division = len(teams)
+                teams[inc].save()
+                inc += 1
+            else:
+                tied_teams = self.team_set.filter(win_percentage=teams[inc].win_percentage)
+                if len(tied_teams) == 1:
+                    print("there are no ties at {}".format(teams[inc].win_percentage))
+                    print("{} is ranked {} in division {}".format(teams[inc], inc + 1, self))
+                    # one team in the division/no ties, carry on
+                    teams[inc].ranking_division = inc + 1
+                    teams[inc].save()
+                    inc += 1
+                else:
+                    print("there is a tie at {}".format(teams[inc].win_percentage))
+                    ranked_teams = tie_break_teams(tied_teams)
+                    for team in ranked_teams:
+                        print("ranking {} at {}, inc is {}".format(teams[inc], inc + offset + 1, inc))
+                        team.ranking_division = inc + offset + 1
+                        team.save()
+                        offset += 1
+                    inc += offset
 
 
 class Team(models.Model):
@@ -262,28 +321,28 @@ class Team(models.Model):
 
         teams = cls.objects.filter(season=season_id).order_by('-win_percentage', 'ranking_division')
         print("there are {} teams to rank: {}".format(len(teams), teams))
-        inc = 0
-        while inc < len(teams) - 1:
-            offset = 1
-            teams[inc].ranking = inc + 1
-            teams[inc].save()
-            print("{} gets ranking {}".format(teams[inc], teams[inc].ranking))
-            while inc + offset < len(teams) and teams[inc].win_percentage == teams[inc+offset].win_percentage:
-                # now we need to tie-break based on division ranking
-                if teams[inc].ranking_division == teams[inc+offset].ranking_division:
-                    # tie-break based on opposing records required
-                    pass
-                else:
-                    # in this case, < represents a better ranking
-                    print("tie-breaking {} and {} based on division rankings, which are {} and {}".format(teams[inc], teams[inc+offset], teams[inc].ranking_division, teams[inc+offset].ranking_division))
-                    if teams[inc].ranking_division < teams[inc+offset].ranking_division:
-                        teams[inc].ranking = inc + offset
-                        teams[inc + offset].ranking = inc + offset + 1
-                offset += 1
-            inc += offset
-        ranked_teams = cls.objects.filter(season=season_id).order_by('ranking')
-        for team in ranked_teams:
-            print("team: {} rank: {}".format(team, team.ranking))
+        # inc = 0
+        # while inc < len(teams) - 1:
+        #     offset = 1
+        #     teams[inc].ranking = inc + 1
+        #     teams[inc].save()
+        #     print("{} gets ranking {}".format(teams[inc], teams[inc].ranking))
+        #     while inc + offset < len(teams) and teams[inc].win_percentage == teams[inc+offset].win_percentage:
+        #         # now we need to tie-break based on division ranking
+        #         if teams[inc].ranking_division == teams[inc+offset].ranking_division:
+        #             # tie-break based on opposing records required
+        #             pass
+        #         else:
+        #             # in this case, < represents a better ranking
+        #             print("tie-breaking {} and {} based on division rankings, which are {} and {}".format(teams[inc], teams[inc+offset], teams[inc].ranking_division, teams[inc+offset].ranking_division))
+        #             if teams[inc].ranking_division < teams[inc+offset].ranking_division:
+        #                 teams[inc].ranking = inc + offset
+        #                 teams[inc + offset].ranking = inc + offset + 1
+        #         offset += 1
+        #     inc += offset
+        # ranked_teams = cls.objects.filter(season=season_id).order_by('ranking')
+        # for team in ranked_teams:
+        #     print("team: {} rank: {}".format(team, team.ranking))
 
     @classmethod
     def update_teams_stats(cls, season_id):

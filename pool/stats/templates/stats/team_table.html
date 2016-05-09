@@ -1,8 +1,9 @@
     <table class="table">
-        <tr><th>Rank</th><th></th><th>Wins</th><th>Losses</th><th>Percent</th></tr>
-        {% for team in teams|dictsort:"ranking" %}
+        <tr><th>Rank</th><th>Division Rank</th><th></th><th>Wins</th><th>Losses</th><th>Percent</th></tr>
+        {% for team in teams|dictsort:"ranking_division" %}
         <tr>
             <td>{{ team.ranking }}</td>
+            <td>{{ team.ranking_division }}</td>
             <td><a href="{% url 'team' team.id %}">{{ team }}</a></td>
             <td>{{ team.wins }}</td>
             <td>{{ team.losses }}</td>
