@@ -76,3 +76,6 @@ pool/pool/override_settings.py
 sfpa/stats/migrations
 
 .vagrant
+
+.idea
+.bundle
