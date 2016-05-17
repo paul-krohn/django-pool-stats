@@ -7,7 +7,7 @@ from .models import PlayPosition
 from .models import PlayerSeasonSummary
 from .models import AwaySubstitution, HomeSubstitution
 from .forms import PlayerForm, ScoreSheetGameForm, DisabledScoreSheetGameForm, ScoreSheetCompletionForm
-from django.forms import modelformset_factory, modelform_factory
+from django.forms import modelformset_factory
 
 import django.forms
 import django.db.models
@@ -23,6 +23,7 @@ def set_season(request, season_id=None):
     """
     Allow the user to set their season to a value other than the default.
     :param request:
+    :param season_id: the season to use, if not the current default
     :return: bool
     """
     if season_id is None:
@@ -60,9 +61,7 @@ def player(request, player_id):
 
     # the set() is necessary to remove the dupes apparently created by the or clause
     _score_sheets = set(_score_sheets.filter(
-        django.db.models.Q(away_lineup__player=_player)
-        |
-        django.db.models.Q(home_lineup__player=_player)
+        django.db.models.Q(away_lineup__player=_player) | django.db.models.Q(home_lineup__player=_player)
     ))
 
     context = {
