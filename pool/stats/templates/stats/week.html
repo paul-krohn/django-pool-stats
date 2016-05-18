@@ -11,7 +11,7 @@
 
 {% if official_matches|length %}
 
-<table class="table">
+<table class="table" align="right">
     <tr><th align="right">Away</th><th>Score</th><th>Home</th></tr>
 {% for score_sheet in official_matches %}
     <tr>
@@ -27,29 +27,22 @@
 <h4>Unofficial Results</h4>
 <table class="table">
     <tr>
-        <th align="right">Away</th><th></th><th>Home</th>
+        <th align="right">Away</th><th>Home</th><th>Score Sheets</th>
     </tr>
     {% for match in unofficial_matches %}
     <tr>
         <td align="right"><a href="{% url 'team' match.away_team.id %}">{{ match.away_team }}</a></td>
         <td><a href="{% url 'team' match.home_team.id %}">{{ match.home_team }}</a></td>
-        <td><a href="{% url 'score_sheet_create' match.id %}">Create Score Sheet</a></td>
+        <td>
+            {% for score_sheet in match.scoresheet_set.all %}
+                {% if score_sheet.creator_session == request.session.uid and not score_sheet.official %}
+                    <a href="{% url 'score_sheet_edit' score_sheet.id %}"> {{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>,
+                {% else %}
+                    <a href="{% url 'score_sheet' score_sheet.id %}"> {{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>,
+                {% endif %}
+            {% endfor %}
+            <a href="{% url 'score_sheet_create' match.id %}">Create</a></td>
     </tr>
-    {% for score_sheet in match.scoresheet_set.all %}
-    <tr>
-        <td colspan="3" align="center">
-            <b>
-            {% if score_sheet.creator_session == request.session.uid and not score_sheet.official %}
-            <a href="{% url 'score_sheet' score_sheet.id %}">
-                {{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}
-            </a>
-            {% else %}
-            <a href="{% url 'score_sheet' score_sheet.id %}">{{ score_sheet.id }}</a>
-            {% endif %}
-            </b>
-        </td>
-    </tr>
-    {% endfor %}
     {% endfor %}
 </table>
 {% endif %}

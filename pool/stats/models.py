@@ -223,7 +223,7 @@ class Week(models.Model):
     name = models.CharField(max_length=32, null=True)
 
     def __str__(self):
-        return "Week {}".format(self.name)
+        return "{}".format(self.name)
 
 
 class AwayTeam(Team):
