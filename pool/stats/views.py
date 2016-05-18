@@ -31,7 +31,7 @@ def set_season(request, season_id=None):
     request.session['season_id'] = season_id
     request.session.save()
     # hard-coded urls are bad okay?
-    return redirect(to='/stats/')
+    return redirect(request.META.get('HTTP_REFERER', '/stats/'))
 
 
 def check_season(request):
