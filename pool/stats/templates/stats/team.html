@@ -5,7 +5,6 @@
 {% block content %}
 {% if team %}
 <h1>{{ team.name }}</h1>
-<p>{{ team.season }}</p>
 <h3><a href="{% url 'sponsor' team.sponsor.id %}">{{ team.sponsor }}</a></h3>
 
 {% include "stats/player_table.html" %}

@@ -1,7 +1,9 @@
 {% extends "stats/base.html" %}
 
 {% block content %}
-<h1>Teams {{ season }}</h1>
+<div class="text-center">
+<h2>Teams</h2>
+</div>
 {% if teams %}
 {% include "stats/team_table.html" %}
 

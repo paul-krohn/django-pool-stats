@@ -2,13 +2,17 @@
 
 {% block content %}
 
-<h1>Season Index</h1>
+<div class="text-center">
+<h2>Seasons</h2>
+</div>
 {% if seasons %}
 
-{% for season in seasons %}
-<h2>{{ season }}</h2>
-<p><a href="{% url 'set_season' season.id %}">Filter On Me</a></p>
-{% endfor %}
+<ul>
+{% for a_season in seasons %}
 
+<li><h5><a href="{% url 'set_season' a_season.id %}">{{ a_season }}</a></h5></li>
+
+{% endfor %}
+</ul>
 {% endif %}
 {% endblock %}
