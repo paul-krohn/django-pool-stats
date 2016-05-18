@@ -151,6 +151,7 @@ class Team(models.Model):
     home_losses = models.IntegerField(verbose_name='Home Losses', default=0)
     win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0)
     ranking = models.IntegerField(null=True)
+    rank_tie_breaker = models.IntegerField(null=True)
 
     class Meta:
         ordering = ['-ranking']
@@ -192,17 +193,18 @@ class Team(models.Model):
 
     @classmethod
     def rank_teams(cls, season_id):
-        teams = cls.objects.filter(season=season_id).order_by('-win_percentage')
+        teams = cls.objects.filter(season=season_id).order_by('-win_percentage', '-rank_tie_breaker')
         # sorted(teams, key=attrgetter('win_percentage'))
         print(teams)
         print("there are {} teams to rank ".format(len(teams)))
         inc = 0
-        while inc < len(teams) - 1:
+        while inc < len(teams):
             offset = 1
             teams[inc].ranking = inc + 1
             teams[inc].save()
             print("{} gets ranking {}".format(teams[inc], teams[inc].ranking))
-            while inc + offset < len(teams) and teams[inc].win_percentage == teams[inc+offset].win_percentage:
+            while inc + offset < len(teams) and teams[inc].win_percentage == teams[inc+offset].win_percentage \
+                    and teams[inc].rank_tie_breaker == teams[inc+offset].rank_tie_breaker:
                 teams[inc+offset].ranking = inc + 1
                 teams[inc+offset].save()
                 print("{} gets ranking {}".format(teams[inc+offset], teams[inc].ranking))

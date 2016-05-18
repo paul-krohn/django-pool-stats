@@ -16,7 +16,7 @@ admin.site.register(Week)
 
 class TeamAdmin(admin.ModelAdmin):
     list_display = ('name', 'season', 'ranking')
-    list_filter = ['season']
+    list_filter = ['season', 'rank_tie_breaker']
     filter_horizontal = ['players']
 
 admin.site.register(Team, TeamAdmin)

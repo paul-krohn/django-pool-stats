@@ -152,9 +152,20 @@ def sponsors(request):
 
 def divisions(request):
     check_season(request)
-    _divisions = Division.objects.filter(season=request.session['season_id'])
+    _divisions = Division.objects.filter(season=request.session['season_id']).order_by('id')
+    # this wrapper divisions dodge is needed so the teams within each division
+    # can be sorted by ranking
+    wrapper_divisions = []
+    for _division in _divisions:
+        teams = Team.objects.filter(division=_division).order_by('ranking')
+        wrapper_divisions.append({
+            'division': _division,
+            'teams': teams
+        })
     context = {
-        'divisions': _divisions
+        'divisions': _divisions,
+        'wrapper_divisions': wrapper_divisions
+
     }
     return render(request, 'stats/divisions.html', context)
 

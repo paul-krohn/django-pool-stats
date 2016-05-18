@@ -7,11 +7,12 @@
 <h2>Divisions</h2>
 </div>
 
-{% for division in divisions %}
-<h4>{{ division }}</h4>
-{% with teams=division.team_set.all %}
+{% for wrapper_division in wrapper_divisions %}
+<h4>{{ wrapper_division.division }}</h4>
+{% with teams=wrapper_division.teams %}
 {% include "stats/team_table.html" %}
 {% endwith %}
+
 {% endfor %}
 
 {% endblock %}
