@@ -12,6 +12,9 @@ from django.forms import modelformset_factory
 import django.forms
 import django.db.models
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 def session_uid(request):
     if 'uid' not in request.session.keys():
@@ -42,6 +45,8 @@ def check_season(request):
 
 
 def index(request):
+    print(__name__)
+    logger.error("this is {}".format(__name__))
     check_season(request)
     team_list = Team.objects.filter(season=request.session['season_id']).order_by('-win_percentage')
     season = Season.objects.get(id=request.session['season_id'])
@@ -90,7 +95,7 @@ def player_create(request):
         player_form = PlayerForm(request.POST)
         if player_form.is_valid():
             p = Player()
-            print(player_form.cleaned_data['team'])
+            logger.debug(player_form.cleaned_data['team'])
             t = player_form.cleaned_data['team']
             if player_form.cleaned_data['display_name'] is not '':
                 p.display_name = player_form.cleaned_data['display_name']
@@ -184,12 +189,7 @@ def week(request, week_id):
         if len(match_score_sheets.filter(official=True)) == 1:
             official_matches.append(match_score_sheets.filter(official=True)[0])
         else:
-            # print('oh yes and the len() thing worked out to {}'.format(match_score_sheets.filter(official=True)))
             unofficial_matches.append(a_match)
-
-    # print('hey there are some matches in week {}'.format(_week))
-    # print('official matches (score sheets really): {}'.format(official_matches))
-    # print('unofficial matches (score sheets really): {}'.format(unofficial_matches))
 
     context = {
         'week': _week,
@@ -413,9 +413,9 @@ def score_sheet_substitutions(request, score_sheet_id, away_home):
             request.POST, queryset=substitution_queryset
         )
         if substitution_formset.is_valid():
-            print('saving away subs for {}'.format(s.match))
+            logging.debug('saving {} subs for {}'.format(away_home, s.match))
             for substitution in substitution_formset.save():
-                print('adding {} as {} in game {}'.format(
+                logging.debug('adding {} as {} in game {}'.format(
                     substitution.player, substitution.play_position, substitution.game_order))
                 add_substitution_function(substitution)
             s.set_games()
