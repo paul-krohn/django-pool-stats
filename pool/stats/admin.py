@@ -7,7 +7,6 @@ admin.AdminSite.site_header = "SFPA stats admin"
 
 
 admin.site.register(Division)
-admin.site.register(Match)
 admin.site.register(Player)
 admin.site.register(Season)
 admin.site.register(Sponsor)
@@ -40,6 +39,12 @@ class GameOrderAdmin(admin.ModelAdmin):
     list_display = ['name', 'away_position', 'home_position', 'home_breaks']
 
 admin.site.register(GameOrder, GameOrderAdmin)
+
+
+class MatchAdmin(admin.ModelAdmin):
+    list_filter = ['season', 'playoff']
+
+admin.site.register(Match, MatchAdmin)
 
 
 # TODO:

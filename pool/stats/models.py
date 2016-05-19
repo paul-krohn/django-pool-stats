@@ -243,6 +243,7 @@ class Match(models.Model):
     week = models.ForeignKey(Week)
     home_team = models.ForeignKey(HomeTeam)
     away_team = models.ForeignKey(AwayTeam)
+    playoff = models.BooleanField(default=False)
 
     def __str__(self):
         return "{} @ {} ({} {})".format(self.away_team, self.home_team, self.season, self.week)
@@ -252,6 +253,7 @@ class PlayPosition(models.Model):
     home_name = models.CharField(max_length=16)
     away_name = models.CharField(max_length=16)
     name = models.CharField(max_length=16)
+    tiebreaker = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -288,6 +290,7 @@ class GameOrder(models.Model):
     home_position = models.ForeignKey(HomePlayPosition)
     home_breaks = models.BooleanField(default=True)
     name = models.CharField(max_length=8)
+    tiebreaker = models.BooleanField(default=False)
 
     def __str__(self):
         return "{} ({} vs {})".format(self.name, self.away_position, self.home_position)
@@ -298,8 +301,8 @@ class Game(models.Model):
     home_player = models.ForeignKey(HomePlayer, null=True, blank=True)
     winner = models.CharField(max_length=4, blank=True)
     order = models.ForeignKey(GameOrder, null=True)
-    table_run = models.BooleanField()
-    forfeit = models.BooleanField()
+    table_run = models.BooleanField(default=False)
+    forfeit = models.BooleanField(default=False)
 
 
 class LineupEntry(models.Model):
@@ -365,7 +368,15 @@ class ScoreSheet(models.Model):
         return len(self.games.filter(winner='home'))
 
     def initialize_lineup(self):
-        for lineup_position in PlayPosition.objects.all():
+        for lineup_position in PlayPosition.objects.filter(tiebreaker=False):
+            ale = AwayLineupEntry(position=lineup_position)
+            ale.save()
+            hle = HomeLineupEntry(position=lineup_position)
+            hle.save()
+            self.away_lineup.add(ale)
+            self.home_lineup.add(hle)
+        if self.match.playoff:
+            lineup_position = PlayPosition.objects.get(tiebreaker=True)
             ale = AwayLineupEntry(position=lineup_position)
             ale.save()
             hle = HomeLineupEntry(position=lineup_position)
@@ -376,13 +387,17 @@ class ScoreSheet(models.Model):
 
     def initialize_games(self):
         # now create games, per the game order table
-        for g in GameOrder.objects.all():
+        for g in GameOrder.objects.filter(tiebreaker=False):
             game = Game()
             game.order = g
-            game.table_run = False
-            game.forfeit = False
             game.save()
             self.games.add(game)
+        if self.match.playoff:
+            game = Game()
+            game.order = GameOrder.objects.get(tiebreaker=True)
+            game.save()
+            self.games.add(game)
+
         self.save()
 
     def set_games(self):
