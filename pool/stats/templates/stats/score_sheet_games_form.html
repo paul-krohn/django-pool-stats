@@ -1,10 +1,9 @@
-    <tr><th></th><th>Home</th><th>Away</th><th>H</th><th>A</th><th colspan="2">TR?</th><th colspan="2">Forfeit?</th> </tr>
+    <tr><th></th><th></th><th>H</th><th>A</th><th></th><th></th><th>TR?</th><th>Forfeit?</th> </tr>
     {% for game_form in games_formset %}
         {{ game_form.id }}
     <tr>
-        <td>{{ game_form.instance.order }}</td>
         {% if game_form.instance.home_player.id  %}
-        <td>
+        <td align="right">
             <a href="{% url 'player' game_form.instance.home_player.id %}">
                 {% if game_form.instance.order.home_breaks %}<strong>{% endif%}
                 {{ game_form.instance.home_player }}
@@ -12,8 +11,13 @@
             </a>
         </td>
         {% else %}
-        <td>--</td>
+        <td align="right">--</td>
         {% endif %}
+        <td align="right"><b>{{ game_form.instance.order.home_position}}</b></td>
+        {% for radio in game_form.winner %}
+            <td>{{ radio.tag }}</td>
+        {% endfor %}
+        <td><b>{{ game_form.instance.order.away_position}}</b></td>
         {% if game_form.instance.away_player.id %}
         <td>
             <a href="{% url 'player' game_form.instance.away_player.id %}">
@@ -25,11 +29,8 @@
         {% else %}
         <td>--</td>
         {% endif %}
-        {% for radio in game_form.winner %}
-            <td>{{ radio.tag }}</td>
-        {% endfor %}
         <td>{{ game_form.table_run }}</td>
-        <td></td>
         <td>{{ game_form.forfeit }}</td>
+
     </tr>
     {% endfor %}
