@@ -1,5 +1,8 @@
 from django.db import models
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 class Sponsor(models.Model):
     name = models.CharField(max_length=200)
@@ -88,12 +91,12 @@ class PlayerSeasonSummary(models.Model):
             offset = 1
             summaries[inc].ranking = inc + 1
             summaries[inc].save()
-            print("{} gets ranking {}".format(summaries[inc], summaries[inc].ranking))
+            logging.debug("{} gets ranking {}".format(summaries[inc], summaries[inc].ranking))
             while inc + offset < len(summaries) and \
                     summaries[inc].win_percentage == summaries[inc+offset].win_percentage:
                 summaries[inc+offset].ranking = inc + 1
                 summaries[inc+offset].save()
-                print("{} gets ranking {}".format(summaries[inc+offset], summaries[inc].ranking))
+                logger.debug("{} gets ranking {}".format(summaries[inc+offset], summaries[inc].ranking))
                 offset += 1
             inc += offset
 
@@ -111,7 +114,7 @@ class PlayerSeasonSummary(models.Model):
         away_losses = games.filter(away_player=self.player).filter(winner='home')
         home_losses = games.filter(home_player=self.player).filter(winner='away')
 
-        print("{} has {} wins and {} losses".format(self, self.wins, self.losses))
+        logger.debug("{} has {} wins and {} losses".format(self, self.wins, self.losses))
         self.wins = len(away_wins) + len(home_wins)
         self.losses = len(away_losses) + len(home_losses)
         self.win_percentage = None
@@ -194,18 +197,18 @@ class Team(models.Model):
     def rank_teams(cls, season_id):
         teams = cls.objects.filter(season=season_id).order_by('-win_percentage')
         # sorted(teams, key=attrgetter('win_percentage'))
-        print(teams)
-        print("there are {} teams to rank ".format(len(teams)))
+        logger.debug(teams)
+        logger.debug("there are {} teams to rank ".format(len(teams)))
         inc = 0
         while inc < len(teams) - 1:
             offset = 1
             teams[inc].ranking = inc + 1
             teams[inc].save()
-            print("{} gets ranking {}".format(teams[inc], teams[inc].ranking))
+            logger.debug("{} gets ranking {}".format(teams[inc], teams[inc].ranking))
             while inc + offset < len(teams) and teams[inc].win_percentage == teams[inc+offset].win_percentage:
                 teams[inc+offset].ranking = inc + 1
                 teams[inc+offset].save()
-                print("{} gets ranking {}".format(teams[inc+offset], teams[inc].ranking))
+                logger.debug("{} gets ranking {}".format(teams[inc+offset], teams[inc].ranking))
                 offset += 1
             inc += offset
 
@@ -385,7 +388,7 @@ class ScoreSheet(models.Model):
 
     def set_games(self):
         for game in self.games.all():
-            print("working on game {} from {}".format(game.order, self.match))
+            logger.debug("working on game {} from {}".format(game.order, self.match))
 
             # set the players for the game; have to convert Player instances to Home/AwayPlayer instances
             away_player_position = self.away_lineup.filter(position_id__exact=game.order.away_position.id)[0]
