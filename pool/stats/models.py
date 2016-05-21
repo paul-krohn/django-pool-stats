@@ -106,6 +106,8 @@ class PlayerSeasonSummary(models.Model):
         ).filter(
             scoresheet__official=True
         ).filter(
+            scoresheet__match__playoff=False
+        ).filter(
             forfeit=False
         )
         away_wins = games.filter(away_player=self.player).filter(winner='away')
@@ -180,7 +182,9 @@ class Team(models.Model):
         self.win_percentage = 0.0
 
         # first, matches involving the team as away team
-        away_score_sheets = ScoreSheet.objects.filter(match__away_team__exact=self, official__exact=True)
+        away_score_sheets = ScoreSheet.objects.filter(
+            match__away_team__exact=self, official__exact=True, match__playoff=False
+        )
         for away_score_sheet in away_score_sheets:
             self.away_wins += len(away_score_sheet.games.filter(winner='away'))
             self.away_losses += len(away_score_sheet.games.filter(winner='home'))
