@@ -40,10 +40,16 @@
                     <a href="{% url 'score_sheet' score_sheet.id %}"> {{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>,
                 {% endif %}
             {% endfor %}
-            <a href="{% url 'score_sheet_create' match.id %}">Create</a></td>
+            <a href="{% url 'score_sheet_create' match.id %}" class="confirm"
+                        data-text="Create new scoresheet for {{ match.away_team }} @ {{match.home_team }} on {{match.week.date}}?">New Scoresheet</a>
+        </td>
     </tr>
     {% endfor %}
 </table>
 {% endif %}
 {% endif %}
+    <!-- wraps the 'create scoresheet' link above in a confirmation dialog -->
+    <script language="JavaScript">
+      $(".confirm").confirm();
+    </script>
 {% endblock %}
