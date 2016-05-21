@@ -13,11 +13,11 @@
         {% else %}
         <td align="right">--</td>
         {% endif %}
-        <td align="right"><b>{{ game_form.instance.order.home_position}}</b></td>
+        <td align="right">{% if game_form.instance.order.home_breaks %}<b>{% endif %}{{ game_form.instance.order.home_position}}{% if game_form.instance.order.home_breaks %}</b>{% endif %}</td>
         {% for radio in game_form.winner %}
             <td>{{ radio.tag }}</td>
         {% endfor %}
-        <td><b>{{ game_form.instance.order.away_position}}</b></td>
+        <td>{% if not game_form.instance.order.home_breaks %}<b>{% endif %}{{ game_form.instance.order.away_position}}{% if not game_form.instance.order.home_breaks %}</b>{% endif %}</td>
         {% if game_form.instance.away_player.id %}
         <td>
             <a href="{% url 'player' game_form.instance.away_player.id %}">
