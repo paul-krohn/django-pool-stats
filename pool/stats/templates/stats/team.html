@@ -9,4 +9,18 @@
 
 {% include "stats/player_table.html" %}
 {% endif %}
+<table class="table">
+<tr><th style="text-align:right">Away</th><th>Score</th><th>Home</th><th>Week</th></tr>
+    {% for score_sheet in scoresheets %}
+<tr>
+    <td align="right"><a href="{% url 'team' score_sheet.match.away_team.id %}">{{ score_sheet.match.away_team }}</a></td>
+    <td align="center"><a href="{% url 'score_sheet' score_sheet.id %}"><b>{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</b></a></td>
+    <td><a href="{% url 'team' score_sheet.match.home_team.id %}">{{ score_sheet.match.home_team }}</a></td>
+    <td><a href="{% url 'week' score_sheet.match.week_id %}">{{ score_sheet.match.week }}</a></td>
+
+</tr>
+    {% endfor %}
+
+</table>
+
 {% endblock %}
