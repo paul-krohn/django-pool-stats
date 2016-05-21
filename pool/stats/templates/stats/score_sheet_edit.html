@@ -41,7 +41,12 @@
 {% include "stats/score_sheet_games_form.html" %}
 <tr><td colspan="2"></td><td><b>{{ score_sheet.home_wins }}</b></td><td><b>{{ score_sheet.away_wins }}</b></td><td colspan="4"></td></tr>
 </table>
-<input type="submit" value="Save"/>
+  <div class="text-center">
+    <input class="btn btn-default" type="submit" value="Save"/>
+  </div>
 </form>
-<a href="{% url 'score_sheet_complete' score_sheet.id %}">Review And Comment</a>
+<br/>
+  <div class="text-center">
+  <a class="btn btn-default" href="{% url 'score_sheet_complete' score_sheet.id %}">Review And Comment</a>
+</div>
 {% endblock %}
