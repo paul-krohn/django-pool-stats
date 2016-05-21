@@ -1,1 +1,4 @@
-/* i was here */
+/* in support of the bootstrap templatetag module; style the 'active' nav item. */
+.active {
+    text-decoration: underline;
+}

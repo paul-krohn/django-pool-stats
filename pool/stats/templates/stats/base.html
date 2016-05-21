@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 {% load staticfiles %}
+{% load bootstrap %}
 <!-- Rev. {{ GIT_BRANCH }} :: {{ GIT_COMMIT }} -->
 <html lang="en">
   <head>
@@ -45,10 +46,10 @@
           </ul>
         </li>
         <!--<li><a href="{% url 'sponsors' %}" data-toggle="collapse" data-target=".navbar-collapse.in">Sponsors</a></li>-->
-        <li><a href="{% url 'divisions' %}" data-toggle="collapse" data-target=".navbar-collapse.in">Divisions</a></li>
-        <li><a href="{% url 'teams' %}" data-toggle="collapse" data-target=".navbar-collapse.in">Teams</a></li>
-        <li><a href="{% url 'players' %}" data-toggle="collapse" data-target=".navbar-collapse.in">Players</a></li>
-        <li><a href="{% url 'weeks' %}" data-toggle="collapse" data-target=".navbar-collapse.in">Weeks</a></li>
+        <li><a href="{% url 'divisions' %}" class="{% active_page request 'divisions' %}" data-toggle="collapse" data-target=".navbar-collapse.in">Divisions</a></li>
+        <li><a href="{% url 'teams' %}" class="{% active_page request 'teams' %}" data-toggle="collapse" data-target=".navbar-collapse.in">Teams</a></li>
+        <li><a href="{% url 'players' %}" class="{% active_page request 'players' %}" data-toggle="collapse" data-target=".navbar-collapse.in">Players</a></li>
+        <li><a href="{% url 'weeks' %}" class="{% active_page request 'weeks' %}" data-toggle="collapse" data-target=".navbar-collapse.in">Weeks</a></li>
         {% if request.user %}
         <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" style="cursor:pointer">Admin</a>
           <ul class="dropdown-menu">
