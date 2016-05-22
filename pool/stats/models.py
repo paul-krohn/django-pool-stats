@@ -188,7 +188,9 @@ class Team(models.Model):
         for away_score_sheet in away_score_sheets:
             self.away_wins += len(away_score_sheet.games.filter(winner='away'))
             self.away_losses += len(away_score_sheet.games.filter(winner='home'))
-        home_score_sheets = ScoreSheet.objects.filter(match__home_team__exact=self, official__exact=True)
+        home_score_sheets = ScoreSheet.objects.filter(
+            match__home_team__exact=self, official__exact=True, match__playoff=False
+        )
         for home_score_sheet in home_score_sheets:
             self.home_wins += len(home_score_sheet.games.filter(winner='home'))
             self.home_losses += len(home_score_sheet.games.filter(winner='away'))
