@@ -62,12 +62,15 @@ def player(request, player_id):
     _player = Player.objects.get(id=player_id)
     summaries = PlayerSeasonSummary.objects.filter(player__exact=_player).order_by('-season')
 
-    _score_sheets = ScoreSheet.objects.filter(official=True)
-
-    # the set() is necessary to remove the dupes apparently created by the or clause
-    _score_sheets = set(_score_sheets.filter(
+    _score_sheets_with_dupes = ScoreSheet.objects.filter(official=True).filter(
         django.db.models.Q(away_lineup__player=_player) | django.db.models.Q(home_lineup__player=_player)
-    ))
+    ).order_by('match__week__date')
+    # there are dupes in _score_sheets at this point, so we have to remove them; method is
+    # cribbed from:
+    # http://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-in-python-whilst-preserving-order
+    seen = set()
+    seen_add = seen.add
+    _score_sheets = [x for x in _score_sheets_with_dupes if not (x in seen or seen_add(x))]
 
     context = {
         'score_sheets': _score_sheets,
