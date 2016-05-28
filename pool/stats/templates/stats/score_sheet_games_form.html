@@ -17,7 +17,7 @@
         {% for radio in game_form.winner %}
             <td>{{ radio.tag }}</td>
         {% endfor %}
-        <td>{% if not game_form.instance.order.home_breaks %}<b>{% endif %}{{ game_form.instance.order.away_position}}{% if not game_form.instance.order.home_breaks %}</b>{% endif %}</td>
+        <td>{% if not game_form.instance.order.home_breaks and not game_form.instance.order.tiebreaker %}<b>{% endif %}{{ game_form.instance.order.away_position}}{% if not game_form.instance.order.home_breaks and not game_form.instance.order.tiebreaker %}</b>{% endif %}</td>
         {% if game_form.instance.away_player.id %}
         <td>
             <a href="{% url 'player' game_form.instance.away_player.id %}">
