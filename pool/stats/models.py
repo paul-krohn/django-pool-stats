@@ -450,9 +450,9 @@ class ScoreSheet(models.Model):
 
         player_score_sheet_summaries = []
         if away_home == 'away':
-            lineup_entries = self.away_lineup.all()
+            lineup_entries = self.away_lineup.filter(position__tiebreaker=False)
         else:
-            lineup_entries = self.home_lineup.all()
+            lineup_entries = self.home_lineup.filter(position__tiebreaker=False)
         for lineup_entry in lineup_entries:
             if lineup_entry.player is None:
                 continue
