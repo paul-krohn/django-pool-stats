@@ -1,4 +1,5 @@
 {% extends "stats/base.html" %}
+{% load staticfiles %}
 
 {% block title %}SFPA :: {{ player }}{% endblock %}
 
@@ -15,7 +16,7 @@
     <tr>
         <th>home</th>
         <th>away</th>
-        <th>table run</th>
+        <th>TR</th>
     </tr>
     {% for game in score_sheet.games.all %}
     {% comment %}
@@ -27,14 +28,14 @@
     <tr>
         <td><a href="{% url 'player' game.home_player.id %}">{% if game.winner == "home" %}<b>{{ game.home_player }}</b>{% else %}{{ game.home_player }}{% endif %}</a></td>
         <td><a href="{% url 'player' game.away_player.id %}">{% if game.winner == "away" %}<b>{{ game.away_player }}</b>{% else %}{{ game.away_player }}{% endif %}</a></td>
-        <td>{{ game.table_run }}</td>
+        <td>{% if game.table_run %} <img height=16 width=16 src="{% static 'stats/check-mark.png' %}"/>{% endif %}</td>
     </tr>
     {% endif %}
     {% if game.home_player == player and game.away_player and game.winner %}
     <tr>
         <td><a href="{% url 'player' game.home_player.id %}">{% if game.winner == "home" %}<b>{{ game.home_player }}</b>{% else %}{{ game.home_player }}{% endif %}</a></td>
         <td><a href="{% url 'player' game.away_player.id %}">{% if game.winner == "away" %}<b>{{ game.away_player }}</b>{% else %}{{ game.away_player }}{% endif %}</a></td>
-        <td>{{ game.table_run }}</td>
+        <td>{% if game.table_run %} <img height=16 width=16 src="{% static 'stats/check-mark.png' %}"/>{% endif %}</td>
     </tr>
     {% endif %}
     {% endfor %}
