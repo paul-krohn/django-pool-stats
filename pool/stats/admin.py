@@ -14,7 +14,7 @@ admin.site.register(Week)
 
 
 class TeamAdmin(admin.ModelAdmin):
-    list_display = ('name', 'season', 'ranking')
+    list_display = ('name', 'season', 'ranking', 'rank_tie_breaker')
     list_filter = ['season', 'rank_tie_breaker']
     filter_horizontal = ['players']
 
@@ -30,7 +30,7 @@ admin.site.register(PlayPosition, PlayPositionAdmin)
 class ScoreSheetAdmin(admin.ModelAdmin):
     list_display = ['match', 'official', 'complete', 'comment']
     fields = ['official', 'complete', 'comment']
-    list_filter = ['official', 'complete']
+    list_filter = ['official', 'complete', 'match__season']
 
 admin.site.register(ScoreSheet, ScoreSheetAdmin)
 
