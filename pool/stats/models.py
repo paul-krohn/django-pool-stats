@@ -257,6 +257,11 @@ class Match(models.Model):
     def __str__(self):
         return "{} @ {} ({} {})".format(self.away_team, self.home_team, self.season, self.week)
 
+    class Meta:
+        verbose_name = 'Match'
+        verbose_name_plural = 'Matches'
+
+
 
 class PlayPosition(models.Model):
     home_name = models.CharField(max_length=16)
