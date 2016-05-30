@@ -10,7 +10,12 @@ admin.site.register(Division)
 admin.site.register(Player)
 admin.site.register(Season)
 admin.site.register(Sponsor)
-admin.site.register(Week)
+
+
+class WeekAdmin(admin.ModelAdmin):
+    list_filter = ['season']
+
+admin.site.register(Week, WeekAdmin)
 
 
 class TeamAdmin(admin.ModelAdmin):
@@ -61,3 +66,5 @@ admin.site.register(Match, MatchAdmin)
 #         return super(MatchAdmin, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 # admin.site.register(Match, MatchAdmin)
+# this is done in the model at the moment, by setting limit_choices_to with a Q queryset; this works
+# but only teams from the default season are available in the admin

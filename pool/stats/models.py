@@ -250,8 +250,8 @@ class HomeTeam(Team):
 class Match(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     week = models.ForeignKey(Week)
-    home_team = models.ForeignKey(HomeTeam)
-    away_team = models.ForeignKey(AwayTeam)
+    home_team = models.ForeignKey('HomeTeam', limit_choices_to=models.Q(season__is_default=True))
+    away_team = models.ForeignKey('AwayTeam', limit_choices_to=models.Q(season__is_default=True))
     playoff = models.BooleanField(default=False)
 
     def __str__(self):
@@ -260,7 +260,6 @@ class Match(models.Model):
     class Meta:
         verbose_name = 'Match'
         verbose_name_plural = 'Matches'
-
 
 
 class PlayPosition(models.Model):
