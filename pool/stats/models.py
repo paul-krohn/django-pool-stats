@@ -147,7 +147,7 @@ class Division(models.Model):
 class Team(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     sponsor = models.ForeignKey(Sponsor, null=True)
-    division = models.ForeignKey(Division, null=True)
+    division = models.ForeignKey(Division, null=True, limit_choices_to=models.Q(season__is_default=True))
     name = models.CharField(max_length=200)
     players = models.ManyToManyField(Player, blank=True)
     away_wins = models.IntegerField(verbose_name='Away Wins', default=0)
@@ -155,11 +155,11 @@ class Team(models.Model):
     home_wins = models.IntegerField(verbose_name='Home Wins', default=0)
     home_losses = models.IntegerField(verbose_name='Home Losses', default=0)
     win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0)
-    ranking = models.IntegerField(null=True)
-    rank_tie_breaker = models.IntegerField(null=True)
+    ranking = models.IntegerField(null=True, blank=True)
+    rank_tie_breaker = models.IntegerField(null=True, blank=True)
 
     class Meta:
-        ordering = ['-ranking']
+        ordering = ['name']
 
     def __str__(self):
         return "{}".format(self.name)
@@ -249,7 +249,7 @@ class HomeTeam(Team):
 
 class Match(models.Model):
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
-    week = models.ForeignKey(Week)
+    week = models.ForeignKey(Week, limit_choices_to=models.Q(season__is_default=True))
     home_team = models.ForeignKey('HomeTeam', limit_choices_to=models.Q(season__is_default=True))
     away_team = models.ForeignKey('AwayTeam', limit_choices_to=models.Q(season__is_default=True))
     playoff = models.BooleanField(default=False)
