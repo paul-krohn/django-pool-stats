@@ -6,7 +6,11 @@ from .models import Division, GameOrder, Match, Player, PlayPosition, ScoreSheet
 admin.AdminSite.site_header = "SFPA stats admin"
 
 
-admin.site.register(Division)
+class DivisionAdmin(admin.ModelAdmin):
+    list_filter = ['season']
+
+admin.site.register(Division, DivisionAdmin)
+
 admin.site.register(Player)
 admin.site.register(Season)
 admin.site.register(Sponsor)
@@ -23,6 +27,8 @@ class TeamAdmin(admin.ModelAdmin):
     list_filter = ['season', 'rank_tie_breaker']
     filter_horizontal = ['players']
     fields = ['season', 'sponsor', 'division', 'name', 'players', 'rank_tie_breaker']
+    save_as = True
+
 
 admin.site.register(Team, TeamAdmin)
 
