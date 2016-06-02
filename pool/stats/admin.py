@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.core.urlresolvers import reverse
 
 from .models import Division, GameOrder, Match, Player, PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
 
@@ -40,9 +41,20 @@ admin.site.register(PlayPosition, PlayPositionAdmin)
 
 
 class ScoreSheetAdmin(admin.ModelAdmin):
-    list_display = ['match', 'official', 'complete', 'comment']
+    list_display = ['opponents', 'links', 'away_wins', 'home_wins', 'official', 'complete', 'comment']
     fields = ['official', 'complete', 'comment']
     list_filter = ['official', 'complete', 'match__season']
+
+    @staticmethod
+    def opponents(obj):
+        return "{} @ {}".format(obj.match.away_team, obj.match.home_team)
+
+    def links(self, obj):
+        edit_url = reverse('score_sheet_edit', args=(obj.id,))
+        view_url = reverse('score_sheet', args=(obj.id,))
+        return '<a href="{}">edit</a>/<a href="{}">view</a>'.format(edit_url, view_url)
+
+    links.allow_tags = True
 
 admin.site.register(ScoreSheet, ScoreSheetAdmin)
 
