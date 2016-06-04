@@ -468,3 +468,21 @@ class ScoreSheet(models.Model):
             ))
             player_score_sheet_summaries.append(summary)
         return player_score_sheet_summaries
+
+
+class PlayerTournamentMatchUp(models.Model):
+    player_a = models.ForeignKey(Player, related_name='player_a')
+    player_b = models.ForeignKey(Player, related_name='player_b')
+    winner = models.ForeignKey(Player, related_name='winner')
+    loser = models.ForeignKey(Player, related_name='loser')
+    # table =
+
+
+class PlayerTournament(models.Model):
+    name = models.CharField(max_length=255)
+    season = models.ForeignKey(Season, default=Season.objects.get(is_default=True))
+    date = models.DateField()
+    players = models.ManyToManyField(Player)
+    match_ups = models.ManyToManyField(PlayerTournamentMatchUp)
+
+
