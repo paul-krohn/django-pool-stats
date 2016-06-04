@@ -58,7 +58,7 @@
           </ul>
         </li>
 
-        {% if request.user %}
+        {% if request.user.is_superuser %}
         <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" style="cursor:pointer">• Admin</a>
           <ul class="dropdown-menu">
               <li><a href="{% url 'update_teams_stats' %}">Update team stats</a></li>
