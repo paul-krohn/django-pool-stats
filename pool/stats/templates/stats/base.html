@@ -39,10 +39,10 @@
       <ul class="nav navbar-nav">
         <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" style="cursor:pointer">• Seasons</a>
           <ul class="dropdown-menu">
+            <li><a href="{% url 'seasons' %}">• All seasons</a></li>
             {% for some_season in seasons %}
             <li><a href="{% url 'set_season' some_season.id%}">{{ some_season }}</a></li>
             {% endfor %}
-            <li><a href="{% url 'seasons' %}">All seasons</a></li>
           </ul>
         </li>
         <!--<li><a href="{% url 'sponsors' %}" data-toggle="collapse" data-target=".navbar-collapse.in">Sponsors</a></li>-->

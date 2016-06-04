@@ -168,7 +168,10 @@ def divisions(request):
     # can be sorted by ranking
     wrapper_divisions = []
     for _division in _divisions:
-        teams = Team.objects.filter(division=_division).order_by('ranking')
+        teams = Team.objects.filter(
+            division=_division,
+            season=request.session['season_id']
+        ).order_by('ranking')
         wrapper_divisions.append({
             'division': _division,
             'teams': teams

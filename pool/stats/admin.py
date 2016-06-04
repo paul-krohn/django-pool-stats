@@ -10,15 +10,29 @@ admin.AdminSite.site_header = "SFPA stats admin"
 class DivisionAdmin(admin.ModelAdmin):
     list_filter = ['season']
 
-admin.site.register(Division, DivisionAdmin)
+    def get_queryset(self, request):
+        qs = super(DivisionAdmin, self).get_queryset(request)
+        if 'season_id' in request.session.keys():
+            return qs.filter(season=request.session['season_id'])
+        else:
+            return qs
 
+
+admin.site.register(Division, DivisionAdmin)
 admin.site.register(Player)
-admin.site.register(Season)
+
+
+class SeasonAdmin(admin.ModelAdmin):
+    list_display = ('name', 'is_default', 'pub_date')
+
+
+admin.site.register(Season, SeasonAdmin)
 admin.site.register(Sponsor)
 
 
 class WeekAdmin(admin.ModelAdmin):
     list_filter = ['season']
+    list_display = ['name', 'season', 'date']
 
 admin.site.register(Week, WeekAdmin)
 
