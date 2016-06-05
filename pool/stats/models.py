@@ -1,7 +1,10 @@
 from django.db import models
-
 import logging
 logger = logging.getLogger(__name__)
+
+
+def get_default_season():
+    Season.objects.get(is_default=True)
 
 
 class Sponsor(models.Model):
@@ -145,7 +148,7 @@ class Division(models.Model):
 
 
 class Team(models.Model):
-    season = models.ForeignKey(Season, on_delete=models.CASCADE, default=Season.objects.get(is_default=True))
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, default=get_default_season())
     sponsor = models.ForeignKey(Sponsor, null=True)
     division = models.ForeignKey(Division, null=True, limit_choices_to=models.Q(season__is_default=True))
     name = models.CharField(max_length=200)
@@ -229,7 +232,7 @@ class Team(models.Model):
 
 
 class Week(models.Model):
-    season = models.ForeignKey(Season, default=Season.objects.get(is_default=True))
+    season = models.ForeignKey(Season, default=get_default_season())
     date = models.DateField(null=True, blank=True)
     name = models.CharField(max_length=32, null=True)
 
@@ -248,7 +251,7 @@ class HomeTeam(Team):
 
 
 class Match(models.Model):
-    season = models.ForeignKey(Season, on_delete=models.CASCADE, default=Season.objects.get(is_default=True))
+    season = models.ForeignKey(Season, on_delete=models.CASCADE, default=get_default_season())
     week = models.ForeignKey(Week, limit_choices_to=models.Q(season__is_default=True))
     home_team = models.ForeignKey('HomeTeam', limit_choices_to=models.Q(season__is_default=True))
     away_team = models.ForeignKey('AwayTeam', limit_choices_to=models.Q(season__is_default=True))
