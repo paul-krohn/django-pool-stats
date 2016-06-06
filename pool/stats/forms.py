@@ -1,5 +1,6 @@
 import django.forms
 from .models import Player, Team, Game, ScoreSheet
+from django.core.exceptions import ValidationError
 
 WINNER_CHOICES = (
     ('home', 'Home'),
@@ -48,9 +49,9 @@ class ScoreSheetCompletionForm(django.forms.ModelForm):
         fields = ['complete', 'comment']
 
 
-class AwayLineupFormSet(django.forms.BaseModelFormSet):
+class LineupFormSet(django.forms.BaseModelFormSet):
     def clean(self):
-        super(AwayLineupFormSet, self).clean()
+        super(LineupFormSet, self).clean()
 
         player_values = []
         for form in self.forms:
@@ -59,12 +60,5 @@ class AwayLineupFormSet(django.forms.BaseModelFormSet):
             if 'player' in form.cleaned_data.keys() and form.cleaned_data['player'] is not None:
                 player_values.append(form.cleaned_data['player'])
         if len(player_values) > len(set(player_values)):
-            message = 'all players must be unique; there were {} players but only {} unique ones'.format(
-                len(player_values), len(set(player_values))
-            )
-            print(message)
-            raise ValidationError(message)
-        else:
-            print("away lineup formset looks good")
-
-
+            raise ValidationError('All players must be unique, there is at least one player in 2 positions.',
+                                  code='lineup_duplicate_player')

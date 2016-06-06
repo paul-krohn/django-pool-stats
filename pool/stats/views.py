@@ -7,6 +7,7 @@ from .models import PlayPosition
 from .models import PlayerSeasonSummary
 from .models import AwaySubstitution, HomeSubstitution
 from .forms import PlayerForm, ScoreSheetGameForm, DisabledScoreSheetGameForm, ScoreSheetCompletionForm
+from .forms import LineupFormSet
 from django.forms import modelformset_factory
 
 import django.forms
@@ -354,25 +355,29 @@ def score_sheet_lineup(request, score_sheet_id, away_home):
 
     # it would be prettier to do this by passing kwargs but,
     # it seems you can't do that with a ModelForm so, the ugly is here.
-    lineup_players_queryset = s.match.away_team.players.all()
     lineup_queryset = s.away_lineup.all()
     lineup_model = AwayLineupEntry
+    lineup_team = s.match.away_team
     if away_home == 'home':
-        lineup_players_queryset = s.match.home_team.players.all()
         lineup_queryset = s.home_lineup.all()
         lineup_model = HomeLineupEntry
+        lineup_team = s.match.home_team
 
     class LineupForm(django.forms.ModelForm):
         # thanks to stack overflow for this, from here:
         # http://stackoverflow.com/questions/1982025/django-form-from-related-model
         player = django.forms.ModelChoiceField(
-            queryset=lineup_players_queryset,
+            queryset=lineup_team.players.all(),
             required=False,
         )
 
     lineup_formset_f = modelformset_factory(
-        model=lineup_model, fields=['player'], form=LineupForm,
-        extra=0, max_num=len(PlayPosition.objects.all())
+        model=lineup_model,
+        fields=['player'],
+        form=LineupForm,
+        formset=LineupFormSet,
+        extra=0,
+        max_num=len(PlayPosition.objects.all()),
     )
 
     if request.method == 'POST':
@@ -381,6 +386,8 @@ def score_sheet_lineup(request, score_sheet_id, away_home):
             lineup_formset.save()
             s.set_games()
             return redirect('score_sheet_edit', score_sheet_id=s.id)
+        else:
+            logging.debug("validation errors:{}".format(lineup_formset.form.non_field_errors()))
     else:
         lineup_formset = lineup_formset_f(queryset=lineup_queryset)
 
