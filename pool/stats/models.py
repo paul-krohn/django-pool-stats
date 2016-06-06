@@ -322,7 +322,7 @@ class Game(models.Model):
 
 
 class LineupEntry(models.Model):
-    player = models.ForeignKey(Player, null=True)
+    player = models.ForeignKey(Player, null=True, blank=True)
     position = models.ForeignKey(PlayPosition, null=True)
 
 
