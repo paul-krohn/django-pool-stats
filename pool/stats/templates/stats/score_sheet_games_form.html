@@ -5,9 +5,9 @@
         {% if game_form.instance.home_player.id  %}
         <td align="right">
             <a href="{% url 'player' game_form.instance.home_player.id %}">
-                {% if game_form.instance.order.home_breaks %}<strong>{% endif%}
+                {% if not game_form.instance.order.tiebreaker and game_form.instance.order.home_breaks %}<strong>{% endif%}
                 {{ game_form.instance.home_player }}
-                {% if game_form.instance.order.home_breaks %}</strong>{% endif%}
+                {% if not game_form.instance.order.tiebreaker and game_form.instance.order.home_breaks %}</strong>{% endif%}
             </a>
         </td>
         {% else %}
@@ -21,9 +21,9 @@
         {% if game_form.instance.away_player.id %}
         <td>
             <a href="{% url 'player' game_form.instance.away_player.id %}">
-                {% if not game_form.instance.order.home_breaks %}<strong>{% endif%}
+                {% if not game_form.instance.order.tiebreaker and not game_form.instance.order.home_breaks %}<strong>{% endif%}
                 {{ game_form.instance.away_player }}
-                {% if game_form.instance.order.home_breaks %}</strong>{% endif%}
+                {% if not game_form.instance.order.tiebreaker and game_form.instance.order.home_breaks %}</strong>{% endif%}
             </a>
         </td>
         {% else %}
