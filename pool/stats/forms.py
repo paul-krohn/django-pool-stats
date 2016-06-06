@@ -54,7 +54,8 @@ class AwayLineupFormSet(django.forms.BaseModelFormSet):
 
         player_values = []
         for form in self.forms:
-            print(form.cleaned_data)
+            if form.cleaned_data['id'].position.tiebreaker:
+                continue
             if 'player' in form.cleaned_data.keys() and form.cleaned_data['player'] is not None:
                 player_values.append(form.cleaned_data['player'])
         if len(player_values) > len(set(player_values)):
