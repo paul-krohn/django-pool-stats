@@ -387,7 +387,7 @@ def score_sheet_lineup(request, score_sheet_id, away_home):
             s.set_games()
             return redirect('score_sheet_edit', score_sheet_id=s.id)
         else:
-            logging.debug("validation errors:{}".format(lineup_formset.form.non_field_errors()))
+            logging.debug("validation errors:{}".format(lineup_formset.form.non_field_errors))
     else:
         lineup_formset = lineup_formset_f(queryset=lineup_queryset)
 
