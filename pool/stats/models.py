@@ -1,10 +1,14 @@
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 import logging
 logger = logging.getLogger(__name__)
 
 
 def get_default_season():
-    Season.objects.get(is_default=True)
+    try:
+        return Season.objects.get(is_default=True)
+    except ObjectDoesNotExist:
+        return None
 
 
 class Sponsor(models.Model):

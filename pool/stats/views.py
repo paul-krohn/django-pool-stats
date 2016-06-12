@@ -46,7 +46,6 @@ def check_season(request):
 
 
 def index(request):
-    print(__name__)
     logger.error("this is {}".format(__name__))
     check_season(request)
     team_list = Team.objects.filter(season=request.session['season_id']).order_by('-win_percentage')
