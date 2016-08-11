@@ -152,7 +152,8 @@ class Division(models.Model):
 
 
 class Team(models.Model):
-    season = models.ForeignKey(Season, on_delete=models.CASCADE, default=get_default_season())
+    # a default season that doesn't bork migrations would be nice
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
     sponsor = models.ForeignKey(Sponsor, null=True)
     division = models.ForeignKey(Division, null=True, limit_choices_to=models.Q(season__is_default=True))
     name = models.CharField(max_length=200)
@@ -236,7 +237,8 @@ class Team(models.Model):
 
 
 class Week(models.Model):
-    season = models.ForeignKey(Season, default=get_default_season())
+    # a default season that doesn't bork migrations would be nice
+    season = models.ForeignKey(Season)
     date = models.DateField(null=True, blank=True)
     name = models.CharField(max_length=32, null=True)
 
@@ -255,7 +257,8 @@ class HomeTeam(Team):
 
 
 class Match(models.Model):
-    season = models.ForeignKey(Season, on_delete=models.CASCADE, default=get_default_season())
+    # a default season that doesn't bork migrations would be nice
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
     week = models.ForeignKey(Week, limit_choices_to=models.Q(season__is_default=True))
     home_team = models.ForeignKey('HomeTeam', limit_choices_to=models.Q(season__is_default=True))
     away_team = models.ForeignKey('AwayTeam', limit_choices_to=models.Q(season__is_default=True))
@@ -264,6 +267,9 @@ class Match(models.Model):
     def __str__(self):
         return "{} @ {} ({} {})".format(self.away_team, self.home_team, self.season, self.week)
 
+    # def name(self):
+    #     return self.__str__()
+    #
     class Meta:
         verbose_name = 'Match'
         verbose_name_plural = 'Matches'
