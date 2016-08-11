@@ -19,7 +19,12 @@ class DivisionAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Division, DivisionAdmin)
-admin.site.register(Player)
+
+
+class PlayerAdmin(admin.ModelAdmin):
+    list_display = ['last_name', 'first_name', 'email']
+
+admin.site.register(Player, PlayerAdmin)
 
 
 class SeasonAdmin(admin.ModelAdmin):
