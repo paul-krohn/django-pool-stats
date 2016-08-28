@@ -2,3 +2,25 @@
 .active {
     text-decoration: underline;
 }
+
+.mark-break-player {
+    font-weight: bold;
+}
+
+.mark-nobreak-position, .mark-break-position, .scoresheet-square {
+    text-align: center;
+    width: 36px;
+}
+.mark-nobreak-position, .mark-break-position {
+    font-weight: bold;
+}
+
+.mark-break-position {
+    background-color: #444444;
+    color: #FFFFFF;
+    padding: 4px;
+}
+
+.mark-break-position a:link {
+    color: white;
+}
