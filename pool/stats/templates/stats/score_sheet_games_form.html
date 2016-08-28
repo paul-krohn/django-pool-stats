@@ -1,12 +1,10 @@
     <tr><th></th><th></th><th class="scoresheet-square">H</th><th class="scoresheet-square">G</th><th class="scoresheet-square">A</th><th></th><th></th><th class="scoresheet-square">TR</th><th class="scoresheet-square">F</th> </tr>
-    <!--<tr><th></th><th>H</th><th>G</th><th>A</th><th></th><th>TR</th><th>Forfeit</th> </tr>-->
     {% for game_form in games_formset %}
         {{ game_form.id }}
         {% with tb=game_form.instance.order.tiebreaker hb=game_form.instance.order.home_breaks %}
     <tr>
         {% if game_form.instance.home_player.id  %}
         <td align="right" {% if not tb and hb %} class="mark-break-player"{% endif%}>
-        <!--<td  align="right" {% if not tb and hb %} class="mark-break-position" {% else %} class="mark-nobreak-position"{% endif%}>-->
             <a href="{% url 'player' game_form.instance.home_player.id %}">{{ game_form.instance.home_player }}</a>
         </td>
         {% else %}
