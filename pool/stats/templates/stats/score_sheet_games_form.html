@@ -1,23 +1,26 @@
-    <tr><th></th><th></th><th class="scoresheet-square">H</th><th class="scoresheet-square">G</th><th class="scoresheet-square">A</th><th></th><th></th><th class="scoresheet-square">TR</th><th class="scoresheet-square">F</th> </tr>
+{% spaceless %}
+<tr><th></th><th></th><th class="scoresheet-square">H</th><th class="scoresheet-square">G</th><th class="scoresheet-square">A</th><th></th><th></th><th class="scoresheet-square">TR</th><th class="scoresheet-square">F</th> </tr>
     {% for game_form in games_formset %}
         {{ game_form.id }}
         {% with tb=game_form.instance.order.tiebreaker hb=game_form.instance.order.home_breaks %}
     <tr>
         {% if game_form.instance.home_player.id  %}
-        <td align="right" {% if not tb and hb %} class="mark-break-player"{% endif%}>
-            <a href="{% url 'player' game_form.instance.home_player.id %}">{{ game_form.instance.home_player }}</a>
+        <td style="vertical-align:middle" class="scoresheet-cell" align="right" >
+            <div class="{% if not tb and hb %}mark-break-player {% endif%}scoresheet-cell">
+                <a class="{% if not tb and hb %}mark-break-player{% else %}mark-nobreak-player{%endif%}" href="{% url 'player' game_form.instance.home_player.id %}">{{ game_form.instance.home_player }}</a>
+            </div>
         </td>
         {% else %}
         <td class="scoresheet-square" align="right">--</td>
         {% endif %}
-        <td class="{% if not tb and hb %}mark-break-position {% else %} mark-nobreak-position{% endif%}">{{ game_form.instance.order.home_position}}</td>
-        <td class="scoresheet-square">{{ game_form.winner.0.tag}}</td>
-        <td class="scoresheet-square">{{ game_form.instance.order.name }}</td>
-        <td class="scoresheet-square">{{ game_form.winner.1.tag}}</td>
-        <td class="{% if not tb and not hb %}mark-break-position {% else %} mark-nobreak-position{% endif%}">{{ game_form.instance.order.away_position}}</td>
+        <td class="scoresheet-square"><div class="{% if not tb and hb %}mark-break-position{% else %}mark-nobreak-position{% endif%}">{{ game_form.instance.order.home_position}}</div></td>
+        <td class="scoresheet-square"><div class="scoresheet-square">{{ game_form.winner.0.tag}}</div></td>
+        <td class="scoresheet-square"><div class="scoresheet-square">{{ game_form.instance.order.name }}</div></td>
+        <td class="scoresheet-square"><div class="scoresheet-square">{{ game_form.winner.1.tag}}</div></td>
+        <td class="scoresheet-square"><div class="{% if not tb and not hb %}mark-break-position{% else %}mark-nobreak-position{% endif%}">{{ game_form.instance.order.away_position}}</div></td>
         {% if game_form.instance.away_player.id %}
-        <td class="{% if not tb and not hb %}mark-break-player{% endif%}">
-            <a href="{% url 'player' game_form.instance.away_player.id %}">{{ game_form.instance.away_player }}</a>
+        <td style="vertical-align:middle" class="{% if not tb and not hb %}mark-break-player{% endif%}">
+            <a class="{% if not tb and not hb %}mark-break-player{% else %}mark-nobreak-player{%endif%}" href="{% url 'player' game_form.instance.away_player.id %}">{{ game_form.instance.away_player }}</a>
         </td>
         {% else %}
         <td class="scoresheet-square">--</td>
@@ -27,3 +30,4 @@
         {% endwith %}
     </tr>
     {% endfor %}
+{% endspaceless %}

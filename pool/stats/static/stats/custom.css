@@ -3,24 +3,40 @@
     text-decoration: underline;
 }
 
+.mark-nobreak-player, mark-break-player {
+    height: 30px;
+}
+
 .mark-break-player {
     font-weight: bold;
 }
 
 .mark-nobreak-position, .mark-break-position, .scoresheet-square {
     text-align: center;
-    width: 36px;
+    /* these !important declarations are needed to over-ride
+        bootstrap rules that are more specific than this. */
+    vertical-align: middle !important;
+    padding: 4px !important;
 }
+
+.scoresheet-cell {
+    vertical-align: middle !important;
+    padding: 4px !important;
+}
+
+.scoresheet-square {
+    vertical-align: middle;
+    width: 30px;
+}
+
 .mark-nobreak-position, .mark-break-position {
     font-weight: bold;
+    width: 28px;
+    height: 28px;
 }
 
 .mark-break-position {
     background-color: #444444;
     color: #FFFFFF;
-    padding: 4px;
 }
 
-.mark-break-position a:link {
-    color: white;
-}
