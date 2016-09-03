@@ -1,4 +1,5 @@
 from .models import Season
+from django.conf import settings
 
 
 def season(request):
@@ -9,4 +10,10 @@ def season(request):
     return {
         'seasons': Season.objects.order_by('-pub_date')[0:4],
         'season': _season
+    }
+
+
+def league(request):
+    return {
+        'league_name': settings.LEAGUE_NAME
     }

@@ -65,6 +65,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'stats.context_processors.season',
+                'stats.context_processors.league',
             ],
         },
     },
@@ -181,3 +182,5 @@ LOGGING = {
         },
     },
 }
+
+LEAGUE_NAME = "Default League"
