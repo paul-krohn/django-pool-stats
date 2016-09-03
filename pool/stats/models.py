@@ -261,8 +261,16 @@ class Match(models.Model):
     # a default season that doesn't bork migrations would be nice
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     week = models.ForeignKey(Week, limit_choices_to=models.Q(season__is_default=True))
-    home_team = models.ForeignKey('HomeTeam', limit_choices_to=models.Q(season__is_default=True))
-    away_team = models.ForeignKey('AwayTeam', limit_choices_to=models.Q(season__is_default=True))
+    home_team = models.ForeignKey(
+        'HomeTeam',
+        limit_choices_to=models.Q(season__is_default=True),
+        related_name='home_team',
+    )
+    away_team = models.ForeignKey(
+        'AwayTeam',
+        limit_choices_to=models.Q(season__is_default=True),
+        related_name='away_team',
+    )
     playoff = models.BooleanField(default=False)
 
     def __str__(self):
@@ -313,8 +321,14 @@ class HomePlayer(Player):
 
 
 class GameOrder(models.Model):
-    away_position = models.ForeignKey(AwayPlayPosition)
-    home_position = models.ForeignKey(HomePlayPosition)
+    away_position = models.ForeignKey(
+        AwayPlayPosition,
+        related_name='away_position',
+    )
+    home_position = models.ForeignKey(
+        HomePlayPosition,
+        related_name='home_position',
+    )
     home_breaks = models.BooleanField(default=True)
     name = models.CharField(max_length=8)
     tiebreaker = models.BooleanField(default=False)
@@ -324,8 +338,18 @@ class GameOrder(models.Model):
 
 
 class Game(models.Model):
-    away_player = models.ForeignKey(AwayPlayer, null=True, blank=True)
-    home_player = models.ForeignKey(HomePlayer, null=True, blank=True)
+    away_player = models.ForeignKey(
+        AwayPlayer,
+        null=True,
+        blank=True,
+        related_name='away_player',
+    )
+    home_player = models.ForeignKey(
+        HomePlayer,
+        null=True,
+        blank=True,
+        related_name='home_player',
+    )
     winner = models.CharField(max_length=4, blank=True)
     order = models.ForeignKey(GameOrder, null=True)
     table_run = models.BooleanField(default=False)
@@ -377,11 +401,25 @@ class ScoreSheet(models.Model):
     official = models.BooleanField(default=False)
     match = models.ForeignKey(Match)
     creator_session = models.CharField(max_length=16, null=True, blank=True)
-    away_lineup = models.ManyToManyField(AwayLineupEntry, blank=True)
-    home_lineup = models.ManyToManyField(HomeLineupEntry, blank=True)
+    away_lineup = models.ManyToManyField(
+        AwayLineupEntry,
+        blank=True,
+        related_name='away_lineup',
+    )
+    home_lineup = models.ManyToManyField(
+        HomeLineupEntry,
+        blank=True,
+        related_name='home_lineup',
+    )
     games = models.ManyToManyField(Game, blank=True)
-    away_substitutions = models.ManyToManyField(AwaySubstitution)
-    home_substitutions = models.ManyToManyField(HomeSubstitution)
+    away_substitutions = models.ManyToManyField(
+        AwaySubstitution,
+        related_name='away_substitution',
+    )
+    home_substitutions = models.ManyToManyField(
+        HomeSubstitution,
+        related_name='home_substitution',
+    )
     comment = models.TextField(max_length=500, blank=True)
     complete = models.BooleanField(default=False)
 
