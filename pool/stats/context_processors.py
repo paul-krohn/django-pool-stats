@@ -15,5 +15,5 @@ def season(request):
 
 def league(request):
     return {
-        'league_name': settings.LEAGUE_NAME
+        'league': settings.LEAGUE,
     }

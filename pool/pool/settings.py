@@ -186,4 +186,9 @@ LOGGING = {
     },
 }
 
-LEAGUE_NAME = "Default League"
+LEAGUE = {
+    'name': "Default League",
+    'logo': None,
+    'tag_line': '',
+    'game_group_size': 4,
+}

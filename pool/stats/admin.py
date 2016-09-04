@@ -1,10 +1,11 @@
 from django.contrib import admin
 from django.core.urlresolvers import reverse
+from django.conf import settings
 
 from .models import Division, GameOrder, Match, Player, PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
 
 
-admin.AdminSite.site_header = "SFPA stats admin"
+admin.AdminSite.site_header = "{} stats admin".format(settings.LEAGUE['name'])
 
 
 class DivisionAdmin(admin.ModelAdmin):

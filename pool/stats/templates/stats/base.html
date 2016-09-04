@@ -33,7 +33,7 @@
         <span class="icon-bar"></span>
         <span class="icon-bar"></span>
       </button>
-      <a class="navbar-brand" href="/">{{ league_name }}</a>
+      <a class="navbar-brand" href="/">{{ league.name }}</a>
     </div>
     <div class="collapse navbar-collapse">
       <ul class="nav navbar-nav">
@@ -75,6 +75,12 @@
   <h5>{{ season }}</h5>
   <div id="content">
   {% block content %}{% endblock %}
+  </div>
+</div>
+<div id="footer">
+  <div class="container text-center">
+    <hr />
+    <img src="{{ league.logo }}" />
   </div>
 </div>
 </body>
