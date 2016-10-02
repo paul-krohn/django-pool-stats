@@ -40,3 +40,12 @@
     color: #FFFFFF;
 }
 
+.scoresheet-divider {
+    height: 1em !important;
+    padding: 0em !important;
+    margin: 0em !important;
+}
+
+.scoresheet-odd {
+    background-color: #f8f8f8;
+}

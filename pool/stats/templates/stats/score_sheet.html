@@ -5,7 +5,7 @@
 {% block content %}
 <h4><a href="{% url 'team' score_sheet.match.away_team_id %}">{{ score_sheet.match.away_team }}</a>: {{ score_sheet.away_wins }} <a href="{% url 'team' score_sheet.match.away_team_id %}">{{ score_sheet.match.home_team }}</a>: {{ score_sheet.home_wins }}</h4>
 <h5>{{ score_sheet.match.week }}, {{ score_sheet.match.week.date }}</h5>
-<table class="table table-striped">
+<table class="table">
 {% include "stats/score_sheet_games_form.html" %}
 </table>
 <h3>Away Player Summaries</h3>

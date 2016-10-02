@@ -1,9 +1,11 @@
+
+{% load scoresheet %}
 {% spaceless %}
-<tr><th></th><th></th><th class="scoresheet-square">H</th><th class="scoresheet-square">G</th><th class="scoresheet-square">A</th><th></th><th></th><th class="scoresheet-square">TR</th><th class="scoresheet-square">F</th> </tr>
+<tr><th style="text-align:right;">Home</th><th></th><th></th><th class="scoresheet-cell">G</th><th></th><th></th><th>Away</th><th class="scoresheet-square">TR</th><th class="scoresheet-square">F</th> </tr>
     {% for game_form in games_formset %}
         {{ game_form.id }}
-        {% with tb=game_form.instance.order.tiebreaker hb=game_form.instance.order.home_breaks %}
-    <tr>
+        {% with tb=game_form.instance.order.tiebreaker hb=game_form.instance.order.home_breaks row_even_odd=game_form.instance.order.name|row_even_odd%}
+    <tr class="scoresheet-{{ row_even_odd }}" id="{{ entry.id }}">
         {% if game_form.instance.home_player.id  %}
         <td style="vertical-align:middle" class="scoresheet-cell" align="right" >
             <div class="{% if not tb and hb %}mark-break-player {% endif%}scoresheet-cell">
@@ -15,7 +17,7 @@
         {% endif %}
         <td class="scoresheet-square"><div class="{% if not tb and hb %}mark-break-position{% else %}mark-nobreak-position{% endif%}">{{ game_form.instance.order.home_position}}</div></td>
         <td class="scoresheet-square"><div class="scoresheet-square">{{ game_form.winner.0.tag}}</div></td>
-        <td class="scoresheet-square"><div class="scoresheet-square">{{ game_form.instance.order.name }}</div></td>
+        <td class="scoresheet-square"><div class="cell">{{ game_form.instance.order.name }}</div></td>
         <td class="scoresheet-square"><div class="scoresheet-square">{{ game_form.winner.1.tag}}</div></td>
         <td class="scoresheet-square"><div class="{% if not tb and not hb %}mark-break-position{% else %}mark-nobreak-position{% endif%}">{{ game_form.instance.order.away_position}}</div></td>
         {% if game_form.instance.away_player.id %}
@@ -29,5 +31,8 @@
         <td class="scoresheet-square">{{ game_form.forfeit }}</td>
         {% endwith %}
     </tr>
+    {% if game_form.instance.order.name|divisibleby:league.game_group_size  %}
+    <tr class="scoresheet-divider"><td class="scoresheet-divider" colspan="9"></td></tr>
+    {% endif %}
     {% endfor %}
 {% endspaceless %}
