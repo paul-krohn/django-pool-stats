@@ -10,7 +10,7 @@
 {% include "stats/player_table.html" %}
 {% endif %}
 <table class="table">
-<tr><th style="text-align:right">Away</th><th>Score</th><th>Home</th><th>Week</th></tr>
+<tr><th style="text-align:right">Away</th><th style="text-align:center">Score</th><th>Home</th><th>Week</th></tr>
     {% for score_sheet in scoresheets %}
 <tr>
     <td align="right"><a href="{% url 'team' score_sheet.match.away_team.id %}">{{ score_sheet.match.away_team }}</a></td>
