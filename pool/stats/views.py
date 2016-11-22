@@ -1,6 +1,6 @@
 import time
 
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Division, AwayLineupEntry, Game, HomeLineupEntry, Match, Player, \
     ScoreSheet, Season, Sponsor, Team, Week
 from .models import PlayPosition
@@ -46,7 +46,6 @@ def check_season(request):
 
 
 def index(request):
-    logger.error("this is {}".format(__name__))
     check_season(request)
     team_list = Team.objects.filter(season=request.session['season_id']).order_by('-win_percentage')
     season = Season.objects.get(id=request.session['season_id'])
@@ -59,7 +58,7 @@ def index(request):
 
 def player(request, player_id):
     check_season(request)
-    _player = Player.objects.get(id=player_id)
+    _player = get_object_or_404(Player, id=player_id)
     summaries = PlayerSeasonSummary.objects.filter(player__exact=_player).order_by('-season')
 
     _score_sheets_with_dupes = ScoreSheet.objects.filter(official=True).filter(
@@ -123,7 +122,7 @@ def update_players_stats(request):
 
 def team(request, team_id):
 
-    _team = Team.objects.get(id=team_id)
+    _team = get_object_or_404(Team, id=team_id)
     _players = PlayerSeasonSummary.objects.filter(player_id__in=list([x.id for x in _team.players.all()]))
     _score_sheets = set(ScoreSheet.objects.filter(official=True).filter(
         django.db.models.Q(match__away_team=_team) | django.db.models.Q(match__home_team=_team)
@@ -146,7 +145,7 @@ def seasons(request):
 
 
 def sponsor(request, sponsor_id):
-    _sponsor = Sponsor.objects.get(id=sponsor_id)
+    _sponsor = get_object_or_404(Sponsor, id=sponsor_id)
     context = {
         'sponsor': _sponsor
     }
@@ -185,7 +184,7 @@ def divisions(request):
 
 
 def week(request, week_id):
-    _week = Week.objects.get(id=week_id)
+    _week = get_object_or_404(Week, id=week_id)
 
     official_matches = []
     unofficial_matches = []
@@ -220,7 +219,7 @@ def weeks(request):
 
 
 def match(request, match_id):
-    _match = Match.objects.get(id=match_id)
+    _match = get_object_or_404(Match, id=match_id)
     match_score_sheets = ScoreSheet.objects.filter(match_id__exact=_match.id, official=True)
 
     score_sheet_game_formsets = None
@@ -261,7 +260,7 @@ def score_sheets(request):
 
 
 def score_sheet(request, score_sheet_id):
-    s = ScoreSheet.objects.get(id=score_sheet_id)
+    s = get_object_or_404(ScoreSheet, id=score_sheet_id)
     score_sheet_game_formset_f = modelformset_factory(
         Game,
         form=DisabledScoreSheetGameForm,
@@ -312,7 +311,7 @@ def score_sheet_complete(request, score_sheet_id):
 
 
 def score_sheet_edit(request, score_sheet_id):
-    s = ScoreSheet.objects.get(id=score_sheet_id)
+    s = get_object_or_404(ScoreSheet, id=score_sheet_id)
     if session_uid(request) != s.creator_session:
         if not request.user.is_superuser:
             return redirect('score_sheet', s.id)
