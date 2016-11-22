@@ -38,6 +38,17 @@ def set_season(request, season_id=None):
     return redirect(request.META.get('HTTP_REFERER', '/stats/'))
 
 
+def user_can_edit_scoresheet(request, score_sheet_id):
+
+    s = ScoreSheet.objects.get(id=score_sheet_id)
+    # you can edit a score sheet if it is not official and either you created it,
+    # or you are an admin
+    if (not s.official) and ((session_uid(request) != s.creator_session) or request.user.is_superuser):
+        return True
+    else:
+        return False
+
+
 def check_season(request):
     if 'season_id' in request.session:
         return
@@ -272,6 +283,7 @@ def score_sheet(request, score_sheet_id):
 
     context = {
         'score_sheet': s,
+        'edit_link': user_can_edit_scoresheet(request, score_sheet_id),
         'games_formset': score_sheet_game_formset,
         'away_player_score_sheet_summaries': s.player_summaries('away'),
         'home_player_score_sheet_summaries': s.player_summaries('home')
@@ -312,9 +324,8 @@ def score_sheet_complete(request, score_sheet_id):
 
 def score_sheet_edit(request, score_sheet_id):
     s = get_object_or_404(ScoreSheet, id=score_sheet_id)
-    if session_uid(request) != s.creator_session:
-        if not request.user.is_superuser:
-            return redirect('score_sheet', s.id)
+    if not user_can_edit_scoresheet(request, score_sheet_id):
+        return redirect('score_sheet', s.id)
     score_sheet_game_formset_f = modelformset_factory(
         Game,
         form=ScoreSheetGameForm,

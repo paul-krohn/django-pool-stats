@@ -5,6 +5,9 @@
 {% block content %}
 <h4><a href="{% url 'team' score_sheet.match.away_team_id %}">{{ score_sheet.match.away_team }}</a>: {{ score_sheet.away_wins }} <a href="{% url 'team' score_sheet.match.away_team_id %}">{{ score_sheet.match.home_team }}</a>: {{ score_sheet.home_wins }}</h4>
 <h5>{{ score_sheet.match.week }}, {{ score_sheet.match.week.date }}</h5>
+{% if edit_link %}
+<p><a href="{% url 'score_sheet_edit' score_sheet.id%}">Edit</a></p>
+{% endif %}
 <table class="table">
 {% include "stats/score_sheet_games_form.html" %}
 </table>
