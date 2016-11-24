@@ -29,10 +29,10 @@
         {% endif %}
         <td class="scoresheet-square">{{ game_form.table_run }}</td>
         <td class="scoresheet-square">{{ game_form.forfeit }}</td>
-        {% endwith %}
     </tr>
     {% if row_divider %}
     <tr class="scoresheet-divider"><td class="scoresheet-divider" colspan="9"></td></tr>
     {% endif %}
+    {% endwith %}
     {% endfor %}
 {% endspaceless %}
