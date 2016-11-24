@@ -4,7 +4,7 @@
 <tr><th style="text-align:right;">Home</th><th></th><th></th><th class="scoresheet-cell">G</th><th></th><th></th><th>Away</th><th class="scoresheet-square">TR</th><th class="scoresheet-square">F</th> </tr>
     {% for game_form in games_formset %}
         {{ game_form.id }}
-        {% with tb=game_form.instance.order.tiebreaker hb=game_form.instance.order.home_breaks row_even_odd=game_form.instance.order.name|row_even_odd%}
+        {% with tb=game_form.instance.order.tiebreaker hb=game_form.instance.order.home_breaks row_even_odd=game_form.instance.order|row_even_odd%}
     <tr class="scoresheet-{{ row_even_odd }}" id="{{ entry.id }}">
         {% if game_form.instance.home_player.id  %}
         <td style="vertical-align:middle" class="scoresheet-cell" align="right" >
@@ -31,7 +31,7 @@
         <td class="scoresheet-square">{{ game_form.forfeit }}</td>
         {% endwith %}
     </tr>
-    {% if game_form.instance.order.name|divisibleby:league.game_group_size  %}
+    {% if not game_form.instance.order.tiebreaker and game_form.instance.order.name|divisibleby:league.game_group_size %}
     <tr class="scoresheet-divider"><td class="scoresheet-divider" colspan="9"></td></tr>
     {% endif %}
     {% endfor %}
