@@ -193,9 +193,9 @@ class ScoreSheetTests(TestCase):
         # since we have a fresh DB, assume this will be score sheet number 1 ...
         self.assertRedirects(response, expected_url=reverse('score_sheet_edit', kwargs={'score_sheet_id': 1}))
 
-        # the number of games should match the match_ups matrix in create_game_order(), ie 9
+        # the number of games should match the match_ups matrix in create_game_order(), ie len(match_ups)
         score_sheet = ScoreSheet.objects.get(id=1)
-        self.assertEqual(len(score_sheet.games.all()), 9)
+        self.assertEqual(len(score_sheet.games.all()), len(match_ups))
 
         # a second client to test the redirect from another session
         c = Client()
