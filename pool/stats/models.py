@@ -374,7 +374,7 @@ class HomeLineupEntry(LineupEntry):
 class Substitution(models.Model):
     game_order = models.ForeignKey(GameOrder)
     player = models.ForeignKey(Player, null=True, blank=True)
-    play_position = models.ForeignKey(PlayPosition)
+    play_position = models.ForeignKey(PlayPosition, null=True, blank=True)
 
 
 class AwaySubstitution(Substitution):
@@ -383,7 +383,7 @@ class AwaySubstitution(Substitution):
 
     def __str__(self):
         return "{} enters as {} starting with game {}".format(
-            self.player, self.play_position, self.game_order
+            self.player, self.play_position.away_name, self.game_order
         )
 
 
@@ -393,7 +393,7 @@ class HomeSubstitution(Substitution):
 
     def __str__(self):
         return "{} enters as {} starting with game {}".format(
-            self.player, self.play_position, self.game_order
+            self.player, self.play_position.home_name, self.game_order
         )
 
 
@@ -465,7 +465,20 @@ class ScoreSheet(models.Model):
 
         self.save()
 
+    def copy_game_orders_to_positions(self):
+        """
+        This ugly hack allows substitutions to be set by just game order, instead of
+         also specifying the play position.
+        """
+        for away_home in ['away', 'home']:
+            list_subs = getattr(self, '{}_substitutions'.format(away_home))
+            for substitution in list_subs.all():
+                position_m = getattr(substitution.game_order, '{}_position'.format(away_home))
+                substitution.play_position = position_m
+                substitution.save()
+
     def set_games(self):
+        self.copy_game_orders_to_positions()
         for game in self.games.all():
             logger.debug("working on game {} from {}".format(game.order, self.match))
 

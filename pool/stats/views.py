@@ -439,10 +439,11 @@ def score_sheet_substitutions(request, score_sheet_id, away_home):
     substitution_formset_f = modelformset_factory(
         model=substitution_model,
         form=SubstitutionForm,
-        fields=['game_order', 'player', 'play_position'],
+        fields=['game_order', 'player'],
         max_num=2,
         can_delete=True,
     )
+
     if request.method == 'POST':
         substitution_formset = substitution_formset_f(
             request.POST, queryset=substitution_queryset
