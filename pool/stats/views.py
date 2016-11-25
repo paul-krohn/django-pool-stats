@@ -12,6 +12,7 @@ from django.forms import modelformset_factory
 
 import django.forms
 import django.db.models
+from django.conf import settings
 
 import logging
 logger = logging.getLogger(__name__)
@@ -409,7 +410,7 @@ def score_sheet_substitutions(request, score_sheet_id, away_home):
     s = ScoreSheet.objects.get(id=score_sheet_id)
 
     already_used_players = []
-    # this_scoresheet_lineup = getattr('s.{}_lineup'.format(away_home))
+    # first exclude players already in the lineup
     for x in getattr(s, '{}_lineup'.format(away_home)).all():
         if x.player is not None:
             already_used_players.append(x.player.id)
@@ -430,7 +431,9 @@ def score_sheet_substitutions(request, score_sheet_id, away_home):
         model=substitution_model,
         form=SubstitutionForm,
         fields=['game_order', 'player'],
-        max_num=2,
+        # this may not work for leagues where the game group size is for some reason not the
+        # same as the number of players in a lineup
+        max_num=len(scoresheet_team.players.all()) - settings.LEAGUE['game_group_size'],
         can_delete=True,
     )
 
