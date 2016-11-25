@@ -411,12 +411,21 @@ def score_sheet_lineup(request, score_sheet_id, away_home):
 def score_sheet_substitutions(request, score_sheet_id, away_home):
     s = ScoreSheet.objects.get(id=score_sheet_id)
 
-    substitution_players_queryset = s.match.away_team.players.all()
+    already_used_players = []
+    for x in s.away_lineup.all():
+        if x.player is not None:
+            already_used_players.append(x.player.id)
+
+    substitution_players_queryset = s.match.away_team.players.all().exclude(id__in=already_used_players)
     substitution_queryset = s.away_substitutions.all()
     substitution_model = AwaySubstitution
     add_substitution_function = s.away_substitutions.add
     if away_home == 'home':
-        substitution_players_queryset = s.match.home_team.players.all()
+        for x in s.home_lineup.all():
+            if x.player is not None:
+                already_used_players.append(x.player.id)
+
+        substitution_players_queryset = s.match.home_team.players.all().exclude(id__in=already_used_players)
         substitution_queryset = s.home_substitutions.all()
         substitution_model = HomeSubstitution
         add_substitution_function = s.home_substitutions.add
