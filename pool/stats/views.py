@@ -440,7 +440,8 @@ def score_sheet_substitutions(request, score_sheet_id, away_home):
         model=substitution_model,
         form=SubstitutionForm,
         fields=['game_order', 'player', 'play_position'],
-        max_num=2
+        max_num=2,
+        can_delete=True,
     )
     if request.method == 'POST':
         substitution_formset = substitution_formset_f(
