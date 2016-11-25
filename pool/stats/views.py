@@ -74,7 +74,7 @@ def player(request, player_id):
 
     _score_sheets_with_dupes = ScoreSheet.objects.filter(official=True).filter(
         django.db.models.Q(away_lineup__player=_player) | django.db.models.Q(home_lineup__player=_player)
-    ).order_by('match__week__date').filter(match__week__season=request.session['season_id']  )
+    ).order_by('match__week__date').filter(match__week__season=request.session['season_id'])
     # there are dupes in _score_sheets at this point, so we have to remove them; method is cribbed from:
     # http://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-in-python-whilst-preserving-order
     seen = set()
@@ -364,13 +364,10 @@ def score_sheet_lineup(request, score_sheet_id, away_home):
 
     # it would be prettier to do this by passing kwargs but,
     # it seems you can't do that with a ModelForm so, the ugly is here.
-    lineup_queryset = s.away_lineup.all()
-    lineup_model = AwayLineupEntry
-    lineup_team = s.match.away_team
-    if away_home == 'home':
-        lineup_queryset = s.home_lineup.all()
-        lineup_model = HomeLineupEntry
-        lineup_team = s.match.home_team
+    lineup_m = getattr(s, '{}_lineup'.format(away_home))
+    lineup_queryset = lineup_m.all()
+    lineup_team = getattr(s.match, '{}_team'.format(away_home))
+    lineup_model = AwayLineupEntry if away_home == 'away' else HomeLineupEntry
 
     class LineupForm(django.forms.ModelForm):
         # thanks to stack overflow for this, from here:
@@ -412,23 +409,16 @@ def score_sheet_substitutions(request, score_sheet_id, away_home):
     s = ScoreSheet.objects.get(id=score_sheet_id)
 
     already_used_players = []
-    for x in s.away_lineup.all():
+    # this_scoresheet_lineup = getattr('s.{}_lineup'.format(away_home))
+    for x in getattr(s, '{}_lineup'.format(away_home)).all():
         if x.player is not None:
             already_used_players.append(x.player.id)
 
-    substitution_players_queryset = s.match.away_team.players.all().exclude(id__in=already_used_players)
-    substitution_queryset = s.away_substitutions.all()
-    substitution_model = AwaySubstitution
-    add_substitution_function = s.away_substitutions.add
-    if away_home == 'home':
-        for x in s.home_lineup.all():
-            if x.player is not None:
-                already_used_players.append(x.player.id)
-
-        substitution_players_queryset = s.match.home_team.players.all().exclude(id__in=already_used_players)
-        substitution_queryset = s.home_substitutions.all()
-        substitution_model = HomeSubstitution
-        add_substitution_function = s.home_substitutions.add
+    scoresheet_team = getattr(s.match, '{}_team'.format(away_home))
+    substitution_players_queryset = scoresheet_team.players.all().exclude(id__in=already_used_players)
+    substitution_model = AwaySubstitution if away_home == 'away' else HomeSubstitution
+    substitution_queryset = getattr(s, '{}_substitutions'.format(away_home)).all()
+    add_substitution_function = getattr(s, '{}_substitutions'.format(away_home))
 
     class SubstitutionForm(django.forms.ModelForm):
         player = django.forms.ModelChoiceField(
@@ -453,7 +443,7 @@ def score_sheet_substitutions(request, score_sheet_id, away_home):
             for substitution in substitution_formset.save():
                 logging.debug('adding {} as {} in game {}'.format(
                     substitution.player, substitution.play_position, substitution.game_order))
-                add_substitution_function(substitution)
+                add_substitution_function.add(substitution)
             s.set_games()
             return redirect('score_sheet_edit', score_sheet_id=s.id)
     else:
