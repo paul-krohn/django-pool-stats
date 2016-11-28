@@ -10,11 +10,17 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.9/ref/settings/
 """
 
+import json
 import os
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(ROOT_DIR)
+VERSION = 'development'
 
+version_file = '{}/.version.json'.format(ROOT_DIR)
+if os.path.isfile(version_file):
+    VERSION = json.load(open(version_file))['version']
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
