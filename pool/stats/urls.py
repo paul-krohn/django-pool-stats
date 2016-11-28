@@ -1,6 +1,6 @@
 from django.conf.urls import url
 
-from . import views
+from . import views, status
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
@@ -42,5 +42,6 @@ urlpatterns = [
     url(r'^update_players_stats/', views.update_players_stats, name='update_players_stats'),
 
     url(r'^unofficial_results/', views.unofficial_results, name='unoffical_results'),
+    url(r'^__status', status.index),
 
 ]
