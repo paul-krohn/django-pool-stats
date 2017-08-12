@@ -52,7 +52,7 @@ class PlayerSeasonSummary(models.Model):
     losses = models.IntegerField(verbose_name='Losses', default=0)
     four_ohs = models.IntegerField(verbose_name='4-0s', default=0)
     table_runs = models.IntegerField(verbose_name='Table Runs', default=0)
-    win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0)
+    win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0, null=True)
     ranking = models.IntegerField(null=True)
 
     def __str__(self):
