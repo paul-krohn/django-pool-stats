@@ -139,6 +139,14 @@ class PlayerSeasonSummary(models.Model):
 
     @classmethod
     def update_all(cls, season_id):
+        # find all the players on teams in this season
+        teams = Team.objects.filter(season=season_id)
+        for team in teams:
+            for player in team.players.all():
+                summaries = cls.objects.filter(season=season_id, player=player)
+                if not len(summaries):
+                    cls(season=Season.objects.get(id=season_id), player=player).save()
+
         for summary in cls.objects.filter(season=season_id):
             summary.update()
         cls.update_rankings(season_id)
