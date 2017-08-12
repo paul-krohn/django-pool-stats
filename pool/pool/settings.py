@@ -172,7 +172,7 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.handlers.SysLogHandler',
             'facility': 'local7',
-            'address': '/dev/log',
+            'address': '/var/run/syslog',
             'formatter': 'verbose'
         },
     },
