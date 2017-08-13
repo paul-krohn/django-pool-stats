@@ -176,7 +176,7 @@ def sponsors(request):
 
 def divisions(request):
     check_season(request)
-    _divisions = Division.objects.filter(season=request.session['season_id']).order_by('id')
+    _divisions = Division.objects.filter(season=request.session['season_id']).order_by('name')
     # this wrapper divisions dodge is needed so the teams within each division
     # can be sorted by ranking
     wrapper_divisions = []
