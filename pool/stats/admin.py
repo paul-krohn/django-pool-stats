@@ -1,11 +1,61 @@
 from django.contrib import admin
 from django.core.urlresolvers import reverse
 from django.conf import settings
+from django.utils.translation import ugettext_lazy as _
+from django.contrib.admin import SimpleListFilter
 
 from .models import Division, GameOrder, Match, Player, PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
 
 
 admin.AdminSite.site_header = "{} stats admin".format(settings.LEAGUE['name'])
+
+
+class SeasonFilter(SimpleListFilter):
+    # a custom filter that defaults to the 'default' season, instead of a 'All'
+    # cribbed/modified from https://stackoverflow.com/questions/851636/default-filter-in-django-admin
+    title = _('Season')
+
+    parameter_name = 'season'
+
+    def lookups(self, request, model_admin):
+        # we want to return a list of tuples of the query value and display value;
+        # in this case, all the seasons, plus 'all'
+        choices = [(season.id, season) for season in Season.objects.all().order_by('-pub_date')]
+        choices.append(('all', _('All')))
+        return choices
+
+    def choices(self, cl):
+        for lookup, title in self.lookup_choices:
+            yield {
+                'selected': self.value() == lookup,
+                'query_string': cl.get_query_string({
+                    self.parameter_name: lookup,
+                }, []),
+                'display': title,
+            }
+
+    def queryset(self, request, queryset):
+        if self.value() == 'all':
+            return queryset
+        elif self.value() is None:
+            return queryset.filter(season__is_default=True)
+        else:
+            return queryset.filter(season=self.value())
+
+
+class MatchSeasonFilter(SeasonFilter):
+    # for admin views where the object's match is via the season
+    parameter_name = 'match__season'
+
+    # TODO: make this require less repeated code just to make
+    # model_path__is_default vary
+    def queryset(self, request, queryset):
+        if self.value() == 'all':
+            return queryset
+        elif self.value() is None:
+            return queryset.filter(match__season__is_default=True)
+        else:
+            return queryset.filter(match__season=self.value())
 
 
 class DivisionAdmin(admin.ModelAdmin):
@@ -45,7 +95,7 @@ admin.site.register(Week, WeekAdmin)
 
 class TeamAdmin(admin.ModelAdmin):
     list_display = ('name', 'season', 'ranking', 'rank_tie_breaker')
-    list_filter = ['season', 'rank_tie_breaker']
+    list_filter = [SeasonFilter, 'rank_tie_breaker']
     filter_horizontal = ['players']
     fields = ['season', 'sponsor', 'division', 'name', 'players', 'rank_tie_breaker']
     save_as = True
@@ -63,7 +113,7 @@ admin.site.register(PlayPosition, PlayPositionAdmin)
 class ScoreSheetAdmin(admin.ModelAdmin):
     list_display = ['opponents', 'links', 'away_wins', 'home_wins', 'official', 'complete', 'comment']
     fields = ['official', 'complete', 'comment']
-    list_filter = ['official', 'complete', 'match__season']
+    list_filter = [MatchSeasonFilter, 'official', 'complete']
 
     @staticmethod
     def opponents(obj):
@@ -86,8 +136,7 @@ admin.site.register(GameOrder, GameOrderAdmin)
 
 
 class MatchAdmin(admin.ModelAdmin):
-    list_filter = ['season', 'playoff']
-    # list_display = ['name', 'playoff']
+    list_filter = [SeasonFilter, 'playoff']
 
 admin.site.register(Match, MatchAdmin)
 
