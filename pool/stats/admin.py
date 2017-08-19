@@ -75,6 +75,7 @@ admin.site.register(Division, DivisionAdmin)
 class PlayerAdmin(admin.ModelAdmin):
     list_display = ['last_name', 'first_name', 'email']
 
+
 admin.site.register(Player, PlayerAdmin)
 
 
@@ -89,6 +90,7 @@ admin.site.register(Sponsor)
 class WeekAdmin(admin.ModelAdmin):
     list_filter = ['season']
     list_display = ['name', 'season', 'date']
+
 
 admin.site.register(Week, WeekAdmin)
 
@@ -106,6 +108,7 @@ admin.site.register(Team, TeamAdmin)
 
 class PlayPositionAdmin(admin.ModelAdmin):
     list_display = ('name', 'home_name', 'away_name')
+
 
 admin.site.register(PlayPosition, PlayPositionAdmin)
 
@@ -126,17 +129,20 @@ class ScoreSheetAdmin(admin.ModelAdmin):
 
     links.allow_tags = True
 
+
 admin.site.register(ScoreSheet, ScoreSheetAdmin)
 
 
 class GameOrderAdmin(admin.ModelAdmin):
     list_display = ['name', 'away_position', 'home_position', 'home_breaks']
 
+
 admin.site.register(GameOrder, GameOrderAdmin)
 
 
 class MatchAdmin(admin.ModelAdmin):
     list_filter = [SeasonFilter, 'playoff']
+
 
 admin.site.register(Match, MatchAdmin)
 
