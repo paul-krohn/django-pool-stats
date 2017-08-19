@@ -335,12 +335,15 @@ class GameOrder(models.Model):
         related_name='home_position',
     )
     home_breaks = models.BooleanField(default=True)
-    name = models.CharField(max_length=8)
     order = models.IntegerField(null=True)
     tiebreaker = models.BooleanField(default=False)
 
     def __str__(self):
-        return "{} ({} vs {})".format(self.name, self.away_position, self.home_position)
+        return "{} ({} vs {})".format(self.order, self.away_position, self.home_position)
+
+    class Meta:
+        # the default/primary key sort is sometimes wrong
+        ordering = ['order']
 
 
 class Game(models.Model):

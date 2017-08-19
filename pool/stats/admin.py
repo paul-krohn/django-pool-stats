@@ -134,7 +134,7 @@ admin.site.register(ScoreSheet, ScoreSheetAdmin)
 
 
 class GameOrderAdmin(admin.ModelAdmin):
-    list_display = ['name', 'away_position', 'home_position', 'home_breaks']
+    list_display = ['order', 'away_position', 'home_position', 'home_breaks']
 
 
 admin.site.register(GameOrder, GameOrderAdmin)
