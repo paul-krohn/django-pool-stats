@@ -141,7 +141,7 @@ admin.site.register(GameOrder, GameOrderAdmin)
 
 
 class MatchAdmin(admin.ModelAdmin):
-    list_filter = [SeasonFilter, 'playoff']
+    list_filter = ['week', SeasonFilter, 'playoff']
 
 
 admin.site.register(Match, MatchAdmin)
