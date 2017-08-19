@@ -284,9 +284,6 @@ class Match(models.Model):
     def __str__(self):
         return "{} @ {} ({} {})".format(self.away_team, self.home_team, self.season, self.week)
 
-    # def name(self):
-    #     return self.__str__()
-    #
     class Meta:
         verbose_name = 'Match'
         verbose_name_plural = 'Matches'
@@ -339,6 +336,7 @@ class GameOrder(models.Model):
     )
     home_breaks = models.BooleanField(default=True)
     name = models.CharField(max_length=8)
+    order = models.IntegerField(null=True)
     tiebreaker = models.BooleanField(default=False)
 
     def __str__(self):

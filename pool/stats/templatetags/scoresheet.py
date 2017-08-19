@@ -21,6 +21,6 @@ def row_even_odd(game_order):
 
 @register.filter()
 def row_divider(game_order):
-    if not game_order.tiebreaker and (int(game_order.name) % settings.LEAGUE['game_group_size'] == 0):
+    if not game_order.tiebreaker and (game_order.order % settings.LEAGUE['game_group_size'] == 0):
         return True
     return False
