@@ -38,6 +38,9 @@ urlpatterns = [
     url(r'^seasons/', views.seasons, name='seasons'),
     url(r'^set_season/(?P<season_id>[0-9]+)/$', views.set_season, name='set_season'),
 
+    url(r'^tournaments/', views.tournaments, name='tournaments'),
+    url(r'^tournament/(?P<tournament_id>[0-9]+)/$', views.tournament, name='tournament'),
+
     url(r'^update_teams_stats/', views.update_teams_stats, name='update_teams_stats'),
     url(r'^update_players_stats/', views.update_players_stats, name='update_players_stats'),
 

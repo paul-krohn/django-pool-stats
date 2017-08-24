@@ -2,7 +2,7 @@ import time
 
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Division, AwayLineupEntry, Game, HomeLineupEntry, Match, Player, \
-    ScoreSheet, Season, Sponsor, Team, Week
+    ScoreSheet, Season, Sponsor, Team, Tournament, Week
 from .models import PlayPosition
 from .models import PlayerSeasonSummary
 from .models import AwaySubstitution, HomeSubstitution
@@ -476,3 +476,25 @@ def unofficial_results(request):
     }
 
     return render(request, 'stats/unofficial_results.html', context)
+
+
+def tournament(request, tournament_id):
+    tourney = Tournament.objects.get(id=tournament_id)
+    context = {
+        'tournament': tourney
+    }
+
+    return render(request, 'stats/tournament.html', context)
+
+
+def tournaments(request):
+    tourneys = Tournament.objects.filter(
+        season=request.session['season_id']
+    ).order_by('-date')
+    context = {
+        'tournaments': tourneys,
+    }
+
+    return render(request, 'stats/tournaments.html', context)
+
+    # team_list = Team.objects.filter(season=request.session['season_id']).order_by('-win_percentage')

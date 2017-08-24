@@ -1,0 +1,14 @@
+{% extends "stats/base.html" %}
+
+{% block title %}SFPA :: Divisions{% endblock %}
+
+{% block content %}
+<div class="text-center">
+<h2>Tournaments</h2>
+</div>
+
+{% for tournament in tournaments %}
+<h4><a href="{% url 'tournament' tournament.id %}" >{{ tournament }}</a></h4>
+{% endfor %}
+
+{% endblock %}

@@ -46,8 +46,9 @@
         </li>
         <!--<li><a href="{% url 'sponsors' %}" data-toggle="collapse" data-target=".navbar-collapse.in">Sponsors</a></li>-->
         <li><a href="{% url 'divisions' %}" class="{% active_page request 'divisions' %}" data-toggle="collapse" data-target=".navbar-collapse.in">Divisions</a></li>
-        <li><a href="{% url 'teams' %}" class="{% active_page request 'teams' %}" data-toggle="collapse" data-target=".navbar-collapse.in">Teams</a></li>
         <li><a href="{% url 'players' %}" class="{% active_page request 'players' %}" data-toggle="collapse" data-target=".navbar-collapse.in">Players</a></li>
+        <li><a href="{% url 'teams' %}" class="{% active_page request 'teams' %}" data-toggle="collapse" data-target=".navbar-collapse.in">Teams</a></li>
+        <li><a href="{% url 'tournaments' %}" class="{% active_page request 'tournaments' %}" data-toggle="collapse" data-target=".navbar-collapse.in">Tournaments</a></li>
         <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" style="cursor:pointer">• Weeks</a>
           <ul class="dropdown-menu">
             <li><a href="{% url 'weeks' %}" class="{% active_page request 'weeks' %}" data-toggle="collapse" data-target=".navbar-collapse.in">• All Weeks</a></li>

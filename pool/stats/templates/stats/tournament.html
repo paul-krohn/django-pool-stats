@@ -1,0 +1,12 @@
+{% extends "stats/base.html" %}
+
+{% block title %}SFPA :: Divisions{% endblock %}
+
+{% block content %}
+<div class="text-center">
+<h2>{{ tournament }}</h2>
+{% for play_position in tournament.play_positions.all %}
+<p>{{play_position}}</p>
+{% endfor %}
+</div>
+{% endblock %}

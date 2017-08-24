@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
 
-from .models import Division, GameOrder, Match, Player, PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
+from .models import Division, GameOrder, Match, Player, PlayPosition, ScoreSheet, Season, Sponsor, Team, Tournament, Week
 
 
 admin.AdminSite.site_header = "{} stats admin".format(settings.LEAGUE['name'])
@@ -163,3 +163,12 @@ admin.site.register(Match, MatchAdmin)
 # admin.site.register(Match, MatchAdmin)
 # this is done in the model at the moment, by setting limit_choices_to with a Q queryset; this works
 # but only teams from the default season are available in the admin
+
+
+class TournamentAdmin(admin.ModelAdmin):
+    filter_horizontal = ['players']
+    list_filter = [SeasonFilter]
+    list_display = ['name', 'play_format', 'date']
+
+
+admin.site.register(Tournament, TournamentAdmin)

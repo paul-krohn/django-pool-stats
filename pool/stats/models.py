@@ -1,6 +1,9 @@
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
 import logging
+from math import log
+from random import shuffle
+
 logger = logging.getLogger(__name__)
 
 
@@ -542,3 +545,75 @@ class ScoreSheet(models.Model):
             ))
             player_score_sheet_summaries.append(summary)
         return player_score_sheet_summaries
+
+
+class TournamentPlayPosition(models.Model):
+    position = models.IntegerField()
+    player = models.ForeignKey(Player, null=True)  # if null, is a bye?
+
+    def __str__(self):
+        if self.player is not None:
+            return self.player.__str__()
+        else:
+            return 'Bye'
+
+
+class Tournament(models.Model):
+    FORMATS = (
+        (0, 'Single Elimination'),
+        (1, 'Double Elimination'),
+        # scotch doubles ??
+    )
+    season = models.ForeignKey(Season)
+    name = models.CharField(max_length=128)
+    date = models.DateField()
+    players = models.ManyToManyField(Player, blank=True)
+    play_positions = models.ManyToManyField(TournamentPlayPosition)
+    play_format = models.IntegerField(choices=FORMATS)
+    race_to = models.IntegerField()
+
+    def __str__(self):
+        return "{}".format(self.name)
+
+    def bracket_size(self):
+        player_count = len(list(self.players.all()))
+        start = int(log(player_count, 2))
+        if player_count == 2 ** start:  # there happens to be power-of-2 players
+            return 2 ** start
+        else:
+            return 2 ** (start + 1)
+
+    def create_play_positions(self):
+        for x in range(0, self.bracket_size()):
+            tpp = TournamentPlayPosition(position=x)
+            tpp.save()
+            self.play_positions.add(tpp)
+        self.save()
+
+    def assign_players(self):
+        player_order = [x for x in range(0, self.bracket_size())]
+        shuffle(player_order)
+        print('player order is: {}'.format(player_order))
+        print('players are: {}'.format(self.players.all()))
+        for player in self.players.all():
+            position = self.play_positions.get(position=player_order.pop())
+            position.player = player
+            position.save()
+        # now the remaining play positions have no player set, ie are
+        # byes. TODO: allow late-entry players into un-realized byes
+
+
+class TournamentMatch(models.Model):
+    play_order = models.IntegerField()
+    bye = models.BooleanField(default=False)
+    tournament = models.ForeignKey(Tournament)
+    player_a = models.ForeignKey(
+        Player,
+        related_name='player_a',
+        null=True,
+    )
+    player_b = models.ForeignKey(
+        Player,
+        related_name='player_b',
+        null=True
+    )
