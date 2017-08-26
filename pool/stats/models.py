@@ -592,6 +592,11 @@ class TournamentMatch(models.Model):
         pbs = 'winner of ' + self.player_b_match if self.player_b_match.winner is None else self.player_b_match.winner
         return '{} vs {}'.format(pas, pbs)
 
+    def __str__(self):
+        pas = self.player_a if self.player_a is not None else self.player_a_match if self.player_a_match is not None else 'TBD'
+        pbs = self.player_b if self.player_b is not None else self.player_b_match if self.player_b_match is not None else 'TBD'
+        return "{} vs {}".format(pas, pbs)
+
 
 class Tournament(models.Model):
     FORMATS = (
