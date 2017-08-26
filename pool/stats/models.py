@@ -558,6 +558,21 @@ class TournamentPlayPosition(models.Model):
             return 'Bye'
 
 
+class TournamentMatch(models.Model):
+    play_order = models.IntegerField()
+    bye = models.BooleanField(default=False)
+    player_a = models.ForeignKey(
+        Player,
+        related_name='player_a',
+        null=True,
+    )
+    player_b = models.ForeignKey(
+        Player,
+        related_name='player_b',
+        null=True
+    )
+
+
 class Tournament(models.Model):
     FORMATS = (
         (0, 'Single Elimination'),
@@ -571,6 +586,7 @@ class Tournament(models.Model):
     play_positions = models.ManyToManyField(TournamentPlayPosition, blank=True)
     play_format = models.IntegerField(choices=FORMATS)
     race_to = models.IntegerField()
+    matches = models.ManyToManyField(TournamentMatch)
 
     def __str__(self):
         return "{}".format(self.name)
@@ -602,18 +618,20 @@ class Tournament(models.Model):
         # now the remaining play positions have no player set, ie are
         # byes. TODO: allow late-entry players into un-realized byes
 
+    def create_tournament_matches(self):
+        for match_number in range(0, self.get_number_of_matches()):
+            m = TournamentMatch(
+                    play_order=match_number,
+            )
+            # set up first-round matches
+            if match_number < int(self.bracket_size() / 2):
+                m.player_a = self.play_positions.all()[match_number].player
+                m.player_b = self.play_positions.all()[self.bracket_size() - 1 - match_number].player
 
-class TournamentMatch(models.Model):
-    play_order = models.IntegerField()
-    bye = models.BooleanField(default=False)
-    tournament = models.ForeignKey(Tournament)
-    player_a = models.ForeignKey(
-        Player,
-        related_name='player_a',
-        null=True,
-    )
-    player_b = models.ForeignKey(
-        Player,
-        related_name='player_b',
-        null=True
-    )
+            m.save()
+            self.matches.add(m)
+            self.save()
+
+    def get_number_of_matches(self):
+        if self.play_format == 0:
+            return self.bracket_size() - 1
