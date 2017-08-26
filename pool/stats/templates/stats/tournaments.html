@@ -1,6 +1,6 @@
 {% extends "stats/base.html" %}
 
-{% block title %}SFPA :: Divisions{% endblock %}
+{% block title %}SFPA :: Tournaments{% endblock %}
 
 {% block content %}
 <div class="text-center">
@@ -9,6 +9,7 @@
 
 {% for tournament in tournaments %}
 <h4><a href="{% url 'tournament' tournament.id %}" >{{ tournament }}</a></h4>
+<p>{{tournament.date}}</p>
 {% endfor %}
 
 {% endblock %}

@@ -568,7 +568,7 @@ class Tournament(models.Model):
     name = models.CharField(max_length=128)
     date = models.DateField()
     players = models.ManyToManyField(Player, blank=True)
-    play_positions = models.ManyToManyField(TournamentPlayPosition)
+    play_positions = models.ManyToManyField(TournamentPlayPosition, blank=True)
     play_format = models.IntegerField(choices=FORMATS)
     race_to = models.IntegerField()
 
