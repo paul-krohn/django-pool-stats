@@ -5,12 +5,13 @@
 {% block content %}
 <div class="text-center">
 <h2>{{ tournament }}</h2>
+{% comment %}
 {% for play_position in tournament.play_positions.all %}
 <p>{{play_position}}</p>
 {% endfor %}
-
+{% endcomment %}
 {% for match in tournament.matches.all %}
-<p>{{ match.player_a }} vs. {{ match.player_b }}</p>
+<p>{{ match }}</p>
 {% endfor %}
 </div>
 {% endblock %}

@@ -569,8 +569,28 @@ class TournamentMatch(models.Model):
     player_b = models.ForeignKey(
         Player,
         related_name='player_b',
-        null=True
+        null=True,
     )
+    winner = models.ForeignKey(
+        Player,
+        related_name='match_winning_player',
+        null=True,
+    )
+    player_a_match = models.ForeignKey(
+        'self',
+        related_name='player_a_source_match',
+        null=True,
+    )
+    player_b_match = models.ForeignKey(
+        'self',
+        related_name='player_b_source_match',
+        null=True,
+    )
+
+    def desc(self):
+        pas = 'winner of ' + self.player_a_match if self.player_a_match.winner is None else self.player_a_match.winner
+        pbs = 'winner of ' + self.player_b_match if self.player_b_match.winner is None else self.player_b_match.winner
+        return '{} vs {}'.format(pas, pbs)
 
 
 class Tournament(models.Model):
@@ -586,7 +606,7 @@ class Tournament(models.Model):
     play_positions = models.ManyToManyField(TournamentPlayPosition, blank=True)
     play_format = models.IntegerField(choices=FORMATS)
     race_to = models.IntegerField()
-    matches = models.ManyToManyField(TournamentMatch)
+    matches = models.ManyToManyField(TournamentMatch, blank=True)
 
     def __str__(self):
         return "{}".format(self.name)
@@ -609,8 +629,8 @@ class Tournament(models.Model):
     def assign_players(self):
         player_order = [x for x in range(0, self.bracket_size())]
         shuffle(player_order)
-        print('player order is: {}'.format(player_order))
-        print('players are: {}'.format(self.players.all()))
+        # print('player order is: {}'.format(player_order))
+        # print('players are: {}'.format(self.players.all()))
         for player in self.players.all():
             position = self.play_positions.get(position=player_order.pop())
             position.player = player
@@ -623,11 +643,20 @@ class Tournament(models.Model):
             m = TournamentMatch(
                     play_order=match_number,
             )
+            half_bracket = int(self.bracket_size() / 2)
             # set up first-round matches
-            if match_number < int(self.bracket_size() / 2):
+            if match_number < half_bracket:
                 m.player_a = self.play_positions.all()[match_number].player
                 m.player_b = self.play_positions.all()[self.bracket_size() - 1 - match_number].player
-
+            # subsequent-round matches, holds through at least 16-player SE bracket
+            else:
+                # example: 8-player bracket:
+                # we are in match 4, we need the winner of match 0 and 1
+                # we are in match 5, we need the winner of match 2 and 3
+                # we are in match 6, we need the winner of match 4 and 5
+                match_base = 2 * (match_number - half_bracket)
+                m.player_a_match = self.matches.get(play_order=match_base)
+                m.player_b_match = self.matches.get(play_order=(match_base + 1))
             m.save()
             self.matches.add(m)
             self.save()
