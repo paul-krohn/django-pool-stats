@@ -8,5 +8,9 @@
 {% for play_position in tournament.play_positions.all %}
 <p>{{play_position}}</p>
 {% endfor %}
+
+{% for match in tournament.matches.all %}
+<p>{{ match.player_a }} vs. {{ match.player_b }}</p>
+{% endfor %}
 </div>
 {% endblock %}
