@@ -587,14 +587,16 @@ class TournamentMatch(models.Model):
         null=True,
     )
 
-    def desc(self):
-        pas = 'winner of ' + self.player_a_match if self.player_a_match.winner is None else self.player_a_match.winner
-        pbs = 'winner of ' + self.player_b_match if self.player_b_match.winner is None else self.player_b_match.winner
-        return '{} vs {}'.format(pas, pbs)
+    def desc(self, pos):
+        source_match = getattr(self, 'player_{}_match'.format(pos))
+        if source_match.player_a is not None and source_match.player_b is not None:
+            return 'winner of {} vs {}'.format(source_match.player_a, source_match.player_b)
+        else:
+            return 'TBD'
 
     def __str__(self):
-        pas = self.player_a if self.player_a is not None else self.player_a_match if self.player_a_match is not None else 'TBD'
-        pbs = self.player_b if self.player_b is not None else self.player_b_match if self.player_b_match is not None else 'TBD'
+        pas = self.desc('a') if self.player_a is None else self.player_a
+        pbs = self.desc('b') if self.player_b is None else self.player_b
         return "{} vs {}".format(pas, pbs)
 
 
