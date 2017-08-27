@@ -7,11 +7,30 @@
 <h2>{{ tournament }}</h2>
 {% comment %}
 {% for play_position in tournament.play_positions.all %}
-<p>{{play_position}}</p>
+<p>{{ play_position }}</p>
 {% endfor %}
 {% endcomment %}
+<table class="table">
+  <tr><th>Match</th></tr>
 {% for match in tournament.matches.all %}
-<p>{{ match }}</p>
+<tr>
+  <td>{{ match.play_order }}</td>
+  <td>
+    {% if match.player_a %}
+    <a href="{% url 'player' match.player_a.id %}">{{ match.player_a }}
+    {% else %}
+    {{ match.player_a_match }}
+    {% endif %}
+  </td>
+  <td>
+    {% if match.player_b %}
+    <a href="{% url 'player' match.player_b.id %}">{{ match.player_b }}
+    {% else %}
+    {{ match.player_b_match }}
+    {% endif %}
+  </td>
+</tr>
 {% endfor %}
+</table>
 </div>
 {% endblock %}

@@ -595,8 +595,9 @@ class TournamentMatch(models.Model):
             return 'TBD'
 
     def __str__(self):
-        pas = self.desc('a') if self.player_a is None else self.player_a
-        pbs = self.desc('b') if self.player_b is None else self.player_b
+        pas = 'winner of match {}'.format(self.player_a_match.play_order) if self.player_a is None else self.player_a
+        pbs = 'winner of match {}'.format(self.player_b_match.play_order) if self.player_b is None else self.player_b
+        # pbs = self.desc('b') if self.player_b is None else self.player_b
         return "{} vs {}".format(pas, pbs)
 
 
