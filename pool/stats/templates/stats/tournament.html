@@ -1,4 +1,5 @@
 {% extends "stats/base.html" %}
+{% load lindex %}
 
 {% block title %}SFPA :: Tournament :: {{ tournament }}{% endblock %}
 
@@ -29,6 +30,7 @@
     {{ match.player_b_match }}
     {% endif %}
   </td>
+  {% if match_forms %}<td>{{ match_forms|lindex:forloop.counter0 }}</td>{% endif %}
 </tr>
 {% endfor %}
 </table>

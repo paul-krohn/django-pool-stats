@@ -1,12 +1,14 @@
 import time
 
+from django.template import loader
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Division, AwayLineupEntry, Game, HomeLineupEntry, Match, Player, \
     ScoreSheet, Season, Sponsor, Team, Tournament, Week
 from .models import PlayPosition
 from .models import PlayerSeasonSummary
 from .models import AwaySubstitution, HomeSubstitution
-from .forms import PlayerForm, ScoreSheetGameForm, DisabledScoreSheetGameForm, ScoreSheetCompletionForm
+from .forms import PlayerForm, ScoreSheetGameForm, DisabledScoreSheetGameForm
+from .forms import ScoreSheetCompletionForm, TournamentMatchForm
 from .forms import LineupFormSet
 from django.forms import modelformset_factory
 
@@ -48,6 +50,11 @@ def user_can_edit_scoresheet(request, score_sheet_id):
         return True
     else:
         return False
+
+
+def user_can_update_tournament(request):
+    # proxy this to is_superuser assuming some change in the future
+    return request.user.is_superuser
 
 
 def check_season(request):
@@ -480,10 +487,26 @@ def unofficial_results(request):
 
 def tournament(request, tournament_id):
     tourney = Tournament.objects.get(id=tournament_id)
+    match_forms = []
+    for m in tourney.matches.all():
+        if m.player_a is not None and m.player_b is not None:
+            # template.render(context, request)
+            template = loader.get_template('stats/tournament_match_form.html')
+            context = {'match_form': TournamentMatchForm()}
+
+            a_match_form = render(
+                request,
+                'stats/tournament_match_form.html',
+                {'match_form': TournamentMatchForm()}
+            )
+            match_forms.append(template.render(context, request))
+        else:
+            match_forms.append(None)
     context = {
         'tournament': tourney
     }
-
+    if user_can_update_tournament(request):
+        context['match_forms'] = match_forms
     return render(request, 'stats/tournament.html', context)
 
 
