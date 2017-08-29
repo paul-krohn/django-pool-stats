@@ -16,6 +16,8 @@ class PlayerForm(django.forms.ModelForm):
 
 
 class TournamentMatchForm(django.forms.ModelForm):
+    fields = ['winner']
+
     class Meta:
         model = TournamentMatch
         fields = ['winner']
