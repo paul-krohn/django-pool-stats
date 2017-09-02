@@ -558,33 +558,33 @@ class TournamentPlayPosition(models.Model):
             return 'Bye'
 
 
+class TournamentMatchPlayer(models.Model):
+    player = models.ForeignKey(Player, null=True)
+    spot = models.CharField(max_length=1)
+
+    def __str__(self):
+        if self.player is None:
+            return self.spot
+        else:
+            return self.player.__str__()
+
+
 class TournamentMatch(models.Model):
     play_order = models.IntegerField()
     bye = models.BooleanField(default=False)
-    player_a = models.ForeignKey(
-        Player,
-        related_name='player_a',
-        null=True,
-    )
-    player_b = models.ForeignKey(
-        Player,
-        related_name='player_b',
-        null=True,
+    players = models.ManyToManyField(
+        TournamentMatchPlayer,
+        # null=True,
     )
     winner = models.ForeignKey(
-        Player,
+        TournamentMatchPlayer,
         related_name='match_winning_player',
         null=True,
     )
-    player_a_match = models.ForeignKey(
+    source_matches = models.ManyToManyField(
         'self',
-        related_name='player_a_source_match',
-        null=True,
-    )
-    player_b_match = models.ForeignKey(
-        'self',
-        related_name='player_b_source_match',
-        null=True,
+        # related_name='player_source_matches',
+        # null=True,
     )
 
     def desc(self, pos):
@@ -647,14 +647,28 @@ class Tournament(models.Model):
 
     def create_tournament_matches(self):
         for match_number in range(0, self.get_number_of_matches()):
-            m = TournamentMatch(
-                    play_order=match_number,
+            tm = TournamentMatch(
+                play_order=match_number,
             )
+            tm.save()
             half_bracket = int(self.bracket_size() / 2)
             # set up first-round matches
             if match_number < half_bracket:
-                m.player_a = self.play_positions.all()[match_number].player
-                m.player_b = self.play_positions.all()[self.bracket_size() - 1 - match_number].player
+                # m.player_a = self.play_positions.all()[match_number].player
+                # m.player_b = self.play_positions.all()[self.bracket_size() - 1 - match_number].player
+                print("about to add {} to a tournament match".format(self.play_positions.all()[match_number].player))
+                tmpa = TournamentMatchPlayer(
+                    player=self.play_positions.all()[match_number].player,
+                    spot='a'
+                )
+                tmpa.save()
+                tm.players.add(tmpa)
+                tmpb = TournamentMatchPlayer(
+                    player=self.play_positions.all()[self.bracket_size() - 1 - match_number].player,
+                    spot='b'
+                )
+                tmpb.save()
+                tm.players.add(tmpb)
             # subsequent-round matches, holds through at least 16-player SE bracket
             else:
                 # example: 8-player bracket:
@@ -662,10 +676,14 @@ class Tournament(models.Model):
                 # we are in match 5, we need the winner of match 2 and 3
                 # we are in match 6, we need the winner of match 4 and 5
                 match_base = 2 * (match_number - half_bracket)
-                m.player_a_match = self.matches.get(play_order=match_base)
-                m.player_b_match = self.matches.get(play_order=(match_base + 1))
-            m.save()
-            self.matches.add(m)
+                # m.player_a_match = self.matches.get(play_order=match_base)
+                # m.player_b_match = self.matches.get(play_order=(match_base + 1))
+                tm.source_matches.add(
+                    self.matches.get(play_order=match_base),
+                    self.matches.get(play_order=(match_base + 1))
+                )
+            tm.save()
+            self.matches.add(tm)
             self.save()
 
     def get_number_of_matches(self):

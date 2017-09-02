@@ -16,20 +16,17 @@
 {% for match in tournament.matches.all %}
 <tr>
   <td>{{ match.play_order }}</td>
-  <td>
+{% comment %}  <td>
     {% if match.player_a %}
     <a href="{% url 'player' match.player_a.id %}">{{ match.player_a }}
     {% else %}
     {{ match.player_a_match }}
     {% endif %}
   </td>
-  <td>
-    {% if match.player_b %}
-    <a href="{% url 'player' match.player_b.id %}">{{ match.player_b }}
-    {% else %}
-    {{ match.player_b_match }}
-    {% endif %}
-  </td>
+{% endcomment %}
+  {% for player in match.players.all %}
+  <td>{{player}}</td>
+  {% endfor %}
   {% if match_forms %}<td>{{ match_forms|lindex:forloop.counter0 }}</td>{% endif %}
 </tr>
 {% endfor %}

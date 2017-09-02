@@ -489,7 +489,7 @@ def tournament(request, tournament_id):
     tourney = Tournament.objects.get(id=tournament_id)
     match_forms = []
     for m in tourney.matches.all():
-        if m.player_a is not None and m.player_b is not None:
+        if len(m.players.all()) > 0:
             template = loader.get_template('stats/tournament_match_form.html')
             context = {'match_form': TournamentMatchForm()}
 
