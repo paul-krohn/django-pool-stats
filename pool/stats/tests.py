@@ -105,10 +105,14 @@ def create_game_order():
     """
     game_match_ups = []
     for match_up in match_ups:
+        away_position_name = 'Player {}'.format(num2words(match_up[0]))
+        home_position_name = 'Player {}'.format(num2words(match_up[1]))
+        # print('this player name is: {}'.format(player_name))
+        AwayPlayPosition.objects.get(name=away_position_name)
         game_order = GameOrder(
-            away_position=AwayPlayPosition.objects.get(name='Player {}'.format(num2words(match_up[0]))),
-            home_position=HomePlayPosition.objects.get(name='Player {}'.format(num2words(match_up[1]))),
-            name=num2words(len(game_match_ups) + 1),
+            away_position=AwayPlayPosition.objects.get(name=away_position_name),
+            home_position=HomePlayPosition.objects.get(name=home_position_name),
+            # name=num2words(len(game_match_ups) + 1),
             order=len(game_match_ups) + 1,
         )
         game_order.save()
