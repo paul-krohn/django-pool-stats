@@ -20,6 +20,16 @@ class Sponsor(models.Model):
         return self.name
 
 
+class Table(models.Model):
+    name = models.CharField(max_length=200)
+    sponsor = models.ForeignKey(Sponsor, null=True)
+
+    def __str__(self):
+        if self.sponsor:
+            return " ".join([self.sponsor.name, self.name])
+
+
+
 class Season(models.Model):
     name = models.CharField(max_length=200)
     pub_date = models.DateTimeField('date of first week')
@@ -164,6 +174,7 @@ class Team(models.Model):
     # a default season that doesn't bork migrations would be nice
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     sponsor = models.ForeignKey(Sponsor, null=True)
+    table = models.ForeignKey(Table, null=True)
     division = models.ForeignKey(Division, null=True, limit_choices_to=models.Q(season__is_default=True))
     name = models.CharField(max_length=200)
     players = models.ManyToManyField(Player, blank=True)
@@ -280,6 +291,7 @@ class Match(models.Model):
         related_name='away_team',
     )
     playoff = models.BooleanField(default=False)
+    table = models.ForeignKey(Table, null=True, blank=True)
 
     def __str__(self):
         return "{} @ {} ({} {})".format(self.away_team, self.home_team, self.season, self.week)

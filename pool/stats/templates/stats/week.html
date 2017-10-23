@@ -11,12 +11,13 @@
 {% if official_matches|length %}
 
 <table class="table" align="right">
-    <tr><th align="right">Away</th><th>Score</th><th>Home</th></tr>
+    <tr><th style="text-align: right;">Away</th><th>Score</th><th>Home</th><th></th></tr>
 {% for score_sheet in official_matches %}
     <tr>
         <td align="right"><a href="{% url 'team' score_sheet.match.away_team.id %}">{{ score_sheet.match.away_team }}</a></td>
         <td><a href="{% url 'score_sheet' score_sheet.id %}"><b>{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</b></a></td>
         <td><a href="{% url 'team' score_sheet.match.home_team.id %}">{{ score_sheet.match.home_team }}</a></td>
+        <td>{% if score_sheet.match.table %} Table: <a href="{% url 'sponsor' score_sheet.match.table.sponsor.id %}">{{ score_sheet.match.table }}{% endif %}</td>
     </tr>
 {% endfor %}
 </table>
@@ -26,7 +27,7 @@
 <h4>Unofficial Results</h4>
 <table class="table">
     <tr>
-        <th align="right">Away</th><th>Home</th><th>Score Sheets</th>
+        <th style="text-align: right;">Away</th><th>Home</th><th>Score Sheets</th><th></th>
     </tr>
     {% for match in unofficial_matches %}
     <tr>
@@ -43,6 +44,7 @@
             <a href="{% url 'score_sheet_create' match.id %}" class="confirm"
                         data-text="Create new scoresheet for {{ match.away_team }} @ {{match.home_team }} on {{match.week.date}}?">New Scoresheet</a>
         </td>
+        <td>{{match.table }}</td>
     </tr>
     {% endfor %}
 </table>

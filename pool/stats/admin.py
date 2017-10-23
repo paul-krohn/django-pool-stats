@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin import SimpleListFilter
 
-from .models import Division, GameOrder, Match, Player, PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
+from .models import Division, GameOrder, Match, Player, PlayPosition, ScoreSheet, Season, Sponsor, Table, Team, Week
 
 
 admin.AdminSite.site_header = "{} stats admin".format(settings.LEAGUE['name'])
@@ -85,6 +85,7 @@ class SeasonAdmin(admin.ModelAdmin):
 
 admin.site.register(Season, SeasonAdmin)
 admin.site.register(Sponsor)
+admin.site.register(Table)
 
 
 class WeekAdmin(admin.ModelAdmin):
