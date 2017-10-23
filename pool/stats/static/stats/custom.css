@@ -1,3 +1,39 @@
+@import url('https://fonts.googleapis.com/css?family=Rubik');
+
+/*
+   "sfpa" blue: #5C7EBB
+   "sfpa" orange: #E39230
+*/
+
+h1, h2, h3, h4, h5, h6, th, .dropdown {
+    font-family: 'Rubik';
+    color: #5C7EBB;
+}
+
+h5, h6 {
+    color: #E39230;
+}
+
+a {
+    text-decoration: none;
+}
+
+a:link {
+	color: #6363A0;
+}
+
+a:visited{
+    color: #B444B4;
+}
+
+a:active	{
+    color: #DA4A33;
+}
+
+a:hover	{
+    color: #18529B;
+}
+
 /* in support of the bootstrap templatetag module; style the 'active' nav item. */
 .active {
     text-decoration: underline;
