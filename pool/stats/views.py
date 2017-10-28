@@ -98,7 +98,8 @@ def players(request):
     ).order_by('-win_percentage', '-wins')
 
     context = {
-        'players': _players
+        'players': _players,
+        'show_teams': True,  # referenced in the player_table.html template
     }
     return render(request, 'stats/players.html', context)
 
