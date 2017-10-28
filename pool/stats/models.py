@@ -61,6 +61,9 @@ class PlayerSeasonSummary(models.Model):
     class Meta:
         ordering = ['-win_percentage']
 
+    def team(self):
+        return self.player.team_set.filter(season=self.season).first()
+
     def update_sweeps(self):
         # the occasional player may have played for more than one
         # team in a season ...
