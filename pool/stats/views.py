@@ -13,6 +13,7 @@ from django.forms import modelformset_factory
 import django.forms
 import django.db.models
 from django.conf import settings
+from django.core.cache import cache
 
 import logging
 logger = logging.getLogger(__name__)
@@ -57,6 +58,14 @@ def check_season(request):
         set_season(request)
 
 
+def get_player_view_cache_key(request):
+    try:
+        request.session['season_id']
+    except KeyError:
+        check_season(request)
+    return 'player_{}'.format(request.session['season_id'])
+
+
 def index(request):
     check_season(request)
     team_list = Team.objects.filter(season=request.session['season_id']).order_by('-win_percentage')
@@ -91,7 +100,14 @@ def player(request, player_id):
 
 
 def players(request):
+    # in this view, the standard/decorator caching does not work well; as the players vary by
+    # season, which is not in the URL; so use the cache API directly.
+
     check_season(request)
+    # players_view_key = 'players_{}'.format(request.session['season_id'])
+    if cache.get(get_player_view_cache_key(request)):
+        return cache.get(get_player_view_cache_key(request))
+
     _players = PlayerSeasonSummary.objects.filter(
         season=request.session['season_id'],
         ranking__gt=0
@@ -101,7 +117,9 @@ def players(request):
         'players': _players,
         'show_teams': True,  # referenced in the player_table.html template
     }
-    return render(request, 'stats/players.html', context)
+    view = render(request, 'stats/players.html', context)
+    cache.set(get_player_view_cache_key(request), view)
+    return view
 
 
 def player_create(request):
@@ -129,7 +147,9 @@ def player_create(request):
 def update_players_stats(request):
 
     PlayerSeasonSummary.update_all(season_id=request.session['season_id'])
-
+    # delete the player view cache; then redirect to the players view, which
+    # will repopulate the cache
+    cache.delete(get_player_view_cache_key(request))
     return redirect('/stats/players')
 
 
