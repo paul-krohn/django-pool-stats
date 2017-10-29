@@ -117,7 +117,7 @@ def players(request):
         'players': _players
     }
     view = render(request, 'stats/players.html', context)
-    cache.set(get_player_view_cache_key(request), view)
+    cache.set(get_player_view_cache_key(request), view, timeout=None)  # yes, cache indefinitely
     return view
 
 
