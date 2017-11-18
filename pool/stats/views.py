@@ -84,6 +84,8 @@ def player(request, player_id):
 
     _score_sheets_with_dupes = ScoreSheet.objects.filter(official=True).filter(
         django.db.models.Q(away_lineup__player=_player) | django.db.models.Q(home_lineup__player=_player)
+        |
+        django.db.models.Q(away_substitutions__player=_player) | django.db.models.Q(home_substitutions__player=_player)
     ).order_by('match__week__date').filter(match__week__season=request.session['season_id'])
     # there are dupes in _score_sheets at this point, so we have to remove them; method is cribbed from:
     # http://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-in-python-whilst-preserving-order
