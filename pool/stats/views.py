@@ -105,20 +105,19 @@ def players(request):
 
     check_season(request)
     # players_view_key = 'players_{}'.format(request.session['season_id'])
-    if cache.get(get_player_view_cache_key(request)):
-        return cache.get(get_player_view_cache_key(request))
-
     _players = PlayerSeasonSummary.objects.filter(
         season=request.session['season_id'],
         ranking__gt=0
     ).order_by('-win_percentage', '-wins')
 
+    cache_key = get_player_view_cache_key(request)
+
     context = {
         'players': _players,
         'show_teams': True,  # referenced in the player_table.html template
+        'cache_key': cache_key,
     }
     view = render(request, 'stats/players.html', context)
-    cache.set(get_player_view_cache_key(request), view)
     return view
 
 

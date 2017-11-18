@@ -1,3 +1,5 @@
+{% load cache %}
+{% cache 86400 player_table cache_key %}
 <table class="table">
     <tr><th>Rank</th><th></th>{% if show_teams %}<th>Team</th>{% endif %}<th>W</th><th>L</th><th>Pct</th><th>4-0</th><th>TR</th></tr>
 {% for player_summary in players %}
@@ -15,3 +17,4 @@
 </tr>
 {% endfor %}
 </table>
+{% endcache %}
