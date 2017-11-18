@@ -530,18 +530,18 @@ class ScoreSheet(models.Model):
     def player_summaries(self, away_home):
 
         player_score_sheet_summaries = []
-        if away_home == 'away':
-            lineup_entries = self.away_lineup.filter(position__tiebreaker=False)
-        else:
-            lineup_entries = self.home_lineup.filter(position__tiebreaker=False)
-        for lineup_entry in lineup_entries:
-            if lineup_entry.player is None:
-                continue
+
+        lineup_entries = getattr(self, '{}_lineup'.format(away_home)).filter(position__tiebreaker=False)
+        substitutions = getattr(self, '{}_substitutions'.format(away_home)).all()
+
+        players = [x.player for x in lineup_entries]
+        [players.append(y.player) for y in substitutions]
+        for player in players:
             summary = {
-                'player': lineup_entry.player,
+                'player': player,
             }
             summary.update(self.player_summary(
-                a_player=lineup_entry.player
+                a_player=player
             ))
             player_score_sheet_summaries.append(summary)
         return player_score_sheet_summaries
