@@ -165,7 +165,9 @@ def team(request, team_id):
     context = {
         'team': _team,
         'players': _players,
-        'scoresheets': _score_sheets
+        'show_players': False,
+        'scoresheets': _score_sheets,
+        'cache_key': _team,
     }
     return render(request, 'stats/team.html', context)
 
