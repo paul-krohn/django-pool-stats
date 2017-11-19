@@ -105,7 +105,6 @@ def player(request, player_id):
         }
         cached_content = render(request, 'stats/player.html', context)
         cache.set(cache_key, cached_content)
-        dprint('the player cache key for {} is: {}'.format(_player, get_single_player_view_cache_key(request, player_id)))
     return cached_content
 
 
