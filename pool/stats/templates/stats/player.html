@@ -30,14 +30,14 @@
     <tr>
         <td><a href="{% url 'player' game.home_player.id %}">{% if game.winner == "home" %}<b>{{ game.home_player }}</b>{% else %}{{ game.home_player }}{% endif %}</a></td>
         <td><a href="{% url 'player' game.away_player.id %}">{% if game.winner == "away" %}<b>{{ game.away_player }}</b>{% else %}{{ game.away_player }}{% endif %}</a></td>
-        <td>{% if game.table_run %} <img height=16 width=16 src="{% static 'stats/check-mark.png' %}"/>{% endif %}</td>
+        <td>{% if game.table_run %}&#x2714;{% endif %}</td>
     </tr>
     {% endif %}
     {% if game.home_player == player and game.away_player and game.winner %}
     <tr>
         <td><a href="{% url 'player' game.home_player.id %}">{% if game.winner == "home" %}<b>{{ game.home_player }}</b>{% else %}{{ game.home_player }}{% endif %}</a></td>
         <td><a href="{% url 'player' game.away_player.id %}">{% if game.winner == "away" %}<b>{{ game.away_player }}</b>{% else %}{{ game.away_player }}{% endif %}</a></td>
-        <td>{% if game.table_run %} <img height=16 width=16 src="{% static 'stats/check-mark.png' %}"/>{% endif %}</td>
+        <td>{% if game.table_run %}&#x2714;{% endif %}</td>
     </tr>
     {% endif %}
     {% endfor %}
