@@ -84,8 +84,8 @@ def index(request):
 def player(request, player_id):
     check_season(request)
     cache_key = get_single_player_view_cache_key(request.session['season_id'], player_id)
-    cached_content = cache.get(cache_key)
-    if cached_content is None:
+    rendered_page = cache.get(cache_key)
+    if rendered_page is None or request.user.is_superuser:
         _player = get_object_or_404(Player, id=player_id)
         summaries = PlayerSeasonSummary.objects.filter(player__exact=_player).order_by('-season')
         _score_sheets_with_dupes = ScoreSheet.objects.filter(official=True).filter(
@@ -103,9 +103,10 @@ def player(request, player_id):
             'summaries': summaries,
             'player': _player,
         }
-        cached_content = render(request, 'stats/player.html', context)
-        cache.set(cache_key, cached_content)
-    return cached_content
+        rendered_page = render(request, 'stats/player.html', context)
+        if not request.user.is_superuser:
+            cache.set(cache_key, rendered_page)
+    return rendered_page
 
 
 def players(request):
