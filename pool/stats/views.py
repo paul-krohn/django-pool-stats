@@ -58,12 +58,16 @@ def check_season(request):
         set_season(request)
 
 
-def get_player_view_cache_key(request):
+def get_player_rankings_view_cache_key(request):
     try:
         request.session['season_id']
     except KeyError:
         check_season(request)
     return 'player_{}'.format(request.session['season_id'])
+
+
+def get_single_player_view_cache_key(season_id, player_id):
+    return 'season_{}_player_{}'.format(season_id, player_id)
 
 
 def index(request):
@@ -79,26 +83,30 @@ def index(request):
 
 def player(request, player_id):
     check_season(request)
-    _player = get_object_or_404(Player, id=player_id)
-    summaries = PlayerSeasonSummary.objects.filter(player__exact=_player).order_by('-season')
-
-    _score_sheets_with_dupes = ScoreSheet.objects.filter(official=True).filter(
-        django.db.models.Q(away_lineup__player=_player) | django.db.models.Q(home_lineup__player=_player)
-        |
-        django.db.models.Q(away_substitutions__player=_player) | django.db.models.Q(home_substitutions__player=_player)
-    ).order_by('match__week__date').filter(match__week__season=request.session['season_id'])
-    # there are dupes in _score_sheets at this point, so we have to remove them; method is cribbed from:
-    # http://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-in-python-whilst-preserving-order
-    seen = set()
-    seen_add = seen.add
-    _score_sheets = [x for x in _score_sheets_with_dupes if not (x in seen or seen_add(x))]
-
-    context = {
-        'score_sheets': _score_sheets,
-        'summaries': summaries,
-        'player': _player
-    }
-    return render(request, 'stats/player.html', context)
+    cache_key = get_single_player_view_cache_key(request.session['season_id'], player_id)
+    cached_content = cache.get(cache_key)
+    if cached_content is None:
+        _player = get_object_or_404(Player, id=player_id)
+        summaries = PlayerSeasonSummary.objects.filter(player__exact=_player).order_by('-season')
+        _score_sheets_with_dupes = ScoreSheet.objects.filter(official=True).filter(
+            django.db.models.Q(away_lineup__player=_player) | django.db.models.Q(home_lineup__player=_player)
+            |
+            django.db.models.Q(away_substitutions__player=_player) | django.db.models.Q(home_substitutions__player=_player)
+        ).order_by('match__week__date').filter(match__week__season=request.session['season_id'])
+        # there are dupes in _score_sheets at this point, so we have to remove them; method is cribbed from:
+        # http://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-in-python-whilst-preserving-order
+        seen = set()
+        seen_add = seen.add
+        _score_sheets = [x for x in _score_sheets_with_dupes if not (x in seen or seen_add(x))]
+        context = {
+            'score_sheets': _score_sheets,
+            'summaries': summaries,
+            'player': _player,
+        }
+        cached_content = render(request, 'stats/player.html', context)
+        cache.set(cache_key, cached_content)
+        dprint('the player cache key for {} is: {}'.format(_player, get_single_player_view_cache_key(request, player_id)))
+    return cached_content
 
 
 def players(request):
@@ -112,7 +120,7 @@ def players(request):
         ranking__gt=0
     ).order_by('-win_percentage', '-wins')
 
-    cache_key = get_player_view_cache_key(request)
+    cache_key = get_player_rankings_view_cache_key(request)
 
     context = {
         'players': _players,
@@ -150,7 +158,7 @@ def update_players_stats(request):
     PlayerSeasonSummary.update_all(season_id=request.session['season_id'])
     # delete the player view cache; then redirect to the players view, which
     # will repopulate the cache
-    cache.delete(get_player_view_cache_key(request))
+    cache.delete(get_player_rankings_view_cache_key(request))
     return redirect('/stats/players')
 
 
