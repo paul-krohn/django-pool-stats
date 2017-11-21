@@ -174,7 +174,8 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.handlers.SysLogHandler',
             'facility': 'local7',
-            'address': '/var/run/syslog',
+            # on macOS, you need:
+            # 'address': '/var/run/syslog',
             'formatter': 'verbose'
         },
     },
