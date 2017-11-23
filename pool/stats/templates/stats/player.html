@@ -12,6 +12,7 @@
 {% for score_sheet in score_sheets %}
 <h5>{{ score_sheet.match.week.date}}: {{ score_sheet.match.week }}</h5>
 <table class="table">
+  <thead>
     <tr>
         <th colspan="4"><a href="{% url 'score_sheet' score_sheet.id %}">{{ score_sheet.match.away_team }} @ {{ score_sheet.match.home_team }}</a></th>
     </tr>
@@ -20,6 +21,8 @@
         <th>away</th>
         <th>TR</th>
     </tr>
+  </thead>
+  <tbody>
     {% for game in score_sheet.games.all %}
     {% comment %}
     This defensive check for a null opponent (ie a forfeit game) really should be
@@ -41,11 +44,15 @@
     </tr>
     {% endif %}
     {% endfor %}
+  </tbody>
 </table>
 
 {% endfor %}
-<table class="table">
+<table class="table sortable">
+  <thead>
     <tr><th>Season</th><th>Wins</th><th>Losses</th><th>Percentage</th></tr>
+  </thead>
+  <tbody>
     {% for summary in summaries %}
     <tr>
         <td>{{ summary.season }}</td>
@@ -54,6 +61,7 @@
         <td>{{ summary.win_percentage|floatformat:3 }}</td>
     </tr>
     {% endfor %}
+  <tbody>
 </table>
 {{ player.season_summary_set }}
 {% endif %}

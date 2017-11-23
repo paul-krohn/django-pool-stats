@@ -1,9 +1,12 @@
 {% load cache %}
 {% cache 86400 player_table cache_key %}
 <table class="table">
+  <thead>
     <tr><th>Rank</th><th></th>{% if show_teams %}<th>Team</th>{% endif %}<th>W</th><th>L</th><th>Pct</th><th>4-0</th><th>TR</th></tr>
-{% for player_summary in players %}
-<tr>
+  </thead>
+  <tbody>
+    {% for player_summary in players %}
+    <tr>
     <td>{% if player_summary.ranking %}{{ player_summary.ranking }}{% endif %}</td>
     <td><a href="{% url 'player' player_summary.player.id %}">{{ player_summary.player }}</a></td>
     {% if show_teams %}
@@ -14,7 +17,8 @@
     <td>{{ player_summary.win_percentage|floatformat:3 }}</td>
     <td>{{ player_summary.four_ohs }}</td>
     <td>{{ player_summary.table_runs }}</td>
-</tr>
-{% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
 </table>
 {% endcache %}
