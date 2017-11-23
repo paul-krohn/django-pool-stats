@@ -1,5 +1,6 @@
 import datetime
 from num2words import num2words
+from django.core.cache import cache
 from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.test import TestCase
@@ -8,6 +9,8 @@ from django.test import Client
 from .models import Season, Player, PlayerSeasonSummary, GameOrder, Match, ScoreSheet, Week
 from .models import PlayPosition, AwayPlayPosition, HomePlayPosition
 from .models import Team, AwayTeam, HomeTeam
+
+from .views import get_single_player_view_cache_key, check_season
 
 
 import random
@@ -170,21 +173,29 @@ class ScoreSheetTests(TestCase):
         response = self.client.get(reverse('players'))
         self.assertQuerysetEqual(response.context['players'], [])
 
-    # TODO: fix this test
-    # def test_player_season_summary(self):
-    #     player = Player(first_name='George', last_name='Smith')
-    #     player.save()
-    #     summary = PlayerSeasonSummary(
-    #         player=player,
-    #         season=Season.objects.get(is_default=True)
-    #     )
-    #     summary.save()
-    #     response = self.client.get(reverse('players'))
-    #     print("season summaries: {}".format(PlayerSeasonSummary.objects.all()))
-    #     print(response.context)
-    #     self.assertQuerysetEqual(
-    #         response.context['players'], ['<PlayerSeasonSummary: George Smith Some Future Season>']
-    #     )
+    def test_player_season_summary(self):
+
+        player = Player(first_name='George', last_name='Smith')
+        player.save()
+
+        # players are cached; make sure we invalidate so we have
+        # consistent test results
+        cache_key = get_single_player_view_cache_key(
+            season_id=Season.objects.get(is_default=True).id,
+            player_id=player.id,
+        )
+        cache.delete(cache_key)
+
+        summary = PlayerSeasonSummary(
+            player=player,
+            season=Season.objects.get(is_default=True)
+        )
+        summary.save()
+
+        response = self.client.get(reverse('player', kwargs={'player_id': player.id}))
+        self.assertQuerysetEqual(
+            response.context['summaries'], ['<PlayerSeasonSummary: George Smith Some Future Season>']
+        )
 
     def test_score_sheet_create(self):
         """
