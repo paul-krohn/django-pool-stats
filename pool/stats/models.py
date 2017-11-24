@@ -108,7 +108,7 @@ class PlayerSeasonSummary(models.Model):
             summaries[inc].ranking = inc + 1
             summaries[inc].save()
             logging.debug("{} gets ranking {}".format(summaries[inc], summaries[inc].ranking))
-            while inc + offset < len(summaries) and \
+            while inc + offset <= (len(summaries) - 1) and \
                     summaries[inc].win_percentage == summaries[inc+offset].win_percentage:
                 summaries[inc+offset].ranking = inc + 1
                 summaries[inc+offset].save()
