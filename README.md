@@ -19,3 +19,5 @@ CREATE DATABASE pool_stats with owner pool_stats
 ## Usage Docs
 
 [Usage Documentation](usage_docs.md)
+
+[Scoring Matches](scoring_matches.md)
