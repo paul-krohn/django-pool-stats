@@ -15,3 +15,7 @@ There is a .gitignore entry for the file, so you don't accidentally check it in.
 create role pool_stats login password 'some_password'
 CREATE DATABASE pool_stats with owner pool_stats
 ```
+
+## Usage Docs
+
+[Usage Documentation](usage_docs.md)
