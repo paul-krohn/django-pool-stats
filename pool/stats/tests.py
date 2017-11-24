@@ -15,6 +15,8 @@ from .views import get_single_player_view_cache_key, check_season
 
 import random
 
+TEAM_SIZE = 7
+
 match_ups = [
     [1, 1],
     [2, 2],
@@ -31,7 +33,12 @@ match_ups = [
 
 
 def create_season():
-    a_season = Season(name='Some Future Season', pub_date=timezone.now(), is_default=True)
+    a_season = Season(
+        name='Some Future Season',
+        pub_date=timezone.now(),
+        is_default=True,
+        minimum_games=1,
+    )
     a_season.save()
     return a_season
 
@@ -56,12 +63,12 @@ def create_teams(a_season):
 
     team_a = Team(name="Team A", season=a_season)
     team_a.save()
-    for p in create_players(7, 0):
+    for p in create_players(TEAM_SIZE, 0):
         team_a.players.add(p)
     team_a.save()
     team_b = Team(name="Team B", season=a_season)
     team_b.save()
-    for p in create_players(7, 16):
+    for p in create_players(TEAM_SIZE, 16):
         team_b.players.add(p)
     team_b.save()
 
@@ -279,5 +286,15 @@ class ScoreSheetTests(TestCase):
         self.assertEqual(score_sheet.match.away_team.wins(), away_wins)
         self.assertEqual(score_sheet.match.home_team.wins(), home_wins)
 
-        # needs refactor of the function to a class method to test
-        # update_players_stats(response)
+        # there should be zero summaries now
+        summaries = PlayerSeasonSummary.objects.all()
+        self.assertEquals(0, len(summaries))
+
+        PlayerSeasonSummary.update_all(season_id=Season.objects.get(is_default=True).id)
+        summaries = PlayerSeasonSummary.objects.all()
+        self.assertEquals(TEAM_SIZE * 2, len(summaries))
+
+        # there should now be six players with enough games to be in the standings
+        response = self.client.get(reverse('players'))
+        print(response.context['players'])
+        self.assertEqual(len(response.context['players']), 6)
