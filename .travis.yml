@@ -1,0 +1,13 @@
+language: python
+python:
+  - "3.5"
+  - "3.6"
+services:
+ - mysql
+ - memcached
+before_install:
+  - mysql -u root -e "CREATE USER 'pool_stats'@'localhost';"
+  - mysql -u root -e "GRANT ALL ON pool_stats.* TO 'pool_stats'@'localhost';"
+  - mysql -u root -e "GRANT ALL ON test_pool_stats.* TO 'pool_stats'@'localhost';"
+script:
+  - cd pool && python manage.py test
