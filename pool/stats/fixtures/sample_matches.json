@@ -1,0 +1,68 @@
+[
+  {
+    "model": "stats.match",
+    "pk": 5,
+    "fields": {
+      "season": 4,
+      "week": 4,
+      "home_team": 6,
+      "away_team": 7,
+      "playoff": false
+    }
+  },
+  {
+    "model": "stats.match",
+    "pk": 6,
+    "fields": {
+      "season": 4,
+      "week": 4,
+      "home_team": 8,
+      "away_team": 9,
+      "playoff": false
+    }
+  },
+  {
+    "model": "stats.match",
+    "pk": 7,
+    "fields": {
+      "season": 4,
+      "week": 4,
+      "home_team": 10,
+      "away_team": 11,
+      "playoff": false
+    }
+  },
+  {
+    "model": "stats.match",
+    "pk": 8,
+    "fields": {
+      "season": 4,
+      "week": 5,
+      "home_team": 11,
+      "away_team": 10,
+      "playoff": false
+    }
+  },
+  {
+    "model": "stats.match",
+    "pk": 9,
+    "fields": {
+      "season": 4,
+      "week": 5,
+      "home_team": 7,
+      "away_team": 8,
+      "playoff": false
+    }
+  },
+  {
+    "model": "stats.match",
+    "pk": 10,
+    "fields": {
+      "season": 4,
+      "week": 5,
+      "home_team": 6,
+      "away_team": 9,
+      "playoff": false
+    }
+  }
+]

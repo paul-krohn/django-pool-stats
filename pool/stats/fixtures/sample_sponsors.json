@@ -1,0 +1,29 @@
+[
+  {
+    "model": "stats.sponsor",
+    "pk": 4,
+    "fields": {
+      "name": "The Admiral's Arms",
+      "address": "123 Main",
+      "link": "/hey"
+    }
+  },
+  {
+    "model": "stats.sponsor",
+    "pk": 5,
+    "fields": {
+      "name": "The Brick",
+      "address": "345 Maple",
+      "link": "https://en.wikipedia.org/wiki/Northern_Exposure"
+    }
+  },
+  {
+    "model": "stats.sponsor",
+    "pk": 6,
+    "fields": {
+      "name": "Chalmun's Cantina",
+      "address": "456 Pine St",
+      "link": "https://en.wikipedia.org/wiki/Mos_Eisley_Cantina"
+    }
+  }
+]

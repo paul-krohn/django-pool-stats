@@ -1,0 +1,18 @@
+[
+  {
+    "model": "stats.division",
+    "pk": 10,
+    "fields": {
+      "season": 4,
+      "name": "I"
+    }
+  },
+  {
+    "model": "stats.division",
+    "pk": 11,
+    "fields": {
+      "season": 4,
+      "name": "II"
+    }
+  }
+]
