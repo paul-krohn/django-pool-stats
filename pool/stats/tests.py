@@ -262,6 +262,8 @@ class ScoreSheetTests(TestCase):
         away_wins = 0
         home_wins = 0
         away_home = ('away', 'home')
+        # this random win setup *eventually* catches all the cases, but it would be better
+        # to create ... fixtures? to create all the cases.
         for game in score_sheet.games.all():
             winner = away_home[random.randint(0, 1)]
             game.winner = winner
