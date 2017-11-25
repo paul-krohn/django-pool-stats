@@ -93,7 +93,7 @@ class PlayerSeasonSummary(models.Model):
 
     @classmethod
     def update_rankings(cls, season_id):
-        all_summaries = cls.objects.filter(season=season_id).order_by('-win_percentage')
+        all_summaries = cls.objects.filter(season=season_id).order_by('-win_percentage', '-wins')
         # remove the players with < the minimum number of games in the current season
         summaries = []
         for summary in all_summaries:
@@ -107,7 +107,9 @@ class PlayerSeasonSummary(models.Model):
             tie_count = 0
             while inc + tie_count < len(summaries):
                 # the first clause below is to prevent us trying to compare something off the end of the list
-                if (inc+tie_count+1 < len(summaries)) and summaries[inc].win_percentage == summaries[inc+tie_count+1].win_percentage:
+                if (inc+tie_count+1 < len(summaries)) and \
+                                summaries[inc].win_percentage == summaries[inc+tie_count+1].win_percentage and \
+                                summaries[inc].wins == summaries[inc + tie_count + 1].wins:
                     tie_count += 1
                 else:
                     break
