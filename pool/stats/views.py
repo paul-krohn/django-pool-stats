@@ -164,6 +164,8 @@ def update_players_stats(request):
 
 def team(request, team_id):
 
+    check_season(request)
+
     _team = get_object_or_404(Team, id=team_id)
     _players = PlayerSeasonSummary.objects.filter(
         player_id__in=list([x.id for x in _team.players.all()]),
@@ -177,7 +179,7 @@ def team(request, team_id):
         'players': _players,
         'show_players': False,
         'scoresheets': _score_sheets,
-        'cache_key': _team,
+        'cache_key': 'team_{}_{}'.format(_team.id, request.session['season_id']),
     }
     return render(request, 'stats/team.html', context)
 

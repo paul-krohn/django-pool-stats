@@ -93,7 +93,7 @@ class PlayerSeasonSummary(models.Model):
 
     @classmethod
     def update_rankings(cls, season_id):
-        all_summaries = cls.objects.filter(season=season_id).order_by('-win_percentage')
+        all_summaries = cls.objects.filter(season=season_id).order_by('-win_percentage', '-wins')
         # remove the players with < the minimum number of games in the current season
         summaries = []
         for summary in all_summaries:
@@ -103,18 +103,20 @@ class PlayerSeasonSummary(models.Model):
                 summary.ranking = 0
                 summary.save()
         inc = 0
-        while inc < len(summaries) - 1:
-            offset = 1
-            summaries[inc].ranking = inc + 1
-            summaries[inc].save()
-            logging.debug("{} gets ranking {}".format(summaries[inc], summaries[inc].ranking))
-            while inc + offset < len(summaries) and \
-                    summaries[inc].win_percentage == summaries[inc+offset].win_percentage:
-                summaries[inc+offset].ranking = inc + 1
-                summaries[inc+offset].save()
-                logger.debug("{} gets ranking {}".format(summaries[inc+offset], summaries[inc].ranking))
-                offset += 1
-            inc += offset
+        while inc < len(summaries):
+            tie_count = 0
+            while inc + tie_count < len(summaries):
+                # the first clause below is to prevent us trying to compare something off the end of the list
+                if (inc+tie_count+1 < len(summaries)) and \
+                                summaries[inc].win_percentage == summaries[inc+tie_count+1].win_percentage and \
+                                summaries[inc].wins == summaries[inc + tie_count + 1].wins:
+                    tie_count += 1
+                else:
+                    break
+            for i in range(0, tie_count + 1):
+                summaries[inc+i].ranking = inc + 1
+                summaries[inc+i].save()
+            inc += tie_count + 1
 
     def update(self):
         games = Game.objects.filter(
