@@ -85,11 +85,9 @@ WSGI_APPLICATION = 'pool.wsgi.application'
 
 DATABASES = {
     'default': {
-        # used to be mysql; should this be settings-overrideable?
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'pool_stats',
         'USER': 'pool_stats',
-        'PASSWORD': 'isysroot',
         'OPTIONS': {
             # this option is mysql-only
             # 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
