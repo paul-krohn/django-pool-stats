@@ -46,7 +46,7 @@ python manage.py migrate
 Fixtures are provided to get you up and running with sample data; they are broken up so you can load just what you need.
 
 ```
-SAMPLES="sample_seasons sample_game_setup sample_sponsors sample_teams sample_divisions sample_matches sample_players sample_weeks"
+SAMPLES="sample_seasons sample_game_setup sample_sponsors sample_players sample_divisions sample_teams  sample_matches  sample_weeks"
 for SAMPLE in ${SAMPLES} ; do {
   python manage.py loaddata $SAMPLE;
 } ; done
