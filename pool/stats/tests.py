@@ -296,5 +296,4 @@ class ScoreSheetTests(TestCase):
 
         # there should now be six players with enough games to be in the standings
         response = self.client.get(reverse('players'))
-        print(response.context['players'])
         self.assertEqual(len(response.context['players']), 6)
