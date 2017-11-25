@@ -85,7 +85,6 @@ WSGI_APPLICATION = 'pool.wsgi.application'
 
 DATABASES = {
     'default': {
-        # used to be mysql; should this be settings-overrideable?
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'pool_stats',
         'USER': 'pool_stats',
