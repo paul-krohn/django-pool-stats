@@ -179,6 +179,7 @@ class Team(models.Model):
     division = models.ForeignKey(Division, null=True, limit_choices_to=models.Q(season__is_default=True))
     name = models.CharField(max_length=200)
     players = models.ManyToManyField(Player, blank=True)
+    captain = models.ForeignKey(Player, null=True, blank=True, related_name='captain')
     away_wins = models.IntegerField(verbose_name='Away Wins', default=0)
     away_losses = models.IntegerField(verbose_name='Away Losses', default=0)
     home_wins = models.IntegerField(verbose_name='Home Wins', default=0)

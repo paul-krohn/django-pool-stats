@@ -6,7 +6,7 @@
 {% if team %}
 <h1>{{ team.name }}</h1>
 <h3><a href="{% url 'sponsor' team.sponsor.id %}">{{ team.sponsor }}</a></h3>
-
+<h4>Captain: <a href="{% url 'player' team.captain.id %}">{{ team.captain }}</a></h4>
 {% include "stats/player_table.html" %}
 {% endif %}
 <table class="table">
