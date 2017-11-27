@@ -51,3 +51,9 @@ for SAMPLE in ${SAMPLES} ; do {
   python manage.py loaddata $SAMPLE;
 } ; done
 ```
+
+## Usage Docs
+
+[Usage Documentation](usage_docs.md)
+
+[Scoring Matches](scoring_matches.md)
