@@ -540,7 +540,12 @@ class ScoreSheet(models.Model):
 
         player_score_sheet_summaries = []
 
-        lineup_entries = getattr(self, '{}_lineup'.format(away_home)).filter(position__tiebreaker=False)
+        lineup_entries = getattr(self, '{}_lineup'.format(away_home)).\
+            filter(
+                position__tiebreaker=False).\
+            exclude(
+                player__isnull=True
+            )
         substitutions = getattr(self, '{}_substitutions'.format(away_home)).all()
 
         players = [x.player for x in lineup_entries]
