@@ -46,7 +46,7 @@ class ScoreSheetCompletionForm(django.forms.ModelForm):
 
     class Meta:
         model = ScoreSheet
-        fields = ['complete', 'comment']
+        fields = ['comment', 'complete']
 
 
 class LineupFormSet(django.forms.BaseModelFormSet):
