@@ -328,37 +328,6 @@ def score_sheet(request, score_sheet_id):
     return render(request, 'stats/score_sheet.html', context)
 
 
-def score_sheet_complete(request, score_sheet_id):
-    s = ScoreSheet.objects.get(id=score_sheet_id)
-    score_sheet_game_formset_f = modelformset_factory(
-        Game,
-        form=DisabledScoreSheetGameForm,
-        max_num=len(s.games.all()),
-    )
-    score_sheet_game_formset = score_sheet_game_formset_f(
-        queryset=s.games.all(),
-    )
-
-    if request.method == 'POST':
-        score_sheet_completion_form = ScoreSheetCompletionForm(request.POST, instance=s)
-        if score_sheet_completion_form.is_valid():
-            score_sheet_completion_form.save()
-            return redirect('week', s.match.week.id)
-    else:
-        score_sheet_completion_form = ScoreSheetCompletionForm(
-            instance=s,
-        )
-
-    context = {
-        'score_sheet': s,
-        'games_formset': score_sheet_game_formset,
-        'away_player_score_sheet_summaries': s.player_summaries('away'),
-        'home_player_score_sheet_summaries': s.player_summaries('home'),
-        'score_sheet_completion_form': score_sheet_completion_form,
-    }
-    return render(request, 'stats/score_sheet_complete.html', context)
-
-
 def score_sheet_edit(request, score_sheet_id):
     s = get_object_or_404(ScoreSheet, id=score_sheet_id)
     if not user_can_edit_scoresheet(request, score_sheet_id):
