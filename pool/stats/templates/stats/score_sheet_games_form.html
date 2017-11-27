@@ -17,7 +17,7 @@
         {% endif %}
         <td class="scoresheet-square"><div class="{% if not tb and hb %}mark-break-position{% else %}mark-nobreak-position{% endif%}">{{ game_form.instance.order.home_position}}</div></td>
         <td class="scoresheet-square"><div class="scoresheet-square">{{ game_form.winner.0.tag}}</div></td>
-        <td class="scoresheet-square"><div class="cell">{{ game_form.instance.order.name }}</div></td>
+        <td class="scoresheet-square"><div class="cell">{{ game_form.instance.order.order }}</div></td>
         <td class="scoresheet-square"><div class="scoresheet-square">{{ game_form.winner.1.tag}}</div></td>
         <td class="scoresheet-square"><div class="{% if not tb and not hb %}mark-break-position{% else %}mark-nobreak-position{% endif%}">{{ game_form.instance.order.away_position}}</div></td>
         {% if game_form.instance.away_player.id %}
