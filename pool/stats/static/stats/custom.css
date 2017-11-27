@@ -58,6 +58,7 @@ a:hover	{
 .scoresheet-cell {
     vertical-align: middle !important;
     padding: 4px !important;
+    white-space: nowrap !important;
 }
 
 .scoresheet-square {

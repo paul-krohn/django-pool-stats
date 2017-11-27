@@ -7,7 +7,7 @@
         {% with tb=game_form.instance.order.tiebreaker hb=game_form.instance.order.home_breaks row_even_odd=game_form.instance.order|row_even_odd row_divider=game_form.instance.order|row_divider %}
     <tr class="scoresheet-{{ row_even_odd }}" id="{{ entry.id }}">
         {% if game_form.instance.home_player.id  %}
-        <td style="vertical-align:middle" class="scoresheet-cell" align="right" >
+        <td class="scoresheet-cell" align="right" >
             <div class="{% if not tb and hb %}mark-break-player {% endif%}scoresheet-cell">
                 <a class="{% if not tb and hb %}mark-break-player{% else %}mark-nobreak-player{%endif%}" href="{% url 'player' game_form.instance.home_player.id %}">{{ game_form.instance.home_player }}</a>
             </div>
@@ -21,8 +21,10 @@
         <td class="scoresheet-square"><div class="scoresheet-square">{{ game_form.winner.1.tag}}</div></td>
         <td class="scoresheet-square"><div class="{% if not tb and not hb %}mark-break-position{% else %}mark-nobreak-position{% endif%}">{{ game_form.instance.order.away_position}}</div></td>
         {% if game_form.instance.away_player.id %}
-        <td style="vertical-align:middle" class="{% if not tb and not hb %}mark-break-player{% endif%}">
-            <a class="{% if not tb and not hb %}mark-break-player{% else %}mark-nobreak-player{%endif%}" href="{% url 'player' game_form.instance.away_player.id %}">{{ game_form.instance.away_player }}</a>
+        <td class="scoresheet-cell">
+            <div class="{% if not tb and not hb %}mark-break-player {% endif%}scoresheet-cell">
+                <a class="{% if not tb and not hb %}mark-break-player{% else %}mark-nobreak-player{%endif%}" href="{% url 'player' game_form.instance.away_player.id %}">{{ game_form.instance.away_player }}</a>
+            </div>
         </td>
         {% else %}
         <td class="scoresheet-square">--</td>
