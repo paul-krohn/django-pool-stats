@@ -6,7 +6,6 @@
 <h4><a href="{% url 'team' score_sheet.match.away_team_id %}">{{ score_sheet.match.away_team }}</a>: {{ score_sheet.away_wins }} <a href="{% url 'team' score_sheet.match.home_team_id %}">{{ score_sheet.match.home_team }}</a>: {{ score_sheet.home_wins }}</h4>
 <h5>{{ score_sheet.match.week }}, {{ score_sheet.match.week.date }}</h5>
 <a href="#Lineups" class="btn btn-default" data-toggle="collapse">Lineups & Subs</a>
-<p/>
 <div id="Lineups" class="collapse">
 <table class="table">
     <tr><td colspan="2"><a href="{% url 'score_sheet_lineup' score_sheet.id 'away' %}"><h4>{{ score_sheet.match.away_team }} Lineup</h4></a></td></tr>
