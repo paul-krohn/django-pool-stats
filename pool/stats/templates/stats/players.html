@@ -2,9 +2,12 @@
 
 {% block title %}SFPA :: Players{% endblock %}
 
+{% load cache %}
+{% cache 86400 player_rankings season_id %}
 {% block content %}
 <div class="text-center">
 <h2>Players</h2>
 </div>
 {% include "stats/player_table.html" %}
 {% endblock %}
+{% endcache %}

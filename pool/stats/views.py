@@ -112,7 +112,7 @@ def player(request, player_id):
 
 def players(request):
     # in this view, the standard/decorator caching does not work well; as the players vary by
-    # season, which is not in the URL; so use the cache API directly.
+    # season, which is not in the URL; so vary in the template based on the season.
 
     check_season(request)
     season_id = request.session['season_id']
@@ -122,10 +122,6 @@ def players(request):
         ranking__gt=0
     ).order_by('-win_percentage', '-wins')
     show_teams = True
-
-    # cache_key = get_player_rankings_view_cache_key(request)
-    cache_key = make_template_fragment_key('player_table', [show_teams, season_id])
-    print('the cache key is: {}'.format(cache_key))
 
     context = {
         'players': _players,
@@ -162,10 +158,9 @@ def update_players_stats(request):
 
     season_id = request.session['season_id']
     PlayerSeasonSummary.update_all(season_id=season_id)
-    # delete both variations of the player view cache; then redirect to the players view, which
+    # delete the player rankings view cache; then redirect to the players view, which
     # will repopulate the cache
-    cache.delete(make_template_fragment_key('player_table', [True, season_id]))
-    cache.delete(make_template_fragment_key('player_table', [False, season_id]))
+    cache.delete(make_template_fragment_key('player_rankings', [season_id]))
     return redirect('/stats/players')
 
 
