@@ -1,5 +1,5 @@
 {% load cache %}
-{% cache 86400 player_table cache_key %}
+{% cache 86400 player_table show_teams season_id %}
 <table class="table">
   <thead>
     <tr><th>Rank</th><th></th>{% if show_teams %}<th>Team</th>{% endif %}<th>W</th><th>L</th><th>Pct</th><th>4-0</th><th>TR</th></tr>

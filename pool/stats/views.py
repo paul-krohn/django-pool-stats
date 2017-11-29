@@ -14,6 +14,7 @@ import django.forms
 import django.db.models
 from django.conf import settings
 from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
 
 import logging
 logger = logging.getLogger(__name__)
@@ -114,18 +115,22 @@ def players(request):
     # season, which is not in the URL; so use the cache API directly.
 
     check_season(request)
-    # players_view_key = 'players_{}'.format(request.session['season_id'])
+    season_id = request.session['season_id']
+
     _players = PlayerSeasonSummary.objects.filter(
-        season=request.session['season_id'],
+        season=season_id,
         ranking__gt=0
     ).order_by('-win_percentage', '-wins')
+    show_teams = True
 
-    cache_key = get_player_rankings_view_cache_key(request)
+    # cache_key = get_player_rankings_view_cache_key(request)
+    cache_key = make_template_fragment_key('player_table', [show_teams, season_id])
+    print('the cache key is: {}'.format(cache_key))
 
     context = {
         'players': _players,
-        'show_teams': True,  # referenced in the player_table.html template
-        'cache_key': cache_key,
+        'show_teams': show_teams,  # referenced in the player_table.html template
+        'season_id': request.session['season_id'],
     }
     view = render(request, 'stats/players.html', context)
     return view
@@ -155,10 +160,12 @@ def player_create(request):
 
 def update_players_stats(request):
 
-    PlayerSeasonSummary.update_all(season_id=request.session['season_id'])
-    # delete the player view cache; then redirect to the players view, which
+    season_id = request.session['season_id']
+    PlayerSeasonSummary.update_all(season_id=season_id)
+    # delete both variations of the player view cache; then redirect to the players view, which
     # will repopulate the cache
-    cache.delete(get_player_rankings_view_cache_key(request))
+    cache.delete(make_template_fragment_key('player_table', [True, season_id]))
+    cache.delete(make_template_fragment_key('player_table', [False, season_id]))
     return redirect('/stats/players')
 
 
