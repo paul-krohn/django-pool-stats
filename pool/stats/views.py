@@ -121,6 +121,7 @@ def player(request, player_id):
     return rendered_page
 
 
+@cache_page(7 * 86400)
 def players(request):
     # in this view, the standard/decorator caching does not work well; as the players vary by
     # season, which is not in the URL; so vary in the template based on the season.
@@ -171,8 +172,8 @@ def update_players_stats(request):
     PlayerSeasonSummary.update_all(season_id=season_id)
     # delete the player rankings view cache; then redirect to the players view, which
     # will repopulate the cache
-    cache.delete(make_template_fragment_key('player_rankings', [season_id]))
-    return redirect('/stats/players')
+    expire_page(request, reverse('players'))
+    return redirect(reverse('players'))
 
 
 @cache_page(60 * 60)
