@@ -13,8 +13,12 @@ from django.forms import modelformset_factory
 import django.forms
 import django.db.models
 from django.conf import settings
+
 from django.core.cache import cache
+from django.views.decorators.cache import cache_page
 from django.core.cache.utils import make_template_fragment_key
+from django.utils.cache import get_cache_key
+from django.urls import reverse
 
 import logging
 logger = logging.getLogger(__name__)
@@ -24,6 +28,13 @@ def session_uid(request):
     if 'uid' not in request.session.keys():
         request.session['uid'] = str(hash(time.time()))[0:15]
     return request.session['uid']
+
+
+def expire_page(request, path):
+    request.path = path
+    key = get_cache_key(request)
+    if key in cache:
+        cache.delete(key)
 
 
 def set_season(request, season_id=None):
@@ -164,6 +175,7 @@ def update_players_stats(request):
     return redirect('/stats/players')
 
 
+@cache_page(60 * 60)
 def team(request, team_id):
 
     check_season(request)
@@ -181,7 +193,6 @@ def team(request, team_id):
         'players': _players,
         'show_players': False,
         'scoresheets': _score_sheets,
-        'cache_key': 'team_{}_{}'.format(_team.id, request.session['season_id']),
     }
     return render(request, 'stats/team.html', context)
 
@@ -482,6 +493,10 @@ def update_teams_stats(request):
     # be sure about what season we are working on
     check_season(request)
     Team.update_teams_stats(season_id=request.session['season_id'])
+    # cache invalidation has to be called from a view, because we need access to a
+    # request object to find the cache key used by the @cache_page decorator.
+    for a_team in Team.objects.filter(season_id=request.session['season_id']):
+        expire_page(request, reverse('team', kwargs={'team_id': a_team.id}))
     return redirect('teams')
 
 
