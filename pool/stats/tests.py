@@ -5,12 +5,13 @@ from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.test import TestCase
 from django.test import Client
+from django.test import RequestFactory
 
 from .models import Season, Player, PlayerSeasonSummary, GameOrder, Match, ScoreSheet, Week
 from .models import PlayPosition, AwayPlayPosition, HomePlayPosition
 from .models import Team, AwayTeam, HomeTeam
 
-from .views import get_single_player_view_cache_key, check_season
+from .views import get_single_player_view_cache_key, expire_page
 
 
 import random
@@ -169,6 +170,7 @@ class ScoreSheetTests(TestCase):
 
     def setUp(self):
         self.sample_match_id = create_data()
+        self.factory = RequestFactory()
 
     def test_player_index(self):
         """
@@ -177,6 +179,9 @@ class ScoreSheetTests(TestCase):
         """
         player = Player(first_name='George', last_name='Smith')
         player.save()
+
+        expire_page(self.factory.get(reverse('players')), reverse('players'))
+
         response = self.client.get(reverse('players'))
         self.assertQuerysetEqual(response.context['players'], [])
 
@@ -297,5 +302,6 @@ class ScoreSheetTests(TestCase):
         self.assertEquals(TEAM_SIZE * 2, len(summaries))
 
         # there should now be six players with enough games to be in the standings
+        expire_page(self.factory.get(reverse('players')), reverse('players'))
         response = self.client.get(reverse('players'))
         self.assertEqual(len(response.context['players']), 6)
