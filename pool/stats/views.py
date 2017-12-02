@@ -121,7 +121,7 @@ def player(request, player_id):
     return rendered_page
 
 
-@cache_page(7 * 86400)
+# @cache_page(7 * 86400)
 def players(request):
     # in this view, the standard/decorator caching does not work well; as the players vary by
     # season, which is not in the URL; so vary in the template based on the season.
