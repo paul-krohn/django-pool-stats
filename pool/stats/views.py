@@ -352,6 +352,13 @@ def score_sheet_edit(request, score_sheet_id):
         max_num=len(s.games.all())
     )
 
+    # normally, you would populate a formset conditionally on whether the request is a POST or not;
+    # in this case, the lineups are posted to a different view, so that is not necessary.
+    away_lineup_formset = score_sheet_lineup_formset(
+        score_sheet_id=score_sheet_id, away_home='away')(queryset=s.away_lineup.all())
+    home_lineup_formset = score_sheet_lineup_formset(
+        score_sheet_id=score_sheet_id, away_home='home')(queryset=s.home_lineup.all())
+
     if request.method == 'POST':
         score_sheet_completion_form = ScoreSheetCompletionForm(request.POST, instance=s)
         if score_sheet_completion_form.is_valid():
@@ -370,11 +377,12 @@ def score_sheet_edit(request, score_sheet_id):
         score_sheet_game_formset = score_sheet_game_formset_f(
             queryset=s.games.all(),
         )
+
     context = {
         'score_sheet': s,
         'games_formset': score_sheet_game_formset,
-        'away_lineup_formset': score_sheet_lineup_formset(score_sheet_id=score_sheet_id, away_home='away'),
-        'home_lineup_formset': score_sheet_lineup_formset(score_sheet_id=score_sheet_id, away_home='home'),
+        'away_lineup_formset': away_lineup_formset,
+        'home_lineup_formset': home_lineup_formset,
         'away_player_score_sheet_summaries': s.player_summaries('away'),
         'home_player_score_sheet_summaries': s.player_summaries('home'),
         'score_sheet_completion_form': score_sheet_completion_form,
@@ -398,8 +406,6 @@ def score_sheet_lineup_formset(score_sheet_id, away_home):
 
     # it would be prettier to do this by passing kwargs but,
     # it seems you can't do that with a ModelForm so, the ugly is here.
-    lineup_m = getattr(s, '{}_lineup'.format(away_home))
-    lineup_queryset = lineup_m.all()
     lineup_team = getattr(s.match, '{}_team'.format(away_home))
     lineup_model = AwayLineupEntry if away_home == 'away' else HomeLineupEntry
 
@@ -411,7 +417,7 @@ def score_sheet_lineup_formset(score_sheet_id, away_home):
             required=False,
         )
 
-    lineup_formset_f = modelformset_factory(
+    return modelformset_factory(
         model=lineup_model,
         fields=['player'],
         form=LineupForm,
@@ -419,38 +425,15 @@ def score_sheet_lineup_formset(score_sheet_id, away_home):
         extra=0,
         max_num=len(PlayPosition.objects.all()),
     )
-
-    return lineup_formset_f(queryset=lineup_queryset)
 
 
 def score_sheet_lineup(request, score_sheet_id, away_home):
     s = ScoreSheet.objects.get(id=score_sheet_id)
 
-    # # it would be prettier to do this by passing kwargs but,
-    # # it seems you can't do that with a ModelForm so, the ugly is here.
     lineup_m = getattr(s, '{}_lineup'.format(away_home))
     lineup_queryset = lineup_m.all()
-    lineup_team = getattr(s.match, '{}_team'.format(away_home))
-    lineup_model = AwayLineupEntry if away_home == 'away' else HomeLineupEntry
 
-    class LineupForm(django.forms.ModelForm):
-        # thanks to stack overflow for this, from here:
-        # http://stackoverflow.com/questions/1982025/django-form-from-related-model
-        player = django.forms.ModelChoiceField(
-            queryset=lineup_team.players.all(),
-            required=False,
-        )
-
-    lineup_formset_f = modelformset_factory(
-        model=lineup_model,
-        fields=['player'],
-        form=LineupForm,
-        formset=LineupFormSet,
-        extra=0,
-        max_num=len(PlayPosition.objects.all()),
-    )
-
-    # lineup_formset_f = score_sheet_lineup_formset(score_sheet_id, away_home)
+    lineup_formset_f = score_sheet_lineup_formset(score_sheet_id, away_home)
 
     if request.method == 'POST':
         lineup_formset = lineup_formset_f(request.POST, queryset=lineup_queryset)
