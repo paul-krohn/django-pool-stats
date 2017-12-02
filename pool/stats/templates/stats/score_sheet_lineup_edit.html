@@ -4,8 +4,8 @@
 
 {% block content %}
 
-<h4>{{ score_sheet.match }}</h4>
-<h5>{{ away_home|capfirst }} Lineup</h5>
+<!--<h4>{{ score_sheet.match }}</h4>-->
+<!--<h5>{{ away_home|capfirst }} Lineup</h5>-->
 <form action="{% url 'score_sheet_lineup' score_sheet.id away_home %}" method="post">
     {% csrf_token %}
     {{ lineup_formset.management_form }}

@@ -5,36 +5,36 @@
 {% block content %}
 <h4><a href="{% url 'team' score_sheet.match.away_team_id %}">{{ score_sheet.match.away_team }}</a>: {{ score_sheet.away_wins }} <a href="{% url 'team' score_sheet.match.home_team_id %}">{{ score_sheet.match.home_team }}</a>: {{ score_sheet.home_wins }}</h4>
 <h5>{{ score_sheet.match.week }}, {{ score_sheet.match.week.date }}</h5>
-<a href="#Lineups" class="btn btn-default" data-toggle="collapse">Lineups & Subs</a>
-<div id="Lineups" class="collapse">
-<table class="table">
-    <tr><td colspan="2"><a href="{% url 'score_sheet_lineup' score_sheet.id 'away' %}"><h4>{{ score_sheet.match.away_team }} Lineup</h4></a></td></tr>
-    <tr><th>Position</th><th>Player</th></tr>
-    {% for position in score_sheet.away_lineup.all %}
-    <tr><td>{{ position.position.away_name }}</td><td>{{ position.player }}</td></tr>
-    {% endfor %}
-</table>
-<h6><a href="{% url 'score_sheet_substitutions' score_sheet.id 'away' %}">Away Substitutions</a></h6>
+<a href="#AwayLineup" class="btn btn-default" data-toggle="collapse">Away Lineup</a>
+<div id="AwayLineup" class="collapse">
+{% with "away" as away_home %}
+{% with away_lineup_formset as lineup_formset %}
+{% include "stats/score_sheet_lineup_edit.html" %}
+{% endwith %}
+{% endwith %}
+</div>
+    <h6><a href="{% url 'score_sheet_substitutions' score_sheet.id 'away' %}">Away Substitutions</a></h6>
 <ol>
 {% for sub in score_sheet.away_substitutions.all %}
     <li>{{ sub }}</li>
 {% endfor %}
 </ol>
 
-<table class="table">
-    <tr><td colspan="2"><h4><a href="{% url 'score_sheet_lineup' score_sheet.id 'home' %}">{{ score_sheet.match.home_team }} Lineup</a></h4></td></tr>
-    <tr><th>Position</th><th>Player</th></tr>
-    {% for position in score_sheet.home_lineup.all %}
-    <tr><td>{{ position.position.home_name }}</td><td>{{ position.player }}</td></tr>
-    {% endfor %}
-</table>
-<h6><a href="{% url 'score_sheet_substitutions' score_sheet.id 'home' %}">Home Substitutions</a></h6>
+<a href="#HomeLineup" class="btn btn-default" data-toggle="collapse">Home Lineup</a>
+<div id="HomeLineup" class="collapse">
+{% with "home" as away_home %}
+{% with home_lineup_formset as lineup_formset %}
+{% include "stats/score_sheet_lineup_edit.html" %}
+{% endwith %}
+{% endwith %}
+</div>
+    <h6><a href="{% url 'score_sheet_substitutions' score_sheet.id 'home' %}">Home Substitutions</a></h6>
 <ol>
 {% for sub in score_sheet.home_substitutions.all %}
     <li>{{ sub }}</li>
 {% endfor %}
 </ol>
-</div>
+
 <h3>Games</h3>
 <form action="{% url 'score_sheet_edit' score_sheet.id %}" method="post">
 {% csrf_token %}

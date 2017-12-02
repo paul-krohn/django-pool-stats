@@ -373,6 +373,8 @@ def score_sheet_edit(request, score_sheet_id):
     context = {
         'score_sheet': s,
         'games_formset': score_sheet_game_formset,
+        'away_lineup_formset': score_sheet_lineup_formset(score_sheet_id=score_sheet_id, away_home='away'),
+        'home_lineup_formset': score_sheet_lineup_formset(score_sheet_id=score_sheet_id, away_home='home'),
         'away_player_score_sheet_summaries': s.player_summaries('away'),
         'home_player_score_sheet_summaries': s.player_summaries('home'),
         'score_sheet_completion_form': score_sheet_completion_form,
@@ -391,7 +393,7 @@ def score_sheet_create(request, match_id):
     return redirect('score_sheet_edit', score_sheet_id=s.id)
 
 
-def score_sheet_lineup(request, score_sheet_id, away_home):
+def score_sheet_lineup_formset(score_sheet_id, away_home):
     s = ScoreSheet.objects.get(id=score_sheet_id)
 
     # it would be prettier to do this by passing kwargs but,
@@ -418,6 +420,38 @@ def score_sheet_lineup(request, score_sheet_id, away_home):
         max_num=len(PlayPosition.objects.all()),
     )
 
+    return lineup_formset_f(queryset=lineup_queryset)
+
+
+def score_sheet_lineup(request, score_sheet_id, away_home):
+    s = ScoreSheet.objects.get(id=score_sheet_id)
+
+    # # it would be prettier to do this by passing kwargs but,
+    # # it seems you can't do that with a ModelForm so, the ugly is here.
+    lineup_m = getattr(s, '{}_lineup'.format(away_home))
+    lineup_queryset = lineup_m.all()
+    lineup_team = getattr(s.match, '{}_team'.format(away_home))
+    lineup_model = AwayLineupEntry if away_home == 'away' else HomeLineupEntry
+
+    class LineupForm(django.forms.ModelForm):
+        # thanks to stack overflow for this, from here:
+        # http://stackoverflow.com/questions/1982025/django-form-from-related-model
+        player = django.forms.ModelChoiceField(
+            queryset=lineup_team.players.all(),
+            required=False,
+        )
+
+    lineup_formset_f = modelformset_factory(
+        model=lineup_model,
+        fields=['player'],
+        form=LineupForm,
+        formset=LineupFormSet,
+        extra=0,
+        max_num=len(PlayPosition.objects.all()),
+    )
+
+    # lineup_formset_f = score_sheet_lineup_formset(score_sheet_id, away_home)
+
     if request.method == 'POST':
         lineup_formset = lineup_formset_f(request.POST, queryset=lineup_queryset)
         if lineup_formset.is_valid():
@@ -427,7 +461,7 @@ def score_sheet_lineup(request, score_sheet_id, away_home):
         else:
             logging.debug("validation errors:{}".format(lineup_formset.form.non_field_errors))
     else:
-        lineup_formset = lineup_formset_f(queryset=lineup_queryset)
+        return redirect('score_sheet_edit', score_sheet_id=s.id)
 
     context = {
         'score_sheet': s,
