@@ -1,15 +1,7 @@
-{% extends "stats/base.html" %}
-
-{% block title %}SFPA :: Away Substitutions {% endblock %}
-
-{% block content%}
-<h4>{{ score_sheet.match }}</h4>
-<h5>Away Substitutions</h5>
 <form action="{% url 'score_sheet_substitutions' score_sheet.id away_home %}" method="post">
 {% csrf_token %}
+{{ substitutions_formset.management_form }}
 <table class="table">
-{{ substitutions_form.as_table }}
+{{ substitutions_formset.as_table }}
 </table><input type="submit"/>
 </form>
-
-{% endblock %}

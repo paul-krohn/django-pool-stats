@@ -36,28 +36,39 @@ $(document).ready(function(){
         <input id="toggle-home_substitutions" type="button" class="btn btn-default" value="Home Subs" />
     </form>
 </div>
-<div id="away_lineup" class="collapse showhide">
 {% with "away" as away_home %}
+<div id="away_lineup" class="collapse showhide">
 {% with away_lineup_formset as lineup_formset %}
 {% include "stats/score_sheet_lineup_edit.html" %}
 {% endwith %}
+</div>
+<div id="away_substitutions" class="collapse showhide">
+{% with away_substitutions_formset as substitutions_formset %}
+{% include "stats/score_sheet_substitutions.html" %}
 {% endwith %}
 </div>
-    <h6><a href="{% url 'score_sheet_substitutions' score_sheet.id 'away' %}">Away Substitutions</a></h6>
+{% endwith %}
+</div>
+{% with "home" as away_home %}
+<div id="home_lineup" class="collapse showhide">
+{% with home_lineup_formset as lineup_formset %}
+{% include "stats/score_sheet_lineup_edit.html" %}
+{% endwith %}
+</div>
+<div id="home_substitutions" class="collapse showhide">
+{% with home_substitutions_formset as substitutions_formset %}
+{% include "stats/score_sheet_substitutions.html" %}
+{% endwith %}
+</div>
+{% endwith %}
+</div>
+
 <ol>
 {% for sub in score_sheet.away_substitutions.all %}
     <li>{{ sub }}</li>
 {% endfor %}
 </ol>
 
-<div id="home_lineup" class="collapse">
-{% with "home" as away_home %}
-{% with home_lineup_formset as lineup_formset %}
-{% include "stats/score_sheet_lineup_edit.html" %}
-{% endwith %}
-{% endwith %}
-</div>
-    <h6><a href="{% url 'score_sheet_substitutions' score_sheet.id 'home' %}">Home Substitutions</a></h6>
 <ol>
 {% for sub in score_sheet.home_substitutions.all %}
     <li>{{ sub }}</li>
