@@ -86,3 +86,7 @@ a:hover	{
 .scoresheet-odd {
     background-color: #f8f8f8;
 }
+
+.showhide {
+    display: none;
+}
