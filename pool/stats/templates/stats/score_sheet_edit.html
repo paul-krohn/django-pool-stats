@@ -3,62 +3,110 @@
 {% block title %}SFPA :: Score Sheet :: {{ score_sheet.match }} {% endblock %}
 
 {% block content %}
+<script language="JavaScript">
+
+var lineup_ids = ['away_lineup', 'away_substitutions', 'home_lineup', 'home_substitutions'];
+
+function toggler(some_div_id) {
+    for (i = 0; i < lineup_ids.length; i++) {
+        if (some_div_id != lineup_ids[i]) {
+            $("#" + lineup_ids[i] ).css("display", "none");
+        }
+    }
+    var current_display = $("#" + some_div_id).css("display");
+    $("#" + some_div_id).css("display", current_display == "block" ? "none" : "block");
+};
+
+$(document).ready(function(){
+    $( "#toggle-away_lineup" ).click(function(){toggler('away_lineup')});
+    $( "#toggle-home_lineup" ).click(function(){toggler('home_lineup')});
+    $( "#toggle-away_substitutions" ).click(function(){toggler('away_substitutions')});
+    $( "#toggle-home_substitutions" ).click(function(){toggler('home_substitutions')});
+});
+
+</script>
+
 <h4><a href="{% url 'team' score_sheet.match.away_team_id %}">{{ score_sheet.match.away_team }}</a>: {{ score_sheet.away_wins }} <a href="{% url 'team' score_sheet.match.home_team_id %}">{{ score_sheet.match.home_team }}</a>: {{ score_sheet.home_wins }}</h4>
 <h5>{{ score_sheet.match.week }}, {{ score_sheet.match.week.date }}</h5>
-<a href="#AwayLineup" class="btn btn-default" data-toggle="collapse">Away Lineup</a>
-<div id="AwayLineup" class="collapse">
+<div>
+    <form id="showhide">
+        <input id="toggle-away_lineup" type="button" class="btn btn-default" value="Away Lineup" />
+        <input id="toggle-home_lineup" type="button" class="btn btn-default" value="Home Lineup" />
+        <input id="toggle-away_substitutions" type="button" class="btn btn-default" value="Away Subs" />
+        <input id="toggle-home_substitutions" type="button" class="btn btn-default" value="Home Subs" />
+    </form>
+</div>
 {% with "away" as away_home %}
-{% with away_lineup_formset as lineup_formset %}
-{% include "stats/score_sheet_lineup_edit.html" %}
-{% endwith %}
-{% endwith %}
+<div id="away_lineup" class="collapse showhide">
+    {% with away_lineup_formset as lineup_formset %}
+    {% include "stats/score_sheet_lineup_edit.html" %}
+    {% endwith %}
 </div>
-    <h6><a href="{% url 'score_sheet_substitutions' score_sheet.id 'away' %}">Away Substitutions</a></h6>
-<ol>
-{% for sub in score_sheet.away_substitutions.all %}
-    <li>{{ sub }}</li>
-{% endfor %}
-</ol>
-
-<a href="#HomeLineup" class="btn btn-default" data-toggle="collapse">Home Lineup</a>
-<div id="HomeLineup" class="collapse">
+<div id="away_substitutions" class="collapse showhide">
+    {% with away_substitutions_formset as substitutions_formset %}
+    {% include "stats/score_sheet_substitutions.html" %}
+    {% endwith %}
+</div>
+{% endwith %}
 {% with "home" as away_home %}
-{% with home_lineup_formset as lineup_formset %}
-{% include "stats/score_sheet_lineup_edit.html" %}
-{% endwith %}
-{% endwith %}
+<div id="home_lineup" class="collapse showhide">
+    {% with home_lineup_formset as lineup_formset %}
+    {% include "stats/score_sheet_lineup_edit.html" %}
+    {% endwith %}
 </div>
-    <h6><a href="{% url 'score_sheet_substitutions' score_sheet.id 'home' %}">Home Substitutions</a></h6>
-<ol>
-{% for sub in score_sheet.home_substitutions.all %}
-    <li>{{ sub }}</li>
-{% endfor %}
-</ol>
+<div id="home_substitutions" class="collapse showhide">
+    {% with home_substitutions_formset as substitutions_formset %}
+    {% include "stats/score_sheet_substitutions.html" %}
+    {% endwith %}
+</div>
+{% endwith %}
+
+{% if score_sheet.away_substitutions %}
+<div>
+    <h5>Away Substitutions</h5>
+    <ol>
+    {% for sub in score_sheet.away_substitutions.all %}
+        <li>{{ sub }}</li>
+    {% endfor %}
+    </ol>
+</div>
+{% endif %}
+
+{% if score_sheet.home_substitutions %}
+<div>
+    <h5>Home Substitutions</h5>
+    <ol>
+    {% for sub in score_sheet.home_substitutions.all %}
+        <li>{{ sub }}</li>
+    {% endfor %}
+    </ol>
+</div>
+{% endif %}
 
 <h3>Games</h3>
 <form action="{% url 'score_sheet_edit' score_sheet.id %}" method="post">
-{% csrf_token %}
-{{ games_formset.management_form }}
-<table class="table">
-{% include "stats/score_sheet_games_form.html" %}
-<tr><td colspan="2"></td><td class="scoresheet-square"><b>{{ score_sheet.home_wins }}</b></td><td></td><td class="scoresheet-square"><b>{{ score_sheet.away_wins }}</b></td><td colspan="4"></td></tr>
-</table>
-<h3>Away Player Summaries</h3>
-{% with player_score_sheet_summaries=away_player_score_sheet_summaries %}
-{% include "stats/player_match_summary.html" %}
-{% endwith %}
+    {% csrf_token %}
+    {{ games_formset.management_form }}
+    <table class="table">
+        {% include "stats/score_sheet_games_form.html" %}
+        <tr><td colspan="2"></td><td class="scoresheet-square"><b>{{ score_sheet.home_wins }}</b></td><td></td><td class="scoresheet-square"><b>{{ score_sheet.away_wins }}</b></td><td colspan="4"></td></tr>
+    </table>
+    <h3>Away Player Summaries</h3>
+    {% with player_score_sheet_summaries=away_player_score_sheet_summaries %}
+    {% include "stats/player_match_summary.html" %}
+    {% endwith %}
 
-<h3>Home Player Summaries</h3>
-{% with player_score_sheet_summaries=home_player_score_sheet_summaries %}
-{% include "stats/player_match_summary.html" %}
-{% endwith %}
+    <h3>Home Player Summaries</h3>
+    {% with player_score_sheet_summaries=home_player_score_sheet_summaries %}
+    {% include "stats/player_match_summary.html" %}
+    {% endwith %}
 
-<table class="table">
-{{ score_sheet_completion_form.as_table }}
-</table>
+    <table class="table">
+    {{ score_sheet_completion_form.as_table }}
+    </table>
 
     <div class="text-center">
-    <input class="btn btn-primary" type="submit" value="Save"/>
-  </div>
+        <input class="btn btn-primary" type="submit" value="Save"/>
+    </div>
 </form>
 {% endblock %}

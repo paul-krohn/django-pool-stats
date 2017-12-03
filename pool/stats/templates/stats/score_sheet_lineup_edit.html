@@ -1,9 +1,4 @@
-{% extends "stats/base.html" %}
-
-{% block title %}SFPA :: {{ away_home|capfirst }} Lineup {% endblock %}
-
-{% block content %}
-
+<h6>{{ away_home|title }} Lineup</h6>
 <form action="{% url 'score_sheet_lineup' score_sheet.id away_home %}" method="post">
     {% csrf_token %}
     {{ lineup_formset.management_form }}
@@ -24,8 +19,6 @@
     {% endfor %}
 </table>
   <div class="text-center">
-    <input class="btn btn-primary" type="submit" value="Save"/>
+    <input class="btn btn-primary" type="submit" value="Save {{ away_home }} lineup"/>
   </div>
 </form>
-
-{% endblock %}

@@ -454,15 +454,10 @@ class ScoreSheet(models.Model):
         return len(self.games.filter(winner='home'))
 
     def initialize_lineup(self):
-        for lineup_position in PlayPosition.objects.filter(tiebreaker=False):
-            ale = AwayLineupEntry(position=lineup_position)
-            ale.save()
-            hle = HomeLineupEntry(position=lineup_position)
-            hle.save()
-            self.away_lineup.add(ale)
-            self.home_lineup.add(hle)
+        lineup_positions = PlayPosition.objects.filter(tiebreaker=False)
         if self.match.playoff:
-            lineup_position = PlayPosition.objects.get(tiebreaker=True)
+            lineup_positions = PlayPosition.objects.all()
+        for lineup_position in lineup_positions:
             ale = AwayLineupEntry(position=lineup_position)
             ale.save()
             hle = HomeLineupEntry(position=lineup_position)

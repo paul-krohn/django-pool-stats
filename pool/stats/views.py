@@ -16,7 +16,6 @@ from django.conf import settings
 
 from django.core.cache import cache
 from django.views.decorators.cache import cache_page
-from django.core.cache.utils import make_template_fragment_key
 from django.utils.cache import get_cache_key
 from django.urls import reverse
 
@@ -353,11 +352,15 @@ def score_sheet_edit(request, score_sheet_id):
     )
 
     # normally, you would populate a formset conditionally on whether the request is a POST or not;
-    # in this case, the lineups are posted to a different view, so that is not necessary.
+    # in this case, the lineups and substitutions are posted to a different view, so that is not necessary.
     away_lineup_formset = score_sheet_lineup_formset(
         score_sheet_id=score_sheet_id, away_home='away')(queryset=s.away_lineup.all())
     home_lineup_formset = score_sheet_lineup_formset(
         score_sheet_id=score_sheet_id, away_home='home')(queryset=s.home_lineup.all())
+    away_substitutions_formset = substitutions_formset_factory_builder(
+        score_sheet_id=score_sheet_id, away_home='away')(queryset=s.away_substitutions.all())
+    home_substitutions_formset = substitutions_formset_factory_builder(
+        score_sheet_id=score_sheet_id, away_home='home')(queryset=s.home_substitutions.all())
 
     if request.method == 'POST':
         score_sheet_completion_form = ScoreSheetCompletionForm(request.POST, instance=s)
@@ -383,6 +386,8 @@ def score_sheet_edit(request, score_sheet_id):
         'games_formset': score_sheet_game_formset,
         'away_lineup_formset': away_lineup_formset,
         'home_lineup_formset': home_lineup_formset,
+        'away_substitutions_formset': away_substitutions_formset,
+        'home_substitutions_formset': home_substitutions_formset,
         'away_player_score_sheet_summaries': s.player_summaries('away'),
         'home_player_score_sheet_summaries': s.player_summaries('home'),
         'score_sheet_completion_form': score_sheet_completion_form,
@@ -454,20 +459,17 @@ def score_sheet_lineup(request, score_sheet_id, away_home):
     return render(request, 'stats/score_sheet_lineup_edit.html', context)
 
 
-def score_sheet_substitutions(request, score_sheet_id, away_home):
+def substitutions_formset_factory_builder(score_sheet_id, away_home):
     s = ScoreSheet.objects.get(id=score_sheet_id)
-
     already_used_players = []
     # first exclude players already in the lineup
     for x in getattr(s, '{}_lineup'.format(away_home)).all():
         if x.player is not None:
             already_used_players.append(x.player.id)
 
-    scoresheet_team = getattr(s.match, '{}_team'.format(away_home))
-    substitution_players_queryset = scoresheet_team.players.all().exclude(id__in=already_used_players)
+    score_sheet_team = getattr(s.match, '{}_team'.format(away_home))
+    substitution_players_queryset = score_sheet_team.players.all().exclude(id__in=already_used_players)
     substitution_model = AwaySubstitution if away_home == 'away' else HomeSubstitution
-    substitution_queryset = getattr(s, '{}_substitutions'.format(away_home)).all()
-    add_substitution_function = getattr(s, '{}_substitutions'.format(away_home))
 
     class SubstitutionForm(django.forms.ModelForm):
         player = django.forms.ModelChoiceField(
@@ -475,15 +477,24 @@ def score_sheet_substitutions(request, score_sheet_id, away_home):
             required=False,
         )
 
-    substitution_formset_f = modelformset_factory(
+    return modelformset_factory(
         model=substitution_model,
         form=SubstitutionForm,
         fields=['game_order', 'player'],
         # this may not work for leagues where the game group size is for some reason not the
         # same as the number of players in a lineup
-        max_num=len(scoresheet_team.players.all()) - settings.LEAGUE['game_group_size'],
+        max_num=len(score_sheet_team.players.all()) - settings.LEAGUE['game_group_size'],
         can_delete=True,
     )
+
+
+def score_sheet_substitutions(request, score_sheet_id, away_home):
+    s = ScoreSheet.objects.get(id=score_sheet_id)
+
+    substitution_queryset = getattr(s, '{}_substitutions'.format(away_home)).all()
+    add_substitution_function = getattr(s, '{}_substitutions'.format(away_home))
+
+    substitution_formset_f = substitutions_formset_factory_builder(s.id, away_home)
 
     if request.method == 'POST':
         substitution_formset = substitution_formset_f(
@@ -498,13 +509,7 @@ def score_sheet_substitutions(request, score_sheet_id, away_home):
             s.set_games()
             return redirect('score_sheet_edit', score_sheet_id=s.id)
     else:
-        substitution_formset = substitution_formset_f(queryset=substitution_queryset)
-        context = {
-            'score_sheet': s,
-            'substitutions_form': substitution_formset,
-            'away_home': away_home,
-        }
-        return render(request, 'stats/score_sheet_substitutions.html', context)
+        return redirect('score_sheet_edit', score_sheet_id=s.id)
 
 
 def update_teams_stats(request):

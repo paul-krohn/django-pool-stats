@@ -41,7 +41,8 @@
     "fields": {
       "home_name": "TB",
       "away_name": "TB",
-      "name": "tiebreaker"
+      "name": "tiebreaker",
+      "tiebreaker": true
     }
   },
   {
