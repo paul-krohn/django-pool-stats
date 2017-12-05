@@ -1,4 +1,3 @@
-<h6>{{ away_home|title }} Subs</h6>
 <form action="{% url 'score_sheet_substitutions' score_sheet.id away_home %}" method="post">
     {% csrf_token %}
     {{ substitutions_formset.management_form }}
