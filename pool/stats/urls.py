@@ -1,13 +1,17 @@
 from django.conf.urls import url
+from django.views.decorators.cache import cache_page
 
 from . import views, status
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
 
+    url(r'^divisions/(?P<season_id>[0-9]+)', cache_page(15)(views.divisions), name='divisions'),
     url(r'^divisions/', views.divisions, name='divisions'),
 
     url(r'^team/(?P<team_id>[0-9]+)/$', views.team, name='team'),
+
+    url(r'^teams/(?P<season_id>[0-9]+)', cache_page(15)(views.teams), name='teams'),
     url(r'^teams/', views.index, name='teams'),
 
     url(r'^week/(?P<week_id>[0-9]+)/$', views.week, name='week'),
@@ -15,7 +19,10 @@ urlpatterns = [
 
     url(r'^match/(?P<match_id>[0-9]+)/$', views.match, name='match'),
 
+    url(r'^players/(?P<season_id>[0-9]+)', cache_page(15)(views.players), name='players'),
     url(r'^players/', views.players, name='players'),
+    # url(r'^foo/([0-9]{1,2})/$', cache_page(60 * 15)(my_view)),
+
     url(r'^player/(?P<player_id>[0-9]+)/$', views.player, name='player'),
     url(r'^player_create/', views.player_create, name='player_create'),
 

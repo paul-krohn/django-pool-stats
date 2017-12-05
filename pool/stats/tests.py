@@ -180,9 +180,13 @@ class ScoreSheetTests(TestCase):
         player = Player(first_name='George', last_name='Smith')
         player.save()
 
-        expire_page(self.factory.get(reverse('players')), reverse('players'))
+        url_args = {'season_id':  Season.objects.get(is_default=True).id}
+        expire_page(self.factory.get(reverse('players')), reverse(
+            'players',
+            kwargs=url_args,
+        ))
 
-        response = self.client.get(reverse('players'))
+        response = self.client.get(reverse('players', kwargs=url_args))
         self.assertQuerysetEqual(response.context['players'], [])
 
     def test_player_season_summary(self):
@@ -297,11 +301,13 @@ class ScoreSheetTests(TestCase):
         summaries = PlayerSeasonSummary.objects.all()
         self.assertEquals(0, len(summaries))
 
-        PlayerSeasonSummary.update_all(season_id=Season.objects.get(is_default=True).id)
+        season_args = {'season_id': Season.objects.get(is_default=True).id}
+
+        PlayerSeasonSummary.update_all(**season_args)
         summaries = PlayerSeasonSummary.objects.all()
         self.assertEquals(TEAM_SIZE * 2, len(summaries))
 
         # there should now be six players with enough games to be in the standings
-        expire_page(self.factory.get(reverse('players')), reverse('players'))
-        response = self.client.get(reverse('players'))
+        expire_page(self.factory.get(reverse('players')), reverse('players', kwargs=season_args))
+        response = self.client.get(reverse('players', kwargs=season_args))
         self.assertEqual(len(response.context['players']), 6)

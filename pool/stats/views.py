@@ -15,7 +15,7 @@ import django.db.models
 from django.conf import settings
 
 from django.core.cache import cache
-from django.views.decorators.cache import cache_page
+from django.views.decorators.cache import cache_page, never_cache
 from django.utils.cache import get_cache_key
 from django.urls import reverse
 
@@ -83,7 +83,15 @@ def get_single_player_view_cache_key(season_id, player_id):
 
 def index(request):
     check_season(request)
-    team_list = Team.objects.filter(season=request.session['season_id']).order_by('-win_percentage')
+    return redirect('teams', season_id=request.session['season_id'])
+
+
+@never_cache
+def teams(request, season_id=None):
+    check_season(request)
+    if season_id is None:
+        return redirect('teams', season_id=request.session['season_id'])
+    team_list = Team.objects.filter(season=season_id).order_by('-win_percentage')
     season = Season.objects.get(id=request.session['season_id'])
     context = {
         'teams': team_list,
@@ -120,13 +128,12 @@ def player(request, player_id):
     return rendered_page
 
 
-@cache_page(7 * 86400)
-def players(request):
-    # in this view, the standard/decorator caching does not work well; as the players vary by
-    # season, which is not in the URL; so vary in the template based on the season.
-
+@never_cache
+def players(request, season_id=None):
     check_season(request)
-    season_id = request.session['season_id']
+
+    if season_id is None:
+        return redirect('players', season_id=request.session['season_id'])
 
     _players = PlayerSeasonSummary.objects.filter(
         season=season_id,
@@ -171,8 +178,8 @@ def update_players_stats(request):
     PlayerSeasonSummary.update_all(season_id=season_id)
     # delete the player rankings view cache; then redirect to the players view, which
     # will repopulate the cache
-    expire_page(request, reverse('players'))
-    return redirect(reverse('players'))
+    expire_page(request, reverse('players', kwargs={'season_id': season_id}))
+    return redirect(reverse('players', kwargs={'season_id': season_id}))
 
 
 @cache_page(60 * 60)
@@ -221,8 +228,11 @@ def sponsors(request):
     return render(request, 'stats/sponsors.html', context)
 
 
-def divisions(request):
+@never_cache
+def divisions(request, season_id=None):
     check_season(request)
+    if season_id is None:
+        return redirect('divisions', season_id=request.session['season_id'])
     _divisions = Division.objects.filter(season=request.session['season_id']).order_by('name')
     # this wrapper divisions dodge is needed so the teams within each division
     # can be sorted by ranking
@@ -518,6 +528,9 @@ def update_teams_stats(request):
     Team.update_teams_stats(season_id=request.session['season_id'])
     # cache invalidation has to be called from a view, because we need access to a
     # request object to find the cache key used by the @cache_page decorator.
+    expire_args = {'season_id': request.session['season_id']}
+    expire_page(request, reverse('divisions', kwargs=expire_args))
+    expire_page(request, reverse('teams', kwargs=expire_args))
     for a_team in Team.objects.filter(season_id=request.session['season_id']):
         expire_page(request, reverse('team', kwargs={'team_id': a_team.id}))
     return redirect('teams')
