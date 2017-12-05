@@ -61,7 +61,7 @@ $(document).ready(function(){
 </div>
 {% endwith %}
 
-{% if score_sheet.away_substitutions %}
+{% if score_sheet.away_substitutions|length > 0 %}
 <div>
     <h5>Away Substitutions</h5>
     <ol>
@@ -72,7 +72,7 @@ $(document).ready(function(){
 </div>
 {% endif %}
 
-{% if score_sheet.home_substitutions %}
+{% if score_sheet.home_substitutions|length > 0 %}
 <div>
     <h5>Home Substitutions</h5>
     <ol>
