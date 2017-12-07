@@ -1,8 +1,10 @@
+<h6>{{ away_home|title }} Substitutions</h6>
 <form action="{% url 'score_sheet_substitutions' score_sheet.id away_home %}" method="post">
     {% csrf_token %}
-    {{ substitutions_formset.management_form }}
     <table class="table">
         {{ substitutions_formset.as_table }}
     </table>
-    <input class="btn btn-primary" type="submit" value="Save {{ away_home }} subs"/>
+    <div class="text-center">
+        <input class="btn btn-primary" type="submit" value="Save {{ away_home }} subs"/>
+    </div>
 </form>
