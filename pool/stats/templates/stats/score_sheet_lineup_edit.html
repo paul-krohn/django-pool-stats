@@ -3,7 +3,7 @@
     {% if lineup_formset.non_form_errors %}
         {{ lineup_formset.non_form_errors }}
     {% endif %}
-    <table class="table">
+    <table class="table" style="width: auto;">
     {% csrf_token %}
     {{ lineup_formset.management_form }}
     {% for lineup_form in lineup_formset %}
@@ -18,7 +18,5 @@
     </tr>
     {% endfor %}
 </table>
-  <div class="text-center">
-    <input class="btn btn-primary" type="submit" value="Save {{ away_home }} lineup"/>
-  </div>
+<input class="btn btn-primary" type="submit" value="Save {{ away_home }} lineup"/>
 </form>
