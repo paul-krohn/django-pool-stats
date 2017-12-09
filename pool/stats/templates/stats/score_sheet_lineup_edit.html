@@ -1,18 +1,18 @@
 <h6>{{ away_home|title }} Lineup</h6>
 <form action="{% url 'score_sheet_lineup' score_sheet.id away_home %}" method="post">
-    {% csrf_token %}
     {% if lineup_formset.non_form_errors %}
         {{ lineup_formset.non_form_errors }}
     {% endif %}
     <table class="table">
+    {% csrf_token %}
     {{ lineup_formset.management_form }}
     {% for lineup_form in lineup_formset %}
     {{ lineup_form.id }}
     <tr>
         {% if away_home == 'away' %}
-        <th><label>{{ lineup_form.instance.position.away_name }}</label></th>
+        <th class="col-sm-1"><label>{{ lineup_form.instance.position.away_name }}</label></th>
         {% else %}
-        <th><label>{{ lineup_form.instance.position.home_name }}</label></th>
+        <th class="col-sm-1"><label>{{ lineup_form.instance.position.home_name }}</label></th>
         {% endif %}
         <td>{{ lineup_form.player }}</td>
     </tr>
