@@ -190,6 +190,7 @@ def team(request, team_id):
     _team = get_object_or_404(Team, id=team_id)
     _players = PlayerSeasonSummary.objects.filter(
         player_id__in=list([x.id for x in _team.players.all()]),
+        season_id=_team.season.id,
     ).order_by('player__last_name')
     _score_sheets = set(ScoreSheet.objects.filter(official=True).filter(
         django.db.models.Q(match__away_team=_team) | django.db.models.Q(match__home_team=_team)
