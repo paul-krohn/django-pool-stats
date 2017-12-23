@@ -91,6 +91,10 @@ $(document).ready(function(){
         {% include "stats/score_sheet_games_form.html" %}
         <tr><td colspan="2"></td><td class="scoresheet-square"><b>{{ score_sheet.home_wins }}</b></td><td></td><td class="scoresheet-square"><b>{{ score_sheet.away_wins }}</b></td><td colspan="4"></td></tr>
     </table>
+    <div class="text-center">
+        <input name="games" class="btn btn-primary" type="submit" value="Save games"/>
+    </div>
+</form>
     <h3>Away Player Summaries</h3>
     {% with player_score_sheet_summaries=away_player_score_sheet_summaries %}
     {% include "stats/player_match_summary.html" %}
@@ -104,9 +108,10 @@ $(document).ready(function(){
     <table class="table">
     {{ score_sheet_completion_form.as_table }}
     </table>
-
+<form action="{% url 'score_sheet_edit' score_sheet.id %}" method="post">
+    {% csrf_token %}
     <div class="text-center">
-        <input class="btn btn-primary" type="submit" value="Save"/>
+        <input name="complete" class="btn btn-primary" type="submit" value="Mark complete"/>
     </div>
 </form>
 {% endblock %}
