@@ -375,15 +375,19 @@ def score_sheet_edit(request, score_sheet_id):
 
     if request.method == 'POST':
         score_sheet_completion_form = ScoreSheetCompletionForm(request.POST, instance=s)
-        if score_sheet_completion_form.is_valid():
-            score_sheet_completion_form.save()
-            if score_sheet_completion_form.instance.complete:
-                return redirect('week', s.match.week.id)
         score_sheet_game_formset = score_sheet_game_formset_f(
             request.POST, queryset=s.games.all()
         )
-        if score_sheet_game_formset.is_valid():
-            score_sheet_game_formset.save()
+        # save either the completion form, or the games. It would be preferable to save both, but one
+        # runs in to management form complications.
+        if 'games' in request.POST:
+            if score_sheet_game_formset.is_valid():
+                score_sheet_game_formset.save()
+        else:
+            if score_sheet_completion_form.is_valid():
+                score_sheet_completion_form.save()
+                if score_sheet_completion_form.instance.complete:
+                    return redirect('week', s.match.week.id)
     else:
         score_sheet_completion_form = ScoreSheetCompletionForm(
             instance=s,

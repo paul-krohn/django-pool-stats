@@ -204,6 +204,17 @@
       "home_position": 4,
       "home_breaks": false
     }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 17,
+    "fields": {
+      "order": 17,
+      "away_position": 5,
+      "home_position": 5,
+      "home_breaks": false,
+      "tiebreaker": true
+    }
   }
 ]
 

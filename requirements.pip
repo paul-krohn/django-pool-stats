@@ -8,3 +8,4 @@ python3-memcached==1.51
 uWSGI==2.0.15
 # for tests
 num2words==0.5.3
+selenium==3.8.0
