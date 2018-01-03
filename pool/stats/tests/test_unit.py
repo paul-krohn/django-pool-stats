@@ -7,11 +7,11 @@ from django.test import TestCase
 from django.test import Client
 from django.test import RequestFactory
 
-from .models import Season, Player, PlayerSeasonSummary, GameOrder, Match, ScoreSheet, Week
-from .models import PlayPosition, AwayPlayPosition, HomePlayPosition
-from .models import Team, AwayTeam, HomeTeam
+from ..models import Season, Player, PlayerSeasonSummary, GameOrder, Match, ScoreSheet, Week
+from ..models import PlayPosition, AwayPlayPosition, HomePlayPosition
+from ..models import Team, AwayTeam, HomeTeam
 
-from .views import get_single_player_view_cache_key, expire_page
+from ..views import get_single_player_view_cache_key, expire_page
 
 
 import random
