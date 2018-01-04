@@ -173,9 +173,12 @@ class ScoreSheetTestCase(BasePoolStatsTestCase):
         self.set_substitution('away', 10)
         self.set_substitution('home', 10)
         win_counts = self.set_winners()
+        # not sure why it helps here to re-get the same page, but when the game counts come up 8-8, the test fails?
+        self.selenium.get('{}score_sheet_edit/{}/'.format(self.base_url, 1))
         for location_name in location_names:
+            page_wins = int(self.selenium.find_element_by_id('{}-wins-total'.format(location_name)).text)
             self.assertEqual(
-                int(self.selenium.find_element_by_id('{}-wins-total'.format(location_name)).text),
+                page_wins,
                 win_counts[location_name]
             )
 
