@@ -65,7 +65,7 @@ class BasePoolStatsTestCase(LiveServerTestCase):
         self.selenium.find_element_by_id('{}_substitutions_save'.format(away_home)).click()
         return selected_player
 
-    def set_winners(self, forfeits=0):
+    def set_winners(self, forfeits=0, table_runs=0):
         games_form = self.selenium.find_element_by_name('score_sheet_games_form')
         # hard-coding game count here, is there a way to not do that?
         # id_form-1-winner_0
@@ -73,22 +73,33 @@ class BasePoolStatsTestCase(LiveServerTestCase):
             'home': 0,
             'away': 0,
         }
+        forfeit_games = []
+        tr_games = []
+
         for inc in range(0, 16):
             # choose whether home (0) or away (1) wins "randomly"
             winner = randrange(0, 2)
             win_counts[location_names[winner]] += 1
             button = games_form.find_element_by_id('id_form-{}-winner_{}'.format(inc, winner))
             button.click()
-        # set some forfeits!
-        if forfeits:
-            forfeit_games = []
-            for forfeit_inc in range(0, forfeits):
+            # set some forfeits!
+
+        while len(forfeit_games) < forfeits:
+            candidate = randrange(0, 16)
+            while candidate in forfeit_games:
                 candidate = randrange(0, 16)
-                while candidate in forfeit_games:
-                    candidate = randrange(0, 16)
-                forfeit_games.append(candidate)
-            for forfeit_game in forfeit_games:
-                games_form.find_element_by_id('id_form-{}-forfeit'.format(forfeit_game)).click()
+            forfeit_games.append(candidate)
+        while len(tr_games) < table_runs:
+            candidate = randrange(0, 16)
+            while candidate in forfeit_games or candidate in tr_games:
+                candidate = randrange(0, 16)
+            tr_games.append(candidate)
+
+        for forfeit_game in forfeit_games:
+            games_form.find_element_by_id('id_form-{}-forfeit'.format(forfeit_game)).click()
+        for tr_game in tr_games:
+            games_form.find_element_by_id('id_form-{}-table_run'.format(tr_game)).click()
+
         games_form.find_element_by_id('games-save-button').click()
         return win_counts
 
@@ -215,12 +226,13 @@ class ScoreSheetTestCase(BasePoolStatsTestCase):
         """
 
         forfeit_count = 3
+        table_run_count = 2
 
         self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 5))
         self.populate_lineup()
         self.set_substitution('away', 10)
         self.set_substitution('home', 10)
-        win_counts = self.set_winners(forfeits=3)
+        win_counts = self.set_winners(forfeits=3, table_runs=table_run_count)
         self.selenium.get('{}score_sheet_edit/{}/'.format(self.base_url, 1))
         wins_set = 0
         total_wins = 0
@@ -233,11 +245,14 @@ class ScoreSheetTestCase(BasePoolStatsTestCase):
         )
         # add up the player win totals; it should be 16 - forfeit count
         player_wins = 0
+        tr_count = 0
         for location_name in location_names:
             player_summary_div = self.selenium.find_element_by_id('{}-player-summaries'.format(location_name))
             player_summary_table = player_summary_div.find_element_by_tag_name('table')
             player_summary_rows = player_summary_table.find_elements_by_tag_name('tr')
             for player_summary_row in player_summary_rows[1:]:  # skip the header row
-                player_summary_wins_cell = player_summary_row.find_elements_by_tag_name('td')[1]
-                player_wins += int(player_summary_wins_cell.text)
+                player_summary_cells = player_summary_row.find_elements_by_tag_name('td')
+                player_wins += int(player_summary_cells[1].text)
+                tr_count += int(player_summary_cells[3].text)
         self.assertEqual(player_wins + forfeit_count, 16)
+        self.assertEqual(tr_count, table_run_count)
