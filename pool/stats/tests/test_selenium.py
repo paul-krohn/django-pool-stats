@@ -2,6 +2,8 @@ from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 
+from ..models import ScoreSheet
+
 from random import randrange
 
 location_names = ['home', 'away']
@@ -121,6 +123,14 @@ class BaseViewRedirectTestCase(BasePoolStatsTestCase):
     def test_divisions_view_redirect(self):
         self.selenium.get('{}divisions/'.format(self.base_url))
         self.assertEquals(self.selenium.current_url, '{}divisions/{}'.format(self.base_url, self.default_season))
+
+    def test_team_stats_update_redirect(self):
+        self.selenium.get('{}update_teams_stats/'.format(self.base_url))
+        self.assertEqual(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
+
+    def test_player_stats_update_redirect(self):
+        self.selenium.get('{}update_players_stats/'.format(self.base_url))
+        self.assertEqual(self.selenium.current_url, '{}players/{}'.format(self.base_url, self.default_season))
 
 
 class ScoreSheetTestCase(BasePoolStatsTestCase):
@@ -256,3 +266,26 @@ class ScoreSheetTestCase(BasePoolStatsTestCase):
                 tr_count += int(player_summary_cells[3].text)
         self.assertEqual(player_wins + forfeit_count, 16)
         self.assertEqual(tr_count, table_run_count)
+
+    def test_team_win_totals(self):
+        self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 5))
+        self.populate_lineup()
+        self.set_substitution('away', 10)
+        self.set_substitution('home', 10)
+        # we need the scoresheet id from the current URL
+        scoresheet_id = self.selenium.current_url.split('/')[-2]
+        win_counts = self.set_winners(forfeits=1, table_runs=2)
+        ss = ScoreSheet.objects.get(id=scoresheet_id)
+        ss.official = True
+        ss.save()
+        self.selenium.get('{}update_teams_stats/'.format(self.base_url))
+        self.assertEquals(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
+        standings_table = self.selenium.find_element_by_id('team-standings-table')
+        standings_rows = standings_table.find_elements_by_tag_name('tr')
+        wins = list()
+        losses = list()
+        for standings_row in standings_rows[1:3]:  # skip header row, only 2 teams have played a match in this scenario
+            cells = standings_row.find_elements_by_tag_name('td')
+            wins.append(int(cells[2].text))
+            losses.append(int(cells[3].text))
+        self.assertTrue(list(win_counts.values()) in [wins, losses])

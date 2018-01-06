@@ -174,6 +174,8 @@ def player_create(request):
 
 def update_players_stats(request):
 
+    check_season(request)
+
     season_id = request.session['season_id']
     PlayerSeasonSummary.update_all(season_id=season_id)
     # delete the player rankings view cache; then redirect to the players view, which
