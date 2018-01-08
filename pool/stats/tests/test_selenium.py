@@ -155,6 +155,13 @@ class BaseViewRedirectTestCase(BasePoolStatsTestCase):
         self.assertEqual(self.selenium.current_url, '{}players/{}'.format(self.base_url, self.default_season))
 
 
+class StatusPageTestCase(BasePoolStatsTestCase):
+
+    def test_status_page(self):
+        response = self.client.get('{}__status'.format(self.base_url))
+        self.assertEqual(response.status_code, 200)
+
+
 class ScoreSheetTestCase(BasePoolStatsTestCase):
 
     def test_match_create_scoresheet(self):
