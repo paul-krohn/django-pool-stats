@@ -18,5 +18,9 @@
     </tr>
     {% endfor %}
 </table>
+    {% if score_sheet.match.playoff %}
+    <p><strong>Note: </strong> the TB (tiebreaker) position only needs to be filled if you reach the tiebreaker game.</p>
+    {{ score_sheet.away_lineup.awaylineupentry }}
+    {% endif %}
 <input class="btn btn-primary" type="submit" value="Save {{ away_home }} lineup" id="{{ away_home }}_lineup_save"/>
 </form>

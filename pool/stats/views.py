@@ -479,8 +479,8 @@ def score_sheet_lineup(request, score_sheet_id, away_home):
 def substitutions_formset_factory_builder(score_sheet_id, away_home):
     s = ScoreSheet.objects.get(id=score_sheet_id)
     already_used_players = []
-    # first exclude players already in the lineup
-    for x in getattr(s, '{}_lineup'.format(away_home)).all():
+    # first exclude players already in the lineup, but not the player in tiebreaker position
+    for x in getattr(s, '{}_lineup'.format(away_home)).filter(position__tiebreaker=False):
         if x.player is not None:
             already_used_players.append(x.player.id)
 
