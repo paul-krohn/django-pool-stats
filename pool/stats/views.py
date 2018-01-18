@@ -544,7 +544,10 @@ def update_teams_stats(request):
 
 
 def unofficial_results(request):
-    sheets = ScoreSheet.objects.filter(official=False)
+
+    check_season(request)
+
+    sheets = ScoreSheet.objects.filter(official=False, match__season_id=request.session['season_id'])
 
     context = {
         'score_sheets': sheets,

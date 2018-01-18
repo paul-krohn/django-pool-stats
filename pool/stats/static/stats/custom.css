@@ -90,3 +90,7 @@ a:hover	{
 .showhide {
     display: none;
 }
+
+.table-compact {
+    width: auto;
+}

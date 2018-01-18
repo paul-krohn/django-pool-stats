@@ -3,14 +3,17 @@
 {% block title %}SFPA :: Unofficial Results :: {{ season }}{% endblock %}
 
 {% block content %}
+<div class="text-center">
+<h2>Unofficial Results</h2>
+</div>
 <table class="table">
-    <tr><th align="right">Away</th><th></th><th></th><th>Home</th></tr>
+    <tr><th>Week</th><th align="right">Away</th><th>Score</th><th>Home</th></tr>
 {% for score_sheet in score_sheets %}
     <tr>
-        <td align="right">{{ score_sheet.match.away_team }}</td>
-        <td>{{ score_sheet.away_wins }}</td>
-        <td>{{ score_sheet.home_wins }}</td>
-        <td>{{ score_sheet.match.home_team }}</td>
+        <td><a href="{% url 'week' score_sheet.match.week.id %}">{{ score_sheet.match.week}}</a></td>
+        <td><a href="{% url 'team' score_sheet.match.away_team.id %}">{{ score_sheet.match.away_team }}</a></td>
+        <td><a href="{% url 'score_sheet' score_sheet.id %}"> {{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a></td>
+        <td><a href="{% url 'team' score_sheet.match.home_team.id %}">{{ score_sheet.match.home_team }}</a></td>
     </tr>
 {% endfor %}
 </table>
