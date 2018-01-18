@@ -265,13 +265,13 @@ class ScoreSheetTestCase(BasePoolStatsTestCase):
         """
 
         forfeit_count = 3
-        table_run_count = 2
+        table_run_count = 0
 
         self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 5))
         self.populate_lineup()
         self.set_substitution('away', 10)
         self.set_substitution('home', 10)
-        win_counts = self.set_winners(forfeits=3, table_runs=table_run_count)
+        win_counts = self.set_winners(forfeits=forfeit_count, table_runs=table_run_count)
         self.selenium.get('{}score_sheet_edit/{}/'.format(self.base_url, 1))
         wins_set = 0
         total_wins = 0
