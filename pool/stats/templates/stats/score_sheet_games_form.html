@@ -32,6 +32,17 @@
         <td class="scoresheet-square">{{ game_form.table_run }}</td>
         <td class="scoresheet-square">{{ game_form.forfeit }}</td>
     </tr>
+    {% if game_form.errors %}
+    <tr>
+        <td colspan="9">
+            {% for error in game_form.non_field_errors %}
+                <div class="alert alert-danger">
+                    <strong>{{ error }}</strong>
+                </div>
+            {% endfor %}
+        </td>
+    </tr>
+    {% endif %}
     {% if row_divider %}
     <tr class="scoresheet-divider"><td class="scoresheet-divider" colspan="9"></td></tr>
     {% endif %}

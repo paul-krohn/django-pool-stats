@@ -32,6 +32,17 @@ class ScoreSheetGameForm(django.forms.ModelForm):
             'forfeit': '',
         }
 
+    def clean(self):
+        cleaned_data = super(ScoreSheetGameForm, self).clean()
+
+        tr = cleaned_data.get('table_run')
+        ff = cleaned_data.get('forfeit')
+
+        if tr and ff:
+            raise ValidationError(
+                "A game can't be both a forfeit and a table run."
+            )
+
 
 class DisabledScoreSheetGameForm(ScoreSheetGameForm):
 

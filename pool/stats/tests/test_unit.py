@@ -8,11 +8,13 @@ from django.test import Client
 from django.test import RequestFactory
 
 from ..models import Season, Player, PlayerSeasonSummary, GameOrder, Match, ScoreSheet, Week
-from ..models import PlayPosition, AwayPlayPosition, HomePlayPosition
+from ..models import PlayPosition, AwayPlayPosition, HomePlayPosition, Game
 from ..models import Team, AwayTeam, HomeTeam
 
 from ..views import get_single_player_view_cache_key, expire_page
 
+from ..forms import ScoreSheetGameForm
+from django.core.exceptions import ValidationError
 
 import random
 
@@ -311,3 +313,17 @@ class ScoreSheetTests(TestCase):
         expire_page(self.factory.get(reverse('players')), reverse('players', kwargs=season_args))
         response = self.client.get(reverse('players', kwargs=season_args))
         self.assertEqual(len(response.context['players']), 6)
+
+
+class GameTests(TestCase):
+
+    def test_score_sheet_game_is_tr_and_forfeit(self):
+
+        test_game = Game()
+        test_game_form = ScoreSheetGameForm(instance=test_game)
+        self.assertEqual(test_game_form.is_valid(), False)  # no data, not valid
+        test_game_form = ScoreSheetGameForm({'winner': 'home', 'forfeit': True, 'table_run': False})
+        self.assertEqual(test_game_form.is_valid(), True)
+        test_game_form = ScoreSheetGameForm({'winner': 'home', 'forfeit': True, 'table_run': True})
+        self.assertEqual(test_game_form.is_valid(), False)  # forfeit + tr -> not valid
+        self.assertRaises(ValidationError, test_game_form.clean)   # and raises ValidationError
