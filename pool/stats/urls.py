@@ -17,11 +17,8 @@ urlpatterns = [
     url(r'^week/(?P<week_id>[0-9]+)/$', views.week, name='week'),
     url(r'^weeks/', views.weeks, name='weeks'),
 
-    url(r'^match/(?P<match_id>[0-9]+)/$', views.match, name='match'),
-
     url(r'^players/(?P<season_id>[0-9]+)', cache_page(15)(views.players), name='players'),
     url(r'^players/', views.players, name='players'),
-    # url(r'^foo/([0-9]{1,2})/$', cache_page(60 * 15)(my_view)),
 
     url(r'^player/(?P<player_id>[0-9]+)/$', views.player, name='player'),
     url(r'^player_create/', views.player_create, name='player_create'),
@@ -38,7 +35,6 @@ urlpatterns = [
     url(r'^score_sheet_edit/(?P<score_sheet_id>[0-9]+)/$', views.score_sheet_edit, name='score_sheet_edit'),
 
     url(r'^score_sheet/(?P<score_sheet_id>[0-9]+)/$', views.score_sheet, name='score_sheet'),
-    url(r'^score_sheets/', views.score_sheets, name='score_sheets'),
 
     url(r'^seasons/', views.seasons, name='seasons'),
     url(r'^set_season/(?P<season_id>[0-9]+)/$', views.set_season, name='set_season'),
