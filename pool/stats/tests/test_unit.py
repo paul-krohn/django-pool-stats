@@ -1,143 +1,24 @@
-import datetime
-from num2words import num2words
 from django.core.cache import cache
 from django.core.urlresolvers import reverse
-from django.utils import timezone
-from django.test import TestCase
 from django.test import Client
 from django.test import RequestFactory
 
-from ..models import Season, Player, PlayerSeasonSummary, GameOrder, Match, ScoreSheet, Week
-from ..models import PlayPosition, AwayPlayPosition, HomePlayPosition, Game
-from ..models import Team, AwayTeam, HomeTeam
+from ..models import Season, Player, PlayerSeasonSummary, GameOrder, ScoreSheet, Game
 
 from ..views import get_single_player_view_cache_key, expire_page
 
 from ..forms import ScoreSheetGameForm
 from django.core.exceptions import ValidationError
 
+from .base_cases import BasePoolStatsTestCase
+
 import random
-
-TEAM_SIZE = 7
-
-match_ups = [
-    [1, 1],
-    [2, 2],
-    [3, 3],
-
-    [1, 2],
-    [2, 3],
-    [3, 1],
-
-    [1, 3],
-    [2, 1],
-    [3, 2]
-]
-
-
-def create_season():
-    a_season = Season(
-        name='Some Future Season',
-        pub_date=timezone.now(),
-        is_default=True,
-        minimum_games=1,
-    )
-    a_season.save()
-    return a_season
-
-
-def create_players(count, start_position):
-    inc = 0
-    start_position += 65
-    players = []
-    while inc < count:
-        p = Player(first_name=chr(start_position + inc), last_name=chr(start_position + inc + 32))
-        p.save()
-        players.append(p)
-        inc += 1
-    return players
-
-
-def create_teams(a_season):
-    """
-    14 players to populate 2 teams
-    :return:
-    """
-
-    team_a = Team(name="Team A", season=a_season)
-    team_a.save()
-    for p in create_players(TEAM_SIZE, 0):
-        team_a.players.add(p)
-    team_a.save()
-    team_b = Team(name="Team B", season=a_season)
-    team_b.save()
-    for p in create_players(TEAM_SIZE, 16):
-        team_b.players.add(p)
-    team_b.save()
-
-
-def create_weeks(a_season, count):
-    weeks = []
-    inc = 0
-    while inc < count:
-        week = Week(
-            season=a_season,
-            date=timezone.now() + datetime.timedelta(days=7 * inc),
-            name='Week {}'.format(chr(65 + inc))
-        )
-        inc += 1
-        week.save()
-        weeks.append(week)
-    return weeks
-
-
-def create_play_positions():
-    positions = []
-    for i in range(1, 4):
-        position = PlayPosition(
-            home_name="Home Player {}".format(chr(65 + i)),
-            away_name="Away Player {}".format(i),
-            name="Player {}".format(num2words(i)),
-        )
-        position.save()
-        positions.append(position)
-    # one sub position
-    positions.append(PlayPosition(
-        home_name="Home Sub 1",
-        away_name="Away Sub 2",
-        name="Sub Two"
-
-    ))
-    return positions
-
-
-def create_game_order():
-    """
-    Use the 3x3 grid in match_up; tests assumptions about 4x4 grid that may lurk in the code
-    :return: bool
-    """
-    game_match_ups = []
-    for match_up in match_ups:
-        away_position_name = 'Player {}'.format(num2words(match_up[0]))
-        home_position_name = 'Player {}'.format(num2words(match_up[1]))
-        # print('this player name is: {}'.format(player_name))
-        AwayPlayPosition.objects.get(name=away_position_name)
-        game_order = GameOrder(
-            away_position=AwayPlayPosition.objects.get(name=away_position_name),
-            home_position=HomePlayPosition.objects.get(name=home_position_name),
-            # name=num2words(len(game_match_ups) + 1),
-            order=len(game_match_ups) + 1,
-        )
-        game_order.save()
-        game_match_ups.append(game_order)
-    return game_match_ups
 
 
 def populate_lineup_entries(score_sheet):
     inc = 0
     for away_lineup_entry in score_sheet.away_lineup.all():
         away_lineup_entry.player = score_sheet.match.away_team.players.all()[inc]
-        # print(away_lineup_entry.position, away_lineup_entry.player)
         away_lineup_entry.save()
         inc += 1
 
@@ -145,34 +26,16 @@ def populate_lineup_entries(score_sheet):
     for home_lineup_entry in score_sheet.home_lineup.all():
         home_lineup_entry.player = score_sheet.match.home_team.players.all()[inc]
         home_lineup_entry.save()
-        # print(home_lineup_entry.position, home_lineup_entry.player)
         inc += 1
 
 
-def create_data():
-    """
-    Create a season, players, 2 teams, and a match, as mock data for many of the tests
-    """
-    a_season = create_season()
-    create_teams(a_season)  # we know they are called Team A and Team B
-    create_play_positions()  # we need these in place to test the score sheet creation
-    create_game_order()  # these too ...
-    (week_one, week_two) = create_weeks(a_season, 2)
-    match_one = Match(
-        week=week_one,
-        season=a_season,
-        away_team=AwayTeam.objects.get(name='Team A'),
-        home_team=HomeTeam.objects.get(name='Team B'),
-    )
-    match_one.save()
-    return match_one.id
-
-
-class ScoreSheetTests(TestCase):
+class ScoreSheetTests(BasePoolStatsTestCase):
 
     def setUp(self):
-        self.sample_match_id = create_data()
+        super(ScoreSheetTests, self).setUp()
+        self.sample_match_id = 5  # match is in fixtures, added above
         self.factory = RequestFactory()
+        self.game_count = len(GameOrder.objects.filter(tiebreaker=False))
 
     def test_player_index(self):
         """
@@ -212,7 +75,7 @@ class ScoreSheetTests(TestCase):
 
         response = self.client.get(reverse('player', kwargs={'player_id': player.id}))
         self.assertQuerysetEqual(
-            response.context['summaries'], ['<PlayerSeasonSummary: George Smith Some Future Season>']
+            response.context['summaries'], ['<PlayerSeasonSummary: George Smith Fall 2010>']
         )
 
     def test_score_sheet_create(self):
@@ -229,7 +92,7 @@ class ScoreSheetTests(TestCase):
 
         # the number of games should match the match_ups matrix in create_game_order(), ie len(match_ups)
         score_sheet = ScoreSheet.objects.get(id=1)
-        self.assertEqual(len(score_sheet.games.all()), len(match_ups))
+        self.assertEqual(len(score_sheet.games.all()), 16)  # 16 is lineup length squared
 
         # a second client to test the redirect from another session
         c = Client()
@@ -241,7 +104,7 @@ class ScoreSheetTests(TestCase):
         Create a score sheet, create the lineup,
 
         """
-        test_score_sheet_id = 2
+        test_score_sheet_id = 1
         response = self.client.get(reverse('score_sheet_create', kwargs={'match_id': self.sample_match_id}))
         # since we have a fresh DB, assume this will be score sheet number 1 ...
         self.assertRedirects(
@@ -259,16 +122,16 @@ class ScoreSheetTests(TestCase):
         # now we are ready to test some things
         # in the first game away player should be the team's first player
         self.assertEqual(score_sheet.games.all()[0].away_player, score_sheet.match.away_team.players.all()[0])
-        # the last game home player should be the second home player
-        self.assertEqual(score_sheet.games.last().home_player, score_sheet.match.home_team.players.all()[1])
+        # the last game home player should be the fourth home player
+        self.assertEqual(score_sheet.games.last().home_player, score_sheet.match.home_team.players.all()[3])
 
         inc = 0
         # choose a game at random to be the forfeit
-        forfeit_game = random.randint(0, len(match_ups))
+        forfeit_game = random.randint(0, self.game_count)
         # same for a table run, not the same as the forfeit ...
-        table_run_game = random.randint(0, len(match_ups))
+        table_run_game = random.randint(0, self.game_count)
         while table_run_game != forfeit_game:
-            table_run_game = random.randint(0, len(match_ups))
+            table_run_game = random.randint(0, self.game_count)
 
         away_wins = 0
         home_wins = 0
@@ -307,15 +170,15 @@ class ScoreSheetTests(TestCase):
 
         PlayerSeasonSummary.update_all(**season_args)
         summaries = PlayerSeasonSummary.objects.all()
-        self.assertEquals(TEAM_SIZE * 2, len(summaries))
+        self.assertEquals(37, len(summaries))  # 37 is a magic number, where does that come from?
 
         # there should now be six players with enough games to be in the standings
         expire_page(self.factory.get(reverse('players')), reverse('players', kwargs=season_args))
         response = self.client.get(reverse('players', kwargs=season_args))
-        self.assertEqual(len(response.context['players']), 6)
+        self.assertEqual(len(response.context['players']), 8)  # 8 is 2x players in lineup
 
 
-class GameTests(TestCase):
+class GameTests(BasePoolStatsTestCase):
 
     def test_score_sheet_game_is_tr_and_forfeit(self):
 
