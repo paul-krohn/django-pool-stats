@@ -292,47 +292,6 @@ def weeks(request):
     return render(request, 'stats/weeks.html', context)
 
 
-def match(request, match_id):
-    _match = get_object_or_404(Match, id=match_id)
-    match_score_sheets = ScoreSheet.objects.filter(match_id__exact=_match.id, official=True)
-
-    score_sheet_game_formsets = None
-
-    if len(match_score_sheets):
-        score_sheet_game_formset_f = modelformset_factory(
-            model=Game,
-            form=DisabledScoreSheetGameForm,
-            max_num=len(match_score_sheets[0].games.all())
-        )
-        score_sheet_game_formsets = []
-        for a_score_sheet in match_score_sheets:
-            score_sheet_game_formsets.append(
-                score_sheet_game_formset_f(
-                    queryset=a_score_sheet.games.all(),
-                )
-            )
-    context = {
-        'match': _match,
-        'score_sheets': score_sheet_game_formsets
-    }
-    return render(request, 'stats/match.html', context)
-
-
-def score_sheets(request):
-    sheets = ScoreSheet.objects.filter(official=False)
-
-    sheets_with_scores = []
-    for sheet in sheets:
-        sheets_with_scores.append({
-            'sheet': sheet,
-        })
-
-    context = {
-        'score_sheets': sheets_with_scores
-    }
-    return render(request, 'stats/score_sheets.html', context)
-
-
 def score_sheet(request, score_sheet_id):
     s = get_object_or_404(ScoreSheet, id=score_sheet_id)
     score_sheet_game_formset_f = modelformset_factory(

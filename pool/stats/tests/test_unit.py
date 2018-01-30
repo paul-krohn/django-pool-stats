@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 from django.test import Client
 from django.test import RequestFactory
 
-from ..models import Season, Player, PlayerSeasonSummary, GameOrder, ScoreSheet, Game
+from ..models import Season, Player, PlayerSeasonSummary, GameOrder, ScoreSheet, Game, Team
 
 from ..views import get_single_player_view_cache_key, expire_page
 
@@ -190,3 +190,57 @@ class GameTests(BasePoolStatsTestCase):
         test_game_form = ScoreSheetGameForm({'winner': 'home', 'forfeit': True, 'table_run': True})
         self.assertEqual(test_game_form.is_valid(), False)  # forfeit + tr -> not valid
         self.assertRaises(ValidationError, test_game_form.clean)   # and raises ValidationError
+
+
+class WeekTests(BasePoolStatsTestCase):
+
+    TEST_WEEKS_COUNT = 7
+    TEST_WEEK_4_MATCH_COUNT = 3
+
+    def test_weeks_count(self):
+        response = self.client.get(reverse('weeks'), follow=True)
+        self.assertEqual(len(response.context['weeks']), self.TEST_WEEKS_COUNT)
+
+    def test_week_match_count(self):
+        response = self.client.get(reverse('week', kwargs={'week_id': 4}))
+        self.assertEqual(len(response.context['unofficial_matches']), self.TEST_WEEK_4_MATCH_COUNT)
+
+
+class TeamTests(BasePoolStatsTestCase):
+
+    TEST_TEAM_ID = 6
+    TEST_TEAM_PLAYER_COUNT = 6
+    TEST_DEFAULT_SEASON = 4
+    TEST_TEAM_COUNT = 6
+
+    def test_team_player_count(self):
+
+        test_team = Team.objects.get(id=self.TEST_TEAM_ID)
+        self.assertEqual(len(test_team.players.all()), self.TEST_TEAM_PLAYER_COUNT)
+
+        season_args = {'season_id': Season.objects.get(is_default=True).id}
+        PlayerSeasonSummary.update_all(**season_args)
+        summaries = PlayerSeasonSummary.objects.filter(
+            player_id__in=list([x.id for x in test_team.players.all()]),
+            season_id=self.TEST_DEFAULT_SEASON,
+        )
+        self.assertEqual(len(summaries), self.TEST_TEAM_PLAYER_COUNT)
+
+        # a bit of artful dodging here; in order to purge a page/view from the cache, we need a request pointing
+        # at the page ... so create a request object, request the page with it, then delete it from cache, then
+        # request it again for the actual test.
+        factory = RequestFactory()
+        request = factory.get(reverse('team', kwargs={'team_id': self.TEST_TEAM_ID}))
+        expire_page(request, reverse('team', kwargs={'team_id': self.TEST_TEAM_ID}))
+
+        response = self.client.get(reverse('team', kwargs={'team_id': self.TEST_TEAM_ID}))
+        self.assertEqual(len(response.context['players']), self.TEST_TEAM_PLAYER_COUNT)
+
+    def test_team_count(self):
+
+        response = self.client.get(reverse('teams'), follow=True)
+        self.assertRedirects(response, expected_url=reverse(
+            'teams',
+            kwargs={'season_id': self.TEST_DEFAULT_SEASON}
+        ))
+        self.assertEqual(len(response.context['teams']), self.TEST_TEAM_COUNT)

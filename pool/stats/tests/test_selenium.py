@@ -1,6 +1,8 @@
 from .base_cases import BaseSeleniumPoolStatsTestCase, form_length_map, location_names
 from ..models import ScoreSheet
 
+from selenium.webdriver.support.ui import Select
+
 
 class BaseViewRedirectTestCase(BaseSeleniumPoolStatsTestCase):
 
@@ -82,6 +84,23 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
             games_form_table.find_elements_by_class_name('scoresheet-even')
         for table_row in table_rows[0:-1]:  # skip the tie-breaker, which will be the last row
             self.assertEquals(len(table_row.find_elements_by_xpath('td[div[a]]')), 2)
+
+    def test_score_sheet_lineup_duplicate_player(self):
+
+        location_name = location_names[0]
+        self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 11))
+        score_sheet_id = self.selenium.current_url.split('/')[-2]
+
+        self.selenium.find_element_by_id('toggle-{}_lineup'.format(location_name)).click()
+        lineup_form = self.selenium.find_element_by_id('{}_lineup'.format(location_name))
+        for inc in [0, 1]:
+            select = Select(lineup_form.find_element_by_id('id_form-{}-player'.format(inc)))
+            select.select_by_index(1)  # '1' as the first option in the select is '------' or similar
+        # submit the form
+        self.selenium.find_element_by_id('{}_lineup_save'.format(location_name)).click()
+        # verify that it redirects to the lineup form on
+        self.assertEquals(self.selenium.current_url, '{}score_sheet_lineup/{}/{}'.format(
+            self.base_url, score_sheet_id, location_name))
 
     def test_match_scoresheet_substitutions(self):
         self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 11))
