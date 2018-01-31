@@ -284,7 +284,7 @@ def week(request, week_id):
 def weeks(request):
     check_season(request)
     _season = Season.objects.get(id=request.session['season_id'])
-    _weeks = Week.objects.filter(season=request.session['season_id'])
+    _weeks = Week.objects.filter(season=request.session['season_id']).order_by('date')
     context = {
         'weeks': _weeks,
         'season': _season
