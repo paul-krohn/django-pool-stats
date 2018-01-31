@@ -432,7 +432,7 @@ def score_sheet_lineup(request, score_sheet_id, away_home):
         'lineup_formset': lineup_formset,
         'away_home': away_home
     }
-    return render(request, 'stats/score_sheet_lineup_edit.html', context)
+    return render(request, 'stats/score_sheet_lineup_edit_standalone.html', context)
 
 
 def substitutions_formset_factory_builder(score_sheet_id, away_home):
