@@ -3,7 +3,7 @@ from django.core.urlresolvers import reverse
 from django.test import Client
 from django.test import RequestFactory
 
-from ..models import Season, Player, PlayerSeasonSummary, GameOrder, ScoreSheet, Game, Team
+from ..models import Season, Player, PlayerSeasonSummary, GameOrder, ScoreSheet, Game, Team, Week
 
 from ..views import get_single_player_view_cache_key, expire_page
 
@@ -196,6 +196,8 @@ class WeekTests(BasePoolStatsTestCase):
 
     TEST_WEEKS_COUNT = 7
     TEST_WEEK_4_MATCH_COUNT = 3
+    TEST_WEEK_FIRST = 4
+    TEST_WEEK_LAST = 11
 
     def test_weeks_count(self):
         response = self.client.get(reverse('weeks'), follow=True)
@@ -204,6 +206,20 @@ class WeekTests(BasePoolStatsTestCase):
     def test_week_match_count(self):
         response = self.client.get(reverse('week', kwargs={'week_id': 4}))
         self.assertEqual(len(response.context['unofficial_matches']), self.TEST_WEEK_4_MATCH_COUNT)
+
+    def test_adjacent_weeks(self):
+        # week 5 has week 4 previous and week 7 next
+        week = Week.objects.get(id=5)
+        previous_week = week.previous()
+        next_week = week.next()
+        self.assertEqual(4, previous_week.id)
+        self.assertEqual(7, next_week.id)
+
+    def test_end_weeks(self):
+        last_week = Week.objects.get(id=self.TEST_WEEK_LAST)
+        self.assertIsNone(last_week.next())
+        first_week = Week.objects.get(id=self.TEST_WEEK_FIRST)
+        self.assertIsNone(first_week.previous())
 
 
 class TeamTests(BasePoolStatsTestCase):
