@@ -266,6 +266,26 @@ class Week(models.Model):
     def __str__(self):
         return "{}".format(self.name)
 
+    @classmethod
+    def get_weeks_in_season(cls, before_after, week):
+        comp_args = {
+            'season_id': week.season,
+            'date__{}'.format('lt' if before_after == 'before' else 'gt'): week.date
+        }
+        weeks = cls.objects.filter(**comp_args).order_by('date')
+        if before_after == 'before':
+            return list(weeks)[-1] if weeks else None
+        else:
+            return weeks[0] if weeks else None
+
+    def next(self):
+        return self.get_weeks_in_season(before_after='after', week=self)
+
+    def previous(self):
+        return self.get_weeks_in_season(before_after='before', week=self)
+
+
+
 
 class AwayTeam(Team):
     class Meta:

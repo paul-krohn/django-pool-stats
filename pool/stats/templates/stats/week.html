@@ -4,9 +4,10 @@
 
 {% block content %}
 {% if week %}
-<h2>{{ week.name }}</h2>
+<h3>{{ week.name }}</h3>
 <p>{{ week.date}}</p>
-
+<p>{% if week.previous %}<a href="{% url 'week' week.previous.id %}">&larr; {{week.previous}}</a>{% endif %} •
+{% if week.next%}<a href="{% url 'week' week.next.id %}">{{week.next}} &rarr;</a>{% endif %}</p>
 
 {% if official_matches|length %}
 
