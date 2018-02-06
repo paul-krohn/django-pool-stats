@@ -1,4 +1,5 @@
 import time
+import datetime
 
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Division, AwayLineupEntry, Game, HomeLineupEntry, Match, Player, \
@@ -185,7 +186,7 @@ def update_players_stats(request):
 
 
 @cache_page(60 * 60)
-def team(request, team_id):
+def team(request, team_id, after=None):
 
     check_season(request)
 
@@ -198,11 +199,23 @@ def team(request, team_id):
         django.db.models.Q(match__away_team=_team) | django.db.models.Q(match__home_team=_team)
     ))
 
+    # we don't expect people to actually use the 'after' parameter, it is really to make test data
+    # with long-ago dates usable .
+    if after is not None:
+        after_parts = list(map(int, after.split('-')))
+        after_date = datetime.date(after_parts[0], after_parts[1], after_parts[2])
+    else:
+        after_date = datetime.date.today()
+    _matches = set(Match.objects.filter(week__date__gt=after_date).filter(
+        django.db.models.Q(away_team=_team) | django.db.models.Q(home_team=_team)
+    ))
+
     context = {
         'team': _team,
         'players': _players,
         'show_players': False,
         'scoresheets': _score_sheets,
+        'matches': _matches,
     }
     return render(request, 'stats/team.html', context)
 

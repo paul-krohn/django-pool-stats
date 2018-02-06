@@ -228,6 +228,8 @@ class TeamTests(BasePoolStatsTestCase):
     TEST_TEAM_PLAYER_COUNT = 6
     TEST_DEFAULT_SEASON = 4
     TEST_TEAM_COUNT = 6
+    TEST_SEASON_START_DATE = '2010-08-09'
+    TEST_TEAM_MATCH_COUNT = 3
 
     def test_team_player_count(self):
 
@@ -260,3 +262,9 @@ class TeamTests(BasePoolStatsTestCase):
             kwargs={'season_id': self.TEST_DEFAULT_SEASON}
         ))
         self.assertEqual(len(response.context['teams']), self.TEST_TEAM_COUNT)
+
+    def test_team_upcoming_matches(self):
+
+        response = self.client.get(reverse('team', kwargs={'team_id': self.TEST_TEAM_ID, 'after': '2010-01-01'}))
+        self.assertEqual(self.TEST_TEAM_MATCH_COUNT, len(response.context['matches']))
+
