@@ -9,7 +9,8 @@ urlpatterns = [
     url(r'^divisions/(?P<season_id>[0-9]+)', cache_page(15)(views.divisions), name='divisions'),
     url(r'^divisions/', views.divisions, name='divisions'),
 
-    url(r'^team/(?P<team_id>[0-9]+)/$', views.team, name='team'),
+    # the 'after' parameter is really just to make it testable
+    url(r'^team/(?P<team_id>[0-9]+)/(?P<after>[0-9-]+)?$', views.team, name='team'),
 
     url(r'^teams/(?P<season_id>[0-9]+)', cache_page(15)(views.teams), name='teams'),
     url(r'^teams/', views.index, name='teams'),
