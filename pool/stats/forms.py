@@ -73,3 +73,18 @@ class LineupFormSet(django.forms.BaseModelFormSet):
         if len(player_values) > len(set(player_values)):
             raise ValidationError('All players must be unique, there is at least one player in 2 positions.',
                                   code='lineup_duplicate_player')
+
+
+class SubstitutionFormSet(django.forms.BaseModelFormSet):
+    def clean(self):
+        super(SubstitutionFormSet, self).clean()
+
+        player_values = []
+        for form in self.forms:
+            # if form.cleaned_data['id'].position.tiebreaker:
+            #     continue
+            if 'player' in form.cleaned_data.keys() and form.cleaned_data['player'] is not None:
+                player_values.append(form.cleaned_data['player'])
+        if len(player_values) > len(set(player_values)):
+            raise ValidationError('You may not substitute in the same player twice',
+                                  code='lineup_duplicate_player')

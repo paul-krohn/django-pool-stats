@@ -65,14 +65,14 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
             # submit the form
             self.selenium.find_element_by_id('{}_lineup_save'.format(location_name)).click()
 
-    def set_substitution(self, away_home, index):
+    def set_substitution(self, away_home, game_index, player_index=1, substitution_index=0):
         self.selenium.find_element_by_id('toggle-{}_substitutions'.format(away_home)).click()
         substitution_form = self.selenium.find_element_by_id('{}_substitutions'.format(away_home))
-        game_select = Select(substitution_form.find_element_by_id('id_form-0-game_order'))
-        game_select.select_by_index(index)
-        player_select = Select(substitution_form.find_element_by_id('id_form-0-player'))
+        game_select = Select(substitution_form.find_element_by_id('id_form-{}-game_order'.format(substitution_index)))
+        game_select.select_by_index(game_index)
+        player_select = Select(substitution_form.find_element_by_id('id_form-{}-player'.format(substitution_index)))
         # select the 1th player; zero is '------' or similar
-        player_select.select_by_index(1)
+        player_select.select_by_index(player_index)
         selected_player = player_select.first_selected_option
         self.selenium.find_element_by_id('{}_substitutions_save'.format(away_home)).click()
         return selected_player
