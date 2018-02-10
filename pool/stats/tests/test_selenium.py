@@ -115,6 +115,16 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
             player_summary_rows = player_summary_table.find_elements_by_tag_name('tr')
             self.assertEqual(len(player_summary_rows), 6)  # 5 players plus a header row
 
+    def test_scoresheet_duplicate_substitutions(self):
+        self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 11))
+        score_sheet_id = self.selenium.current_url.split('/')[-2]
+
+        self.set_substitution('away', game_index=11, substitution_index=0)
+        self.set_substitution('away', game_index=12, substitution_index=1)  # this creates a duplicate substitution
+        self.assertEqual(self.selenium.current_url, '{}score_sheet_substitutions/{}/away'.format(
+            self.base_url, score_sheet_id, )
+        )
+
     def test_match_scoresheet_mark_winners(self):
         self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 11))
 

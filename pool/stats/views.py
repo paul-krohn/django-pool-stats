@@ -8,7 +8,7 @@ from .models import PlayPosition
 from .models import PlayerSeasonSummary
 from .models import AwaySubstitution, HomeSubstitution
 from .forms import PlayerForm, ScoreSheetGameForm, DisabledScoreSheetGameForm, ScoreSheetCompletionForm
-from .forms import LineupFormSet
+from .forms import LineupFormSet, SubstitutionFormSet
 from django.forms import modelformset_factory
 
 import django.forms
@@ -469,6 +469,7 @@ def substitutions_formset_factory_builder(score_sheet_id, away_home):
     return modelformset_factory(
         model=substitution_model,
         form=SubstitutionForm,
+        formset=SubstitutionFormSet,
         fields=['game_order', 'player'],
         # this may not work for leagues where the game group size is for some reason not the
         # same as the number of players in a lineup
@@ -497,6 +498,15 @@ def score_sheet_substitutions(request, score_sheet_id, away_home):
                 add_substitution_function.add(substitution)
             s.set_games()
             return redirect('score_sheet_edit', score_sheet_id=s.id)
+        else:
+            logging.debug("validation errors:{}".format(substitution_formset.form.non_field_errors))
+            context = {
+                'score_sheet': s,
+                'substitutions_formset': substitution_formset,
+                'away_home': away_home
+            }
+            return render(request, 'stats/score_sheet_substitutions_standalone.html', context)
+
     else:
         return redirect('score_sheet_edit', score_sheet_id=s.id)
 
