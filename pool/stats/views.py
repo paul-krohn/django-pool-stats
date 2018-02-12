@@ -255,13 +255,13 @@ def divisions(request, season_id=None):
     # can be sorted by ranking
     wrapper_divisions = []
     for _division in _divisions:
-        teams = Team.objects.filter(
+        _teams = Team.objects.filter(
             division=_division,
             season=request.session['season_id']
         ).order_by('ranking')
         wrapper_divisions.append({
             'division': _division,
-            'teams': teams
+            'teams': _teams
         })
     context = {
         'divisions': _divisions,
