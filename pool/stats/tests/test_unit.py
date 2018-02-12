@@ -195,8 +195,8 @@ class GameTests(BasePoolStatsTestCase):
 class WeekTests(BasePoolStatsTestCase):
 
     TEST_WEEKS_COUNT = 7
-    TEST_WEEK_4_MATCH_COUNT = 3
-    TEST_WEEK_FIRST = 4
+    TEST_WEEK_5_MATCH_COUNT = 3
+    TEST_WEEK_FIRST = 5
     TEST_WEEK_LAST = 11
 
     def test_weeks_count(self):
@@ -204,15 +204,15 @@ class WeekTests(BasePoolStatsTestCase):
         self.assertEqual(len(response.context['weeks']), self.TEST_WEEKS_COUNT)
 
     def test_week_match_count(self):
-        response = self.client.get(reverse('week', kwargs={'week_id': 4}))
-        self.assertEqual(len(response.context['unofficial_matches']), self.TEST_WEEK_4_MATCH_COUNT)
+        response = self.client.get(reverse('week', kwargs={'week_id': 5}))
+        self.assertEqual(len(response.context['unofficial_matches']), self.TEST_WEEK_5_MATCH_COUNT)
 
     def test_adjacent_weeks(self):
         # week 5 has week 4 previous and week 7 next
-        week = Week.objects.get(id=5)
+        week = Week.objects.get(id=4)
         previous_week = week.previous()
         next_week = week.next()
-        self.assertEqual(4, previous_week.id)
+        self.assertEqual(5, previous_week.id)
         self.assertEqual(7, next_week.id)
 
     def test_end_weeks(self):
@@ -264,7 +264,19 @@ class TeamTests(BasePoolStatsTestCase):
         self.assertEqual(len(response.context['teams']), self.TEST_TEAM_COUNT)
 
     def test_team_upcoming_matches(self):
+        # see comment in test_team_player_count about purging the cache to make sure response.context is not empty
+        request_args = {'team_id': self.TEST_TEAM_ID, 'after': '2010-01-01'}
+        factory = RequestFactory()
+        request = factory.get(reverse('team', kwargs=request_args))
+        expire_page(request, reverse('team', kwargs=request_args))
 
-        response = self.client.get(reverse('team', kwargs={'team_id': self.TEST_TEAM_ID, 'after': '2010-01-01'}))
-        self.assertEqual(self.TEST_TEAM_MATCH_COUNT, len(response.context['matches']))
+        response = self.client.get(reverse('team', kwargs=request_args))
+        matches = response.context['matches'].all()
+        self.assertEqual(self.TEST_TEAM_MATCH_COUNT, len(matches))
 
+        match_count = len(matches)
+        for match_number in range(1, match_count):
+            self.assertGreater(
+                matches[match_number].week.date,
+                matches[match_number - 1].week.date
+            )
