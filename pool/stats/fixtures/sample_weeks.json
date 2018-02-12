@@ -1,7 +1,7 @@
 [
   {
     "model": "stats.week",
-    "pk": 4,
+    "pk": 5,
     "fields": {
       "season": 4,
       "date": "2010-08-03",
@@ -10,7 +10,7 @@
   },
   {
     "model": "stats.week",
-    "pk": 5,
+    "pk": 4,
     "fields": {
       "season": 4,
       "date": "2010-08-10",

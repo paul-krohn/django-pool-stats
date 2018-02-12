@@ -195,9 +195,9 @@ def team(request, team_id, after=None):
         player_id__in=list([x.id for x in _team.players.all()]),
         season_id=_team.season.id,
     ).order_by('player__last_name')
-    _score_sheets = set(ScoreSheet.objects.filter(official=True).filter(
+    _score_sheets = ScoreSheet.objects.filter(official=True).filter(
         django.db.models.Q(match__away_team=_team) | django.db.models.Q(match__home_team=_team)
-    ))
+    ).order_by('match__week__date')
 
     # we don't expect people to actually use the 'after' parameter, it is really to make test data
     # with long-ago dates usable .
@@ -206,9 +206,10 @@ def team(request, team_id, after=None):
         after_date = datetime.date(after_parts[0], after_parts[1], after_parts[2])
     else:
         after_date = datetime.date.today()
-    _matches = set(Match.objects.filter(week__date__gt=after_date).filter(
+    after_date -= datetime.timedelta(days=2)
+    _matches = Match.objects.filter(week__date__gt=after_date).filter(
         django.db.models.Q(away_team=_team) | django.db.models.Q(home_team=_team)
-    ))
+    ).order_by('week__date')
 
     context = {
         'team': _team,
