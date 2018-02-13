@@ -88,6 +88,37 @@ def index(request):
 
 
 @never_cache
+def get_current_week(request):
+
+    check_season(request)
+    # now get the time range that is Sun-Sat this week; start with the DOW now
+    today = datetime.date.today()
+
+    # in datetime, Monday -> 0 :/
+    prev_sunday = today - datetime.timedelta(days=(today.weekday() % 6 + 1))
+    next_saturday = today + datetime.timedelta(days=(6-today.weekday()))
+
+    _weeks = Week.objects.filter(
+        date__lt=next_saturday,
+        date__gt=prev_sunday,
+        season_id=request.session['season_id'],
+    ).order_by('date')
+
+    if len(_weeks) == 1:
+        return redirect('week', week_id=_weeks[0].id)
+    elif len(_weeks) == 2:
+        closest_week = _weeks[0]
+        closest_week_gap = abs(today - _weeks[0].date)
+        for _week in _weeks:
+            if abs(today - _week.date) < closest_week_gap:
+                closest_week_gap = abs(_week.date - today)
+                closest_week = _week
+        return redirect('week', week_id=closest_week.id)
+    else:
+        return redirect('weeks')
+
+
+@never_cache
 def teams(request, season_id=None):
     check_season(request)
     if season_id is None:

@@ -13,7 +13,7 @@ from django.core.exceptions import ValidationError
 from .base_cases import BasePoolStatsTestCase
 
 import random
-
+import datetime
 
 def populate_lineup_entries(score_sheet):
     inc = 0
@@ -220,6 +220,10 @@ class WeekTests(BasePoolStatsTestCase):
         self.assertIsNone(last_week.next())
         first_week = Week.objects.get(id=self.TEST_WEEK_FIRST)
         self.assertIsNone(first_week.previous())
+
+    def test_get_next_week_no_matching_weeks(self):
+        response = self.client.get(reverse('nextweek'))
+        self.assertEqual(response.url, '/stats/weeks/')
 
 
 class TeamTests(BasePoolStatsTestCase):
