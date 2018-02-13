@@ -170,7 +170,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         self.populate_lineup()
         self.set_substitution('away', 10)
         self.set_substitution('home', 10)
-        win_counts = self.set_winners(forfeits=forfeit_count, table_runs=table_run_count)
+        win_counts = self.set_winners(forfeits=forfeit_count, table_runs=table_run_count, random_wins=False)
         self.selenium.get('{}score_sheet_edit/{}/'.format(self.base_url, 1))
         wins_set = 0
         total_wins = 0
