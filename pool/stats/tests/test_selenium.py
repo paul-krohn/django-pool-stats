@@ -225,7 +225,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         self.set_substitution('home', 10)
         # we need the scoresheet id from the current URL
         scoresheet_id = self.selenium.current_url.split('/')[-2]
-        self.set_winners(forfeits=1, table_runs=2)
+        self.set_winners(forfeits=1, table_runs=2, random_wins=False)
         ss = ScoreSheet.objects.get(id=scoresheet_id)
         ss.official = True
         ss.save()
