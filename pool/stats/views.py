@@ -525,13 +525,3 @@ def update_teams_stats(request):
     for a_team in Team.objects.filter(season_id=request.session['season_id']):
         expire_page(request, reverse('team', kwargs={'team_id': a_team.id}))
     return redirect('teams')
-
-
-def unofficial_results(request):
-    sheets = ScoreSheet.objects.filter(official=False)
-
-    context = {
-        'score_sheets': sheets,
-    }
-
-    return render(request, 'stats/unofficial_results.html', context)
