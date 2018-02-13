@@ -88,6 +88,37 @@ def index(request):
 
 
 @never_cache
+def get_current_week(request):
+
+    check_season(request)
+    # now get the time range that is Sun-Sat this week; start with the DOW now
+    today = datetime.date.today()
+
+    # in datetime, Monday -> 0 :/
+    prev_sunday = today - datetime.timedelta(days=(today.weekday() % 6 + 1))
+    next_saturday = today + datetime.timedelta(days=(6-today.weekday()))
+
+    _weeks = Week.objects.filter(
+        date__lt=next_saturday,
+        date__gt=prev_sunday,
+        season_id=request.session['season_id'],
+    ).order_by('date')
+
+    if len(_weeks) == 1:
+        return redirect('week', week_id=_weeks[0].id)
+    elif len(_weeks) == 2:
+        closest_week = _weeks[0]
+        closest_week_gap = abs(today - _weeks[0].date)
+        for _week in _weeks:
+            if abs(today - _week.date) < closest_week_gap:
+                closest_week_gap = abs(_week.date - today)
+                closest_week = _week
+        return redirect('week', week_id=closest_week.id)
+    else:
+        return redirect('weeks')
+
+
+@never_cache
 def teams(request, season_id=None):
     check_season(request)
     if season_id is None:
@@ -109,9 +140,10 @@ def player(request, player_id):
         _player = get_object_or_404(Player, id=player_id)
         summaries = PlayerSeasonSummary.objects.filter(player__exact=_player).order_by('-season')
         _score_sheets_with_dupes = ScoreSheet.objects.filter(official=True).filter(
-            django.db.models.Q(away_lineup__player=_player) | django.db.models.Q(home_lineup__player=_player)
-            |
-            django.db.models.Q(away_substitutions__player=_player) | django.db.models.Q(home_substitutions__player=_player)
+            django.db.models.Q(away_lineup__player=_player) |
+            django.db.models.Q(home_lineup__player=_player) |
+            django.db.models.Q(away_substitutions__player=_player) |
+            django.db.models.Q(home_substitutions__player=_player)
         ).order_by('match__week__date').filter(match__week__season=request.session['season_id'])
         # there are dupes in _score_sheets at this point, so we have to remove them; method is cribbed from:
         # http://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-in-python-whilst-preserving-order
@@ -255,13 +287,13 @@ def divisions(request, season_id=None):
     # can be sorted by ranking
     wrapper_divisions = []
     for _division in _divisions:
-        teams = Team.objects.filter(
+        _teams = Team.objects.filter(
             division=_division,
             season=request.session['season_id']
         ).order_by('ranking')
         wrapper_divisions.append({
             'division': _division,
-            'teams': teams
+            'teams': _teams
         })
     context = {
         'divisions': _divisions,
@@ -524,13 +556,3 @@ def update_teams_stats(request):
     for a_team in Team.objects.filter(season_id=request.session['season_id']):
         expire_page(request, reverse('team', kwargs={'team_id': a_team.id}))
     return redirect('teams')
-
-
-def unofficial_results(request):
-    sheets = ScoreSheet.objects.filter(official=False)
-
-    context = {
-        'score_sheets': sheets,
-    }
-
-    return render(request, 'stats/unofficial_results.html', context)

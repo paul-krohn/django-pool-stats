@@ -73,7 +73,7 @@ admin.site.register(Division, DivisionAdmin)
 
 
 class PlayerAdmin(admin.ModelAdmin):
-    list_display = ['last_name', 'first_name', 'email']
+    list_display = ['__str__', 'last_name', 'first_name', 'email']
 
 
 admin.site.register(Player, PlayerAdmin)

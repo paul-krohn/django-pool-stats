@@ -17,6 +17,7 @@ urlpatterns = [
 
     url(r'^week/(?P<week_id>[0-9]+)/$', views.week, name='week'),
     url(r'^weeks/', views.weeks, name='weeks'),
+    url(r'^nextweek/', views.get_current_week, name='nextweek'),
 
     url(r'^players/(?P<season_id>[0-9]+)', cache_page(15)(views.players), name='players'),
     url(r'^players/', views.players, name='players'),
@@ -43,7 +44,6 @@ urlpatterns = [
     url(r'^update_teams_stats/', views.update_teams_stats, name='update_teams_stats'),
     url(r'^update_players_stats/', views.update_players_stats, name='update_players_stats'),
 
-    url(r'^unofficial_results/', views.unofficial_results, name='unoffical_results'),
     url(r'^__status', status.index),
 
 ]
