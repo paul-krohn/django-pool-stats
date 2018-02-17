@@ -1,28 +1,30 @@
 from django.conf.urls import url
 from django.views.decorators.cache import cache_page
-
+from django.conf import settings
 from . import views, status
+
+view_cache_time = settings.VIEW_CACHE_TIME
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
 
-    url(r'^divisions/(?P<season_id>[0-9]+)', cache_page(15)(views.divisions), name='divisions'),
+    url(r'^divisions/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(views.divisions), name='divisions'),
     url(r'^divisions/', views.divisions, name='divisions'),
 
     # the 'after' parameter is really just to make it testable
     url(r'^team/(?P<team_id>[0-9]+)/(?P<after>[0-9-]+)?$', views.team, name='team'),
 
-    url(r'^teams/(?P<season_id>[0-9]+)', cache_page(15)(views.teams), name='teams'),
+    url(r'^teams/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(views.teams), name='teams'),
     url(r'^teams/', views.index, name='teams'),
 
     url(r'^week/(?P<week_id>[0-9]+)/$', views.week, name='week'),
     url(r'^weeks/', views.weeks, name='weeks'),
     url(r'^nextweek/', views.get_current_week, name='nextweek'),
 
-    url(r'^players/(?P<season_id>[0-9]+)', cache_page(15)(views.players), name='players'),
+    url(r'^players/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(views.players), name='players'),
     url(r'^players/', views.players, name='players'),
 
-    url(r'^player/(?P<player_id>[0-9]+)/$', views.player, name='player'),
+    url(r'^player/(?P<player_id>[0-9]+)/$', cache_page(view_cache_time)(views.player), name='player'),
     url(r'^player_create/', views.player_create, name='player_create'),
 
     url(r'^sponsors/', views.sponsors, name='sponsors'),

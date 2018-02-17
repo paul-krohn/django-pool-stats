@@ -199,3 +199,5 @@ LEAGUE = {
     'tag_line': '',
     'game_group_size': 4,
 }
+
+VIEW_CACHE_TIME = 86400

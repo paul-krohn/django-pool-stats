@@ -16,12 +16,17 @@ import django.db.models
 from django.conf import settings
 
 from django.core.cache import cache
-from django.views.decorators.cache import cache_page, never_cache
+from django.views.decorators.cache import never_cache, cache_control
 from django.utils.cache import get_cache_key
 from django.urls import reverse
 
 import logging
 logger = logging.getLogger(__name__)
+
+
+cached_view_cc_args = {
+    'must_revalidate': True,
+}
 
 
 def session_uid(request):
@@ -118,7 +123,7 @@ def get_current_week(request):
         return redirect('weeks')
 
 
-@never_cache
+@cache_control(**cached_view_cc_args)
 def teams(request, season_id=None):
     check_season(request)
     if season_id is None:
@@ -132,36 +137,32 @@ def teams(request, season_id=None):
     return render(request, 'stats/teams.html', context)
 
 
+@cache_control(**cached_view_cc_args)
 def player(request, player_id):
     check_season(request)
-    cache_key = get_single_player_view_cache_key(request.session['season_id'], player_id)
-    rendered_page = cache.get(cache_key)
-    if rendered_page is None or request.user.is_superuser:
-        _player = get_object_or_404(Player, id=player_id)
-        summaries = PlayerSeasonSummary.objects.filter(player__exact=_player).order_by('-season')
-        _score_sheets_with_dupes = ScoreSheet.objects.filter(official=True).filter(
-            django.db.models.Q(away_lineup__player=_player) |
-            django.db.models.Q(home_lineup__player=_player) |
-            django.db.models.Q(away_substitutions__player=_player) |
-            django.db.models.Q(home_substitutions__player=_player)
-        ).order_by('match__week__date').filter(match__week__season=request.session['season_id'])
-        # there are dupes in _score_sheets at this point, so we have to remove them; method is cribbed from:
-        # http://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-in-python-whilst-preserving-order
-        seen = set()
-        seen_add = seen.add
-        _score_sheets = [x for x in _score_sheets_with_dupes if not (x in seen or seen_add(x))]
-        context = {
-            'score_sheets': _score_sheets,
-            'summaries': summaries,
-            'player': _player,
-        }
-        rendered_page = render(request, 'stats/player.html', context)
-        if not request.user.is_superuser:
-            cache.set(cache_key, rendered_page)
+    _player = get_object_or_404(Player, id=player_id)
+    summaries = PlayerSeasonSummary.objects.filter(player__exact=_player).order_by('-season')
+    _score_sheets_with_dupes = ScoreSheet.objects.filter(official=True).filter(
+        django.db.models.Q(away_lineup__player=_player) |
+        django.db.models.Q(home_lineup__player=_player) |
+        django.db.models.Q(away_substitutions__player=_player) |
+        django.db.models.Q(home_substitutions__player=_player)
+    ).order_by('match__week__date').filter(match__week__season=request.session['season_id'])
+    # there are dupes in _score_sheets at this point, so we have to remove them; method is cribbed from:
+    # http://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-in-python-whilst-preserving-order
+    seen = set()
+    seen_add = seen.add
+    _score_sheets = [x for x in _score_sheets_with_dupes if not (x in seen or seen_add(x))]
+    context = {
+        'score_sheets': _score_sheets,
+        'summaries': summaries,
+        'player': _player,
+    }
+    rendered_page = render(request, 'stats/player.html', context)
     return rendered_page
 
 
-@never_cache
+@cache_control(**cached_view_cc_args)
 def players(request, season_id=None):
     check_season(request)
 
@@ -211,13 +212,16 @@ def update_players_stats(request):
 
     season_id = request.session['season_id']
     PlayerSeasonSummary.update_all(season_id=season_id)
+    for pss in PlayerSeasonSummary.objects.filter(season_id=season_id):
+        expire_page(request, reverse('player', kwargs={'player_id': pss.player.id}))
+
     # delete the player rankings view cache; then redirect to the players view, which
     # will repopulate the cache
     expire_page(request, reverse('players', kwargs={'season_id': season_id}))
     return redirect(reverse('players', kwargs={'season_id': season_id}))
 
 
-@cache_page(60 * 60)
+@cache_control(**cached_view_cc_args)
 def team(request, team_id, after=None):
 
     check_season(request)
@@ -277,7 +281,7 @@ def sponsors(request):
     return render(request, 'stats/sponsors.html', context)
 
 
-@never_cache
+@cache_control(**cached_view_cc_args)
 def divisions(request, season_id=None):
     check_season(request)
     if season_id is None:

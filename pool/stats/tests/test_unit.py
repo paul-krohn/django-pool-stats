@@ -7,6 +7,7 @@ from ..models import Season, Player, PlayerSeasonSummary, GameOrder, ScoreSheet,
 
 from ..views import get_single_player_view_cache_key, expire_page
 
+
 from ..forms import ScoreSheetGameForm
 from django.core.exceptions import ValidationError
 
@@ -14,6 +15,7 @@ from .base_cases import BasePoolStatsTestCase
 
 import random
 import datetime
+
 
 def populate_lineup_entries(score_sheet):
     inc = 0
@@ -72,6 +74,7 @@ class ScoreSheetTests(BasePoolStatsTestCase):
             season=Season.objects.get(is_default=True)
         )
         summary.save()
+        expire_page(self.factory.get(reverse('players')), reverse('player', kwargs={'player_id': player.id}))
 
         response = self.client.get(reverse('player', kwargs={'player_id': player.id}))
         self.assertQuerysetEqual(
