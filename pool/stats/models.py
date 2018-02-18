@@ -301,18 +301,21 @@ class HomeTeam(Team):
 
 
 class Match(models.Model):
-    # a default season that doesn't bork migrations would be nice
+    # the `is_default` season being the default is set in the admin, rather than here,
+    # doing it here breaks generating migrations with an empty database.
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     week = models.ForeignKey(Week, limit_choices_to=models.Q(season__is_default=True))
     home_team = models.ForeignKey(
         'HomeTeam',
         limit_choices_to=models.Q(season__is_default=True),
         related_name='home_team',
+        blank=True, null=True,
     )
     away_team = models.ForeignKey(
         'AwayTeam',
         limit_choices_to=models.Q(season__is_default=True),
         related_name='away_team',
+        blank=True, null=True,
     )
     playoff = models.BooleanField(default=False)
 
