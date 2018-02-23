@@ -287,7 +287,23 @@ class Week(models.Model):
     def previous(self):
         return self.get_weeks_in_season(before_after='before', week=self)
 
+    def unused_teams(self):
+        matches_this_week = Match.objects.filter(week=self)
+        used_teams = set([])
+        for m in matches_this_week:
+            used_teams.add(m.away_team.id)
+            used_teams.add(m.home_team.id)
+        return Team.objects.filter(season__is_default=True).exclude(id__in=used_teams)
 
+    def used_teams(self, teams=[]):
+        matches_this_week = Match.objects.filter(week=self)
+        used_teams = set([])
+        for m in matches_this_week:
+            if hasattr(m.away_team, 'id') and m.away_team.id not in teams:
+                used_teams.add(m.away_team.id)
+            if hasattr(m.home_team, 'id') and m.home_team.id not in teams:
+                used_teams.add(m.home_team.id)
+        return Team.objects.filter(season__is_default=True).filter(id__in=used_teams)
 
 
 class AwayTeam(Team):
