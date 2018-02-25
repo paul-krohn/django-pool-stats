@@ -231,7 +231,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         ss.save()
         self.selenium.get('{}update_players_stats/'.format(self.base_url))
         self.assertEquals(self.selenium.current_url, '{}players/{}'.format(self.base_url, self.default_season))
-        tables = self.selenium.find_elements_by_tag_name('table')
+        tables = self.selenium.find_elements_by_id('player_rankings_table')
 
         stats = self.count_player_stats_in_table(tables[0])
         self.assertEqual(stats['wins'], 15)
@@ -249,7 +249,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         ss.save()
         self.selenium.get('{}update_players_stats/'.format(self.base_url))
         self.assertEquals(self.selenium.current_url, '{}players/{}'.format(self.base_url, self.default_season))
-        tables = self.selenium.find_elements_by_tag_name('table')
+        tables = self.selenium.find_elements_by_id('player_rankings_table')
         stats = self.count_player_stats_in_table(tables[0])
 
         self.assertEqual(stats['wins'] + stats['losses'], 24)
