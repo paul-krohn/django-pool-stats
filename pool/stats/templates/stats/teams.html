@@ -6,7 +6,21 @@
 <h2>Teams</h2>
 </div>
 {% if teams %}
+<div class="pull-right search"><input id="filter" class="form-control" type="text" placeholder="Filter"></div>
 {% include "stats/team_table.html" %}
+    <script>
+    $(document).ready(function () {
+        (function ($) {
+            $('#filter').keyup(function () {
+                var rex = new RegExp($(this).val(), 'i');
+                $('.searchable tr').hide();
+                $('.searchable tr').filter(function () {
+                    return rex.test($(this).text());
+                }).show();
+            })
+        }(jQuery));
+    });
+    </script>
 
 {% endif %}
 

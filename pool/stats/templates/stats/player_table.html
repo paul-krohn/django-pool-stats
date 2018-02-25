@@ -1,4 +1,4 @@
-<table class="table table-borderless" data-sort-name="Rank" data-toggle="table" data-sort-order="asc" id="foo">
+<table class="table" data-sort-name="Rank" data-toggle="table" data-sort-order="asc" id="player_rankings_table">
   <thead>
     <tr>
       <th data-field="Rank" data-sortable="true">Rank</th>
@@ -11,7 +11,7 @@
       <th data-field="TR" data-sortable="true">TR</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody class="searchable">
     {% for player_summary in players %}
     <tr>
     <td>{% if player_summary.ranking %}{{ player_summary.ranking }}{% endif %}</td>
