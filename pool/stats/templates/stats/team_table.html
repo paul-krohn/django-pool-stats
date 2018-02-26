@@ -1,12 +1,22 @@
-    <table class="table" id="team-standings-table{% if wrapper_division.division %}-division-{{ wrapper_division.division.id }}{% endif %}">
-        <tr><th>Rank</th><th></th><th>Wins</th><th>Losses</th><th>Percent</th></tr>
+    <table data-sort-name="Rank" data-toggle="table" data-sort-order="asc" class="table" id="team-standings-table{% if wrapper_division.division %}-division-{{ wrapper_division.division.id }}{% endif %}">
+      <thead>
+        <tr>
+            <th data-field="Rank" data-sortable="true">Rank</th>
+            <th data-field="Name" data-sortable="true">Name</th>
+            <th data-field="Wins" data-sortable="true">Wins</th>
+            <th data-field="Losses" data-sortable="true">Losses</th>
+            <th data-field="Percent" data-sortable="true">Percent</th>
+        </tr>
+      </thead>
+      <tbody class="searchable">
         {% for team in teams %}
         <tr>
             <td>{{ team.ranking }}</td>
-            <td><a href="{% url 'team' team.id %}">{{ team }}</a></td>
+            <td><!-- {{ team }} sort lexically --><a href="{% url 'team' team.id %}">{{ team }}</a></td>
             <td>{{ team.wins }}</td>
             <td>{{ team.losses }}</td>
             <td>{{ team.win_percentage|floatformat:3 }}</td>
         </tr>
         {% endfor %}
+      </tbody>
     </table>

@@ -6,7 +6,13 @@
 <h2>Teams</h2>
 </div>
 {% if teams %}
+<div class="pull-right search"><input id="filter" class="form-control" type="text" placeholder="Filter"></div>
 {% include "stats/team_table.html" %}
+<script>
+$(document).ready(function () {
+    filterer('#filter', '.searchable');
+});
+    </script>
 
 {% endif %}
 
