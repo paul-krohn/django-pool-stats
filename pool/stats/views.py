@@ -24,11 +24,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-cached_view_cc_args = {
-    'must_revalidate': True,
-}
-
-
 def session_uid(request):
     if 'uid' not in request.session.keys():
         request.session['uid'] = str(hash(time.time()))[0:15]
@@ -123,7 +118,6 @@ def get_current_week(request):
         return redirect('weeks')
 
 
-@cache_control(**cached_view_cc_args)
 def teams(request, season_id=None):
     check_season(request)
     if season_id is None:
@@ -137,7 +131,6 @@ def teams(request, season_id=None):
     return render(request, 'stats/teams.html', context)
 
 
-@cache_control(**cached_view_cc_args)
 def player(request, player_id):
     check_season(request)
     _player = get_object_or_404(Player, id=player_id)
@@ -162,7 +155,6 @@ def player(request, player_id):
     return rendered_page
 
 
-@cache_control(**cached_view_cc_args)
 def players(request, season_id=None):
     check_season(request)
 
@@ -221,7 +213,6 @@ def update_players_stats(request):
     return redirect(reverse('players', kwargs={'season_id': season_id}))
 
 
-@cache_control(**cached_view_cc_args)
 def team(request, team_id, after=None):
 
     check_season(request)
@@ -281,7 +272,6 @@ def sponsors(request):
     return render(request, 'stats/sponsors.html', context)
 
 
-@cache_control(**cached_view_cc_args)
 def divisions(request, season_id=None):
     check_season(request)
     if season_id is None:
