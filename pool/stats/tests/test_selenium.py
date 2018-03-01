@@ -18,13 +18,9 @@ class BaseViewRedirectTestCase(BaseSeleniumPoolStatsTestCase):
         self.selenium.get('{}divisions/'.format(self.base_url))
         self.assertEquals(self.selenium.current_url, '{}divisions/{}'.format(self.base_url, self.default_season))
 
-    def test_team_stats_update_redirect(self):
-        self.selenium.get('{}update_teams_stats/'.format(self.base_url))
+    def test_stats_update_redirect(self):
+        self.selenium.get('{}update_stats/'.format(self.base_url))
         self.assertEqual(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
-
-    def test_player_stats_update_redirect(self):
-        self.selenium.get('{}update_players_stats/'.format(self.base_url))
-        self.assertEqual(self.selenium.current_url, '{}players/{}'.format(self.base_url, self.default_season))
 
 
 class StatusPageTestCase(BaseSeleniumPoolStatsTestCase):
@@ -206,7 +202,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         ss = ScoreSheet.objects.get(id=scoresheet_id)
         ss.official = True
         ss.save()
-        self.selenium.get('{}update_teams_stats/'.format(self.base_url))
+        self.selenium.get('{}update_stats/'.format(self.base_url))
         self.assertEquals(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
         standings_table = self.selenium.find_element_by_id('team-standings-table')
         standings_rows = standings_table.find_elements_by_tag_name('tr')
@@ -229,8 +225,9 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         ss = ScoreSheet.objects.get(id=scoresheet_id)
         ss.official = True
         ss.save()
-        self.selenium.get('{}update_players_stats/'.format(self.base_url))
-        self.assertEquals(self.selenium.current_url, '{}players/{}'.format(self.base_url, self.default_season))
+        self.selenium.get('{}update_stats/'.format(self.base_url))
+        self.assertEquals(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
+        self.selenium.get('{}players/{}'.format(self.base_url, 4))
         tables = self.selenium.find_elements_by_tag_name('table')
 
         stats = self.count_player_stats_in_table(tables[0])
@@ -247,8 +244,9 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         ss = ScoreSheet.objects.get(id=scoresheet_id)
         ss.official = True
         ss.save()
-        self.selenium.get('{}update_players_stats/'.format(self.base_url))
-        self.assertEquals(self.selenium.current_url, '{}players/{}'.format(self.base_url, self.default_season))
+        self.selenium.get('{}update_stats/'.format(self.base_url))
+        self.assertEquals(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
+        self.selenium.get('{}players/{}'.format(self.base_url, self.default_season))
         tables = self.selenium.find_elements_by_tag_name('table')
         stats = self.count_player_stats_in_table(tables[0])
 

@@ -70,18 +70,6 @@ def check_season(request):
         set_season(request)
 
 
-def get_player_rankings_view_cache_key(request):
-    try:
-        request.session['season_id']
-    except KeyError:
-        check_season(request)
-    return 'player_{}'.format(request.session['season_id'])
-
-
-def get_single_player_view_cache_key(season_id, player_id):
-    return 'season_{}_player_{}'.format(season_id, player_id)
-
-
 def index(request):
     check_season(request)
     return redirect('teams', season_id=request.session['season_id'])
@@ -196,21 +184,6 @@ def player_create(request):
         'form': player_form
     }
     return render(request, 'stats/player_create.html', context)
-
-
-def update_players_stats(request):
-
-    check_season(request)
-
-    season_id = request.session['season_id']
-    PlayerSeasonSummary.update_all(season_id=season_id)
-    for pss in PlayerSeasonSummary.objects.filter(season_id=season_id):
-        expire_page(request, reverse('player', kwargs={'player_id': pss.player.id}))
-
-    # delete the player rankings view cache; then redirect to the players view, which
-    # will repopulate the cache
-    expire_page(request, reverse('players', kwargs={'season_id': season_id}))
-    return redirect(reverse('players', kwargs={'season_id': season_id}))
 
 
 def team(request, team_id, after=None):
@@ -538,15 +511,24 @@ def score_sheet_substitutions(request, score_sheet_id, away_home):
         return redirect('score_sheet_edit', score_sheet_id=s.id)
 
 
-def update_teams_stats(request):
+def update_stats(request):
     # be sure about what season we are working on
     check_season(request)
-    Team.update_teams_stats(season_id=request.session['season_id'])
+    season_id = request.session['season_id']
+
+    Team.update_teams_stats(season_id=season_id)
     # cache invalidation has to be called from a view, because we need access to a
-    # request object to find the cache key used by the @cache_page decorator.
-    expire_args = {'season_id': request.session['season_id']}
+    # request object to find the cache key.
+    expire_args = {'season_id': season_id}
     expire_page(request, reverse('divisions', kwargs=expire_args))
     expire_page(request, reverse('teams', kwargs=expire_args))
     for a_team in Team.objects.filter(season_id=request.session['season_id']):
         expire_page(request, reverse('team', kwargs={'team_id': a_team.id}))
+
+    PlayerSeasonSummary.update_all(season_id=season_id)
+    for pss in PlayerSeasonSummary.objects.filter(season_id=season_id):
+        expire_page(request, reverse('player', kwargs={'player_id': pss.player.id}))
+
+    expire_page(request, reverse('players', kwargs={'season_id': season_id}))
+
     return redirect('teams')
