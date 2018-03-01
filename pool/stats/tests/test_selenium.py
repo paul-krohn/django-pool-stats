@@ -229,8 +229,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         self.assertEquals(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
         self.selenium.get('{}players/{}'.format(self.base_url, self.default_season))
         tables = self.selenium.find_elements_by_tag_name('table')
-
-        stats = self.count_player_stats_in_table(tables[0])
+        stats = self.count_player_stats_in_table(tables[1])
         self.assertEqual(stats['wins'], 15)
         self.assertEqual(stats['losses'], 15)
         self.assertEqual(stats['trs'], 2)
@@ -248,8 +247,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         self.assertEquals(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
         self.selenium.get('{}players/{}'.format(self.base_url, self.default_season))
         tables = self.selenium.find_elements_by_tag_name('table')
-        stats = self.count_player_stats_in_table(tables[0])
-
+        stats = self.count_player_stats_in_table(tables[1])
         self.assertEqual(stats['wins'] + stats['losses'], 24)
         # we can't really test table runs here, because one or more of the TRs could land on games with
         # the player still anonymous/not set.
