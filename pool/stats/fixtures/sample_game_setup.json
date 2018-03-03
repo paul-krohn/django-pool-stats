@@ -1,0 +1,220 @@
+[
+  {
+    "model": "stats.playposition",
+    "pk": 1,
+    "fields": {
+      "home_name": "1",
+      "away_name": "A",
+      "name": "player 1"
+    }
+  },
+  {
+    "model": "stats.playposition",
+    "pk": 2,
+    "fields": {
+      "home_name": "2",
+      "away_name": "B",
+      "name": "player 2"
+    }
+  },
+  {
+    "model": "stats.playposition",
+    "pk": 3,
+    "fields": {
+      "home_name": "3",
+      "away_name": "C",
+      "name": "player 3"
+    }
+  },
+  {
+    "model": "stats.playposition",
+    "pk": 4,
+    "fields": {
+      "home_name": "4",
+      "away_name": "D",
+      "name": "player 4"
+    }
+  },
+  {
+    "model": "stats.playposition",
+    "pk": 5,
+    "fields": {
+      "home_name": "TB",
+      "away_name": "TB",
+      "name": "tiebreaker",
+      "tiebreaker": true
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 1,
+    "fields": {
+      "order": 1,
+      "away_position": 1,
+      "home_position": 1,
+      "home_breaks": false
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 2,
+    "fields": {
+      "order": 2,
+      "away_position": 2,
+      "home_position": 2,
+      "home_breaks": true
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 3,
+    "fields": {
+      "order": 3,
+      "away_position": 3,
+      "home_position": 3,
+      "home_breaks": false
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 4,
+    "fields": {
+      "order": 4,
+      "away_position": 4,
+      "home_position": 4,
+      "home_breaks": true
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 5,
+    "fields": {
+      "order": 5,
+      "away_position": 1,
+      "home_position": 2,
+      "home_breaks": true
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 6,
+    "fields": {
+      "order": 6,
+      "away_position": 2,
+      "home_position": 1,
+      "home_breaks": true
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 7,
+    "fields": {
+      "order": 7,
+      "away_position": 4,
+      "home_position": 3,
+      "home_breaks": true
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 8,
+    "fields": {
+      "order": 8,
+      "away_position": 3,
+      "home_position": 2,
+      "home_breaks": false
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 9,
+    "fields": {
+      "order": 9,
+      "away_position": 2,
+      "home_position": 4,
+      "home_breaks": false
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 10,
+    "fields": {
+      "order": 10,
+      "away_position": 4,
+      "home_position": 1,
+      "home_breaks": false
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 11,
+    "fields": {
+      "order": 11,
+      "away_position": 1,
+      "home_position": 3,
+      "home_breaks": true
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 12,
+    "fields": {
+      "order": 12,
+      "away_position": 3,
+      "home_position": 4,
+      "home_breaks": true
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 13,
+    "fields": {
+      "order": 13,
+      "away_position": 4,
+      "home_position": 2,
+      "home_breaks": false
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 14,
+    "fields": {
+      "order": 14,
+      "away_position": 2,
+      "home_position": 3,
+      "home_breaks": false
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 15,
+    "fields": {
+      "order": 15,
+      "away_position": 3,
+      "home_position": 1,
+      "home_breaks": true
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 16,
+    "fields": {
+      "order": 16,
+      "away_position": 1,
+      "home_position": 4,
+      "home_breaks": false
+    }
+  },
+  {
+    "model": "stats.gameorder",
+    "pk": 17,
+    "fields": {
+      "order": 17,
+      "away_position": 5,
+      "home_position": 5,
+      "home_breaks": false,
+      "tiebreaker": true
+    }
+  }
+]
+

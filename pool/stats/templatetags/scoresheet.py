@@ -10,7 +10,7 @@ def row_even_odd(game_order):
     if game_order.tiebreaker:
         return 'even'
     try:
-        game_number = int(game_order.name)
+        game_number = game_order.order
     except ValueError:
         game_number = 2
     if ((game_number - 1) % settings.LEAGUE['game_group_size'] + 1) % 2:

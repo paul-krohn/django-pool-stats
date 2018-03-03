@@ -1,14 +1,30 @@
-<table class="table">
-    <tr><th>Rank</th><th></th><th>W</th><th>L</th><th>Pct</th><th>4-0</th><th>TR</th></tr>
-{% for player_summary in players %}
-<tr>
+<table class="table" data-sort-name="Rank" data-toggle="table" data-sort-order="asc" id="player_rankings_table">
+  <thead>
+    <tr>
+      <th data-field="Rank" data-sortable="true">Rank</th>
+      <th data-field="Name" data-sortable="true">Name</th>
+      {% if show_teams %}<th data-field="Team" data-sortable="true">Team</th>{% endif %}
+      <th data-field="W" data-sortable="true">W</th>
+      <th data-field="L" data-sortable="true">L</th>
+      <th data-field="Pct" data-sortable="true">Pct</th>
+      <th data-field="4-0"  data-sortable="true">4-0</th>
+      <th data-field="TR" data-sortable="true">TR</th>
+    </tr>
+  </thead>
+  <tbody class="searchable">
+    {% for player_summary in players %}
+    <tr>
     <td>{% if player_summary.ranking %}{{ player_summary.ranking }}{% endif %}</td>
-    <td><a href="{% url 'player' player_summary.player.id %}">{{ player_summary.player }}</a></td>
+    <td><!-- {{ player_summary.player }} sort lexically --><a href="{% url 'player' player_summary.player.id %}">{{ player_summary.player }}</a></td>
+    {% if show_teams %}
+    <td><!-- {{ player_summary.team }} sort lexically --><a href="{% url 'team' player_summary.team.id %}">{{ player_summary.team }}</a></td>
+    {% endif %}
     <td>{{ player_summary.wins }}</td>
     <td>{{ player_summary.losses }}</td>
     <td>{{ player_summary.win_percentage|floatformat:3 }}</td>
     <td>{{ player_summary.four_ohs }}</td>
     <td>{{ player_summary.table_runs }}</td>
-</tr>
-{% endfor %}
+    </tr>
+    {% endfor %}
+  </tbody>
 </table>

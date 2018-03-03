@@ -48,113 +48,6 @@ class Player(models.Model):
         ordering = ['first_name', 'last_name']
 
 
-class PlayerSeasonSummary(models.Model):
-    player = models.ForeignKey(Player)
-    season = models.ForeignKey(Season)
-    wins = models.IntegerField(verbose_name='Wins', default=0)
-    losses = models.IntegerField(verbose_name='Losses', default=0)
-    four_ohs = models.IntegerField(verbose_name='4-0s', default=0)
-    table_runs = models.IntegerField(verbose_name='Table Runs', default=0)
-    win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0, null=True)
-    ranking = models.IntegerField(null=True)
-
-    def __str__(self):
-        return "{} {}".format(self.player, self.season)
-
-    class Meta:
-        ordering = ['-win_percentage']
-
-    def update_sweeps(self):
-        # the occasional player may have played for more than one
-        # team in a season ...
-        score_sheets = ScoreSheet.objects.filter(
-            models.Q(match__away_team__in=self.player.team_set.filter(season=self.season))
-            |
-            models.Q(match__home_team__in=self.player.team_set.filter(season=self.season))
-        ).filter(official=True)
-        sweeps = 0
-
-        for score_sheet in score_sheets:
-            for away_home in ['away', 'home']:
-                score_sheet_filter_args = {'{}_player'.format(away_home): self.player}
-                if len(score_sheet.games.filter(
-                    **score_sheet_filter_args
-                ).filter(
-                    winner=away_home
-                )) == 4:
-                    sweeps += 1
-        self.four_ohs = sweeps
-        self.save()
-
-    @classmethod
-    def update_rankings(cls, season_id):
-        all_summaries = cls.objects.filter(season=season_id).order_by('-win_percentage')
-        # remove the players with < the minimum number of games in the current season
-        summaries = []
-        for summary in all_summaries:
-            if summary.wins + summary.losses >= summary.season.minimum_games:
-                summaries.append(summary)
-            else:
-                summary.ranking = 0
-                summary.save()
-        inc = 0
-        while inc < len(summaries) - 1:
-            offset = 1
-            summaries[inc].ranking = inc + 1
-            summaries[inc].save()
-            logging.debug("{} gets ranking {}".format(summaries[inc], summaries[inc].ranking))
-            while inc + offset < len(summaries) and \
-                    summaries[inc].win_percentage == summaries[inc+offset].win_percentage:
-                summaries[inc+offset].ranking = inc + 1
-                summaries[inc+offset].save()
-                logger.debug("{} gets ranking {}".format(summaries[inc+offset], summaries[inc].ranking))
-                offset += 1
-            inc += offset
-
-    def update(self):
-        games = Game.objects.filter(
-            scoresheet__match__season_id=self.season
-        ).filter(
-            scoresheet__official=True
-        ).filter(
-            scoresheet__match__playoff=False
-        ).filter(
-            forfeit=False
-        )
-        away_wins = games.filter(away_player=self.player).filter(winner='away')
-        home_wins = games.filter(home_player=self.player).filter(winner='home')
-
-        away_losses = games.filter(away_player=self.player).filter(winner='home')
-        home_losses = games.filter(home_player=self.player).filter(winner='away')
-
-        logger.debug("{} has {} wins and {} losses".format(self, self.wins, self.losses))
-        self.wins = len(away_wins) + len(home_wins)
-        self.losses = len(away_losses) + len(home_losses)
-        self.win_percentage = None
-        if self.wins + self.losses > 0:
-            self.win_percentage = self.wins / (self.wins + self.losses)
-
-        self.table_runs = len(away_wins.filter(table_run=True)) + len(home_wins.filter(table_run=True))
-
-        self.update_sweeps()
-
-        self.save()
-
-    @classmethod
-    def update_all(cls, season_id):
-        # find all the players on teams in this season
-        teams = Team.objects.filter(season=season_id)
-        for team in teams:
-            for player in team.players.all():
-                summaries = cls.objects.filter(season=season_id, player=player)
-                if not len(summaries):
-                    cls(season=Season.objects.get(id=season_id), player=player).save()
-
-        for summary in cls.objects.filter(season=season_id):
-            summary.update()
-        cls.update_rankings(season_id)
-
-
 class Division(models.Model):
     season = models.ForeignKey(Season)
     name = models.CharField(max_length=64)
@@ -248,6 +141,121 @@ class Team(models.Model):
         cls.rank_teams(season_id)
 
 
+class PlayerSeasonSummary(models.Model):
+    player = models.ForeignKey(Player)
+    season = models.ForeignKey(Season)
+    team = models.ForeignKey(Team, null=True, blank=True)
+    wins = models.IntegerField(verbose_name='Wins', default=0)
+    losses = models.IntegerField(verbose_name='Losses', default=0)
+    four_ohs = models.IntegerField(verbose_name='4-0s', default=0)
+    table_runs = models.IntegerField(verbose_name='Table Runs', default=0)
+    win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0, null=True)
+    ranking = models.IntegerField(null=True)
+
+    def __str__(self):
+        return "{} {}".format(self.player, self.season)
+
+    class Meta:
+        ordering = ['-win_percentage']
+
+    def team(self):
+        return self.player.team_set.filter(season=self.season).first()
+
+    def update_sweeps(self):
+        # the occasional player may have played for more than one
+        # team in a season ...
+        score_sheets = ScoreSheet.objects.filter(
+            models.Q(match__away_team__in=self.player.team_set.filter(season=self.season))
+            |
+            models.Q(match__home_team__in=self.player.team_set.filter(season=self.season))
+        ).filter(official=True)
+        sweeps = 0
+
+        for score_sheet in score_sheets:
+            for away_home in ['away', 'home']:
+                score_sheet_filter_args = {'{}_player'.format(away_home): self.player}
+                if len(score_sheet.games.filter(
+                    **score_sheet_filter_args
+                ).filter(
+                    winner=away_home
+                )) == 4:
+                    sweeps += 1
+        self.four_ohs = sweeps
+        self.save()
+
+    @classmethod
+    def update_rankings(cls, season_id):
+        all_summaries = cls.objects.filter(season=season_id).order_by('-win_percentage', '-wins')
+        # remove the players with < the minimum number of games in the current season
+        summaries = []
+        for summary in all_summaries:
+            if summary.wins + summary.losses >= summary.season.minimum_games:
+                summaries.append(summary)
+            else:
+                summary.ranking = 0
+                summary.save()
+        inc = 0
+        while inc < len(summaries):
+            tie_count = 0
+            while inc + tie_count < len(summaries):
+                # the first clause below is to prevent us trying to compare something off the end of the list
+                if (inc+tie_count+1 < len(summaries)) and \
+                                summaries[inc].win_percentage == summaries[inc+tie_count+1].win_percentage and \
+                                summaries[inc].wins == summaries[inc + tie_count + 1].wins:
+                    tie_count += 1
+                else:
+                    break
+            for i in range(0, tie_count + 1):
+                summaries[inc+i].ranking = inc + 1
+                summaries[inc+i].save()
+            inc += tie_count + 1
+
+    def update(self):
+        games = Game.objects.filter(
+            scoresheet__match__season_id=self.season
+        ).filter(
+            scoresheet__official=True
+        ).filter(
+            scoresheet__match__playoff=False
+        ).filter(
+            forfeit=False
+        )
+        away_wins = games.filter(away_player=self.player).filter(winner='away')
+        home_wins = games.filter(home_player=self.player).filter(winner='home')
+
+        away_losses = games.filter(away_player=self.player).filter(winner='home')
+        home_losses = games.filter(home_player=self.player).filter(winner='away')
+
+        self.team = self.player.team_set.filter(season=self.season).first()
+
+        logger.debug("{} has {} wins and {} losses".format(self, self.wins, self.losses))
+        self.wins = len(away_wins) + len(home_wins)
+        self.losses = len(away_losses) + len(home_losses)
+        self.win_percentage = None
+        if self.wins + self.losses > 0:
+            self.win_percentage = self.wins / (self.wins + self.losses)
+
+        self.table_runs = len(away_wins.filter(table_run=True)) + len(home_wins.filter(table_run=True))
+
+        self.update_sweeps()
+
+        self.save()
+
+    @classmethod
+    def update_all(cls, season_id):
+        # find all the players on teams in this season
+        teams = Team.objects.filter(season=season_id)
+        for team in teams:
+            for player in team.players.all():
+                summaries = cls.objects.filter(season=season_id, player=player)
+                if not len(summaries):
+                    cls(season=Season.objects.get(id=season_id), player=player).save()
+
+        for summary in cls.objects.filter(season=season_id):
+            summary.update()
+        cls.update_rankings(season_id)
+
+
 class Week(models.Model):
     # a default season that doesn't bork migrations would be nice
     season = models.ForeignKey(Season)
@@ -256,6 +264,42 @@ class Week(models.Model):
 
     def __str__(self):
         return "{}".format(self.name)
+
+    @classmethod
+    def get_weeks_in_season(cls, before_after, week):
+        comp_args = {
+            'season_id': week.season,
+            'date__{}'.format('lt' if before_after == 'before' else 'gt'): week.date
+        }
+        weeks = cls.objects.filter(**comp_args).order_by('date')
+        if before_after == 'before':
+            return list(weeks)[-1] if weeks else None
+        else:
+            return weeks[0] if weeks else None
+
+    def next(self):
+        return self.get_weeks_in_season(before_after='after', week=self)
+
+    def previous(self):
+        return self.get_weeks_in_season(before_after='before', week=self)
+
+    def unused_teams(self):
+        matches_this_week = Match.objects.filter(week=self)
+        used_teams = set([])
+        for m in matches_this_week:
+            used_teams.add(m.away_team.id)
+            used_teams.add(m.home_team.id)
+        return Team.objects.filter(season__is_default=True).exclude(id__in=used_teams)
+
+    def used_teams(self, teams=[]):
+        matches_this_week = Match.objects.filter(week=self)
+        used_teams = set([])
+        for m in matches_this_week:
+            if hasattr(m.away_team, 'id') and m.away_team.id not in teams:
+                used_teams.add(m.away_team.id)
+            if hasattr(m.home_team, 'id') and m.home_team.id not in teams:
+                used_teams.add(m.home_team.id)
+        return Team.objects.filter(season__is_default=True).filter(id__in=used_teams)
 
 
 class AwayTeam(Team):
@@ -269,18 +313,21 @@ class HomeTeam(Team):
 
 
 class Match(models.Model):
-    # a default season that doesn't bork migrations would be nice
+    # the `is_default` season being the default is set in the admin, rather than here,
+    # doing it here breaks generating migrations with an empty database.
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     week = models.ForeignKey(Week, limit_choices_to=models.Q(season__is_default=True))
     home_team = models.ForeignKey(
         'HomeTeam',
         limit_choices_to=models.Q(season__is_default=True),
         related_name='home_team',
+        blank=True, null=True,
     )
     away_team = models.ForeignKey(
         'AwayTeam',
         limit_choices_to=models.Q(season__is_default=True),
         related_name='away_team',
+        blank=True, null=True,
     )
     playoff = models.BooleanField(default=False)
 
@@ -445,15 +492,10 @@ class ScoreSheet(models.Model):
         return len(self.games.filter(winner='home'))
 
     def initialize_lineup(self):
-        for lineup_position in PlayPosition.objects.filter(tiebreaker=False):
-            ale = AwayLineupEntry(position=lineup_position)
-            ale.save()
-            hle = HomeLineupEntry(position=lineup_position)
-            hle.save()
-            self.away_lineup.add(ale)
-            self.home_lineup.add(hle)
+        lineup_positions = PlayPosition.objects.filter(tiebreaker=False)
         if self.match.playoff:
-            lineup_position = PlayPosition.objects.get(tiebreaker=True)
+            lineup_positions = PlayPosition.objects.all()
+        for lineup_position in lineup_positions:
             ale = AwayLineupEntry(position=lineup_position)
             ale.save()
             hle = HomeLineupEntry(position=lineup_position)
@@ -530,18 +572,23 @@ class ScoreSheet(models.Model):
     def player_summaries(self, away_home):
 
         player_score_sheet_summaries = []
-        if away_home == 'away':
-            lineup_entries = self.away_lineup.filter(position__tiebreaker=False)
-        else:
-            lineup_entries = self.home_lineup.filter(position__tiebreaker=False)
-        for lineup_entry in lineup_entries:
-            if lineup_entry.player is None:
-                continue
+
+        lineup_entries = getattr(self, '{}_lineup'.format(away_home)).\
+            filter(
+                position__tiebreaker=False).\
+            exclude(
+                player__isnull=True
+            )
+        substitutions = getattr(self, '{}_substitutions'.format(away_home)).all()
+
+        players = [x.player for x in lineup_entries]
+        [players.append(y.player) for y in substitutions]
+        for player in players:
             summary = {
-                'player': lineup_entry.player,
+                'player': player,
             }
             summary.update(self.player_summary(
-                a_player=lineup_entry.player
+                a_player=player
             ))
             player_score_sheet_summaries.append(summary)
         return player_score_sheet_summaries

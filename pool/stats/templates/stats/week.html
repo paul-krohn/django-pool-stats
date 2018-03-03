@@ -4,34 +4,48 @@
 
 {% block content %}
 {% if week %}
-<h2>{{ week.name }}</h2>
+<h3>{{ week.name }}</h3>
 <p>{{ week.date}}</p>
-
+<p>{% if week.previous %}<a href="{% url 'week' week.previous.id %}">&larr; {{week.previous}}</a>{% endif %} •
+{% if week.next%}<a href="{% url 'week' week.next.id %}">{{week.next}} &rarr;</a>{% endif %}</p>
 
 {% if official_matches|length %}
-
-<table class="table" align="right">
-    <tr><th align="right">Away</th><th>Score</th><th>Home</th></tr>
-{% for score_sheet in official_matches %}
+<div class="pull-right search"><input id="results_filter" class="form-control" type="search" placeholder="Filter"></div>
+<table class="table table-striped" data-sort-name="Away" data-toggle="table" data-sort-order="asc" id="week_results" align="right">
+    <thead>
+        <tr>
+            <th data-field="Away" data-sortable="true" align="right">Away</th>
+            <th>Score</th>
+            <th data-field="Home" data-sortable="true">Home</th>
+        </tr>
+    </thead>
+    <tbody class="results_searchable">
+    {% for score_sheet in official_matches %}
     <tr>
-        <td align="right"><a href="{% url 'team' score_sheet.match.away_team.id %}">{{ score_sheet.match.away_team }}</a></td>
+        <td align="right"><!-- {{ score_sheet.match.away_team }} sort lexically --><a href="{% url 'team' score_sheet.match.away_team.id %}">{{ score_sheet.match.away_team }}</a></td>
         <td><a href="{% url 'score_sheet' score_sheet.id %}"><b>{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</b></a></td>
-        <td><a href="{% url 'team' score_sheet.match.home_team.id %}">{{ score_sheet.match.home_team }}</a></td>
+        <td><!-- {{ score_sheet.match.home_team }} sort lexically --><a href="{% url 'team' score_sheet.match.home_team.id %}">{{ score_sheet.match.home_team }}</a></td>
     </tr>
 {% endfor %}
+    </tbody>
 </table>
 {% endif %}
 
 {% if unofficial_matches|length %}
 <h4>Unofficial Results</h4>
-<table class="table">
+<div class="pull-right search"><input id="schedule_filter" class="form-control" type="search" placeholder="Filter"></div>
+<table class="table table-striped" data-sort-name="Away" data-toggle="table" data-sort-order="asc" id="week_schedule">
+    <thead>
     <tr>
-        <th align="right">Away</th><th>Home</th><th>Score Sheets</th>
+        <th data-field="Away" data-sortable="true" align="right">Away</th>
+        <th data-field="Home" data-sortable="true">Home</th><th>Score Sheets</th>
     </tr>
+    </thead>
+    <tbody class="schedule_searchable">
     {% for match in unofficial_matches %}
     <tr>
-        <td align="right"><a href="{% url 'team' match.away_team.id %}">{{ match.away_team }}</a></td>
-        <td><a href="{% url 'team' match.home_team.id %}">{{ match.home_team }}</a></td>
+        <td align="right"><!-- {{ match.away_team }} sort lexically --><a href="{% url 'team' match.away_team.id %}">{{ match.away_team }}</a></td>
+        <td><!-- {{ match.home_team }} sort lexically --><a href="{% url 'team' match.home_team.id %}">{{ match.home_team }}</a></td>
         <td>
             {% for score_sheet in match.scoresheet_set.all %}
                 {% if score_sheet.creator_session == request.session.uid and not score_sheet.official %}
@@ -45,11 +59,17 @@
         </td>
     </tr>
     {% endfor %}
+    </tbody>
 </table>
 {% endif %}
 {% endif %}
-    <!-- wraps the 'create scoresheet' link above in a confirmation dialog -->
-    <script language="JavaScript">
-      $(".confirm").confirm();
-    </script>
+<script language="JavaScript">
+    // wraps the 'create scoresheet' links in a confirmation dialog -->
+    $(".confirm").confirm();
+    // set up filter inputs for the 2 tables
+    $(document).ready(function () {
+        filterer('#results_filter', '.results_searchable');
+        filterer('#schedule_filter', '.schedule_searchable');
+    });
+</script>
 {% endblock %}

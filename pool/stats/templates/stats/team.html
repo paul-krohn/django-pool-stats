@@ -9,18 +9,33 @@
 
 {% include "stats/player_table.html" %}
 {% endif %}
+<h2>Official Results</h2>
 <table class="table">
-<tr><th style="text-align:right">Away</th><th style="text-align:center">Score</th><th>Home</th><th>Week</th></tr>
+<thead><tr><th style="text-align:right">Away</th><th style="text-align:center">Score</th><th>Home</th><th>Week</th></tr></thead>
+<tbody>
     {% for score_sheet in scoresheets %}
-<tr>
+    <tr>
     <td align="right"><a href="{% url 'team' score_sheet.match.away_team.id %}">{{ score_sheet.match.away_team }}</a></td>
     <td align="center"><a href="{% url 'score_sheet' score_sheet.id %}"><b>{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</b></a></td>
     <td><a href="{% url 'team' score_sheet.match.home_team.id %}">{{ score_sheet.match.home_team }}</a></td>
     <td><a href="{% url 'week' score_sheet.match.week_id %}">{{ score_sheet.match.week }}</a></td>
-
-</tr>
+    </tr>
     {% endfor %}
-
+</tbody>
 </table>
 
+<h2>Upcoming Matches</h2>
+<table class="table">
+    <thead>
+        <tr><th>Date</th><th>Home</th><th>Away</th></tr>
+    </thead>
+    <tbody>
+    {% for match in matches %}
+    <tr>
+        <td><a href="{% url 'week' match.week.id %}">{{ match.week.date }}</a></td>
+        <td><a href="{% url 'team' match.home_team.id %}">{{ match.home_team }}</a></td>
+        <td><a href="{% url 'team' match.away_team.id %}">{{ match.away_team }}</a></td></tr>
+    {% endfor %}
+    </tbody>
+</table>
 {% endblock %}

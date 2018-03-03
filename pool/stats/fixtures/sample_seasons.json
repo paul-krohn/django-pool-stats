@@ -1,0 +1,12 @@
+[
+  {
+    "model": "stats.season",
+    "pk": 4,
+    "fields": {
+      "name": "Fall 2010",
+      "pub_date": "2010-08-03T12:00:00Z",
+      "is_default": true,
+      "minimum_games": 1
+    }
+  }
+]

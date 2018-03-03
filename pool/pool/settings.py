@@ -55,6 +55,7 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'stats.middleware.downstream_caching.Disable',
 ]
 
 ROOT_URLCONF = 'pool.urls'
@@ -85,11 +86,9 @@ WSGI_APPLICATION = 'pool.wsgi.application'
 
 DATABASES = {
     'default': {
-        # used to be mysql; should this be settings-overrideable?
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'pool_stats',
         'USER': 'pool_stats',
-        'PASSWORD': 'isysroot',
         'OPTIONS': {
             # this option is mysql-only
             # 'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
@@ -174,7 +173,8 @@ LOGGING = {
             'level': 'DEBUG',
             'class': 'logging.handlers.SysLogHandler',
             'facility': 'local7',
-            'address': '/var/run/syslog',
+            # on macOS, you need:
+            # 'address': '/var/run/syslog',
             'formatter': 'verbose'
         },
     },
@@ -200,3 +200,5 @@ LEAGUE = {
     'tag_line': '',
     'game_group_size': 4,
 }
+
+VIEW_CACHE_TIME = 86400

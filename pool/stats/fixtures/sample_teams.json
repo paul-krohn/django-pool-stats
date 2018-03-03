@@ -1,0 +1,153 @@
+[
+  {
+    "model": "stats.team",
+    "pk": 6,
+    "fields": {
+      "season": 4,
+      "sponsor": 4,
+      "division": 10,
+      "name": "The Thunder Down Under",
+      "away_wins": 0,
+      "away_losses": 0,
+      "home_wins": 0,
+      "home_losses": 0,
+      "win_percentage": 0,
+      "ranking": null,
+      "rank_tie_breaker": null,
+      "players": [
+        46,
+        44,
+        5,
+        29,
+        18,
+        15
+      ]
+    }
+  },
+  {
+    "model": "stats.team",
+    "pk": 7,
+    "fields": {
+      "season": 4,
+      "sponsor": 4,
+      "division": 11,
+      "name": "Swamp Donkeys",
+      "away_wins": 0,
+      "away_losses": 0,
+      "home_wins": 0,
+      "home_losses": 0,
+      "win_percentage": 0,
+      "ranking": null,
+      "rank_tie_breaker": null,
+      "players": [
+        19,
+        50,
+        17,
+        21,
+        27,
+        41,
+        28
+      ]
+    }
+  },
+  {
+    "model": "stats.team",
+    "pk": 8,
+    "fields": {
+      "season": 4,
+      "sponsor": 5,
+      "division": 10,
+      "name": "The Cereal Killers",
+      "away_wins": 0,
+      "away_losses": 0,
+      "home_wins": 0,
+      "home_losses": 0,
+      "win_percentage": 0,
+      "ranking": null,
+      "rank_tie_breaker": null,
+      "players": [
+        32,
+        40,
+        12,
+        31,
+        33,
+        16
+      ]
+    }
+  },
+  {
+    "model": "stats.team",
+    "pk": 9,
+    "fields": {
+      "season": 4,
+      "sponsor": 5,
+      "division": 11,
+      "name": "Walla Walla Weasels",
+      "away_wins": 0,
+      "away_losses": 0,
+      "home_wins": 0,
+      "home_losses": 0,
+      "win_percentage": 0,
+      "ranking": null,
+      "rank_tie_breaker": null,
+      "players": [
+        47,
+        45,
+        24,
+        35,
+        6,
+        9,
+        13
+      ]
+    }
+  },
+  {
+    "model": "stats.team",
+    "pk": 10,
+    "fields": {
+      "season": 4,
+      "sponsor": 6,
+      "division": 10,
+      "name": "Spider Pigs",
+      "away_wins": 0,
+      "away_losses": 0,
+      "home_wins": 0,
+      "home_losses": 0,
+      "win_percentage": 0,
+      "ranking": null,
+      "rank_tie_breaker": null,
+      "players": [
+        4,
+        1,
+        22,
+        34,
+        8,
+        42
+      ]
+    }
+  },
+  {
+    "model": "stats.team",
+    "pk": 11,
+    "fields": {
+      "season": 4,
+      "sponsor": 6,
+      "division": 11,
+      "name": "Sand People",
+      "away_wins": 0,
+      "away_losses": 0,
+      "home_wins": 0,
+      "home_losses": 0,
+      "win_percentage": 0,
+      "ranking": null,
+      "rank_tie_breaker": null,
+      "players": [
+        3,
+        30,
+        25,
+        20,
+        26
+      ]
+    }
+  }
+]

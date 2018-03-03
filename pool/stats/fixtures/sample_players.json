@@ -1,0 +1,502 @@
+[
+  {
+    "model": "stats.player",
+    "pk": 1,
+    "fields": {
+      "first_name": "Carolynn",
+      "last_name": "Lemelle",
+      "display_name": null,
+      "email": "carolynn.lemelle@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 2,
+    "fields": {
+      "first_name": "Mable",
+      "last_name": "No",
+      "display_name": null,
+      "email": "mable.no@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 3,
+    "fields": {
+      "first_name": "Anderson",
+      "last_name": "Giel",
+      "display_name": null,
+      "email": "anderson.giel@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 4,
+    "fields": {
+      "first_name": "Carma",
+      "last_name": "Hanus",
+      "display_name": null,
+      "email": "carma.hanus@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 5,
+    "fields": {
+      "first_name": "Jerald",
+      "last_name": "Luttrell",
+      "display_name": null,
+      "email": "jerald.luttrell@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 6,
+    "fields": {
+      "first_name": "Winter",
+      "last_name": "Ely",
+      "display_name": null,
+      "email": "winter.ely@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 7,
+    "fields": {
+      "first_name": "Sandy",
+      "last_name": "Hau",
+      "display_name": null,
+      "email": "sandy.hau@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 8,
+    "fields": {
+      "first_name": "Delpha",
+      "last_name": "Helle",
+      "display_name": null,
+      "email": "delpha.helle@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 9,
+    "fields": {
+      "first_name": "Zelda",
+      "last_name": "Hamrick",
+      "display_name": null,
+      "email": "zelda.hamrick@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 10,
+    "fields": {
+      "first_name": "Masako",
+      "last_name": "Aquirre",
+      "display_name": null,
+      "email": "masako.aquirre@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 11,
+    "fields": {
+      "first_name": "Terrell",
+      "last_name": "Crupi",
+      "display_name": null,
+      "email": "terrell.crupi@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 12,
+    "fields": {
+      "first_name": "Emile",
+      "last_name": "Kinnard",
+      "display_name": null,
+      "email": "emile.kinnard@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 13,
+    "fields": {
+      "first_name": "Zofia",
+      "last_name": "Bridgers",
+      "display_name": null,
+      "email": "zofia.bridgers@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 14,
+    "fields": {
+      "first_name": "Derick",
+      "last_name": "Sturgis",
+      "display_name": null,
+      "email": "derick.sturgis@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 15,
+    "fields": {
+      "first_name": "Lisette",
+      "last_name": "Weiland",
+      "display_name": null,
+      "email": "lisette.weiland@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 16,
+    "fields": {
+      "first_name": "Gregoria",
+      "last_name": "Gossman",
+      "display_name": null,
+      "email": "gregoria.gossman@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 17,
+    "fields": {
+      "first_name": "Dexter",
+      "last_name": "Daniell",
+      "display_name": null,
+      "email": "dexter.daniell@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 18,
+    "fields": {
+      "first_name": "Ladawn",
+      "last_name": "Bechtol",
+      "display_name": null,
+      "email": "ladawn.bechtol@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 19,
+    "fields": {
+      "first_name": "Denver",
+      "last_name": "Hendrix",
+      "display_name": null,
+      "email": "denver.hendrix@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 20,
+    "fields": {
+      "first_name": "Billie",
+      "last_name": "Pacelli",
+      "display_name": null,
+      "email": "billie.pacelli@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 21,
+    "fields": {
+      "first_name": "Dinorah",
+      "last_name": "Sundberg",
+      "display_name": null,
+      "email": "dinorah.sundberg@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 22,
+    "fields": {
+      "first_name": "Deeann",
+      "last_name": "Confer",
+      "display_name": null,
+      "email": "deeann.confer@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 23,
+    "fields": {
+      "first_name": "Mabel",
+      "last_name": "Key",
+      "display_name": null,
+      "email": "mabel.key@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 24,
+    "fields": {
+      "first_name": "Usha",
+      "last_name": "Sibert",
+      "display_name": null,
+      "email": "usha.sibert@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 25,
+    "fields": {
+      "first_name": "Barabara",
+      "last_name": "Kiesel",
+      "display_name": null,
+      "email": "barabara.kiesel@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 26,
+    "fields": {
+      "first_name": "Callie",
+      "last_name": "Miah",
+      "display_name": null,
+      "email": "callie.miah@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 27,
+    "fields": {
+      "first_name": "Dominga",
+      "last_name": "Pinedo",
+      "display_name": null,
+      "email": "dominga.pinedo@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 28,
+    "fields": {
+      "first_name": "Eldora",
+      "last_name": "Alcock",
+      "display_name": null,
+      "email": "eldora.alcock@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 29,
+    "fields": {
+      "first_name": "Kelley",
+      "last_name": "Stemm",
+      "display_name": null,
+      "email": "kelley.stemm@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 30,
+    "fields": {
+      "first_name": "Arminda",
+      "last_name": "Roeder",
+      "display_name": null,
+      "email": "arminda.roeder@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 31,
+    "fields": {
+      "first_name": "Fran",
+      "last_name": "Mcneilly",
+      "display_name": null,
+      "email": "fran.mcneilly@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 32,
+    "fields": {
+      "first_name": "Elmer",
+      "last_name": "Dearing",
+      "display_name": null,
+      "email": "elmer.dearing@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 33,
+    "fields": {
+      "first_name": "Geri",
+      "last_name": "Mattice",
+      "display_name": null,
+      "email": "geri.mattice@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 34,
+    "fields": {
+      "first_name": "Deirdre",
+      "last_name": "Weigand",
+      "display_name": null,
+      "email": "deirdre.weigand@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 35,
+    "fields": {
+      "first_name": "Valery",
+      "last_name": "Lukasiewicz",
+      "display_name": null,
+      "email": "valery.lukasiewicz@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 36,
+    "fields": {
+      "first_name": "Neil",
+      "last_name": "Miyashiro",
+      "display_name": null,
+      "email": "neil.miyashiro@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 37,
+    "fields": {
+      "first_name": "Margaret",
+      "last_name": "Schrupp",
+      "display_name": null,
+      "email": "margaret.schrupp@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 38,
+    "fields": {
+      "first_name": "Tawanna",
+      "last_name": "Schiffman",
+      "display_name": null,
+      "email": "tawanna.schiffman@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 39,
+    "fields": {
+      "first_name": "Peg",
+      "last_name": "Bouie",
+      "display_name": null,
+      "email": "peg.bouie@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 40,
+    "fields": {
+      "first_name": "Elza",
+      "last_name": "Kinder",
+      "display_name": null,
+      "email": "elza.kinder@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 41,
+    "fields": {
+      "first_name": "Donnell",
+      "last_name": "Greenland",
+      "display_name": null,
+      "email": "donnell.greenland@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 42,
+    "fields": {
+      "first_name": "Denisse",
+      "last_name": "Larios",
+      "display_name": null,
+      "email": "denisse.larios@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 43,
+    "fields": {
+      "first_name": "Lorelei",
+      "last_name": "Cabot",
+      "display_name": null,
+      "email": "lorelei.cabot@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 44,
+    "fields": {
+      "first_name": "Isela",
+      "last_name": "Mcchesney",
+      "display_name": null,
+      "email": "isela.mcchesney@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 45,
+    "fields": {
+      "first_name": "Trey",
+      "last_name": "Cisco",
+      "display_name": null,
+      "email": "trey.cisco@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 46,
+    "fields": {
+      "first_name": "Hermine",
+      "last_name": "Gallup",
+      "display_name": null,
+      "email": "hermine.gallup@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 47,
+    "fields": {
+      "first_name": "Thu",
+      "last_name": "Domenico",
+      "display_name": null,
+      "email": "thu.domenico@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 48,
+    "fields": {
+      "first_name": "Paola",
+      "last_name": "Rugh",
+      "display_name": null,
+      "email": "paola.rugh@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 49,
+    "fields": {
+      "first_name": "Luigi",
+      "last_name": "Halvorsen",
+      "display_name": null,
+      "email": "luigi.halvorsen@nodomain.com"
+    }
+  },
+  {
+    "model": "stats.player",
+    "pk": 50,
+    "fields": {
+      "first_name": "Destiny",
+      "last_name": "Strother",
+      "display_name": null,
+      "email": "destiny.strother@nodomain.com"
+    }
+  }
+]

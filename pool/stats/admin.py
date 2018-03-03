@@ -6,6 +6,7 @@ from django.contrib.admin import SimpleListFilter
 
 from .models import Division, GameOrder, Match, Player, PlayPosition, ScoreSheet, Season, Sponsor, Team, Tournament, Week
 
+from .forms import MatchForm
 
 admin.AdminSite.site_header = "{} stats admin".format(settings.LEAGUE['name'])
 
@@ -73,7 +74,7 @@ admin.site.register(Division, DivisionAdmin)
 
 
 class PlayerAdmin(admin.ModelAdmin):
-    list_display = ['last_name', 'first_name', 'email']
+    list_display = ['__str__', 'last_name', 'first_name', 'email']
 
 
 admin.site.register(Player, PlayerAdmin)
@@ -142,7 +143,16 @@ admin.site.register(GameOrder, GameOrderAdmin)
 
 class MatchAdmin(admin.ModelAdmin):
     list_filter = ['week', SeasonFilter, 'playoff']
+    list_display = ['id', 'away_team', 'home_team', 'week']
 
+    form = MatchForm
+
+    def get_changeform_initial_data(self, request):
+        try:
+            default_season = Season.objects.filter(is_default=True)[0]
+            return {'season': default_season.id}
+        except ValueError:
+            return {}
 
 admin.site.register(Match, MatchAdmin)
 
