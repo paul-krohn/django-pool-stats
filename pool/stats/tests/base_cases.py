@@ -120,7 +120,7 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
 
     @staticmethod
     def count_player_stats_in_table(table):
-        # player_rows = tables[0].find_elements_by_tag_name('tr')
+
         player_rows = table.find_elements_by_xpath('tbody/tr')
         wins = 0
         losses = 0

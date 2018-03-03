@@ -5,7 +5,7 @@ from django.test import RequestFactory
 
 from ..models import Season, Player, PlayerSeasonSummary, GameOrder, ScoreSheet, Game, Team, Week
 
-from ..views import get_single_player_view_cache_key, expire_page
+from ..views import expire_page
 
 
 from ..forms import ScoreSheetGameForm
@@ -14,7 +14,6 @@ from django.core.exceptions import ValidationError
 from .base_cases import BasePoolStatsTestCase
 
 import random
-import datetime
 
 
 def populate_lineup_entries(score_sheet):
@@ -60,14 +59,6 @@ class ScoreSheetTests(BasePoolStatsTestCase):
 
         player = Player(first_name='George', last_name='Smith')
         player.save()
-
-        # players are cached; make sure we invalidate so we have
-        # consistent test results
-        cache_key = get_single_player_view_cache_key(
-            season_id=Season.objects.get(is_default=True).id,
-            player_id=player.id,
-        )
-        cache.delete(cache_key)
 
         summary = PlayerSeasonSummary(
             player=player,

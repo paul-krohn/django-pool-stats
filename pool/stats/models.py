@@ -1,5 +1,4 @@
 from django.db import models
-from django.core.cache import cache
 from django.core.exceptions import ObjectDoesNotExist
 import logging
 logger = logging.getLogger(__name__)
@@ -159,10 +158,6 @@ class PlayerSeasonSummary(models.Model):
     def team(self):
         return self.player.team_set.filter(season=self.season).first()
 
-    def delete_view_from_cache(self):
-        from .views import get_single_player_view_cache_key
-        cache.delete(get_single_player_view_cache_key(self.season.id, self.player.id))
-
     def update_sweeps(self):
         # the occasional player may have played for more than one
         # team in a season ...
@@ -240,8 +235,6 @@ class PlayerSeasonSummary(models.Model):
         self.table_runs = len(away_wins.filter(table_run=True)) + len(home_wins.filter(table_run=True))
 
         self.update_sweeps()
-
-        self.delete_view_from_cache()
 
         self.save()
 
