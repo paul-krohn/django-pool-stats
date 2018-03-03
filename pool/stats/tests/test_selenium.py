@@ -226,7 +226,6 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         ss.official = True
         ss.save()
         self.selenium.get('{}update_stats/'.format(self.base_url))
-        self.assertEquals(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
         self.selenium.get('{}players/{}'.format(self.base_url, 4))
         tables = self.selenium.find_elements_by_tag_name('table')
 
@@ -245,7 +244,6 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         ss.official = True
         ss.save()
         self.selenium.get('{}update_stats/'.format(self.base_url))
-        self.assertEquals(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
         self.selenium.get('{}players/{}'.format(self.base_url, self.default_season))
         tables = self.selenium.find_elements_by_tag_name('table')
         stats = self.count_player_stats_in_table(tables[0])

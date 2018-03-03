@@ -1,5 +1,5 @@
 import django.forms
-from .models import Player, Team, Game, ScoreSheet
+from .models import Player, Team, Game, ScoreSheet, Week
 from django.core.exceptions import ValidationError
 
 WINNER_CHOICES = (
@@ -88,3 +88,27 @@ class SubstitutionFormSet(django.forms.BaseModelFormSet):
         if len(player_values) > len(set(player_values)):
             raise ValidationError('You may not substitute in the same player twice',
                                   code='lineup_duplicate_player')
+
+
+class MatchForm(django.forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(MatchForm, self).__init__(*args, **kwargs)
+
+        # we need the list of teams in this match, to pass them to Week.used_teams, so
+        # it can return them in the list of teams to choose from displayed in the match admin form.
+        this_match_teams = []
+        if hasattr(self.instance, 'away_team') and hasattr(self.instance.away_team, 'id'):
+            this_match_teams.append(self.instance.away_team.id)
+        if hasattr(self.instance, 'home_team') and hasattr(self.instance.home_team, 'id'):
+            this_match_teams.append(self.instance.home_team.id)
+
+        if hasattr(self.instance, 'week'):
+            for loc in ['away', 'home']:
+                self.fields['{}_team'.format(loc)].queryset = Team.objects.filter(
+                    season__is_default=True).exclude(
+                    id__in=self.instance.week.used_teams(teams=this_match_teams)
+                )
+        else:
+            self.fields['away_team'].queryset = Team.objects.filter(season__is_default=True)
+            self.fields['home_team'].queryset = Team.objects.filter(season__is_default=True)
