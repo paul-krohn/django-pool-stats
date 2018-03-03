@@ -287,7 +287,23 @@ class Week(models.Model):
     def previous(self):
         return self.get_weeks_in_season(before_after='before', week=self)
 
+    def unused_teams(self):
+        matches_this_week = Match.objects.filter(week=self)
+        used_teams = set([])
+        for m in matches_this_week:
+            used_teams.add(m.away_team.id)
+            used_teams.add(m.home_team.id)
+        return Team.objects.filter(season__is_default=True).exclude(id__in=used_teams)
 
+    def used_teams(self, teams=[]):
+        matches_this_week = Match.objects.filter(week=self)
+        used_teams = set([])
+        for m in matches_this_week:
+            if hasattr(m.away_team, 'id') and m.away_team.id not in teams:
+                used_teams.add(m.away_team.id)
+            if hasattr(m.home_team, 'id') and m.home_team.id not in teams:
+                used_teams.add(m.home_team.id)
+        return Team.objects.filter(season__is_default=True).filter(id__in=used_teams)
 
 
 class AwayTeam(Team):
@@ -301,18 +317,21 @@ class HomeTeam(Team):
 
 
 class Match(models.Model):
-    # a default season that doesn't bork migrations would be nice
+    # the `is_default` season being the default is set in the admin, rather than here,
+    # doing it here breaks generating migrations with an empty database.
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     week = models.ForeignKey(Week, limit_choices_to=models.Q(season__is_default=True))
     home_team = models.ForeignKey(
         'HomeTeam',
         limit_choices_to=models.Q(season__is_default=True),
         related_name='home_team',
+        blank=True, null=True,
     )
     away_team = models.ForeignKey(
         'AwayTeam',
         limit_choices_to=models.Q(season__is_default=True),
         related_name='away_team',
+        blank=True, null=True,
     )
     playoff = models.BooleanField(default=False)
 
