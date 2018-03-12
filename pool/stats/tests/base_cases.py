@@ -17,13 +17,18 @@ class BasePoolStatsTestCase(LiveServerTestCase):
                 'sample_players', 'sample_divisions', 'sample_teams', 'sample_weeks',
                 'sample_matches']
 
-    default_season = 4
+    DEFAULT_TEST_MATCH_ID = 5
+    DEFAULT_TEST_WEEK_ID = 5
 
+    PLAYOFF_TEST_MATCH_ID = 11
+    PLAYOFF_TEST_WEEK_ID = 11
+
+    default_season = 4
     test_match = {
-        "pk": 5,
+        "pk": DEFAULT_TEST_MATCH_ID,
         "fields": {
             "season": default_season,
-            "week": 4,
+            "week": DEFAULT_TEST_WEEK_ID,
             "home_team": 6,
             "away_team": 7,
             "playoff": False
@@ -50,6 +55,12 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
 
         self.selenium.quit()
         super(BaseSeleniumPoolStatsTestCase, self).tearDown()
+
+    def score_sheet_create(self,
+                           match_id=BasePoolStatsTestCase.DEFAULT_TEST_MATCH_ID,
+                           week_id=BasePoolStatsTestCase.DEFAULT_TEST_WEEK_ID):
+        self.selenium.get('{}week/{}'.format(self.base_url, week_id))
+        self.selenium.find_element_by_id('score_sheet_create_button_match_{}'.format(match_id)).click()
 
     def populate_lineup(self, away_players=4, home_players=4):
         # get the lineup form, set the first player to 1, second to 2, etc

@@ -80,7 +80,8 @@ class ScoreSheetTests(BasePoolStatsTestCase):
 
         """
 
-        response = self.client.get(reverse('score_sheet_create', kwargs={'match_id': self.sample_match_id}))
+        response = self.client.post(reverse('score_sheet_create'), data={'match_id': self.sample_match_id})
+
         # since we have a fresh DB, assume this will be score sheet number 1 ...
         self.assertRedirects(response, expected_url=reverse('score_sheet_edit', kwargs={'score_sheet_id': 1}))
 
@@ -99,7 +100,7 @@ class ScoreSheetTests(BasePoolStatsTestCase):
 
         """
         test_score_sheet_id = 1
-        response = self.client.get(reverse('score_sheet_create', kwargs={'match_id': self.sample_match_id}))
+        response = self.client.post(reverse('score_sheet_create'), data={'match_id': self.sample_match_id})
         # since we have a fresh DB, assume this will be score sheet number 1 ...
         self.assertRedirects(
             response,

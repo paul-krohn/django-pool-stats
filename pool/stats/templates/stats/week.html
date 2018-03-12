@@ -20,11 +20,17 @@
         </tr>
     </thead>
     <tbody class="results_searchable">
-    {% for score_sheet in official_matches %}
+{% for score_sheet in official_matches %}
     <tr>
-        <td align="right"><!-- {{ score_sheet.match.away_team }} sort lexically --><a href="{% url 'team' score_sheet.match.away_team.id %}">{{ score_sheet.match.away_team }}</a></td>
-        <td><a href="{% url 'score_sheet' score_sheet.id %}"><b>{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</b></a></td>
-        <td><!-- {{ score_sheet.match.home_team }} sort lexically --><a href="{% url 'team' score_sheet.match.home_team.id %}">{{ score_sheet.match.home_team }}</a></td>
+        <td align="right"><!-- {{ score_sheet.match.away_team }} sort lexically -->
+            <a href="{% url 'team' score_sheet.match.away_team.id %}">{{ score_sheet.match.away_team }}</a>
+        </td>
+        <td>
+            <a href="{% url 'score_sheet' score_sheet.id %}"><b>{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</b></a>
+        </td>
+        <td><!-- {{ score_sheet.match.home_team }} sort lexically -->
+            <a href="{% url 'team' score_sheet.match.home_team.id %}">{{ score_sheet.match.home_team }}</a>
+        </td>
     </tr>
 {% endfor %}
     </tbody>
@@ -38,36 +44,56 @@
     <thead>
     <tr>
         <th data-field="Away" data-sortable="true" align="right">Away</th>
-        <th data-field="Home" data-sortable="true">Home</th><th>Score Sheets</th>
+        <th data-field="Home" data-sortable="true">Home</th><th></th><th>Score Sheets</th>
     </tr>
     </thead>
     <tbody class="schedule_searchable">
-    {% for match in unofficial_matches %}
+    {% for unofficial_match in unofficial_matches %}
+    {% with unofficial_match.score_sheet_form as score_sheet_form %}
     <tr>
-        <td align="right"><!-- {{ match.away_team }} sort lexically --><a href="{% url 'team' match.away_team.id %}">{{ match.away_team }}</a></td>
-        <td><!-- {{ match.home_team }} sort lexically --><a href="{% url 'team' match.home_team.id %}">{{ match.home_team }}</a></td>
+        <td><!-- {{ score_sheet_form.instance.away_team }} sort lexically -->
+            <a href="{% url 'team' score_sheet_form.instance.away_team.id %}">
+            {{ score_sheet_form.instance.away_team }}</a>
+        </td>
+        <td><!-- {{ score_sheet_form.instance.home_team }} sort lexically -->
+            <a href="{% url 'team' score_sheet_form.instance.home_team.id %}">
+            {{ score_sheet_form.instance.home_team }}</a>
+        </td>
         <td>
-            {% for score_sheet in match.scoresheet_set.all %}
-                {% if score_sheet.creator_session == request.session.uid and not score_sheet.official %}
-                    <a href="{% url 'score_sheet_edit' score_sheet.id %}"> {{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>,
-                {% else %}
-                    <a href="{% url 'score_sheet' score_sheet.id %}"> {{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>,
-                {% endif %}
-            {% endfor %}
-            <a href="{% url 'score_sheet_create' match.id %}" class="confirm"
-                        data-text="Create new scoresheet for {{ match.away_team }} @ {{match.home_team }} on {{match.week.date}}?">New Scoresheet</a>
+            <form method="post" action="{% url 'score_sheet_create' %}">
+                {% csrf_token %}
+                <input type="hidden" value="{{ score_sheet_form.instance.id }}" name="match_id" />
+                <input
+                        id="score_sheet_create_button_match_{{ score_sheet_form.instance.id }}"
+                        class="btn btn-primary btn-sm confirm"
+                        type="submit"
+                        value="New"
+                        data-text="Create new scoresheet for {{ score_sheet_form.instance.away_team }} @ {{score_sheet_form.instance.home_team }}?"
+                />
+            </form>
+        </td>
+        <td>
+{% for score_sheet in unofficial_match.score_sheets %}
+    {% if score_sheet.creator_session == request.session.uid and not score_sheet.official %}
+        <a href="{% url 'score_sheet_edit' score_sheet.id %}"> {{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>
+    {% else %}
+        <a href="{% url 'score_sheet' score_sheet.id %}"> {{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>
+    {% endif %}
+{% endfor %}
         </td>
     </tr>
+    {% endwith %}
     {% endfor %}
     </tbody>
 </table>
 {% endif %}
 {% endif %}
 <script language="JavaScript">
-    // wraps the 'create scoresheet' links in a confirmation dialog -->
-    $(".confirm").confirm();
     // set up filter inputs for the 2 tables
     $(document).ready(function () {
+        // wraps the 'create scoresheet' links in a confirmation dialog -->
+        $(".confirm").confirm();
+        // sets up table filtering
         filterer('#results_filter', '.results_searchable');
         filterer('#schedule_filter', '.schedule_searchable');
     });
