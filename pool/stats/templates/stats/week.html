@@ -62,13 +62,17 @@
         <td>
             <form method="post" action="{% url 'score_sheet_create' %}">
                 {% csrf_token %}
-                <input type="hidden" value="{{ score_sheet_form.instance.id }}" name="match_id" />
+                <input
+                        type="hidden"
+                        value="{{ score_sheet_form.instance.id }}"
+                        name="match_id"
+                />
                 <input
                         id="score_sheet_create_button_match_{{ score_sheet_form.instance.id }}"
-                        class="btn btn-primary btn-sm confirm"
+                        class="btn btn-primary btn-sm"
                         type="submit"
                         value="New"
-                        data-text="Create new scoresheet for {{ score_sheet_form.instance.away_team }} @ {{score_sheet_form.instance.home_team }}?"
+                        onclick='return confirm("Create new score sheet?");'
                 />
             </form>
         </td>
@@ -91,8 +95,6 @@
 <script language="JavaScript">
     // set up filter inputs for the 2 tables
     $(document).ready(function () {
-        // wraps the 'create scoresheet' links in a confirmation dialog -->
-        $(".confirm").confirm();
         // sets up table filtering
         filterer('#results_filter', '.results_searchable');
         filterer('#schedule_filter', '.schedule_searchable');
