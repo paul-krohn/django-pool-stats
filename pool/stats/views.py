@@ -21,6 +21,8 @@ from django.utils.cache import get_cache_key
 from django.urls import reverse
 from django.http import HttpResponseBadRequest
 
+from django.contrib.auth.models import User, Group
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -54,12 +56,16 @@ def set_season(request, season_id=None):
     return redirect(request.META.get('HTTP_REFERER', '/stats/'))
 
 
+def is_stats_master(user):
+    return user.groups.filter(name='statsmaster').exists()
+
+
 def user_can_edit_scoresheet(request, score_sheet_id):
 
     s = ScoreSheet.objects.get(id=score_sheet_id)
     # you can edit a score sheet if it is not official and either you created it,
     # or you are an admin
-    if (not s.official) and ((session_uid(request) == s.creator_session) or request.user.is_superuser):
+    if (not s.official) and ((session_uid(request) == s.creator_session) or request.user.is_superuser or is_stats_master(request.user)):
         return True
     else:
         return False
