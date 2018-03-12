@@ -63,7 +63,7 @@
             <form method="post" action="{% url 'score_sheet_create' %}">
                 {% csrf_token %}
                 <input type="hidden" value="{{ score_sheet_form.instance.id }}" name="match_id" />
-                <input id="score_sheet_create_button" class="btn btn-primary btn-sm confirm" type="submit" value="New"/>
+                <input id="score_sheet_create_button_match_{{ score_sheet_form.instance.id }}" class="btn btn-primary btn-sm confirm" type="submit" value="New"/>
             </form>
         </td>
         <td>

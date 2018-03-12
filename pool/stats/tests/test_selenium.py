@@ -34,7 +34,8 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
 
     def test_match_create_scoresheet(self):
 
-        self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, self.test_match['pk']))
+        # self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, self.test_match['pk']))
+        self.score_sheet_create()
 
         # test that we get redirected to the edit URL
         self.assertEquals(self.selenium.current_url, '{}score_sheet_edit/{}/'.format(self.base_url, 1))
@@ -55,7 +56,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         self.assertEquals(86, len(games_form_inputs))
 
     def test_match_create_playoff_scoresheet(self):
-        self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 11))
+        self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
         self.assertEquals(self.selenium.current_url, '{}score_sheet_edit/{}/'.format(self.base_url, 1))
         # <input type="hidden" name="form-TOTAL_FORMS" value="16" id="id_form-TOTAL_FORMS">
         games_form = self.selenium.find_element_by_name('score_sheet_games_form')
@@ -68,7 +69,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         self.assertEquals(91, len(games_form_inputs))
 
     def test_match_scoresheet_set_lineup(self):
-        self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 11))
+        self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
 
         self.populate_lineup()
         # now that we have lineups set, make sure we have games, and that all have players. We should still be on the
@@ -84,7 +85,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
     def test_score_sheet_lineup_duplicate_player(self):
 
         location_name = location_names[0]
-        self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 11))
+        self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
         score_sheet_id = self.selenium.current_url.split('/')[-2]
 
         self.selenium.find_element_by_id('toggle-{}_lineup'.format(location_name)).click()
@@ -99,7 +100,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
             self.base_url, score_sheet_id, location_name))
 
     def test_match_scoresheet_substitutions(self):
-        self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 11))
+        self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
 
         self.populate_lineup()
         self.set_substitution('away', 11)
@@ -112,7 +113,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
             self.assertEqual(len(player_summary_rows), 6)  # 5 players plus a header row
 
     def test_scoresheet_duplicate_substitutions(self):
-        self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 11))
+        self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
         score_sheet_id = self.selenium.current_url.split('/')[-2]
 
         self.set_substitution('away', game_index=11, substitution_index=0)
@@ -122,7 +123,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         )
 
     def test_match_scoresheet_mark_winners(self):
-        self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 11))
+        self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
 
         self.populate_lineup()
         self.set_substitution('away', 10)
@@ -138,7 +139,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
             )
 
     def test_match_scoresheet_remove_substitutions(self):
-        self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 5))
+        self.score_sheet_create()
         self.populate_lineup()
         self.set_substitution('away', 10)
         self.set_substitution('home', 10)
@@ -162,7 +163,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         forfeit_count = 3
         table_run_count = 0
 
-        self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 5))
+        self.score_sheet_create()
         self.populate_lineup()
         self.set_substitution('away', 10)
         self.set_substitution('home', 10)
@@ -192,7 +193,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         self.assertEqual(tr_count, table_run_count)
 
     def test_team_win_totals(self):
-        self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 5))
+        self.score_sheet_create()
         self.populate_lineup()
         self.set_substitution('away', 10)
         self.set_substitution('home', 10)
@@ -215,7 +216,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         self.assertTrue(list(win_counts.values()) in [wins, losses])
 
     def test_player_win_totals(self):
-        self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 5))
+        self.score_sheet_create()
         self.populate_lineup()
         self.set_substitution('away', 10)
         self.set_substitution('home', 10)
@@ -236,7 +237,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
 
     def test_both_teams_shorthanded(self):
 
-        self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, 5))
+        self.score_sheet_create()
         self.populate_lineup(home_players=3, away_players=3)
         self.set_winners(table_runs=2)
         scoresheet_id = self.selenium.current_url.split('/')[-2]
