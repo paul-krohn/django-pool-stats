@@ -16,12 +16,10 @@ import django.db.models
 from django.conf import settings
 
 from django.core.cache import cache
-from django.views.decorators.cache import never_cache, cache_control
+from django.views.decorators.cache import never_cache
 from django.utils.cache import get_cache_key
 from django.urls import reverse
 from django.http import HttpResponseBadRequest
-
-from django.contrib.auth.models import User, Group
 
 
 import logging
