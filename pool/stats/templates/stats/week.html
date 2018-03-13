@@ -60,17 +60,33 @@
             {{ score_sheet_form.instance.home_team }}</a>
         </td>
         <td>
-            <form method="post" action="{% url 'score_sheet_create' %}">
+            <form
+                    id="score_sheet_create_form_{{ score_sheet_form.instance.id }}"
+                    method="post"
+                    action="{% url 'score_sheet_create' %}">
                 {% csrf_token %}
-                <input type="hidden" value="{{ score_sheet_form.instance.id }}" name="match_id" />
+                <input
+                        type="hidden"
+                        value="{{ score_sheet_form.instance.id }}"
+                        name="match_id"
+                />
                 <input
                         id="score_sheet_create_button_match_{{ score_sheet_form.instance.id }}"
+                        data-text="Create new scoresheet for {{ score_sheet_form.instance.away_team }} @ {{score_sheet_form.instance.home_team }}?"
                         class="btn btn-primary btn-sm confirm"
                         type="submit"
                         value="New"
-                        data-text="Create new scoresheet for {{ score_sheet_form.instance.away_team }} @ {{score_sheet_form.instance.home_team }}?"
                 />
             </form>
+            <script language="JavaScript">
+                $("#score_sheet_create_button_match_{{ score_sheet_form.instance.id }}").confirm({
+                    submitForm: true,
+                    post: true,
+                    confirm: function(button) {
+                        $("#score_sheet_create_form_{{ score_sheet_form.instance.id }}").submit();
+                    }
+                });
+            </script>
         </td>
         <td>
 {% for score_sheet in unofficial_match.score_sheets %}
@@ -89,10 +105,7 @@
 {% endif %}
 {% endif %}
 <script language="JavaScript">
-    // set up filter inputs for the 2 tables
     $(document).ready(function () {
-        // wraps the 'create scoresheet' links in a confirmation dialog -->
-        $(".confirm").confirm();
         // sets up table filtering
         filterer('#results_filter', '.results_searchable');
         filterer('#schedule_filter', '.schedule_searchable');

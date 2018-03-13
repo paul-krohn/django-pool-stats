@@ -114,10 +114,46 @@ class PlayPositionAdmin(admin.ModelAdmin):
 admin.site.register(PlayPosition, PlayPositionAdmin)
 
 
+def make_official(modeladmin, request, queryset):
+    queryset.update(official=True)
+make_official.description = "Mark as official"
+
+
+class BlankScoreSheetFilter(admin.SimpleListFilter):
+    title = _('no wins')
+
+    # Parameter for the filter that will be used in the URL query.
+    parameter_name = 'is_blank'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('blank', _('no wins')),
+        )
+
+    def queryset(self, request, queryset):
+        """
+        Returns the filtered queryset based on the value
+        provided in the query string and retrievable via
+        `self.value()`.
+        """
+        # Compare the requested value (either '80s' or '90s')
+        # to decide how to filter the queryset.
+        # return queryset.filter(birthday__gte=date(1990, 1, 1),)
+        if self.value() == 'blank':
+            blank = []
+            for s in queryset:
+                if s.away_wins() == 0 and s.home_wins() == 0:
+                    blank.append(s.id)
+            return ScoreSheet.objects.filter(id__in=blank)
+        else:
+            return queryset
+
+
 class ScoreSheetAdmin(admin.ModelAdmin):
     list_display = ['opponents', 'links', 'away_wins', 'home_wins', 'official', 'complete', 'comment']
     fields = ['official', 'complete', 'comment']
-    list_filter = [MatchSeasonFilter, 'official', 'complete']
+    list_filter = [MatchSeasonFilter, 'official', 'complete', BlankScoreSheetFilter]
+    actions = [make_official]
 
     @staticmethod
     def opponents(obj):
