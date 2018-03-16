@@ -44,7 +44,7 @@
     <thead>
     <tr>
         <th data-field="Away" data-sortable="true" align="right">Away</th>
-        <th data-field="Home" data-sortable="true">Home</th><th></th><th>Score Sheets</th>
+        <th data-field="Home" data-sortable="true">Home</th><th>Score Sheets</th>
     </tr>
     </thead>
     <tbody class="schedule_searchable">
@@ -77,6 +77,13 @@
                         type="submit"
                         value="New"
                 />
+{% for score_sheet in unofficial_match.score_sheets %}&nbsp;
+    {% if score_sheet.creator_session == request.session.uid and not score_sheet.official %}
+        <a href="{% url 'score_sheet_edit' score_sheet.id %}">{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>
+    {% else %}
+        <a href="{% url 'score_sheet' score_sheet.id %}">{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>
+    {% endif %}
+{% endfor %}
             </form>
             <script language="JavaScript">
                 $("#score_sheet_create_button_match_{{ score_sheet_form.instance.id }}").confirm({
@@ -87,15 +94,6 @@
                     }
                 });
             </script>
-        </td>
-        <td>
-{% for score_sheet in unofficial_match.score_sheets %}
-    {% if score_sheet.creator_session == request.session.uid and not score_sheet.official %}
-        <a href="{% url 'score_sheet_edit' score_sheet.id %}"> {{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>
-    {% else %}
-        <a href="{% url 'score_sheet' score_sheet.id %}"> {{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>
-    {% endif %}
-{% endfor %}
         </td>
     </tr>
     {% endwith %}
