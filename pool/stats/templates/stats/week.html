@@ -5,7 +5,7 @@
 {% block content %}
 {% if week %}
 <h3>{{ week.name }}</h3>
-<p>{{ week.date}}</p>
+<p>{{ week.date }}</p>
 <p>{% if week.previous %}<a href="{% url 'week' week.previous.id %}">&larr; {{week.previous}}</a>{% endif %} •
 {% if week.next%}<a href="{% url 'week' week.next.id %}">{{week.next}} &rarr;</a>{% endif %}</p>
 
@@ -103,6 +103,11 @@
     </tbody>
 </table>
 {% endif %}
+{% endif %}
+{% if not official_matches|length and not unofficial_matches|length %}
+<div class="text-center">
+    <strong>No matches scheduled.</strong>
+</div>
 {% endif %}
 <script language="JavaScript">
     $(document).ready(function () {
