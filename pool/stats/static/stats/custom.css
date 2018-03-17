@@ -82,6 +82,11 @@ a:hover	{
     margin: 0em !important;
 }
 
+.scoresheet-small-header {
+    padding: 0em !important;
+    margin: 0em !important;
+}
+
 .scoresheet-odd {
     background-color: #f8f8f8;
 }

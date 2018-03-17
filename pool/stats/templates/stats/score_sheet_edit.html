@@ -26,7 +26,6 @@ $(document).ready(function(){
 
 </script>
 
-<h4><a href="{% url 'team' score_sheet.match.away_team_id %}">{{ score_sheet.match.away_team }}</a>: {{ score_sheet.away_wins }} <a href="{% url 'team' score_sheet.match.home_team_id %}">{{ score_sheet.match.home_team }}</a>: {{ score_sheet.home_wins }}</h4>
 <h5>{{ score_sheet.match.week }}, {{ score_sheet.match.week.date }}</h5>
 <div>
     <form id="showhide">
@@ -82,8 +81,7 @@ $(document).ready(function(){
     </ol>
 </div>
 {% endif %}
-
-<h3>Games</h3>
+<p/>
 <form name="score_sheet_games_form" action="{% url 'score_sheet_edit' score_sheet.id %}" method="post">
     {% csrf_token %}
     {{ games_formset.management_form }}
@@ -101,12 +99,12 @@ $(document).ready(function(){
         <input id="games-save-button" name="games" class="btn btn-primary" type="submit" value="Save games"/>
     </div>
 </form>
-    <div id="away-player-summaries"><h3>Away Player Summaries</h3>
+    <div id="away-player-summaries"><h4>{{ score_sheet.match.away_team }} Player Summaries</h4>
     {% with player_score_sheet_summaries=away_player_score_sheet_summaries %}
     {% include "stats/player_match_summary.html" %}
     {% endwith %}
     </div>
-    <div id="home-player-summaries"><h3>Home Player Summaries</h3>
+    <div id="home-player-summaries"><h4>{{ score_sheet.match.home_team }} Player Summaries</h4>
     {% with player_score_sheet_summaries=home_player_score_sheet_summaries %}
     {% include "stats/player_match_summary.html" %}
     {% endwith %}
