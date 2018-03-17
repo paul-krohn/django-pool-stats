@@ -21,8 +21,13 @@
 {% include "stats/player_match_summary.html" %}
 {% endwith %}
 {% block completion_block %}
-{% if score_sheet.complete and score_sheet.comment %}
-<p>{{ score_sheet.comment }}</p>
+{% if score_sheet.comment %}
+<h3>Comment</h3>
+<div class="container">
+    <div class="lead">
+        {{ score_sheet.comment }}
+    </div>
+</div>
 {% endif %}
 {% endblock %}
 {% endblock %}
