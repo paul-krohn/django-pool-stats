@@ -52,12 +52,15 @@
     {% with unofficial_match.score_sheet_form as score_sheet_form %}
     <tr>
         <td><!-- {{ score_sheet_form.instance.away_team }} sort lexically -->
-            <a href="{% url 'team' score_sheet_form.instance.away_team.id %}">
+            <div class="scoresheet-cell"><a href="{% url 'team' score_sheet_form.instance.away_team.id %}">
             {{ score_sheet_form.instance.away_team }}</a>
+            </div>
         </td>
         <td><!-- {{ score_sheet_form.instance.home_team }} sort lexically -->
+            <div class="scoresheet-cell">
             <a href="{% url 'team' score_sheet_form.instance.home_team.id %}">
             {{ score_sheet_form.instance.home_team }}</a>
+            </div>
         </td>
         <td>
             <form

@@ -30,10 +30,10 @@ $(document).ready(function(){
 <h5>{{ score_sheet.match.week }}, {{ score_sheet.match.week.date }}</h5>
 <div>
     <form id="showhide">
-        <input id="toggle-away_lineup" type="button" class="btn btn-default" value="Away Lineup" />
         <input id="toggle-home_lineup" type="button" class="btn btn-default" value="Home Lineup" />
+        <input id="toggle-home_substitutions" type="button" class="btn btn-default" value="Home Subs" /> •
+        <input id="toggle-away_lineup" type="button" class="btn btn-default" value="Away Lineup" />
         <input id="toggle-away_substitutions" type="button" class="btn btn-default" value="Away Subs" />
-        <input id="toggle-home_substitutions" type="button" class="btn btn-default" value="Home Subs" />
     </form>
 </div>
 {% with "away" as away_home %}
