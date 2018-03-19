@@ -141,7 +141,6 @@ class Team(models.Model):
 class PlayerSeasonSummary(models.Model):
     player = models.ForeignKey(Player)
     season = models.ForeignKey(Season)
-    team = models.ForeignKey(Team, null=True, blank=True)
     wins = models.IntegerField(verbose_name='Wins', default=0)
     losses = models.IntegerField(verbose_name='Losses', default=0)
     four_ohs = models.IntegerField(verbose_name='4-0s', default=0)
