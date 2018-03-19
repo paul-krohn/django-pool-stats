@@ -23,8 +23,8 @@
     {% endfor %}
 </tbody>
 </table>
-
 <h2>Upcoming Matches</h2>
+{% if matches|length %}
 <table class="table">
     <thead>
         <tr><th>Date</th><th>Home</th><th>Away</th></tr>
@@ -38,4 +38,9 @@
     {% endfor %}
     </tbody>
 </table>
+{% else %}
+<div class="text-center">
+    <strong>No matches currently scheduled</strong>
+</div>
+{% endif %}
 {% endblock %}

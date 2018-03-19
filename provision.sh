@@ -8,7 +8,7 @@ sudo apt-get upgrade -y
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password janet'
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password janet'
 sudo apt-get install -y mysql-common mysql-server mysql-client
-sudo apt-get install -y python3.4 python3.4-dev python-virtualenv python-pip
+sudo apt-get install -y python3.5 python3.5-dev python-virtualenv python-pip
 sudo apt-get install -y libmysqlclient-dev memcached
 
 VE_DIR="/usr/local/django-pool-stats-ve"
@@ -17,8 +17,8 @@ VE_DIR="/usr/local/django-pool-stats-ve"
 chown vagrant:vagrant
 
 # python virtualenv
-if [ ! -d ${VE_DIR}] ] ; then
-    sudo virtualenv ${VE_DIR} -p python3.4
+if [ ! -d ${VE_DIR} ] ; then
+    sudo virtualenv ${VE_DIR} -p python3.5
     sudo chown -R vagrant:vagrant ${VE_DIR}
 fi
 . ${VE_DIR}/bin/activate

@@ -52,12 +52,15 @@
     {% with unofficial_match.score_sheet_form as score_sheet_form %}
     <tr>
         <td><!-- {{ score_sheet_form.instance.away_team }} sort lexically -->
-            <a href="{% url 'team' score_sheet_form.instance.away_team.id %}">
+            <div class="scoresheet-cell"><a href="{% url 'team' score_sheet_form.instance.away_team.id %}">
             {{ score_sheet_form.instance.away_team }}</a>
+            </div>
         </td>
         <td><!-- {{ score_sheet_form.instance.home_team }} sort lexically -->
+            <div class="scoresheet-cell">
             <a href="{% url 'team' score_sheet_form.instance.home_team.id %}">
             {{ score_sheet_form.instance.home_team }}</a>
+            </div>
         </td>
         <td>
             <form
@@ -79,9 +82,9 @@
                 />
 {% for score_sheet in unofficial_match.score_sheets %}&nbsp;
     {% if score_sheet.creator_session == request.session.uid and not score_sheet.official %}
-        <a href="{% url 'score_sheet_edit' score_sheet.id %}">{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>
+        <a title="{{ score_sheet.comment }}" href="{% url 'score_sheet_edit' score_sheet.id %}">{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>
     {% else %}
-        <a href="{% url 'score_sheet' score_sheet.id %}">{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>
+        <a title="{{ score_sheet.comment }}" href="{% url 'score_sheet' score_sheet.id %}">{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>
     {% endif %}
 {% endfor %}
             </form>
