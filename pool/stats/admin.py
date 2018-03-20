@@ -75,7 +75,7 @@ admin.site.register(Division, DivisionAdmin)
 
 class PlayerAdmin(admin.ModelAdmin):
     list_display = ['__str__', 'last_name', 'first_name', 'email']
-
+    search_fields = ['last_name', 'first_name', 'display_name']
 
 admin.site.register(Player, PlayerAdmin)
 
@@ -116,7 +116,7 @@ admin.site.register(PlayPosition, PlayPositionAdmin)
 
 def make_official(modeladmin, request, queryset):
     queryset.update(official=True)
-make_official.description = "Mark as official"
+make_official.description = "Mark selected score sheets as official"
 
 
 class BlankScoreSheetFilter(admin.SimpleListFilter):
@@ -152,7 +152,7 @@ class BlankScoreSheetFilter(admin.SimpleListFilter):
 class ScoreSheetAdmin(admin.ModelAdmin):
     list_display = ['opponents', 'links', 'away_wins', 'home_wins', 'official', 'complete', 'comment']
     fields = ['official', 'complete', 'comment']
-    list_filter = [MatchSeasonFilter, 'official', 'complete', BlankScoreSheetFilter]
+    list_filter = [MatchSeasonFilter, 'official', 'complete', BlankScoreSheetFilter, 'match__week']
     actions = [make_official]
 
     @staticmethod
