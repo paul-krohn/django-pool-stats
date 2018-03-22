@@ -159,13 +159,13 @@ class ScoreSheetTests(BasePoolStatsTestCase):
 
         # there should be zero summaries now
         summaries = PlayerSeasonSummary.objects.all()
-        self.assertEquals(0, len(summaries))
+        self.assertEqual(0, len(summaries))
 
         season_args = {'season_id': Season.objects.get(is_default=True).id}
 
         PlayerSeasonSummary.update_all(**season_args)
         summaries = PlayerSeasonSummary.objects.all()
-        self.assertEquals(37, len(summaries))  # 37 is a magic number, where does that come from?
+        self.assertEqual(37, len(summaries))  # 37 is a magic number, where does that come from?
 
         # there should now be six players with enough games to be in the standings
         expire_page(self.factory.get(reverse('players')), reverse('players', kwargs=season_args))

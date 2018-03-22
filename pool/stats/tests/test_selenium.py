@@ -8,15 +8,15 @@ class BaseViewRedirectTestCase(BaseSeleniumPoolStatsTestCase):
 
     def test_default_view_redirect(self):
         self.selenium.get(self.base_url)
-        self.assertEquals(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
+        self.assertEqual(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
 
     def test_players_view_redirect(self):
         self.selenium.get('{}players/'.format(self.base_url))
-        self.assertEquals(self.selenium.current_url, '{}players/{}'.format(self.base_url, self.default_season))
+        self.assertEqual(self.selenium.current_url, '{}players/{}'.format(self.base_url, self.default_season))
 
     def test_divisions_view_redirect(self):
         self.selenium.get('{}divisions/'.format(self.base_url))
-        self.assertEquals(self.selenium.current_url, '{}divisions/{}'.format(self.base_url, self.default_season))
+        self.assertEqual(self.selenium.current_url, '{}divisions/{}'.format(self.base_url, self.default_season))
 
     def test_stats_update_redirect(self):
         self.selenium.get('{}update_stats/'.format(self.base_url))
@@ -38,7 +38,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         self.score_sheet_create()
 
         # test that we get redirected to the edit URL
-        self.assertEquals(self.selenium.current_url, '{}score_sheet_edit/{}/'.format(self.base_url, 1))
+        self.assertEqual(self.selenium.current_url, '{}score_sheet_edit/{}/'.format(self.base_url, 1))
 
         for location_name in location_names:
             for form_type in form_length_map:
@@ -47,26 +47,26 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
                 lineup_form = lineup_div.find_element_by_tag_name('form')
                 lineup_inputs = lineup_form.find_elements_by_tag_name('input')
                 # with the correct number of elements
-                self.assertEquals(form_length_map[form_type], len(lineup_inputs))
+                self.assertEqual(form_length_map[form_type], len(lineup_inputs))
         games_form = self.selenium.find_element_by_name('score_sheet_games_form')
         games_form_inputs = games_form.find_elements_by_tag_name('input')
 
         # there should be 16 forms in the playoff div; 5 inputs in each is 80 inputs.
         # plus 5 at the top of the form ... plus 1 more somewhere? total is 86.
-        self.assertEquals(86, len(games_form_inputs))
+        self.assertEqual(86, len(games_form_inputs))
 
     def test_match_create_playoff_scoresheet(self):
         self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
-        self.assertEquals(self.selenium.current_url, '{}score_sheet_edit/{}/'.format(self.base_url, 1))
+        self.assertEqual(self.selenium.current_url, '{}score_sheet_edit/{}/'.format(self.base_url, 1))
         # <input type="hidden" name="form-TOTAL_FORMS" value="16" id="id_form-TOTAL_FORMS">
         games_form = self.selenium.find_element_by_name('score_sheet_games_form')
         games_form_inputs = games_form.find_elements_by_tag_name('input')
         form_count_input = games_form.find_element_by_id('id_form-TOTAL_FORMS')
-        self.assertEquals(int(form_count_input.get_attribute('value')), 17)
+        self.assertEqual(int(form_count_input.get_attribute('value')), 17)
 
         # there should be 17 forms in the playoff div; 5 inputs in each is 85 inputs.
         # plus 5 at the top of the form ... plus 1 more somewhere? total is 91.
-        self.assertEquals(91, len(games_form_inputs))
+        self.assertEqual(91, len(games_form_inputs))
 
     def test_match_scoresheet_set_lineup(self):
         self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
@@ -80,7 +80,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         table_rows = games_form_table.find_elements_by_class_name('scoresheet-odd') + \
             games_form_table.find_elements_by_class_name('scoresheet-even')
         for table_row in table_rows[0:-1]:  # skip the tie-breaker, which will be the last row
-            self.assertEquals(len(table_row.find_elements_by_xpath('td[div[a]]')), 2)
+            self.assertEqual(len(table_row.find_elements_by_xpath('td[div[a]]')), 2)
 
     def test_score_sheet_lineup_duplicate_player(self):
 
@@ -96,7 +96,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         # submit the form
         self.selenium.find_element_by_id('{}_lineup_save'.format(location_name)).click()
         # verify that it redirects to the lineup form on
-        self.assertEquals(self.selenium.current_url, '{}score_sheet_lineup/{}/{}'.format(
+        self.assertEqual(self.selenium.current_url, '{}score_sheet_lineup/{}/{}'.format(
             self.base_url, score_sheet_id, location_name))
 
     def test_match_scoresheet_substitutions(self):
@@ -204,7 +204,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         ss.official = True
         ss.save()
         self.selenium.get('{}update_stats/'.format(self.base_url))
-        self.assertEquals(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
+        self.assertEqual(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
         standings_table = self.selenium.find_element_by_id('team-standings-table')
         standings_rows = standings_table.find_elements_by_tag_name('tr')
         wins = list()
@@ -227,7 +227,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         ss.official = True
         ss.save()
         self.selenium.get('{}update_stats/'.format(self.base_url))
-        self.assertEquals(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
+        self.assertEqual(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
         self.selenium.get('{}players/{}'.format(self.base_url, self.default_season))
         tables = self.selenium.find_elements_by_tag_name('table')
         stats = self.count_player_stats_in_table(tables[1])
