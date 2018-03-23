@@ -46,7 +46,7 @@ class Player(models.Model):
 
 
 class Division(models.Model):
-    season = models.ForeignKey(Season)
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
     name = models.CharField(max_length=64)
 
     def __str__(self):
@@ -56,8 +56,8 @@ class Division(models.Model):
 class Team(models.Model):
     # a default season that doesn't bork migrations would be nice
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
-    sponsor = models.ForeignKey(Sponsor, null=True)
-    division = models.ForeignKey(Division, null=True, limit_choices_to=models.Q(season__is_default=True))
+    sponsor = models.ForeignKey(Sponsor, null=True, on_delete=models.CASCADE)
+    division = models.ForeignKey(Division, null=True, limit_choices_to=models.Q(season__is_default=True), on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     players = models.ManyToManyField(Player, blank=True)
     away_wins = models.IntegerField(verbose_name='Away Wins', default=0)
@@ -139,8 +139,8 @@ class Team(models.Model):
 
 
 class PlayerSeasonSummary(models.Model):
-    player = models.ForeignKey(Player)
-    season = models.ForeignKey(Season)
+    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
     wins = models.IntegerField(verbose_name='Wins', default=0)
     losses = models.IntegerField(verbose_name='Losses', default=0)
     four_ohs = models.IntegerField(verbose_name='4-0s', default=0)
@@ -254,7 +254,7 @@ class PlayerSeasonSummary(models.Model):
 
 class Week(models.Model):
     # a default season that doesn't bork migrations would be nice
-    season = models.ForeignKey(Season)
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
     date = models.DateField(null=True, blank=True)
     name = models.CharField(max_length=32, null=True)
 
@@ -312,18 +312,20 @@ class Match(models.Model):
     # the `is_default` season being the default is set in the admin, rather than here,
     # doing it here breaks generating migrations with an empty database.
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
-    week = models.ForeignKey(Week, limit_choices_to=models.Q(season__is_default=True))
+    week = models.ForeignKey(Week, limit_choices_to=models.Q(season__is_default=True), on_delete=models.CASCADE)
     home_team = models.ForeignKey(
         'HomeTeam',
         limit_choices_to=models.Q(season__is_default=True),
         related_name='home_team',
         blank=True, null=True,
+        on_delete = models.CASCADE
     )
     away_team = models.ForeignKey(
         'AwayTeam',
         limit_choices_to=models.Q(season__is_default=True),
         related_name='away_team',
         blank=True, null=True,
+        on_delete=models.CASCADE
     )
     playoff = models.BooleanField(default=False)
 
@@ -375,10 +377,12 @@ class GameOrder(models.Model):
     away_position = models.ForeignKey(
         AwayPlayPosition,
         related_name='away_position',
+        on_delete = models.CASCADE,
     )
     home_position = models.ForeignKey(
         HomePlayPosition,
         related_name='home_position',
+        on_delete=models.CASCADE,
     )
     home_breaks = models.BooleanField(default=True)
     order = models.IntegerField(null=True)
@@ -398,22 +402,24 @@ class Game(models.Model):
         null=True,
         blank=True,
         related_name='away_player',
+        on_delete=models.CASCADE,
     )
     home_player = models.ForeignKey(
         HomePlayer,
         null=True,
         blank=True,
         related_name='home_player',
+        on_delete=models.CASCADE,
     )
     winner = models.CharField(max_length=4, blank=True)
-    order = models.ForeignKey(GameOrder, null=True)
+    order = models.ForeignKey(GameOrder, null=True, on_delete=models.CASCADE)
     table_run = models.BooleanField(default=False)
     forfeit = models.BooleanField(default=False)
 
 
 class LineupEntry(models.Model):
-    player = models.ForeignKey(Player, null=True, blank=True)
-    position = models.ForeignKey(PlayPosition, null=True)
+    player = models.ForeignKey(Player, null=True, blank=True, on_delete=models.CASCADE)
+    position = models.ForeignKey(PlayPosition, null=True, on_delete=models.CASCADE)
 
 
 class AwayLineupEntry(LineupEntry):
@@ -427,9 +433,9 @@ class HomeLineupEntry(LineupEntry):
 
 
 class Substitution(models.Model):
-    game_order = models.ForeignKey(GameOrder)
-    player = models.ForeignKey(Player, null=True, blank=True)
-    play_position = models.ForeignKey(PlayPosition, null=True, blank=True)
+    game_order = models.ForeignKey(GameOrder, on_delete=models.CASCADE)
+    player = models.ForeignKey(Player, null=True, blank=True, on_delete=models.CASCADE)
+    play_position = models.ForeignKey(PlayPosition, null=True, blank=True, on_delete=models.CASCADE)
 
 
 class AwaySubstitution(Substitution):
@@ -454,7 +460,7 @@ class HomeSubstitution(Substitution):
 
 class ScoreSheet(models.Model):
     official = models.BooleanField(default=False)
-    match = models.ForeignKey(Match)
+    match = models.ForeignKey(Match, on_delete=models.CASCADE)
     creator_session = models.CharField(max_length=16, null=True, blank=True)
     away_lineup = models.ManyToManyField(
         AwayLineupEntry,
