@@ -30,7 +30,8 @@ urlpatterns = [
     url(r'^sponsors/', views.sponsors, name='sponsors'),
     url(r'^sponsor/(?P<sponsor_id>[0-9]+)/$', views.sponsor, name='sponsor'),
 
-    url(r'^score_sheet_create/(?P<match_id>[0-9]+)/$', views.score_sheet_create, name='score_sheet_create'),
+    url(r'^score_sheet_create/$', views.score_sheet_create, name='score_sheet_create'),
+
     url(r'^score_sheet_lineup/(?P<score_sheet_id>[0-9]+)/(?P<away_home>[a-z]+)$',
         views.score_sheet_lineup, name='score_sheet_lineup'),
     url(r'^score_sheet_substitutions/(?P<score_sheet_id>[0-9]+)/(?P<away_home>[a-z]+)$',

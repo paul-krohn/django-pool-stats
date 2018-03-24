@@ -5,7 +5,7 @@
 {% block content %}
 {% if week %}
 <h3>{{ week.name }}</h3>
-<p>{{ week.date}}</p>
+<p>{{ week.date }}</p>
 <p>{% if week.previous %}<a href="{% url 'week' week.previous.id %}">&larr; {{week.previous}}</a>{% endif %} •
 {% if week.next%}<a href="{% url 'week' week.next.id %}">{{week.next}} &rarr;</a>{% endif %}</p>
 
@@ -20,11 +20,17 @@
         </tr>
     </thead>
     <tbody class="results_searchable">
-    {% for score_sheet in official_matches %}
+{% for score_sheet in official_matches %}
     <tr>
-        <td align="right"><!-- {{ score_sheet.match.away_team }} sort lexically --><a href="{% url 'team' score_sheet.match.away_team.id %}">{{ score_sheet.match.away_team }}</a></td>
-        <td><a href="{% url 'score_sheet' score_sheet.id %}"><b>{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</b></a></td>
-        <td><!-- {{ score_sheet.match.home_team }} sort lexically --><a href="{% url 'team' score_sheet.match.home_team.id %}">{{ score_sheet.match.home_team }}</a></td>
+        <td align="right"><!-- {{ score_sheet.match.away_team }} sort lexically -->
+            <a href="{% url 'team' score_sheet.match.away_team.id %}">{{ score_sheet.match.away_team }}</a>
+        </td>
+        <td>
+            <a href="{% url 'score_sheet' score_sheet.id %}"><b>{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</b></a>
+        </td>
+        <td><!-- {{ score_sheet.match.home_team }} sort lexically -->
+            <a href="{% url 'team' score_sheet.match.home_team.id %}">{{ score_sheet.match.home_team }}</a>
+        </td>
     </tr>
 {% endfor %}
     </tbody>
@@ -42,32 +48,71 @@
     </tr>
     </thead>
     <tbody class="schedule_searchable">
-    {% for match in unofficial_matches %}
+    {% for unofficial_match in unofficial_matches %}
+    {% with unofficial_match.score_sheet_form as score_sheet_form %}
     <tr>
-        <td align="right"><!-- {{ match.away_team }} sort lexically --><a href="{% url 'team' match.away_team.id %}">{{ match.away_team }}</a></td>
-        <td><!-- {{ match.home_team }} sort lexically --><a href="{% url 'team' match.home_team.id %}">{{ match.home_team }}</a></td>
+        <td><!-- {{ score_sheet_form.instance.away_team }} sort lexically -->
+            <div class="scoresheet-cell"><a href="{% url 'team' score_sheet_form.instance.away_team.id %}">
+            {{ score_sheet_form.instance.away_team }}</a>
+            </div>
+        </td>
+        <td><!-- {{ score_sheet_form.instance.home_team }} sort lexically -->
+            <div class="scoresheet-cell">
+            <a href="{% url 'team' score_sheet_form.instance.home_team.id %}">
+            {{ score_sheet_form.instance.home_team }}</a>
+            </div>
+        </td>
         <td>
-            {% for score_sheet in match.scoresheet_set.all %}
-                {% if score_sheet.creator_session == request.session.uid and not score_sheet.official %}
-                    <a href="{% url 'score_sheet_edit' score_sheet.id %}"> {{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>,
-                {% else %}
-                    <a href="{% url 'score_sheet' score_sheet.id %}"> {{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>,
-                {% endif %}
-            {% endfor %}
-            <a href="{% url 'score_sheet_create' match.id %}" class="confirm"
-                        data-text="Create new scoresheet for {{ match.away_team }} @ {{match.home_team }} on {{match.week.date}}?">New Scoresheet</a>
+            <form
+                    id="score_sheet_create_form_{{ score_sheet_form.instance.id }}"
+                    method="post"
+                    action="{% url 'score_sheet_create' %}">
+                {% csrf_token %}
+                <input
+                        type="hidden"
+                        value="{{ score_sheet_form.instance.id }}"
+                        name="match_id"
+                />
+                <input
+                        id="score_sheet_create_button_match_{{ score_sheet_form.instance.id }}"
+                        data-text="Create new scoresheet for {{ score_sheet_form.instance.away_team }} @ {{score_sheet_form.instance.home_team }}?"
+                        class="btn btn-primary btn-sm confirm"
+                        type="submit"
+                        value="New"
+                />
+{% for score_sheet in unofficial_match.score_sheets %}&nbsp;
+    {% if score_sheet.creator_session == request.session.uid and not score_sheet.official %}
+        <a title="{{ score_sheet.comment }}" href="{% url 'score_sheet_edit' score_sheet.id %}">{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>
+    {% else %}
+        <a title="{{ score_sheet.comment }}" href="{% url 'score_sheet' score_sheet.id %}">{{ score_sheet.away_wins }}-{{ score_sheet.home_wins }}</a>
+    {% endif %}
+{% endfor %}
+            </form>
+            <script language="JavaScript">
+                $("#score_sheet_create_button_match_{{ score_sheet_form.instance.id }}").confirm({
+                    submitForm: true,
+                    post: true,
+                    confirm: function(button) {
+                        $("#score_sheet_create_form_{{ score_sheet_form.instance.id }}").submit();
+                    }
+                });
+            </script>
         </td>
     </tr>
+    {% endwith %}
     {% endfor %}
     </tbody>
 </table>
 {% endif %}
 {% endif %}
+{% if not official_matches|length and not unofficial_matches|length %}
+<div class="text-center">
+    <strong>No matches scheduled.</strong>
+</div>
+{% endif %}
 <script language="JavaScript">
-    // wraps the 'create scoresheet' links in a confirmation dialog -->
-    $(".confirm").confirm();
-    // set up filter inputs for the 2 tables
     $(document).ready(function () {
+        // sets up table filtering
         filterer('#results_filter', '.results_searchable');
         filterer('#schedule_filter', '.schedule_searchable');
     });

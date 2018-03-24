@@ -13,6 +13,11 @@
   </thead>
   <tbody class="searchable">
     {% for player_summary in players %}
+    {% comment %}
+    Once in a blue moon a player leaves a team, and then PlayerSeasonSummary().team() return None;
+    checking for player_summary.team here defends against that.
+    {% endcomment %}
+    {% if player_summary.team %}
     <tr>
     <td>{% if player_summary.ranking %}{{ player_summary.ranking }}{% endif %}</td>
     <td><!-- {{ player_summary.player }} sort lexically --><a href="{% url 'player' player_summary.player.id %}">{{ player_summary.player }}</a></td>
@@ -25,6 +30,7 @@
     <td>{{ player_summary.four_ohs }}</td>
     <td>{{ player_summary.table_runs }}</td>
     </tr>
+    {% endif %}
     {% endfor %}
   </tbody>
 </table>

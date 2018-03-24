@@ -21,6 +21,8 @@ from django.core.cache import cache
 from django.views.decorators.cache import never_cache
 from django.utils.cache import get_cache_key
 from django.urls import reverse
+from django.http import HttpResponseBadRequest
+
 
 import logging
 logger = logging.getLogger(__name__)
@@ -54,12 +56,16 @@ def set_season(request, season_id=None):
     return redirect(request.META.get('HTTP_REFERER', '/stats/'))
 
 
+def is_stats_master(user):
+    return user.groups.filter(name='statsmaster').exists()
+
+
 def user_can_edit_scoresheet(request, score_sheet_id):
 
     s = ScoreSheet.objects.get(id=score_sheet_id)
     # you can edit a score sheet if it is not official and either you created it,
     # or you are an admin
-    if (not s.official) and ((session_uid(request) == s.creator_session) or request.user.is_superuser):
+    if (not s.official) and ((session_uid(request) == s.creator_session) or request.user.is_superuser or is_stats_master(request.user)):
         return True
     else:
         return False
@@ -277,6 +283,14 @@ def divisions(request, season_id=None):
     return render(request, 'stats/divisions.html', context)
 
 
+class ScoreSheetCreationForm(django.forms.ModelForm):
+
+    class Meta:
+        model = Match
+        # fields = ['id']
+        exclude = []
+
+
 def week(request, week_id):
     _week = get_object_or_404(Week, id=week_id)
 
@@ -291,7 +305,10 @@ def week(request, week_id):
         if len(match_score_sheets.filter(official=True)) == 1:
             official_matches.append(match_score_sheets.filter(official=True)[0])
         else:
-            unofficial_matches.append(a_match)
+            unofficial_matches.append({
+                'score_sheet_form': ScoreSheetCreationForm(instance=a_match),
+                'score_sheets': match_score_sheets,
+            })
 
     context = {
         'week': _week,
@@ -391,15 +408,18 @@ def score_sheet_edit(request, score_sheet_id):
     return render(request, 'stats/score_sheet_edit.html', context)
 
 
-def score_sheet_create(request, match_id):
-    # m = Match.objects.get(id=match_id)
-    s = ScoreSheet(match=Match.objects.get(id=match_id))
-    s.creator_session = session_uid(request)
-    s.save()
-    s.initialize_lineup()
-    s.initialize_games()
+def score_sheet_create(request):
 
-    return redirect('score_sheet_edit', score_sheet_id=s.id)
+    if request.method == 'POST' and 'match_id' in request.POST:
+        s = ScoreSheet(match=Match.objects.get(id=request.POST['match_id']))
+        s.creator_session = session_uid(request)
+        s.save()
+        s.initialize_lineup()
+        s.initialize_games()
+
+        return redirect('score_sheet_edit', score_sheet_id=s.id)
+    else:
+        return HttpResponseBadRequest()
 
 
 def score_sheet_lineup_formset(score_sheet_id, away_home):
