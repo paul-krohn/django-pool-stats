@@ -601,7 +601,7 @@ class ScoreSheet(models.Model):
 
 class TournamentPlayPosition(models.Model):
     position = models.IntegerField()
-    player = models.ForeignKey(Player, null=True)  # if null, is a bye?
+    player = models.ForeignKey(Player, null=True, on_delete=models.CASCADE)  # if null, is a bye?
 
     def __str__(self):
         if self.player is not None:
@@ -611,7 +611,7 @@ class TournamentPlayPosition(models.Model):
 
 
 class TournamentMatchPlayer(models.Model):
-    player = models.ForeignKey(Player, null=True)
+    player = models.ForeignKey(Player, null=True,on_delete=models.CASCADE)
     spot = models.CharField(max_length=1)
 
     def __str__(self):
@@ -632,6 +632,7 @@ class TournamentMatch(models.Model):
         TournamentMatchPlayer,
         related_name='match_winning_player',
         null=True,
+        on_delete=models.CASCADE,
     )
     source_matches = models.ManyToManyField(
         'self',
@@ -658,7 +659,7 @@ class Tournament(models.Model):
         (1, 'Double Elimination'),
         # scotch doubles ??
     )
-    season = models.ForeignKey(Season)
+    season = models.ForeignKey(Season, on_delete=models.CASCADE)
     name = models.CharField(max_length=128)
     date = models.DateField()
     players = models.ManyToManyField(Player, blank=True)
