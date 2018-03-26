@@ -140,8 +140,32 @@ def player(request, player_id):
     seen = set()
     seen_add = seen.add
     _score_sheets = [x for x in _score_sheets_with_dupes if not (x in seen or seen_add(x))]
+    score_sheet_summaries = []
+    # now scrape through the score sheets; collect games from each scoresheet, with win true/falsed and TRs marked
+    for _score_sheet in _score_sheets:
+        this_score_sheet = {
+            'id': _score_sheet.id,
+            'match': _score_sheet.match,
+            'games': []
+        }
+        for game in _score_sheet.games.all():
+            if not game.winner or game.forfeit or game.away_player is None or game.home_player is None:
+                continue  # skip not-won games, ie forfeits and unplayed playoff games
+            # if _player.id not in [game.away_player.id, game.home_player.id]:
+            if _player not in [game.away_player, game.home_player]:
+                continue  # skip games not involving this player
+            this_game = {
+                'table_run': game.table_run,
+                'opponent': game.home_player,
+                'win': game.winner == 'away',
+            }
+            if _player == game.home_player:
+                this_game['opponent'] = game.away_player
+                this_game['win'] = game.winner == 'home'
+            this_score_sheet['games'].append(this_game)
+        score_sheet_summaries.append(this_score_sheet)
     context = {
-        'score_sheets': _score_sheets,
+        'score_sheet_summaries': score_sheet_summaries,
         'summaries': summaries,
         'player': _player,
     }

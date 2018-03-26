@@ -94,3 +94,9 @@ a:hover	{
 .showhide {
     display: none;
 }
+
+.player-games {
+    float: left;
+    position: relative;
+    margin: 10px;
+}
