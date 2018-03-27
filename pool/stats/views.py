@@ -225,7 +225,10 @@ def team(request, team_id, after=None):
         player_id__in=list([x.id for x in _team.players.all()]),
         season_id=_team.season.id,
     ).order_by('player__last_name')
-    _score_sheets = ScoreSheet.objects.filter(official=True).filter(
+    official_score_sheets = ScoreSheet.objects.filter(official=True).filter(
+        django.db.models.Q(match__away_team=_team) | django.db.models.Q(match__home_team=_team)
+    ).order_by('match__week__date')
+    unofficial_score_sheets = ScoreSheet.objects.filter(official=False).filter(
         django.db.models.Q(match__away_team=_team) | django.db.models.Q(match__home_team=_team)
     ).order_by('match__week__date')
 
@@ -245,7 +248,8 @@ def team(request, team_id, after=None):
         'team': _team,
         'players': _players,
         'show_players': False,
-        'scoresheets': _score_sheets,
+        'official_score_sheets': official_score_sheets,
+        'unofficial_score_sheets': unofficial_score_sheets,
         'matches': _matches,
     }
     return render(request, 'stats/team.html', context)
