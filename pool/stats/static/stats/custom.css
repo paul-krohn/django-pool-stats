@@ -99,4 +99,5 @@ a:hover	{
     float: left;
     position: relative;
     margin: 10px;
+    min-height: 18em; /* height works for 4 games; */
 }
