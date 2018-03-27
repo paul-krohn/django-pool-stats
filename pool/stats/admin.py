@@ -78,6 +78,7 @@ class PlayerAdmin(admin.ModelAdmin):
     list_display = ['__str__', 'last_name', 'first_name', 'email']
     search_fields = ['last_name', 'first_name', 'display_name']
 
+
 admin.site.register(Player, PlayerAdmin)
 
 
@@ -190,6 +191,7 @@ class MatchAdmin(admin.ModelAdmin):
             return {'season': default_season.id}
         except ValueError:
             return {}
+
 
 admin.site.register(Match, MatchAdmin)
 
