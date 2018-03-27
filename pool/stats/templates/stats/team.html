@@ -10,6 +10,7 @@
 
 {% include "stats/player_table.html" %}
 {% endif %}
+{% if official_score_sheets %}
 <h3>Official Results</h3>
 <table class="table">
 <thead><tr><th style="text-align:right">Away</th><th style="text-align:center">Score</th><th>Home</th><th>Week</th></tr></thead>
@@ -24,6 +25,8 @@
     {% endfor %}
 </tbody>
 </table>
+{% endif %}
+{% if unofficial_score_sheets %}
 <h3>Unofficial Results</h3>
 <table class="table">
 <thead><tr><th style="text-align:right">Away</th><th style="text-align:center">Score</th><th>Home</th><th>Week</th></tr></thead>
@@ -38,6 +41,7 @@
     {% endfor %}
 </tbody>
 </table>
+{% endif %}
 <h3>Upcoming Matches</h3>
 {% if matches|length %}
 <table class="table">
