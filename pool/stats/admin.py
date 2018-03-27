@@ -4,10 +4,12 @@ from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.utils.html import format_html
 from django.contrib.admin import SimpleListFilter
+from django.shortcuts import redirect
 
-from .models import Division, GameOrder, Match, Player, PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
-
+from .models import Division, GameOrder, Match, Player, PlayPosition
+from .models import PlayerSeasonSummary, ScoreSheet, Season, Sponsor, Team, Week
 from .forms import MatchForm
+from .views import expire_page
 
 admin.AdminSite.site_header = "{} stats admin".format(settings.LEAGUE['name'])
 
@@ -118,6 +120,26 @@ admin.site.register(PlayPosition, PlayPositionAdmin)
 
 def make_official(modeladmin, request, queryset):
     queryset.update(official=True)
+    # We need to redirect to this path later, because when we want to expire the cache,
+    # we have to change the path of the request object, resulting in a redirect to the player page
+    # of the last player updated, which is confusing. We can't copy.deepcopy() the request object,
+    # due to a "TypeError: cannot serialize '_io.BufferedReader' object" error.
+    redirect_to = request.get_full_path()
+    for score_sheet in queryset:
+        for team in [score_sheet.match.home_team, score_sheet.match.away_team]:
+            team.count_games()
+            expire_page(request, reverse('team', kwargs={'team_id': team.id}))
+        players = [x.player for x in list(score_sheet.away_lineup.all()) + list(score_sheet.home_lineup.all())]
+        for subsititution in list(score_sheet.away_substitutions.all()) + list(score_sheet.home_substitutions.all()):
+            players.append(subsititution.player)
+        for player in players:
+            summary = PlayerSeasonSummary.objects.filter(player=player).filter(season=score_sheet.match.season)[0]
+            summary.update()
+            expire_page(request, reverse('player', kwargs={'player_id': player.id}))
+    # see comment about redirect_to above
+    return redirect(redirect_to)
+
+
 make_official.description = "Mark selected score sheets as official"
 
 
