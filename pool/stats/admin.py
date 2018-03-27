@@ -2,6 +2,7 @@ from django.contrib import admin
 from django.urls import reverse
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
+from django.utils.html import format_html
 from django.contrib.admin import SimpleListFilter
 
 from .models import Division, GameOrder, Match, Player, PlayPosition, ScoreSheet, Season, Sponsor, Team, Week
@@ -162,7 +163,7 @@ class ScoreSheetAdmin(admin.ModelAdmin):
     def links(self, obj):
         edit_url = reverse('score_sheet_edit', args=(obj.id,))
         view_url = reverse('score_sheet', args=(obj.id,))
-        return '<a href="{}">edit</a>/<a href="{}">view</a>'.format(edit_url, view_url)
+        return format_html('<a href="{}">edit</a>/<a href="{}">view</a>'.format(edit_url, view_url))
 
     links.allow_tags = True
 
