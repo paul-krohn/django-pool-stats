@@ -60,14 +60,8 @@
             {% endfor %}
           </ul>
         </li>
-
         {% if request.user.is_authenticated %}
-        <li class="dropdown"><a class="dropdown-toggle" data-toggle="dropdown" style="cursor:pointer">• Admin</a>
-          <ul class="dropdown-menu">
-              <li><a href="{% url 'update_stats' %}">Update stats</a></li>
-              <li><a href="{% url 'admin:index' %}">Admin Site</a></li>
-          </ul>
-        </li>
+          <li><a href="{% url 'admin:index' %}">Admin</a></li>
         {% endif %}
       </ul>
     </div>
