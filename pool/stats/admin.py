@@ -125,6 +125,8 @@ def make_official(modeladmin, request, queryset):
     # of the last player updated, which is confusing. We can't copy.deepcopy() the request object,
     # due to a "TypeError: cannot serialize '_io.BufferedReader' object" error.
     redirect_to = request.get_full_path()
+    # we'll assume the season is the same for all the score sheets and use the first one
+    expire_season_id = queryset[0].match.season.id
     for score_sheet in queryset:
         for team in [score_sheet.match.home_team, score_sheet.match.away_team]:
             team.count_games()
@@ -133,9 +135,11 @@ def make_official(modeladmin, request, queryset):
         for subsititution in list(score_sheet.away_substitutions.all()) + list(score_sheet.home_substitutions.all()):
             players.append(subsititution.player)
         for player in players:
-            summary = PlayerSeasonSummary.objects.filter(player=player).filter(season=score_sheet.match.season)[0]
+            summary = PlayerSeasonSummary.objects.get_or_create(player=player, season=score_sheet.match.season)[0]
             summary.update()
             expire_page(request, reverse('player', kwargs={'player_id': player.id}))
+    expire_page(request, reverse('players', kwargs={'season_id': expire_season_id}))
+    expire_page(request, reverse('teams', kwargs={'season_id': expire_season_id}))
     # see comment about redirect_to above
     return redirect(redirect_to)
 
