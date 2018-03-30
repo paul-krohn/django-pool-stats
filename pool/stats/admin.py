@@ -138,6 +138,7 @@ def make_official(modeladmin, request, queryset):
             summary = PlayerSeasonSummary.objects.get_or_create(player=player, season=score_sheet.match.season)[0]
             summary.update()
             expire_page(request, reverse('player', kwargs={'player_id': player.id}))
+    Team.rank_teams(season_id=expire_season_id)
     expire_page(request, reverse('players', kwargs={'season_id': expire_season_id}))
     expire_page(request, reverse('teams', kwargs={'season_id': expire_season_id}))
     # see comment about redirect_to above
