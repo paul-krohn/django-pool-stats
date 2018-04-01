@@ -38,24 +38,39 @@ Set up the weeks of play for the entire season, they just need a name, date, and
 
 In the Matches section of the admin area, click the "Create Match" button.
 
-Select the week (only weeks from the current season should be displayed), then the home and away teams.
+* Select the week (only weeks from the current season should be displayed). If you click "save and continue editing", then the list of teams in the drop-down will include only those not yet scheduled for that week.
+* select the home and away teams.
+* click one of the save buttons
 
-Any match that is scheduled can be entered ahead of time, for exxample the first few weeks of intra-divisional play.
+Any match that is scheduled can be entered ahead of time, for example the first few weeks of intra-divisional play.
+
+### Adding players
+
+Ideally, the league will hear about new players before they need to appear on a submitted score sheet, but this is not always possible; in any case, players can be created and added to a team, and a score sheet, after the fact.
+
+* check if the player is already in the system
+* create the player  in the Player section of the admin UI
+* find the team you need to add them to in the Teams section of the admin UI
+* edit the team, adding the player
+
+_Note:_ while editing teams to add players does work in the the mobile UI, it is a bit counter-intuitive and is probably best done in a desktop browser the first few times through.
+
 
 ### Processing score sheets
 
 First, add any new players you have heard about, so that you can fix up any score sheets they should be on.
 
-In the score sheets section of the admin area, filter all the score sheets for the week you are working on. 
+In the score sheets section of the admin area, filter all the score sheets for the week you are working on.
 
-There are edit and view links for each score sheet, so you can verify that:
+There are edit and view links for each score sheet (suggestion: open these in a new tab), so you can verify that:
 
-* each game has a home and away player, in no '--' in the lineups.
+* each game has a home and away player (no '--' in the lineups).
 * each game has a marked winner
 * substitutions comply with the rules, ie no player has been subbed back in.
+* extra or incomplete submissions have been deleted
 
-Then, click on the "Team A @ Team B" label, and tick the "Official" box, and save the match.
+There are two tasks available (in the Action menu at the top of the list of score sheets) to apply to all the selected score sheets:
+* delete (useful for incomplete submissions)
+* Make official
 
-Once you have made all the score sheets official:
-* delete any extra submissions.
-* from the public view, under the admin menu, click the "Update team stats" and then "Update player stats" links. This will recalculate the rankings for all the teams and players in the current season.
+Once you are happy with one or more score sheets, select the ones you want (or all of the displayed ones, using the check box at the top of the left-hand column), and select "Make official" from the Action menu; this will trigger a recalculation of the related player and team stats for the season, so it may take a few seconds.
