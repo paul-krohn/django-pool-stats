@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.contrib.admin import SimpleListFilter
 from django.shortcuts import redirect
 
@@ -145,9 +146,6 @@ def make_official(modeladmin, request, queryset):
     return redirect(redirect_to)
 
 
-make_official.description = "Mark selected score sheets as official"
-
-
 class BlankScoreSheetFilter(admin.SimpleListFilter):
     title = _('no wins')
 
@@ -189,11 +187,10 @@ class ScoreSheetAdmin(admin.ModelAdmin):
         return "{} @ {}".format(obj.match.away_team, obj.match.home_team)
 
     def links(self, obj):
-        edit_url = reverse('score_sheet_edit', args=(obj.id,))
-        view_url = reverse('score_sheet', args=(obj.id,))
-        return format_html('<a href="{}">edit</a>/<a href="{}">view</a>'.format(edit_url, view_url))
-
-    links.allow_tags = True
+        score_sheet_links = format_html('<a href="{}">view</a>'.format(reverse('score_sheet', args=(obj.id,))))
+        if not obj.official:
+            score_sheet_links += '/' + format_html('<a href="{}">edit</a>'.format(reverse('score_sheet_edit', args=(obj.id,))))
+        return mark_safe(score_sheet_links)
 
 
 admin.site.register(ScoreSheet, ScoreSheetAdmin)
