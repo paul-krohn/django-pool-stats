@@ -136,6 +136,8 @@ def make_official(modeladmin, request, queryset):
         for subsititution in list(score_sheet.away_substitutions.all()) + list(score_sheet.home_substitutions.all()):
             players.append(subsititution.player)
         for player in players:
+            if player is None:
+                continue
             summary = PlayerSeasonSummary.objects.get_or_create(player=player, season=score_sheet.match.season)[0]
             summary.update()
             expire_page(request, reverse('player', kwargs={'player_id': player.id}))
