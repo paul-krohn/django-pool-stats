@@ -459,7 +459,14 @@ class HomeSubstitution(Substitution):
 
 
 class ScoreSheet(models.Model):
-    official = models.BooleanField(default=False)
+
+    MATCH_STATES = (
+        (0, 'New'),
+        (1, 'Official'),
+        (2, 'Needs Changes'),
+    )
+
+    official = models.IntegerField(default=0, choices=MATCH_STATES, verbose_name='Status')
     match = models.ForeignKey(Match, on_delete=models.CASCADE)
     creator_session = models.CharField(max_length=16, null=True, blank=True)
     away_lineup = models.ManyToManyField(

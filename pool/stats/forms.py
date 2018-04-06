@@ -60,6 +60,13 @@ class ScoreSheetCompletionForm(django.forms.ModelForm):
         fields = ['comment', 'complete']
 
 
+class ScoreSheetStatusForm(django.forms.ModelForm):
+
+    class Meta:
+        model = ScoreSheet
+        fields = ['comment', 'complete', 'official']
+
+
 class LineupFormSet(django.forms.BaseModelFormSet):
     def clean(self):
         super(LineupFormSet, self).clean()

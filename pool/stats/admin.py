@@ -120,7 +120,7 @@ admin.site.register(PlayPosition, PlayPositionAdmin)
 
 
 def make_official(modeladmin, request, queryset):
-    queryset.update(official=True)
+    queryset.update(official=1)
     # We need to redirect to this path later, because when we want to expire the cache,
     # we have to change the path of the request object, resulting in a redirect to the player page
     # of the last player updated, which is confusing. We can't copy.deepcopy() the request object,
