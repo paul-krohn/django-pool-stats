@@ -44,7 +44,10 @@
     <thead>
     <tr>
         <th data-field="Away" data-sortable="true" align="right">Away</th>
-        <th data-field="Home" data-sortable="true">Home</th><th>Score Sheets</th>
+        <th data-field="AwayDiv" data-sortable="true">Div</th>
+        <th data-field="Home" data-sortable="true">Home</th>
+        <th data-field="HomeDiv" data-sortable="true">Div</th>
+        <th>Score Sheets</th>
     </tr>
     </thead>
     <tbody class="schedule_searchable">
@@ -56,12 +59,14 @@
             {{ score_sheet_form.instance.away_team }}</a>
             </div>
         </td>
+        <td>{{ score_sheet_form.instance.away_team.division }}</td>
         <td><!-- {{ score_sheet_form.instance.home_team }} sort lexically -->
             <div class="scoresheet-cell">
             <a href="{% url 'team' score_sheet_form.instance.home_team.id %}">
             {{ score_sheet_form.instance.home_team }}</a>
             </div>
         </td>
+        <td>{{ score_sheet_form.instance.home_team.division }}</td>
         <td>
             <form
                     id="score_sheet_create_form_{{ score_sheet_form.instance.id }}"

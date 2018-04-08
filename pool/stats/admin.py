@@ -207,7 +207,7 @@ admin.site.register(GameOrder, GameOrderAdmin)
 
 class MatchAdmin(admin.ModelAdmin):
     list_filter = ['week', SeasonFilter, 'playoff']
-    list_display = ['id', 'away_team', 'home_team', 'week']
+    list_display = ['id', 'away_team', 'awayteamdiv', 'home_team', 'hometeamdiv', 'week']
 
     form = MatchForm
 
@@ -217,6 +217,14 @@ class MatchAdmin(admin.ModelAdmin):
             return {'season': default_season.id}
         except ValueError:
             return {}
+
+    @staticmethod
+    def awayteamdiv(obj):
+        return obj.away_team.division
+
+    @staticmethod
+    def hometeamdiv(obj):
+        return obj.home_team.division
 
 
 admin.site.register(Match, MatchAdmin)
