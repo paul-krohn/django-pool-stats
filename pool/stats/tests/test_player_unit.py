@@ -1,7 +1,7 @@
 from django.urls import reverse
 from django.test import RequestFactory
 
-from ..models import Season, Player, PlayerSeasonSummary
+from ..models import Season, Player, PlayerSeasonSummary, Team
 from ..views import expire_page
 from .base_cases import BasePoolStatsTestCase
 
@@ -31,12 +31,22 @@ class PlayerViewTests(BasePoolStatsTestCase):
 
     def test_player_season_summary(self):
 
+        # default season is provided by fixtures
+        s = Season.objects.get(is_default=True)
+
         player = Player(first_name='George', last_name='Smith')
         player.save()
+        team = Team(
+            name='The George Team',
+            season=s,
+        )
+        team.save()
+        team.players.add(player)
+        team.save()
 
         summary = PlayerSeasonSummary(
             player=player,
-            season=Season.objects.get(is_default=True)
+            season=s
         )
         summary.save()
         expire_page(self.factory.get(reverse('players')), reverse('player', kwargs={'player_id': player.id}))

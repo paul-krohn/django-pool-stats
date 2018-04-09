@@ -1,17 +1,15 @@
 from django.urls import reverse
 from django.test import Client
 from django.test import RequestFactory
-
-from ..models import Season, Player, PlayerSeasonSummary, GameOrder, ScoreSheet, Game, Team, Week
-
-from ..views import expire_page
-
-
-from ..forms import ScoreSheetGameForm
+from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.exceptions import ValidationError
 
+from ..models import Season, Player, PlayerSeasonSummary, GameOrder, ScoreSheet, Game, Team, Week
+from ..views import expire_page, get_current_week
+from ..forms import ScoreSheetGameForm
 from .base_cases import BasePoolStatsTestCase
 
+import datetime
 import random
 
 
@@ -27,6 +25,13 @@ def populate_lineup_entries(score_sheet):
         home_lineup_entry.player = score_sheet.match.home_team.players.all()[inc]
         home_lineup_entry.save()
         inc += 1
+
+
+def add_session_to_request(request):
+    """Annotate a request object with a session"""
+    middleware = SessionMiddleware()
+    middleware.process_request(request)
+    request.session.save()
 
 
 class ScoreSheetTests(BasePoolStatsTestCase):
@@ -184,6 +189,27 @@ class WeekTests(BasePoolStatsTestCase):
     def test_get_next_week_no_matching_weeks(self):
         response = self.client.get(reverse('nextweek'))
         self.assertEqual(response.url, '/stats/weeks/')
+
+    def test_get_next_week(self):
+        factory = RequestFactory()
+        request = factory.get(reverse('nextweek'))
+        add_session_to_request(request)
+        foo = get_current_week(request)
+        # test that this way-in-the-past season doesn't have a week close to now
+        self.assertEqual(foo.url, '/stats/weeks/')
+
+        # on sunday, I should get the next tuesday
+        current_week_from_sunday = get_current_week(request, '2010-08-09')
+        self.assertEqual(current_week_from_sunday.url, reverse('week', kwargs={'week_id': 4}))
+
+        current_week_from_wednesday = get_current_week(request, '2010-08-11')
+        self.assertEqual(current_week_from_wednesday.url, reverse('week', kwargs={'week_id': 4}))
+
+        current_week_between_playoff_dates = get_current_week(request, '2010-09-15')
+        self.assertEqual(current_week_between_playoff_dates.url, reverse('week', kwargs={'week_id': 10}))
+        #
+        current_week_on_playoff_dates = get_current_week(request, '2010-09-16')
+        self.assertEqual(current_week_on_playoff_dates.url, reverse('week', kwargs={'week_id': 11}))
 
 
 class TeamTests(BasePoolStatsTestCase):

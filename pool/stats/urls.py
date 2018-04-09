@@ -19,6 +19,7 @@ urlpatterns = [
 
     url(r'^week/(?P<week_id>[0-9]+)/$', views.week, name='week'),
     url(r'^weeks/', views.weeks, name='weeks'),
+    url(r'^nextweek/(?P<today_date>[0-9-]+)', views.get_current_week, name='nextweek'),
     url(r'^nextweek/', views.get_current_week, name='nextweek'),
 
     url(r'^players/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(views.players), name='players'),
