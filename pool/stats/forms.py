@@ -1,5 +1,5 @@
 import django.forms
-from .models import Player, Team, Game, ScoreSheet, TournamentMatch, Week
+from .models import Player, Team, Game, ScoreSheet, TournamentMatch, TournamentMatchPlayer, Week
 from django.core.exceptions import ValidationError
 
 WINNER_CHOICES = (
@@ -21,6 +21,12 @@ class TournamentMatchForm(django.forms.ModelForm):
     class Meta:
         model = TournamentMatch
         fields = ['winner']
+
+    def __init__(self, *args, **kwargs):
+        super(TournamentMatchForm, self).__init__(*args, **kwargs)
+        ids = [x.id for x in self.instance.players.all()]
+        print('the ids are: {}'.format(ids))
+        self.fields['winner'].queryset = TournamentMatchPlayer.objects.filter(id__in=ids)
 
 
 class ScoreSheetGameForm(django.forms.ModelForm):

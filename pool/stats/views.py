@@ -567,12 +567,15 @@ def tournament(request, tournament_id):
     for m in tourney.matches.all():
         if len(m.players.all()) > 0:
             template = loader.get_template('stats/tournament_match_form.html')
-            context = {'match_form': TournamentMatchForm()}
+            context = {
+                'match_form': TournamentMatchForm(instance=m),
+                'tournament_id': tournament_id,
+            }
 
             a_match_form = render(
                 request,
                 'stats/tournament_match_form.html',
-                {'match_form': TournamentMatchForm()}
+                context,
             )
             match_forms.append(template.render(context, request))
         else:
