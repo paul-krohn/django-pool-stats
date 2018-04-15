@@ -82,15 +82,19 @@ def index(request):
 
 
 @never_cache
-def get_current_week(request):
+def get_current_week(request, today_date=''):
 
     check_season(request)
     # now get the time range that is Sun-Sat this week; start with the DOW now
     today = datetime.date.today()
+    if today_date != '':  # this param is really just here for tests.
+        # print('we got the arg: {}'.format(today_date))
+        (year, month, day) = today_date.split('-')
+        today = datetime.date(year=int(year), month=int(month), day=int(day))
 
     # in datetime, Monday -> 0 :/
-    prev_sunday = today - datetime.timedelta(days=(today.weekday() % 6 + 1))
-    next_saturday = today + datetime.timedelta(days=(6-today.weekday()))
+    prev_sunday = today - datetime.timedelta(days=(today.weekday()+1))
+    next_saturday = prev_sunday + datetime.timedelta(days=6)
 
     _weeks = Week.objects.filter(
         date__lt=next_saturday,
@@ -99,6 +103,7 @@ def get_current_week(request):
     ).order_by('date')
 
     if len(_weeks) == 1:
+        # print('redirecting to {}/{}'.format(_weeks[0], _weeks[0].date))
         return redirect('week', week_id=_weeks[0].id)
     elif len(_weeks) == 2:
         closest_week = _weeks[0]
@@ -107,6 +112,7 @@ def get_current_week(request):
             if abs(today - _week.date) < closest_week_gap:
                 closest_week_gap = abs(_week.date - today)
                 closest_week = _week
+        # print('redirecting to {}/{}'.format(closest_week, closest_week.date))
         return redirect('week', week_id=closest_week.id)
     else:
         return redirect('weeks')

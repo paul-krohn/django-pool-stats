@@ -36,12 +36,13 @@
 </div>
 <table class="table sortable">
   <thead>
-    <tr><th>Season</th><th>Wins</th><th>Losses</th><th>Percentage</th></tr>
+    <tr><th>Season</th><th>Team</th><th>Wins</th><th>Losses</th><th>Percentage</th></tr>
   </thead>
   <tbody>
     {% for summary in summaries %}
     <tr>
         <td>{{ summary.season }}</td>
+        <td><a href="{% url 'team' summary.team.id %}">{{ summary.team }}</a></td>
         <td>{{ summary.wins }}</td>
         <td>{{ summary.losses }}</td>
         <td>{{ summary.win_percentage|floatformat:3 }}</td>
