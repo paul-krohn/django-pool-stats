@@ -136,6 +136,33 @@ class WeekAdmin(admin.ModelAdmin):
         else:
             return False
 
+    def set_matches_for_division_matchup(self, request, _week, division_matchup):
+        away_teams = Team.objects.filter(
+            division=division_matchup.away_division
+        ).filter(season=_week.season).order_by('ranking')
+        home_teams = Team.objects.filter(
+            division=division_matchup.home_division
+        ).filter(season=_week.season).order_by('ranking')
+        if len(away_teams) == len(home_teams):
+            for i in range(0, len(away_teams)):
+                # do we already have this match?
+                if len(Match.objects.filter(week=_week).filter(away_team=away_teams[i]).filter(home_team=home_teams[i])):
+                    print('we already have {} @ {} in week {} match, skipping '.format(away_teams[i], home_teams[i], _week))
+                else:
+                    m = Match(
+                        week=_week,
+                        away_team=away_teams[i],
+                        home_team=home_teams[i],
+                        season=_week.season,
+                    )
+                    m.save()
+                    self.message_user(
+                        request,
+                        'created match {}'.format(m)
+                    )
+        else:
+            print('divisions are uneven: away teams: {} and home teams: {}'.format(away_teams, home_teams))
+
     def division_matchups(self, request, queryset):
 
         # check that we are working on exactly one week
@@ -159,33 +186,7 @@ class WeekAdmin(admin.ModelAdmin):
             print('no divisions tied yay')
         division_matchups = WeekDivisionMatchup.objects.filter(week=_week)
         for division_matchup in division_matchups:
-            # filtering on the season is only necessary beacuse there might be incorrect division entries
-            # for a team in another season.
-            away_teams = Team.objects.filter(
-                division=division_matchup.away_division
-            ).filter(season=_week.season).order_by('ranking')
-            home_teams = Team.objects.filter(
-                division=division_matchup.home_division
-            ).filter(season=_week.season).order_by('ranking')
-            if len(away_teams) == len(home_teams):
-                for i in range(0, len(away_teams)):
-                    # do we already have this match?
-                    if len(Match.objects.filter(week=_week).filter(away_team=away_teams[i]).filter(home_team=home_teams[i])):
-                        print('we already have {} @ {} in week {} match, skipping '.format(away_teams[i], home_teams[i], _week))
-                    else:
-                        m = Match(
-                            week=_week,
-                            away_team=away_teams[i],
-                            home_team=home_teams[i],
-                            season=_week.season,
-                        )
-                        m.save()
-                        self.message_user(
-                            request,
-                            'created match {}'.format(m)
-                        )
-            else:
-                print('divisions are uneven: away teams: {} and home teams: {}'.format(away_teams, home_teams))
+            self.set_matches_for_division_matchup(request, _week, division_matchup)
 
     division_matchups.short_description = "Set division-ranked matches"
 
