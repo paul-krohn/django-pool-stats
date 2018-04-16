@@ -104,7 +104,7 @@ class WeekAdmin(admin.ModelAdmin):
     actions = ['division_matchups']
     inlines = [WeekDivisionMatchupInline]
 
-    def check_matchup_length(self, week):
+    def check_matchup_length(self, request, week):
         division_matchups = WeekDivisionMatchup.objects.filter(week=week)
         DIV_MATCHUP_EXACT = 3  # this is bad mmkay
         if len(division_matchups) != DIV_MATCHUP_EXACT:
@@ -145,7 +145,7 @@ class WeekAdmin(admin.ModelAdmin):
         _week = queryset[0]
 
         # check that the one week has the right number of matchups set. is this necessary? or just check for over?
-        if self.check_matchup_length(week=_week):
+        if self.check_matchup_length(request, _week):
             pass
         else:
             return
