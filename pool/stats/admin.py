@@ -159,10 +159,14 @@ class WeekAdmin(admin.ModelAdmin):
             print('no divisions tied yay')
         division_matchups = WeekDivisionMatchup.objects.filter(week=_week)
         for division_matchup in division_matchups:
-            print('doing matches between {} and {}'.format(division_matchup.away_division, division_matchup.home_division))
-            # TODO: are the divisions the same length?
-            away_teams = Team.objects.filter(division=division_matchup.away_division).order_by('ranking')
-            home_teams = Team.objects.filter(division=division_matchup.home_division).order_by('ranking')
+            # filtering on the season is only necessary beacuse there might be incorrect division entries
+            # for a team in another season.
+            away_teams = Team.objects.filter(
+                division=division_matchup.away_division
+            ).filter(season=_week.season).order_by('ranking')
+            home_teams = Team.objects.filter(
+                division=division_matchup.home_division
+            ).filter(season=_week.season).order_by('ranking')
             if len(away_teams) == len(home_teams):
                 for i in range(0, len(away_teams)):
                     # do we already have this match?
