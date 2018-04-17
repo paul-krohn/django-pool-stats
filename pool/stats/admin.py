@@ -147,7 +147,10 @@ class WeekAdmin(admin.ModelAdmin):
             for i in range(0, len(away_teams)):
                 # do we already have this match?
                 if len(Match.objects.filter(week=_week).filter(away_team=away_teams[i]).filter(home_team=home_teams[i])):
-                    print('we already have {} @ {} in week {} match, skipping '.format(away_teams[i], home_teams[i], _week))
+                    self.message_user(
+                        request,
+                        'match {} @ {} in week {} exists, skipping '.format(away_teams[i], home_teams[i], _week)
+                    )
                 else:
                     m = Match(
                         week=_week,

@@ -107,8 +107,18 @@
 {% endif %}
 {% if not official_matches|length and not unofficial_matches|length %}
 <div class="text-center">
-    <strong>No matches scheduled.</strong>
+    <strong>Matches not yet scheduled.</strong>
 </div>
+{% if week.weekdivisionmatchup_set.all %}
+<div>
+    <p>Teams of same rank play each other:</p>
+    <ul>
+    {% for matchup in week.weekdivisionmatchup_set.all %}
+      <li>{{ matchup.away_division }} @ {{ matchup.home_division }}</li>
+    {% endfor %}
+</ul>
+</div>
+{% endif %}
 {% endif %}
 <script language="JavaScript">
     $(document).ready(function () {
