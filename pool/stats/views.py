@@ -8,6 +8,7 @@ from .models import PlayPosition
 from .models import PlayerSeasonSummary
 from .models import AwaySubstitution, HomeSubstitution
 from .forms import PlayerForm, ScoreSheetGameForm, DisabledScoreSheetGameForm, ScoreSheetCompletionForm
+from .forms import ScoreSheetStatusForm
 from .forms import LineupFormSet, SubstitutionFormSet
 from django.forms import modelformset_factory
 
@@ -400,6 +401,8 @@ def score_sheet_edit(request, score_sheet_id):
 
     if request.method == 'POST':
         score_sheet_completion_form = ScoreSheetCompletionForm(request.POST, instance=s)
+        if is_stats_master(request.user):
+            score_sheet_completion_form = ScoreSheetStatusForm(request.POST, instance=s)
         score_sheet_game_formset = score_sheet_game_formset_f(
             request.POST, queryset=s.games.all()
         )
@@ -417,6 +420,9 @@ def score_sheet_edit(request, score_sheet_id):
         score_sheet_completion_form = ScoreSheetCompletionForm(
             instance=s,
         )
+        if is_stats_master(request.user):
+            score_sheet_completion_form = ScoreSheetStatusForm(instance=s)
+
         score_sheet_game_formset = score_sheet_game_formset_f(
             queryset=s.games.all(),
         )
