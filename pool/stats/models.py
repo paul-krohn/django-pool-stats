@@ -57,7 +57,8 @@ class Team(models.Model):
     # a default season that doesn't bork migrations would be nice
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
     sponsor = models.ForeignKey(Sponsor, null=True, on_delete=models.CASCADE)
-    division = models.ForeignKey(Division, null=True, limit_choices_to=models.Q(season__is_default=True), on_delete=models.CASCADE)
+    division = models.ForeignKey(Division, null=True, limit_choices_to=models.Q(
+        season__is_default=True), on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
     players = models.ManyToManyField(Player, blank=True)
     away_wins = models.IntegerField(verbose_name='Away Wins', default=0)
@@ -66,6 +67,7 @@ class Team(models.Model):
     home_losses = models.IntegerField(verbose_name='Home Losses', default=0)
     win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0)
     ranking = models.IntegerField(null=True, blank=True)
+    division_ranking = models.IntegerField(null=True, blank=True)
     rank_tie_breaker = models.IntegerField(null=True, blank=True)
 
     class Meta:
@@ -110,25 +112,158 @@ class Team(models.Model):
 
         self.save()
 
+    def forfeit_wins(self):
+        forfeit_wins = 0
+        for home_away in ['away', 'home']:
+            ss_filter_args = {'match__{}_team'.format(home_away): self}
+            home_ss = ScoreSheet.objects.filter(official=1).filter(match__season=self.season).filter(
+                **ss_filter_args
+            )
+            for s in home_ss:
+                forfeit_wins += len(s.games.filter(winner=home_away).filter(forfeit=True))
+        return forfeit_wins
+
+    def net_game_wins_against(self, other_teams):
+        wins = 0
+        losses = 0
+        if self.id in other_teams:  # this makes it easier to use a sorted/lambda thing
+            other_teams.remove(self.id)
+        for score_sheet in ScoreSheet.objects.filter(
+            official=1
+        ).filter(
+            match__home_team_id__in=[self] + other_teams,
+            match__away_team_id__in=[self] + other_teams
+        ):
+            away_match = 1 if score_sheet.match.away_team == self else -1
+            # print('adding {} to wins'.format(score_sheet.away_wins() * away_match))
+            wins += score_sheet.away_wins() * away_match
+            # print('adding {} to losses'.format(score_sheet.home_wins() * away_match))
+            losses += score_sheet.home_wins() * away_match
+
+        return wins - losses
+
     @classmethod
-    def rank_teams(cls, season_id):
-        teams = cls.objects.filter(season=season_id).order_by('-win_percentage', '-rank_tie_breaker')
-        # sorted(teams, key=attrgetter('win_percentage'))
-        logger.debug(teams)
-        logger.debug("there are {} teams to rank ".format(len(teams)))
+    def update_rankings(cls, season_id):
+        # first, the divisions
+        for division in Division.objects.filter(season_id=season_id):
+            print('ranking things for division {}/{}'.format(division, division.id))
+            Team.rank_teams(Team.objects.filter(division=division).order_by('-win_percentage'), divisional=True)
+            # TODO: there may be unresolved ties. how should we flag that?
+        Team.rank_teams(Team.objects.filter(season_id=season_id).order_by('-win_percentage'))
+        # TODO: same as above here
+
+    def get_ranking(self, divisional):
+        attribute = 'division_ranking' if divisional else 'ranking'
+        return getattr(self, attribute)
+
+    def set_ranking(self, value, divisional):
+        attribute = 'division_ranking' if divisional else 'ranking'
+        # print('previous ranking for {}: {}'.format(self, getattr(self, attribute)))
+        setattr(self, attribute, value)
+        self.save()
+        # print('{} set to {} for team {}'.format(attribute, getattr(self, attribute), self ))
+
+    @classmethod
+    def find_ties(cls, queryset, attribute, divisional=False, set_rankings=False):
         inc = 0
-        while inc < len(teams):
+        the_ties = []
+        # print("\n".join([x.name for x in queryset]))
+        while inc < len(queryset):
             offset = 1
-            teams[inc].ranking = inc + 1
-            teams[inc].save()
-            logger.debug("{} gets ranking {}".format(teams[inc], teams[inc].ranking))
-            while inc + offset < len(teams) and teams[inc].win_percentage == teams[inc+offset].win_percentage \
-                    and teams[inc].rank_tie_breaker == teams[inc+offset].rank_tie_breaker:
-                teams[inc+offset].ranking = inc + 1
-                teams[inc+offset].save()
-                logger.debug("{} gets ranking {}".format(teams[inc+offset], teams[inc].ranking))
+            this_tie = [queryset[inc]]
+            # print('checking for ties with: {}/{}'.format(
+            #     queryset[inc],
+            #     getattr(queryset[inc], attribute)
+            # ))
+            if inc == (len(queryset) - 1) or \
+                    getattr(queryset[inc], attribute) != getattr(queryset[inc + offset], attribute):
+                queryset[inc].set_ranking(inc + 1, divisional)
+            while inc + offset < len(queryset) \
+                    and getattr(queryset[inc], attribute) == getattr(queryset[inc + offset], attribute):
+                this_tie.append(queryset[inc + offset])
+                if set_rankings:
+                    queryset[inc].set_ranking(inc + 1, divisional)
+                    queryset[inc + offset].set_ranking(inc + 1, divisional)
                 offset += 1
+            if len(this_tie) > 1:
+                the_ties.append(this_tie)
             inc += offset
+        for t in queryset:
+            t.save()
+        return the_ties
+
+    @classmethod
+    def break_tie(cls, tie, attribute, divisional=False, tie_arg=False):
+
+        def get_value(team):
+            if tie_arg:
+                return getattr(team, attribute)(tie)
+            elif attribute == 'forfeit_wins':
+                return team.forfeit_wins()
+            else:
+                return getattr(team, attribute)
+
+        # print('breaking ties based on {}'.format(attribute))
+        sorted_teams = sorted(tie, key=lambda team: get_value(team))
+        # print('after sorting the teams in this tie: {}'.format(sorted_teams))
+        # print('there are {} teams to compare'.format(len(sorted_teams)))
+
+        inc = 0
+        de_tying_array = []  # will be the number to add to the ranking
+        # 0 for the 0th team + tied teams
+        while inc < len(sorted_teams):
+            offset = 1
+            tiebreaker_value = get_value(sorted_teams[inc])
+            de_tying_array.append(inc)
+
+            while inc + offset < len(sorted_teams) and \
+                    tiebreaker_value == \
+                    get_value(sorted_teams[inc + offset]):
+                de_tying_array.append(inc)
+                offset += 1
+                # print('bottom of the while: inc {} and offset: {}'.format(inc, offset))
+            inc += offset
+        # print('de-tying array: {}'.format(de_tying_array))
+        rank_set_inc = 0
+        for rank_change in de_tying_array:
+            prev_rank = sorted_teams[rank_set_inc].get_ranking(divisional)
+            sorted_teams[rank_set_inc].set_ranking(prev_rank + rank_change, divisional)
+            rank_set_inc += 1
+
+    @classmethod
+    def rank_teams(cls, queryset, divisional=False):
+        # first-order ordering
+
+        the_ties = Team.find_ties(queryset, 'win_percentage', divisional, set_rankings=True)
+        # now take the ties, the teams in them are ranked.
+        # if a tie can be broken by the net game wins in matches against tied teams,
+        # set/save the new ranking, then delete the ties
+
+        # print('the ties are: {}'.format(the_ties))
+        for a_tie in the_ties:
+            Team.break_tie(a_tie, 'net_game_wins_against', divisional, tie_arg=True)
+
+        # there ought to be a way to preserve the ties, but it seems I am going to re-find them
+        # to tie-break based on divisional rankings
+        if not divisional:
+            # this code is pointless for divisional rankings
+            inc = 0
+            # attribute = 'divisional_ranking' if divisional else 'ranking'
+            the_ties = Team.find_ties(queryset, 'ranking')
+            # print('after division ranking, there are some ties? : {}'.format(the_ties))
+            # print('the ties are: {}'.format(the_ties))
+            for a_tie in the_ties:
+                Team.break_tie(a_tie, 'division_ranking')
+
+        # OK now, this is the last tie-breaker. no more copy-pasta! ok a bit more copy-pasta
+        # print('let us now find some post-division-ranking ties, and break them based on forfeit wins')
+        # urk we re-need to find if this is/not divisional
+        attribute = 'division_ranking' if divisional else 'ranking'
+        the_ties = Team.find_ties(queryset, attribute, divisional)
+        # print('after division ranking, there are some ties? : {}'.format(the_ties))
+        # print('the ties are: {}'.format(the_ties))
+        for a_tie in the_ties:
+            Team.break_tie(a_tie, 'forfeit_wins', divisional)
 
     @classmethod
     def update_teams_stats(cls, season_id):
@@ -164,7 +299,7 @@ class PlayerSeasonSummary(models.Model):
             models.Q(match__away_team__in=self.player.team_set.filter(season=self.season))
             |
             models.Q(match__home_team__in=self.player.team_set.filter(season=self.season))
-        ).filter(official=True)
+        ).filter(official=1)
         sweeps = 0
 
         for score_sheet in score_sheets:
@@ -338,7 +473,7 @@ class Match(models.Model):
         limit_choices_to=models.Q(season__is_default=True),
         related_name='home_team',
         blank=True, null=True,
-        on_delete = models.CASCADE
+        on_delete=models.CASCADE
     )
     away_team = models.ForeignKey(
         'AwayTeam',
@@ -397,7 +532,7 @@ class GameOrder(models.Model):
     away_position = models.ForeignKey(
         AwayPlayPosition,
         related_name='away_position',
-        on_delete = models.CASCADE,
+        on_delete=models.CASCADE,
     )
     home_position = models.ForeignKey(
         HomePlayPosition,
@@ -487,7 +622,7 @@ class ScoreSheet(models.Model):
     )
 
     official = models.IntegerField(default=0, choices=MATCH_STATES, verbose_name='Status')
-    match = models.ForeignKey(Match, on_delete=models.CASCADE)
+    match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='scoresheets')
     creator_session = models.CharField(max_length=16, null=True, blank=True)
     away_lineup = models.ManyToManyField(
         AwayLineupEntry,
@@ -519,6 +654,9 @@ class ScoreSheet(models.Model):
 
     def home_wins(self):
         return len(self.games.filter(winner='home'))
+
+    def wins(self, away_home):
+        return len(self.games.filter(winner=away_home))
 
     def initialize_lineup(self):
         lineup_positions = PlayPosition.objects.filter(tiebreaker=False)
