@@ -7,7 +7,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.admin import SimpleListFilter
 from django.shortcuts import redirect
 
-from .models import Division, GameOrder, Match, Player, PlayPosition
+from .models import Division, GameOrder, Match, Player, PlayPosition, WeekDivisionMatchup
 from .models import PlayerSeasonSummary, ScoreSheet, Season, Sponsor, Team, Week
 from .forms import MatchForm
 from .views import expire_page
@@ -93,9 +93,105 @@ admin.site.register(Season, SeasonAdmin)
 admin.site.register(Sponsor)
 
 
+class WeekDivisionMatchupInline(admin.StackedInline):
+    model = WeekDivisionMatchup
+    extra = 0
+
+
 class WeekAdmin(admin.ModelAdmin):
     list_filter = ['season']
     list_display = ['name', 'season', 'date']
+    actions = ['division_matchups']
+    inlines = [WeekDivisionMatchupInline]
+
+    def check_matchup_length(self, request, week):
+        division_matchups = WeekDivisionMatchup.objects.filter(week=week)
+        div_matchup_count = int(len(Division.objects.filter(season_id=week.season))/2)
+        if len(division_matchups) != div_matchup_count:
+            self.message_user(
+                request,
+                'the week must have exactly {} division matchups set'.format(DIV_MATCHUP_EXACT),
+                level='ERROR',
+            )
+            return False
+        else:
+            return True
+
+    def check_division_ties(self, request, division):
+        teams = Team.objects.filter(division=division).order_by('-ranking')
+        last_rank = 0
+        ties = []
+        for i in range(0, len(teams) - 1):
+            if teams[i].ranking == teams[i+1].ranking:
+                ties.append((teams[i], teams[i+1]))
+        if len(ties):
+            # print('ties are: {}'.format(ties))
+            for tie in ties:
+                self.message_user(
+                    request,
+                    '{} and {} are tied, no matches created.'.format(tie[0], tie[1]),
+                    level='ERROR'
+                )
+            return True
+        else:
+            return False
+
+    def set_matches_for_division_matchup(self, request, _week, division_matchup):
+        away_teams = Team.objects.filter(
+            division=division_matchup.away_division
+        ).filter(season=_week.season).order_by('ranking')
+        home_teams = Team.objects.filter(
+            division=division_matchup.home_division
+        ).filter(season=_week.season).order_by('ranking')
+        if len(away_teams) == len(home_teams):
+            for i in range(0, len(away_teams)):
+                # do we already have this match?
+                if len(Match.objects.filter(week=_week).filter(away_team=away_teams[i]).filter(home_team=home_teams[i])):
+                    self.message_user(
+                        request,
+                        'match {} @ {} in week {} exists, skipping '.format(away_teams[i], home_teams[i], _week)
+                    )
+                else:
+                    m = Match(
+                        week=_week,
+                        away_team=away_teams[i],
+                        home_team=home_teams[i],
+                        season=_week.season,
+                    )
+                    m.save()
+                    self.message_user(
+                        request,
+                        'created match {}'.format(m)
+                    )
+        else:
+            print('divisions are uneven: away teams: {} and home teams: {}'.format(away_teams, home_teams))
+
+    def division_matchups(self, request, queryset):
+
+        # check that we are working on exactly one week
+        if len(queryset) != 1:
+            self.message_user(request=request, message='must select exactly one week', level='ERROR')
+            return
+        _week = queryset[0]
+
+        # check that the one week has the right number of matchups set. is this necessary? or just check for over?
+        if self.check_matchup_length(request, _week):
+            pass
+        else:
+            return
+        tied_divisions = 0
+        for division in Division.objects.filter(season=_week.season):
+            if self.check_division_ties(request, division):
+                tied_divisions += 1
+        if tied_divisions:
+            return
+        # else:
+        #     print('no divisions tied yay')
+        division_matchups = WeekDivisionMatchup.objects.filter(week=_week)
+        for division_matchup in division_matchups:
+            self.set_matches_for_division_matchup(request, _week, division_matchup)
+
+    division_matchups.short_description = "Set division-ranked matches"
 
 
 admin.site.register(Week, WeekAdmin)
