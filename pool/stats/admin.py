@@ -106,8 +106,8 @@ class WeekAdmin(admin.ModelAdmin):
 
     def check_matchup_length(self, request, week):
         division_matchups = WeekDivisionMatchup.objects.filter(week=week)
-        DIV_MATCHUP_EXACT = 3  # this is bad mmkay
-        if len(division_matchups) != DIV_MATCHUP_EXACT:
+        div_matchup_count = int(len(Division.objects.filter(season_id=week.season))/2)
+        if len(division_matchups) != div_matchup_count:
             self.message_user(
                 request,
                 'the week must have exactly {} division matchups set'.format(DIV_MATCHUP_EXACT),
@@ -185,8 +185,8 @@ class WeekAdmin(admin.ModelAdmin):
                 tied_divisions += 1
         if tied_divisions:
             return
-        else:
-            print('no divisions tied yay')
+        # else:
+        #     print('no divisions tied yay')
         division_matchups = WeekDivisionMatchup.objects.filter(week=_week)
         for division_matchup in division_matchups:
             self.set_matches_for_division_matchup(request, _week, division_matchup)
