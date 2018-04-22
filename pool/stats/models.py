@@ -110,6 +110,34 @@ class Team(models.Model):
 
         self.save()
 
+    def forfeit_wins(self):
+        forfeit_wins = 0
+        for home_away in ['away', 'home']:
+            ss_filter_args = {'match__{}_team'.format(home_away): self}
+            home_ss = ScoreSheet.objects.filter(official=1).filter(match__season=self.season).filter(
+                **ss_filter_args
+            )
+            for s in home_ss:
+                forfeit_wins += len(s.games.filter(winner=home_away).filter(forfeit=True))
+        return forfeit_wins
+
+    def net_match_wins_against(self, other_teams):
+        wins = 0
+        losses = 0
+        # for match in Match.objects.filter(home_team__in=[self] + other_teams, away_team__in=[self] + other_teams):
+        #     score_sheet = match.scoresheets.filter(official=1)[0]
+        for score_sheet in ScoreSheet.objects.filter(official=1).filter(match__home_team__in=[self] + other_teams, match__away_team__in=[self] + other_teams):
+            # score_sheet = match.scoresheets.filter(official=1)[0]
+            if score_sheet.away_wins() == score_sheet.home_wins():
+                continue
+            if score_sheet.away_wins() > score_sheet.home_wins():
+                wins += int(score_sheet.match.away_team == self)
+                losses += int(score_sheet.match.home_team == self)
+            if score_sheet.away_wins() < score_sheet.home_wins():
+                wins += int(score_sheet.match.home_team == self)
+                losses += int(score_sheet.match.away_team == self)
+        return wins - losses
+
     @classmethod
     def rank_teams(cls, season_id):
         teams = cls.objects.filter(season=season_id).order_by('-win_percentage', '-rank_tie_breaker')
