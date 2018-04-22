@@ -202,7 +202,25 @@ class TeamAdmin(admin.ModelAdmin):
     list_filter = [SeasonFilter, 'rank_tie_breaker']
     filter_horizontal = ['players']
     fields = ['season', 'sponsor', 'division', 'name', 'players', 'rank_tie_breaker']
+    actions = ['clear_tie_breakers', 'add_tie_breakers']
     save_as = True
+
+    def clear_tie_breakers(self, request, queryset):
+
+        for team in queryset:
+            team.rank_tie_breaker = 0
+            team.save()
+
+    clear_tie_breakers.short_description = "Clear tie-breakers"
+
+    def add_tie_breakers(self, request, queryset):
+
+        for team in queryset:
+            old_value = team.rank_tie_breaker
+            team.rank_tie_breaker = old_value + 1
+            team.save()
+
+    add_tie_breakers.short_description = "Add 1 to tie-breaker"
 
 
 admin.site.register(Team, TeamAdmin)
