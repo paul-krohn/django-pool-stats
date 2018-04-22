@@ -198,12 +198,15 @@ admin.site.register(Week, WeekAdmin)
 
 
 class TeamAdmin(admin.ModelAdmin):
-    list_display = ('name', 'season', 'ranking', 'forfeit_wins', 'rank_tie_breaker')
+    list_display = ('name', 'record', 'season', 'ranking', 'forfeit_wins', 'rank_tie_breaker')
     list_filter = [SeasonFilter, 'rank_tie_breaker']
     filter_horizontal = ['players']
     fields = ['season', 'sponsor', 'division', 'name', 'players', 'rank_tie_breaker']
     actions = ['clear_tie_breakers', 'add_tie_breakers']
     save_as = True
+
+    def record(self, obj):
+        return mark_safe(format_html('<a href="{}">view</a>'.format(reverse('team', args=(obj.id,)))))
 
     def clear_tie_breakers(self, request, queryset):
 
