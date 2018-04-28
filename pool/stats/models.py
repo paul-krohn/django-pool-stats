@@ -246,9 +246,6 @@ class Team(models.Model):
         # there ought to be a way to preserve the ties, but it seems I am going to re-find them
         # to tie-break based on divisional rankings
         if not divisional:
-            # this code is pointless for divisional rankings
-            inc = 0
-            # attribute = 'divisional_ranking' if divisional else 'ranking'
             the_ties = Team.find_ties(queryset, 'ranking')
             # print('after division ranking, there are some ties? : {}'.format(the_ties))
             # print('the ties are: {}'.format(the_ties))
@@ -465,7 +462,7 @@ class WeekDivisionMatchup(models.Model):
     )
 
     def __str__(self):
-        return('{} @ {}'.format(self.away_division, self.home_division))
+        return '{} @ {}'.format(self.away_division, self.home_division)
 
 
 class Match(models.Model):

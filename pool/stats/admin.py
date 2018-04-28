@@ -52,8 +52,6 @@ class MatchSeasonFilter(SeasonFilter):
     # for admin views where the object's match is via the season
     parameter_name = 'match__season'
 
-    # TODO: make this require less repeated code just to make
-    # model_path__is_default vary
     def queryset(self, request, queryset):
         if self.value() == 'all':
             return queryset
@@ -110,7 +108,7 @@ class WeekAdmin(admin.ModelAdmin):
         if len(division_matchups) != div_matchup_count:
             self.message_user(
                 request,
-                'the week must have exactly {} division matchups set'.format(DIV_MATCHUP_EXACT),
+                'the week must have exactly {} division matchups set'.format(div_matchup_count),
                 level='ERROR',
             )
             return False
@@ -119,7 +117,6 @@ class WeekAdmin(admin.ModelAdmin):
 
     def check_division_ties(self, request, division):
         teams = Team.objects.filter(division=division).order_by('-ranking')
-        last_rank = 0
         ties = []
         for i in range(0, len(teams) - 1):
             if teams[i].ranking == teams[i+1].ranking:
@@ -146,7 +143,9 @@ class WeekAdmin(admin.ModelAdmin):
         if len(away_teams) == len(home_teams):
             for i in range(0, len(away_teams)):
                 # do we already have this match?
-                if len(Match.objects.filter(week=_week).filter(away_team=away_teams[i]).filter(home_team=home_teams[i])):
+                if len(Match.objects.filter(week=_week).filter(
+                        away_team=away_teams[i]).filter(home_team=home_teams[i])
+                ):
                     self.message_user(
                         request,
                         'match {} @ {} in week {} exists, skipping '.format(away_teams[i], home_teams[i], _week)
@@ -205,7 +204,8 @@ class TeamAdmin(admin.ModelAdmin):
     actions = ['clear_tie_breakers', 'add_tie_breakers']
     save_as = True
 
-    def record(self, obj):
+    @staticmethod
+    def record(obj):
         return mark_safe(format_html('<a href="{}">view</a>'.format(reverse('team', args=(obj.id,)))))
 
     def clear_tie_breakers(self, request, queryset):
@@ -309,10 +309,12 @@ class ScoreSheetAdmin(admin.ModelAdmin):
     def opponents(obj):
         return "{} @ {}".format(obj.match.away_team, obj.match.home_team)
 
-    def links(self, obj):
+    @staticmethod
+    def links(obj):
         score_sheet_links = format_html('<a href="{}">view</a>'.format(reverse('score_sheet', args=(obj.id,))))
         if not obj.official:
-            score_sheet_links += '/' + format_html('<a href="{}">edit</a>'.format(reverse('score_sheet_edit', args=(obj.id,))))
+            score_sheet_links += '/' + format_html('<a href="{}">edit</a>'.format(
+                reverse('score_sheet_edit', args=(obj.id,))))
         return mark_safe(score_sheet_links)
 
 
