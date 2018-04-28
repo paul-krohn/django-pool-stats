@@ -68,7 +68,7 @@ class Team(models.Model):
     win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0)
     ranking = models.IntegerField(null=True, blank=True)
     division_ranking = models.IntegerField(null=True, blank=True)
-    rank_tie_breaker = models.IntegerField(null=True, blank=True)
+    rank_tie_breaker = models.IntegerField(default=0, null=True, blank=True)
 
     class Meta:
         ordering = ['name']
