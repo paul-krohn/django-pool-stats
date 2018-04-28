@@ -1,7 +1,11 @@
-from .base_cases import BaseSeleniumPoolStatsTestCase, form_length_map, location_names
-from ..models import ScoreSheet
+from django.test import RequestFactory
+from django.urls import reverse
 
 from selenium.webdriver.support.ui import Select
+
+from .base_cases import BaseSeleniumPoolStatsTestCase, form_length_map, location_names
+from ..models import ScoreSheet, Team, PlayerSeasonSummary
+from ..admin import update_stats
 
 
 class BaseViewRedirectTestCase(BaseSeleniumPoolStatsTestCase):
@@ -18,10 +22,6 @@ class BaseViewRedirectTestCase(BaseSeleniumPoolStatsTestCase):
         self.selenium.get('{}divisions/'.format(self.base_url))
         self.assertEqual(self.selenium.current_url, '{}divisions/{}'.format(self.base_url, self.default_season))
 
-    def test_stats_update_redirect(self):
-        self.selenium.get('{}update_stats/'.format(self.base_url))
-        self.assertEqual(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
-
 
 class StatusPageTestCase(BaseSeleniumPoolStatsTestCase):
 
@@ -31,6 +31,10 @@ class StatusPageTestCase(BaseSeleniumPoolStatsTestCase):
 
 
 class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
+
+    def setUp(self):
+        super(ScoreSheetTestCase, self).setUp()
+        self.factory = RequestFactory()
 
     def test_match_create_scoresheet(self):
 
@@ -93,6 +97,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         for inc in [0, 1]:
             select = Select(lineup_form.find_element_by_id('id_form-{}-player'.format(inc)))
             select.select_by_index(1)  # '1' as the first option in the select is '------' or similar
+        # submit the form
         # submit the form
         self.selenium.find_element_by_id('{}_lineup_save'.format(location_name)).click()
         # verify that it redirects to the lineup form on
@@ -203,17 +208,15 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         ss = ScoreSheet.objects.get(id=scoresheet_id)
         ss.official = True
         ss.save()
-        self.selenium.get('{}update_stats/'.format(self.base_url))
-        self.assertEqual(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
-        standings_table = self.selenium.find_element_by_id('team-standings-table')
-        standings_rows = standings_table.find_elements_by_tag_name('tr')
-        wins = list()
-        losses = list()
-        for standings_row in standings_rows[1:3]:  # skip header row, only 2 teams have played a match in this scenario
-            cells = standings_row.find_elements_by_tag_name('td')
-            wins.append(int(cells[2].text))
-            losses.append(int(cells[3].text))
-        self.assertTrue(list(win_counts.values()) in [wins, losses])
+
+        update_stats(False, self.factory.get(reverse('players')), [ss])
+        Team.update_rankings(season_id=self.default_season)
+        teams = Team.objects.filter(season_id=self.default_season)
+        list_of_outcomes = []
+        for team in teams:
+            list_of_outcomes.append([team.wins(), team.losses()])
+
+        self.assertTrue(list(win_counts.values()) in list_of_outcomes)
 
     def test_player_win_totals(self):
         self.score_sheet_create()
@@ -226,11 +229,22 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         ss = ScoreSheet.objects.get(id=scoresheet_id)
         ss.official = True
         ss.save()
-        self.selenium.get('{}update_stats/'.format(self.base_url))
-        self.assertEqual(self.selenium.current_url, '{}teams/{}'.format(self.base_url, self.default_season))
-        self.selenium.get('{}players/{}'.format(self.base_url, self.default_season))
-        tables = self.selenium.find_elements_by_tag_name('table')
-        stats = self.count_player_stats_in_table(tables[1])
+
+        update_stats(False, self.factory.get(reverse('players')), [ss])
+        PlayerSeasonSummary.update_all(season_id=self.default_season)
+        summaries = PlayerSeasonSummary.objects.filter(
+            season=self.default_season,
+        )
+        stats = {
+            'wins': 0,
+            'losses': 0,
+            'trs': 0,
+        }
+        for summary in summaries:
+            stats['wins'] += summary.wins
+            stats['losses'] += summary.losses
+            stats['trs'] += summary.table_runs
+
         self.assertEqual(stats['wins'], 15)
         self.assertEqual(stats['losses'], 15)
         self.assertEqual(stats['trs'], 2)
@@ -244,11 +258,18 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         ss = ScoreSheet.objects.get(id=scoresheet_id)
         ss.official = True
         ss.save()
-        self.selenium.get('{}update_stats/'.format(self.base_url))
-        self.selenium.get('{}players/{}'.format(self.base_url, self.default_season))
-        tables = self.selenium.find_elements_by_tag_name('table')
-        stats = self.count_player_stats_in_table(tables[1])
-        self.assertEqual(stats['wins'] + stats['losses'], 24)
+
+        update_stats(False, self.factory.get(reverse('players')), [ss])
+        PlayerSeasonSummary.update_all(season_id=self.default_season)
+        summaries = PlayerSeasonSummary.objects.filter(
+            season=self.default_season,
+        )
+        wins = 0
+        losses = 0
+        for summary in summaries:
+            wins += summary.wins
+            losses += summary.losses
+        self.assertEqual(wins + losses, 24)
         # we can't really test table runs here, because one or more of the TRs could land on games with
         # the player still anonymous/not set.
         # self.assertEqual(stats['trs'], 2)

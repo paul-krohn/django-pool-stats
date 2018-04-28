@@ -146,7 +146,7 @@ class Team(models.Model):
     def update_rankings(cls, season_id):
         # first, the divisions
         for division in Division.objects.filter(season_id=season_id):
-            print('ranking things for division {}/{}'.format(division, division.id))
+            # print('ranking things for division {}/{}'.format(division, division.id))
             Team.rank_teams(Team.objects.filter(division=division).order_by('-win_percentage'), divisional=True)
             # TODO: there may be unresolved ties. how should we flag that?
         Team.rank_teams(Team.objects.filter(season_id=season_id).order_by('-win_percentage'))
