@@ -265,6 +265,11 @@ class Team(models.Model):
         for a_tie in the_ties:
             Team.break_tie(a_tie, 'forfeit_wins', divisional)
 
+        # norly, the last tie breaker is the rank_tie_breaker
+        the_ties = Team.find_ties(queryset, attribute, divisional)
+        for a_tie in the_ties:
+            Team.break_tie(a_tie, 'rank_tie_breaker', divisional)
+
     @classmethod
     def update_teams_stats(cls, season_id):
         teams = cls.objects.filter(season=season_id)
