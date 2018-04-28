@@ -150,4 +150,3 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
     @property
     def base_url(self):
         return '{}/stats/'.format(self.live_server_url)
-
