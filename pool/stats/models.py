@@ -177,7 +177,8 @@ class Team(models.Model):
             # ))
             if inc == (len(queryset) - 1) or \
                     getattr(queryset[inc], attribute) != getattr(queryset[inc + offset], attribute):
-                queryset[inc].set_ranking(inc + 1, divisional)
+                if set_rankings:
+                    queryset[inc].set_ranking(inc + 1, divisional)
             while inc + offset < len(queryset) \
                     and getattr(queryset[inc], attribute) == getattr(queryset[inc + offset], attribute):
                 this_tie.append(queryset[inc + offset])
@@ -188,12 +189,20 @@ class Team(models.Model):
             if len(this_tie) > 1:
                 the_ties.append(this_tie)
             inc += offset
-        for t in queryset:
-            t.save()
         return the_ties
 
     @classmethod
-    def break_tie(cls, tie, attribute, divisional=False, tie_arg=False):
+    def break_tie(cls, tie, attribute, divisional=False, tie_arg=False, reverse_order=False):
+        """
+
+        :param tie: the tie that needs broken
+        :param attribute: the attribute or method name we'll use to sort/break ties on this pass
+        :param divisional: are we setting divisional rankings? or overall?
+        :param tie_arg: does the method need the tie passed to it as an argument? really just for net_game_wins_against.
+        :param reverse_order: does this tie-breaker sort people in the reverse order we want?
+            it should be true for net_game_wins_against.
+        :return: nothing. apply new rankings in-place.
+        """
 
         def get_value(team):
             if tie_arg:
@@ -205,8 +214,8 @@ class Team(models.Model):
 
         # print('breaking ties based on {}'.format(attribute))
         sorted_teams = sorted(tie, key=lambda team: get_value(team))
-        # print('after sorting the teams in this tie: {}'.format(sorted_teams))
-        # print('there are {} teams to compare'.format(len(sorted_teams)))
+        if reverse_order:
+            sorted_teams.reverse()
 
         inc = 0
         de_tying_array = []  # will be the number to add to the ranking
@@ -223,11 +232,11 @@ class Team(models.Model):
                 offset += 1
                 # print('bottom of the while: inc {} and offset: {}'.format(inc, offset))
             inc += offset
-        # print('de-tying array: {}'.format(de_tying_array))
         rank_set_inc = 0
         for rank_change in de_tying_array:
-            prev_rank = sorted_teams[rank_set_inc].get_ranking(divisional)
-            sorted_teams[rank_set_inc].set_ranking(prev_rank + rank_change, divisional)
+            if rank_change:
+                prev_rank = sorted_teams[rank_set_inc].get_ranking(divisional)
+                sorted_teams[rank_set_inc].set_ranking(prev_rank + rank_change, divisional)
             rank_set_inc += 1
 
     @classmethod
@@ -239,33 +248,23 @@ class Team(models.Model):
         # if a tie can be broken by the net game wins in matches against tied teams,
         # set/save the new ranking, then delete the ties
 
-        # print('the ties are: {}'.format(the_ties))
         for a_tie in the_ties:
-            Team.break_tie(a_tie, 'net_game_wins_against', divisional, tie_arg=True)
+            Team.break_tie(a_tie, 'net_game_wins_against', divisional, tie_arg=True, reverse_order=True)
 
         # there ought to be a way to preserve the ties, but it seems I am going to re-find them
         # to tie-break based on divisional rankings
         if not divisional:
-            # this code is pointless for divisional rankings
-            inc = 0
-            # attribute = 'divisional_ranking' if divisional else 'ranking'
             the_ties = Team.find_ties(queryset, 'ranking')
-            # print('after division ranking, there are some ties? : {}'.format(the_ties))
-            # print('the ties are: {}'.format(the_ties))
             for a_tie in the_ties:
                 Team.break_tie(a_tie, 'division_ranking')
 
-        # OK now, this is the last tie-breaker. no more copy-pasta! ok a bit more copy-pasta
-        # print('let us now find some post-division-ranking ties, and break them based on forfeit wins')
-        # urk we re-need to find if this is/not divisional
+        # OK now, this is the last automatic tie-breaker.
         attribute = 'division_ranking' if divisional else 'ranking'
         the_ties = Team.find_ties(queryset, attribute, divisional)
-        # print('after division ranking, there are some ties? : {}'.format(the_ties))
-        # print('the ties are: {}'.format(the_ties))
         for a_tie in the_ties:
             Team.break_tie(a_tie, 'forfeit_wins', divisional)
 
-        # norly, the last tie breaker is the rank_tie_breaker
+        # norly, the last tie breaker is the rank_tie_breaker, which is populated manually, ie on a coin toss
         the_ties = Team.find_ties(queryset, attribute, divisional)
         for a_tie in the_ties:
             Team.break_tie(a_tie, 'rank_tie_breaker', divisional)
