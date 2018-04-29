@@ -464,7 +464,7 @@ class WeekDivisionMatchup(models.Model):
     )
 
     def __str__(self):
-        return('{} @ {}'.format(self.away_division, self.home_division))
+        return '{} @ {}'.format(self.away_division, self.home_division)
 
 
 class Match(models.Model):

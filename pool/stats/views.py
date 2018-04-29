@@ -78,7 +78,8 @@ def user_can_edit_scoresheet(request, score_sheet_id):
     s = ScoreSheet.objects.get(id=score_sheet_id)
     # you can edit a score sheet if it is not official and either you created it,
     # or you are an admin
-    if (not s.official) and ((session_uid(request) == s.creator_session) or request.user.is_superuser or is_stats_master(request.user)):
+    if (not s.official) and ((session_uid(request) == s.creator_session) or
+                             request.user.is_superuser or is_stats_master(request.user)):
         return True
     else:
         return False
