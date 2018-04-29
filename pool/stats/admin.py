@@ -99,7 +99,7 @@ class WeekDivisionMatchupInline(admin.StackedInline):
 class WeekAdmin(admin.ModelAdmin):
     list_filter = ['season']
     list_display = ['name', 'season', 'date']
-    actions = ['division_matchups']
+    actions = ['division_matchups', 'league_rank_matches']
     inlines = [WeekDivisionMatchupInline]
 
     def check_matchup_length(self, request, week):
@@ -191,6 +191,54 @@ class WeekAdmin(admin.ModelAdmin):
             self.set_matches_for_division_matchup(request, _week, division_matchup)
 
     division_matchups.short_description = "Set division-ranked matches"
+
+    def league_rank_matches(self, request, queryset):
+        if len(queryset) != 1:
+            self.message_user(request=request, message='must select exactly one week', level='ERROR')
+            return
+        _week = queryset[0]
+        print("week is : {}".format(_week))
+        # is this a div-ranked week?
+        division_matchups = WeekDivisionMatchup.objects.filter(week=_week)
+        if len(division_matchups):
+            self.message_user(
+                request=request,
+                message='This week has division matchups set! not setting league-ranked matches.',
+                level='ERROR',
+            )
+        # check for ties
+        teams = Team.objects.filter(season=_week.season).order_by('ranking')
+        ties = Team.find_ties(teams, 'ranking')
+        for tie in ties:
+            self.message_user(
+                request=request,
+                message='{} and {} are tied; no matches set'.format(tie[0], tie[1]),
+                level='ERROR'
+            )
+            return
+        # so there are no ties ... set matches!
+        inc = 0
+        while inc < len(teams):
+
+            if len(Match.objects.filter(week=_week).filter(
+                    away_team=teams[inc + 1]).filter(home_team=teams[inc])
+                   ):
+                self.message_user(
+                    request,
+                    'match {} @ {} in week {} exists, skipping '.format(teams[inc + 1], teams[inc], _week)
+                )
+            else:
+                m = Match(
+                    week=_week,
+                    away_team=teams[inc + 1],
+                    home_team=teams[inc],
+                    season=_week.season,
+                )
+                m.save()
+                self.message_user(request, 'created match {}'.format(m))
+            inc += 2
+
+    league_rank_matches.short_description = "Set league-ranked matches"
 
 
 admin.site.register(Week, WeekAdmin)
