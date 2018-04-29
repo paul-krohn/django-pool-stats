@@ -177,7 +177,8 @@ class Team(models.Model):
             # ))
             if inc == (len(queryset) - 1) or \
                     getattr(queryset[inc], attribute) != getattr(queryset[inc + offset], attribute):
-                queryset[inc].set_ranking(inc + 1, divisional)
+                if set_rankings:
+                    queryset[inc].set_ranking(inc + 1, divisional)
             while inc + offset < len(queryset) \
                     and getattr(queryset[inc], attribute) == getattr(queryset[inc + offset], attribute):
                 this_tie.append(queryset[inc + offset])
