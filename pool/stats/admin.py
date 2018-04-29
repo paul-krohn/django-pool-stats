@@ -52,8 +52,6 @@ class MatchSeasonFilter(SeasonFilter):
     # for admin views where the object's match is via the season
     parameter_name = 'match__season'
 
-    # TODO: make this require less repeated code just to make
-    # model_path__is_default vary
     def queryset(self, request, queryset):
         if self.value() == 'all':
             return queryset
@@ -101,7 +99,7 @@ class WeekDivisionMatchupInline(admin.StackedInline):
 class WeekAdmin(admin.ModelAdmin):
     list_filter = ['season']
     list_display = ['name', 'season', 'date']
-    actions = ['division_matchups']
+    actions = ['division_matchups', 'intra_division_matches', 'league_rank_matches']
     inlines = [WeekDivisionMatchupInline]
 
     def check_matchup_length(self, request, week):
@@ -110,7 +108,7 @@ class WeekAdmin(admin.ModelAdmin):
         if len(division_matchups) != div_matchup_count:
             self.message_user(
                 request,
-                'the week must have exactly {} division matchups set'.format(DIV_MATCHUP_EXACT),
+                'the week must have exactly {} division matchups set'.format(div_matchup_count),
                 level='ERROR',
             )
             return False
@@ -119,7 +117,6 @@ class WeekAdmin(admin.ModelAdmin):
 
     def check_division_ties(self, request, division):
         teams = Team.objects.filter(division=division).order_by('-ranking')
-        last_rank = 0
         ties = []
         for i in range(0, len(teams) - 1):
             if teams[i].ranking == teams[i+1].ranking:
@@ -136,6 +133,25 @@ class WeekAdmin(admin.ModelAdmin):
         else:
             return False
 
+    def create_match_if_not_exist(self, week, request, away_team, home_team):
+        existing_matches = Match.objects.filter(week=week).filter(
+                away_team=away_team).filter(home_team=home_team)
+        if len(existing_matches):
+            for m in existing_matches:
+                self.message_user(
+                    request,
+                    'match {} in week {} exists, skipping '.format(m, week)
+                )
+        else:
+            m = Match(
+                week=week,
+                away_team=away_team,
+                home_team=home_team,
+                season=week.season,
+            )
+            m.save()
+            self.message_user(request, 'created match {}'.format(m))
+
     def set_matches_for_division_matchup(self, request, _week, division_matchup):
         away_teams = Team.objects.filter(
             division=division_matchup.away_division
@@ -145,24 +161,8 @@ class WeekAdmin(admin.ModelAdmin):
         ).filter(season=_week.season).order_by('ranking')
         if len(away_teams) == len(home_teams):
             for i in range(0, len(away_teams)):
-                # do we already have this match?
-                if len(Match.objects.filter(week=_week).filter(away_team=away_teams[i]).filter(home_team=home_teams[i])):
-                    self.message_user(
-                        request,
-                        'match {} @ {} in week {} exists, skipping '.format(away_teams[i], home_teams[i], _week)
-                    )
-                else:
-                    m = Match(
-                        week=_week,
-                        away_team=away_teams[i],
-                        home_team=home_teams[i],
-                        season=_week.season,
-                    )
-                    m.save()
-                    self.message_user(
-                        request,
-                        'created match {}'.format(m)
-                    )
+                self.create_match_if_not_exist(_week, request, away_team=away_teams[i], home_team=home_teams[i])
+
         else:
             print('divisions are uneven: away teams: {} and home teams: {}'.format(away_teams, home_teams))
 
@@ -185,14 +185,76 @@ class WeekAdmin(admin.ModelAdmin):
                 tied_divisions += 1
         if tied_divisions:
             return
-        # else:
-        #     print('no divisions tied yay')
         division_matchups = WeekDivisionMatchup.objects.filter(week=_week)
         for division_matchup in division_matchups:
             self.set_matches_for_division_matchup(request, _week, division_matchup)
 
-    division_matchups.short_description = "Set division-ranked matches"
+    division_matchups.short_description = "Set inter-division ranked matches"
 
+    def league_rank_matches(self, request, queryset):
+        if len(queryset) != 1:
+            self.message_user(request=request, message='must select exactly one week', level='ERROR')
+            return
+        _week = queryset[0]
+        print("week is : {}".format(_week))
+        # is this a div-ranked week?
+        division_matchups = WeekDivisionMatchup.objects.filter(week=_week)
+        if len(division_matchups):
+            self.message_user(
+                request=request,
+                message='This week has division matchups set! not setting league-ranked matches.',
+                level='ERROR',
+            )
+        # check for ties
+        teams = Team.objects.filter(season=_week.season).order_by('ranking')
+        ties = Team.find_ties(teams, 'ranking')
+        for tie in ties:
+            self.message_user(
+                request=request,
+                message='{} and {} are tied; no matches set'.format(tie[0], tie[1]),
+                level='ERROR'
+            )
+            return
+        # so there are no ties ... set matches!
+        inc = 0
+        while inc < len(teams):
+            self.create_match_if_not_exist(_week, request, away_team=teams[inc + 1], home_team=teams[inc])
+            inc += 2
+
+    league_rank_matches.short_description = "Set league-ranked matches"
+
+    def intra_division_matches(self, request, queryset):
+        if len(queryset) != 1:
+            self.message_user(request=request, message='must select exactly one week', level='ERROR')
+            return
+        _week = queryset[0]
+        divisions = Division.objects.filter(season=_week.season)
+        for division in divisions:
+            div_teams = Team.objects.filter(division=division)
+            if len(div_teams) % 2:
+                self.message_user(request,
+                                  message="{} has an uneven team count, no matches created".format(division),
+                                  level='ERROR'
+                                  )
+                self.message_user(request,
+                                  message="teams are: {}".format(div_teams),
+                                  level='ERROR'
+                                  )
+                continue
+            div_ties = Team.find_ties(div_teams, 'division_ranking')
+            if div_ties:
+                self.message_user(
+                    request,
+                    message="{} and {} are tied; no matches created for {}",
+                    level='ERROR',
+                )
+                continue
+            inc = 0
+            while inc + 1 < len(div_teams):
+                self.create_match_if_not_exist(_week, request, away_team=div_teams[inc+1], home_team=div_teams[inc])
+                inc += 2
+
+    intra_division_matches.short_description = "Set intra-division ranked matches"
 
 admin.site.register(Week, WeekAdmin)
 
@@ -205,7 +267,8 @@ class TeamAdmin(admin.ModelAdmin):
     actions = ['clear_tie_breakers', 'add_tie_breakers']
     save_as = True
 
-    def record(self, obj):
+    @staticmethod
+    def record(obj):
         return mark_safe(format_html('<a href="{}">view</a>'.format(reverse('team', args=(obj.id,)))))
 
     def clear_tie_breakers(self, request, queryset):
@@ -309,10 +372,12 @@ class ScoreSheetAdmin(admin.ModelAdmin):
     def opponents(obj):
         return "{} @ {}".format(obj.match.away_team, obj.match.home_team)
 
-    def links(self, obj):
+    @staticmethod
+    def links(obj):
         score_sheet_links = format_html('<a href="{}">view</a>'.format(reverse('score_sheet', args=(obj.id,))))
         if not obj.official:
-            score_sheet_links += '/' + format_html('<a href="{}">edit</a>'.format(reverse('score_sheet_edit', args=(obj.id,))))
+            score_sheet_links += '/' + format_html('<a href="{}">edit</a>'.format(
+                reverse('score_sheet_edit', args=(obj.id,))))
         return mark_safe(score_sheet_links)
 
 
