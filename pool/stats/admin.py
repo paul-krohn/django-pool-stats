@@ -99,7 +99,7 @@ class WeekDivisionMatchupInline(admin.StackedInline):
 class WeekAdmin(admin.ModelAdmin):
     list_filter = ['season']
     list_display = ['name', 'season', 'date']
-    actions = ['division_matchups', 'league_rank_matches']
+    actions = ['division_matchups', 'intra_division_matches', 'league_rank_matches']
     inlines = [WeekDivisionMatchupInline]
 
     def check_matchup_length(self, request, week):
@@ -189,7 +189,7 @@ class WeekAdmin(admin.ModelAdmin):
         for division_matchup in division_matchups:
             self.set_matches_for_division_matchup(request, _week, division_matchup)
 
-    division_matchups.short_description = "Set division-ranked matches"
+    division_matchups.short_description = "Set inter-division ranked matches"
 
     def league_rank_matches(self, request, queryset):
         if len(queryset) != 1:
@@ -223,6 +223,38 @@ class WeekAdmin(admin.ModelAdmin):
 
     league_rank_matches.short_description = "Set league-ranked matches"
 
+    def intra_division_matches(self, request, queryset):
+        if len(queryset) != 1:
+            self.message_user(request=request, message='must select exactly one week', level='ERROR')
+            return
+        _week = queryset[0]
+        divisions = Division.objects.filter(season=_week.season)
+        for division in divisions:
+            div_teams = Team.objects.filter(division=division)
+            if len(div_teams) % 2:
+                self.message_user(request,
+                                  message="{} has an uneven team count, no matches created".format(division),
+                                  level='ERROR'
+                                  )
+                self.message_user(request,
+                                  message="teams are: {}".format(div_teams),
+                                  level='ERROR'
+                                  )
+                continue
+            div_ties = Team.find_ties(div_teams, 'division_ranking')
+            if div_ties:
+                self.message_user(
+                    request,
+                    message="{} and {} are tied; no matches created for {}",
+                    level='ERROR',
+                )
+                continue
+            inc = 0
+            while inc + 1 < len(div_teams):
+                self.create_match_if_not_exist(_week, request, away_team=div_teams[inc+1], home_team=div_teams[inc])
+                inc += 2
+
+    intra_division_matches.short_description = "Set intra-division ranked matches"
 
 admin.site.register(Week, WeekAdmin)
 
