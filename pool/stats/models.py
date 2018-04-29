@@ -194,7 +194,17 @@ class Team(models.Model):
         return the_ties
 
     @classmethod
-    def break_tie(cls, tie, attribute, divisional=False, tie_arg=False):
+    def break_tie(cls, tie, attribute, divisional=False, tie_arg=False, reverse_order=False):
+        """
+
+        :param tie: the tie that needs broken
+        :param attribute: the attribute or method name we'll use to sort/break ties on this pass
+        :param divisional: are we setting divisional rankings? or overall?
+        :param tie_arg: does the method need the tie passed to it as an argument? really just for net_game_wins_against.
+        :param reverse_order: does this tie-breaker sort people in the reverse order we want?
+            it should be true for net_game_wins_against.
+        :return: nothing. apply new rankings in-place.
+        """
 
         def get_value(team):
             if tie_arg:
@@ -206,8 +216,8 @@ class Team(models.Model):
 
         # print('breaking ties based on {}'.format(attribute))
         sorted_teams = sorted(tie, key=lambda team: get_value(team))
-        # print('after sorting the teams in this tie: {}'.format(sorted_teams))
-        # print('there are {} teams to compare'.format(len(sorted_teams)))
+        if reverse_order:
+            sorted_teams.reverse()
 
         inc = 0
         de_tying_array = []  # will be the number to add to the ranking
@@ -242,7 +252,7 @@ class Team(models.Model):
 
         # print('the ties are: {}'.format(the_ties))
         for a_tie in the_ties:
-            Team.break_tie(a_tie, 'net_game_wins_against', divisional, tie_arg=True)
+            Team.break_tie(a_tie, 'net_game_wins_against', divisional, tie_arg=True, reverse_order=True)
 
         # there ought to be a way to preserve the ties, but it seems I am going to re-find them
         # to tie-break based on divisional rankings
