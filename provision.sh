@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 # update all the things
 sudo apt-get update -qq
 sudo apt-get upgrade -y
@@ -10,39 +12,47 @@ sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again p
 sudo apt-get install -y mysql-common mysql-server mysql-client
 sudo apt-get install -y python3.5 python3.5-dev python-virtualenv python-pip
 sudo apt-get install -y libmysqlclient-dev memcached
+sudo apt-get install -y firefox
 
-VE_DIR="/usr/local/django-pool-stats-ve"
+GECKO_VERSION=v0.20.1
 
+BASE_DIR="/usr/local/django-pool-stats"
+VE_DIR="${BASE_DIR}/ve"
+
+sudo mkdir -p ${BASE_DIR}
+sudo chown $USER:$USER ${BASE_DIR}
+
+BIN_DIR="${BASE_DIR}/bin"
+mkdir -p $BIN_DIR
+if ! [ `which geckodriver` ] ; then
+    curl -LO https://github.com/mozilla/geckodriver/releases/download/${GECKO_VERSION}/geckodriver-${GECKO_VERSION}-linux64.tar.gz
+    sudo tar -C /usr/local/bin -zxf geckodriver-${GECKO_VERSION}-linux64.tar.gz
+fi
+
+touch ~vagrant/.bash_profile
+sudo chown ${USER}:${USER} ~vagrant/.bash_profile
 /bin/echo ". ${VE_DIR}/bin/activate" > ~vagrant/.bash_profile
-chown vagrant:vagrant
 
 # python virtualenv
 if [ ! -d ${VE_DIR} ] ; then
-    sudo virtualenv ${VE_DIR} -p python3.5
-    sudo chown -R vagrant:vagrant ${VE_DIR}
+    virtualenv ${VE_DIR} -p python3.5
+    . ${VE_DIR}/bin/activate
+    pip install --upgrade pip
+#    chown -R vagrant:vagrant ${VE_DIR}
 fi
 . ${VE_DIR}/bin/activate
-pip install -r /vagrant/requirements.pip
+pip install -r /vagrant/requirements.txt
 
 
 # set up mysql user
 cat <<MYSQL_USER | mysql -u root -pjanet
 create database if not exists pool_stats;
-GRANT ALL ON pool_stats.* TO 'pool_stats'@'localhost' identified by 'isysroot';
-GRANT ALL ON test_pool_stats.* TO 'pool_stats'@'localhost' identified by 'isysroot';
+create user if not exists 'pool_stats'@'localhost';
+GRANT ALL ON pool_stats.* TO 'pool_stats'@'localhost';
+GRANT ALL ON test_pool_stats.* TO 'pool_stats'@'localhost';
 flush privileges;
 MYSQL_USER
 
 # allow access from not-localhost, so a dev has a chance
-sed -i 's/bind-address.*/bind-address = 0.0.0.0/' /etc/mysql/my.cnf
-
-
-# teensy wrapper to start the app in development mode
-cat <<EOF > ~vagrant/runserver.sh
-cd /vagrant/pool
-python manage.py runserver 0.0.0.0:8000
-EOF
-
-chown vagrant:vagrant ~vagrant/runserver.sh
-chmod +x ~vagrant/runserver.sh
+sudo sed -i 's/bind-address.*/bind-address = 0.0.0.0/' /etc/mysql/my.cnf
 
