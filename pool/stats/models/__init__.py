@@ -3,6 +3,8 @@ from django.core.exceptions import ObjectDoesNotExist
 import logging
 logger = logging.getLogger(__name__)
 
+away_home = ['away', 'home']
+
 
 def get_default_season():
     try:
@@ -489,7 +491,8 @@ class Match(models.Model):
     playoff = models.BooleanField(default=False)
 
     def __str__(self):
-        return "{} @ {} ({} {})".format(self.away_team, self.home_team, self.season, self.week)
+        # return "{} @ {} ({} {})".format(self.away_team, self.home_team, self.season, self.week)
+        return "{} @ {}".format(self.away_team, self.home_team)
 
     class Meta:
         verbose_name = 'Match'
@@ -763,3 +766,70 @@ class ScoreSheet(models.Model):
             ))
             player_score_sheet_summaries.append(summary)
         return player_score_sheet_summaries
+
+    def check_wins_regular_season(self):
+
+        issues = []
+
+        # for non-playoff matches, check for there being lineup length * lineup length non-forfeit wins
+        wins = dict.fromkeys(away_home, 0)
+        losses = dict.fromkeys(away_home, 0)
+        expected_wins = len(self.home_lineup.exclude(player=None)) * len(self.away_lineup.exclude(player=None))
+
+        for game in self.games.all():
+            if game.winner in away_home and not game.forfeit:
+                wins[game.winner] += 1
+                other = [x for x in away_home if x != game.winner]
+                losses[other[0]] += 1
+
+        if expected_wins != wins['away'] + wins['home']:
+            issues += ['expected {} non-forfeit wins, found {}'.format(expected_wins, wins['away'] + wins['home'])]
+        return issues
+
+    def check_unmarked_forfeits(self):
+
+        from operator import xor
+        issues = []
+
+        # check for games where a player is None, but it is not marked as a forfeit
+        unmarked_forfeit_games = []
+        for game in self.games.all():
+            if xor(bool(game.away_player), bool(game.home_player)) and not game.forfeit:
+                unmarked_forfeit_games.append(game.order)
+        if unmarked_forfeit_games:
+            issues += ["{} is/are missing a player, but not marked as a forfeit".format(', '.join(
+                    [str(x) for x in unmarked_forfeit_games]
+            ))]
+        return issues
+
+    def check_playoff_win_count(self):
+        """
+        Check that there are exactly len(non-tiebreaker games) / 2 + 1 wins by one team
+        :return:
+        """
+
+        issues = []
+
+        win_count = 1 + int(len(GameOrder.objects.filter(tiebreaker=False)) / 2)
+        home_wins = self.home_wins()
+        away_wins = self.away_wins()
+        if win_count != home_wins and win_count != away_wins:
+            issues += ["Playoff matches should have exactly {} wins".format(win_count)]
+
+        return issues
+
+    def self_check(self):
+
+        """
+
+        :return: a list of issues with the score sheet
+        """
+
+        issues = []
+        issues += self.check_unmarked_forfeits()
+        if self.match.playoff:
+            issues += self.check_playoff_win_count()
+        else:
+            issues += self.check_wins_regular_season()
+
+        return issues

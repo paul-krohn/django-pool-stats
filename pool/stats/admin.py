@@ -332,6 +332,21 @@ def update_stats(modeladmin, request, queryset):
     return redirect(redirect_to)
 
 
+def lint_score_sheets(modeladmin, request, queryset):
+
+    for score_sheet in queryset:
+        warnings = score_sheet.self_check()
+        if len(warnings):
+            score_sheet.official = 2
+            score_sheet.save()
+        for warning in warnings:
+            modeladmin.message_user(
+                request=request,
+                message="{}/{}: {}".format(score_sheet, score_sheet.id, warning),
+                level='WARNING'
+            )
+
+
 class BlankScoreSheetFilter(admin.SimpleListFilter):
     title = _('no wins')
 
@@ -363,10 +378,10 @@ class BlankScoreSheetFilter(admin.SimpleListFilter):
 
 
 class ScoreSheetAdmin(admin.ModelAdmin):
-    list_display = ['opponents', 'links', 'away_wins', 'home_wins', 'official', 'complete', 'comment']
+    list_display = ['id', 'match', 'links', 'away_wins', 'home_wins', 'official', 'complete', 'comment']
     fields = ['official', 'complete', 'comment']
     list_filter = [MatchSeasonFilter, 'official', 'complete', BlankScoreSheetFilter, 'match__week']
-    actions = [make_official, update_stats]
+    actions = [lint_score_sheets, make_official, update_stats]
 
     @staticmethod
     def opponents(obj):
