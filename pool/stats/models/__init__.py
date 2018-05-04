@@ -828,7 +828,7 @@ class ScoreSheet(models.Model):
 
         return issues
 
-    def self_check(self):
+    def self_check(self, mark_for_review=False):
 
         """
 
@@ -841,5 +841,8 @@ class ScoreSheet(models.Model):
             issues += self.check_playoff_win_count()
         else:
             issues += self.check_wins_regular_season()
+
+        if len(issues) and mark_for_review:
+            self.status = 2  # needs changes
 
         return issues

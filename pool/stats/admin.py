@@ -335,7 +335,7 @@ def update_stats(modeladmin, request, queryset):
 def lint_score_sheets(modeladmin, request, queryset):
 
     for score_sheet in queryset:
-        warnings = score_sheet.self_check()
+        warnings = score_sheet.self_check(mark_for_review=True)
         if len(warnings):
             score_sheet.official = 2
             score_sheet.save()
@@ -390,7 +390,7 @@ class ScoreSheetAdmin(admin.ModelAdmin):
     @staticmethod
     def links(obj):
         score_sheet_links = format_html('<a href="{}">view</a>'.format(reverse('score_sheet', args=(obj.id,))))
-        if not obj.official:
+        if obj.official != 1:
             score_sheet_links += '/' + format_html('<a href="{}">edit</a>'.format(
                 reverse('score_sheet_edit', args=(obj.id,))))
         return mark_safe(score_sheet_links)
