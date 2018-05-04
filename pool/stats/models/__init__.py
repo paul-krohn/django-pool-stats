@@ -771,16 +771,26 @@ class ScoreSheet(models.Model):
 
         issues = []
 
-        # for non-playoff matches, check for there being lineup length * lineup length non-forfeit wins
+        # for non-playoff matches, check for there being lineup length * lineup length wins
         wins = dict.fromkeys(away_home, 0)
         losses = dict.fromkeys(away_home, 0)
-        expected_wins = len(self.home_lineup.exclude(player=None)) * len(self.away_lineup.exclude(player=None))
+
+        # expected_wins = len(self.home_lineup.exclude(player=None)) * len(self.away_lineup.exclude(player=None))
+        away_lineup_player_count = len(self.away_lineup.exclude(player=None))
+        home_lineup_player_count = len(self.home_lineup.exclude(player=None))
+        away_lineup_length = len(self.away_lineup.all())
+        home_lineup_length = len(self.home_lineup.all())
+
+        # if there are missing players on *both* teams, then reduce the expected wins by the multiple of the 2
+        expected_wins = away_lineup_length * home_lineup_length - \
+            (away_lineup_length - away_lineup_player_count) * \
+            (home_lineup_length - home_lineup_player_count)
 
         for game in self.games.all():
-            if game.winner in away_home and not game.forfeit:
+            if game.winner:
                 wins[game.winner] += 1
-                other = [x for x in away_home if x != game.winner]
-                losses[other[0]] += 1
+            other = [x for x in away_home if x != game.winner]
+            losses[other[0]] += 1
 
         if expected_wins != wins['away'] + wins['home']:
             issues += ['expected {} non-forfeit wins, found {}'.format(expected_wins, wins['away'] + wins['home'])]
