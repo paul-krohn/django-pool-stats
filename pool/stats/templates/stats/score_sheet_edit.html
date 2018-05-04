@@ -99,6 +99,17 @@ $(document).ready(function(){
         <input id="games-save-button" name="games" class="btn btn-primary" type="submit" value="Save games"/>
     </div>
 </form>
+    {%  with score_sheet.self_check as issues %}
+        {% if issues|length %}
+            <ul>
+            {%  for issue in issues %}
+            <div>
+                <li>{{ issue }}</li>
+            </div>
+            {% endfor %}
+            </ul>
+        {% endif %}
+    {%  endwith %}
     <div id="away-player-summaries"><h4>{{ score_sheet.match.away_team }} Player Summaries</h4>
     {% with player_score_sheet_summaries=away_player_score_sheet_summaries %}
     {% include "stats/player_match_summary.html" %}

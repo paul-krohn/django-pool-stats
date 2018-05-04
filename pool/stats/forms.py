@@ -5,6 +5,7 @@ from django.core.exceptions import ValidationError
 WINNER_CHOICES = (
     ('home', 'Home'),
     ('away', 'Away'),
+    ('', None)
 )
 
 

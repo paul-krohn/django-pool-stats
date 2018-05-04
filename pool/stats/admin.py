@@ -315,21 +315,30 @@ def update_stats(modeladmin, request, queryset):
         for team in [score_sheet.match.home_team, score_sheet.match.away_team]:
             team.count_games()
             expire_page(request, reverse('team', kwargs={'team_id': team.id}), '')
-        players = [x.player for x in list(score_sheet.away_lineup.all()) + list(score_sheet.home_lineup.all())]
-        for substitution in list(score_sheet.away_substitutions.all()) + list(score_sheet.home_substitutions.all()):
-            players.append(substitution.player)
-        for player in players:
-            if player is None:
-                continue
-            summary = PlayerSeasonSummary.objects.get_or_create(player=player, season=score_sheet.match.season)[0]
-            summary.update()
-            expire_page(request, reverse('player', kwargs={'player_id': player.id}), '')
+    PlayerSeasonSummary.update_all(season_id=expire_season_id)
+    for pss in PlayerSeasonSummary.objects.filter(season_id=expire_season_id):
+        expire_page(request, reverse('player', kwargs={'player_id': pss.player.id}))
     Team.update_rankings(season_id=expire_season_id)
     expire_page(request, reverse('divisions', kwargs={'season_id': expire_season_id}), '')
     expire_page(request, reverse('players', kwargs={'season_id': expire_season_id}), '')
     expire_page(request, reverse('teams', kwargs={'season_id': expire_season_id}), '')
     # see comment about redirect_to above
     return redirect(redirect_to)
+
+
+def lint_score_sheets(modeladmin, request, queryset):
+
+    for score_sheet in queryset:
+        warnings = score_sheet.self_check(mark_for_review=True)
+        if len(warnings):
+            score_sheet.official = 2
+            score_sheet.save()
+        for warning in warnings:
+            modeladmin.message_user(
+                request=request,
+                message="{}/{}: {}".format(score_sheet, score_sheet.id, warning),
+                level='WARNING'
+            )
 
 
 class BlankScoreSheetFilter(admin.SimpleListFilter):
@@ -363,10 +372,10 @@ class BlankScoreSheetFilter(admin.SimpleListFilter):
 
 
 class ScoreSheetAdmin(admin.ModelAdmin):
-    list_display = ['opponents', 'links', 'away_wins', 'home_wins', 'official', 'complete', 'comment']
+    list_display = ['id', 'match', 'links', 'away_wins', 'home_wins', 'official', 'complete', 'comment']
     fields = ['official', 'complete', 'comment']
     list_filter = [MatchSeasonFilter, 'official', 'complete', BlankScoreSheetFilter, 'match__week']
-    actions = [make_official, update_stats]
+    actions = [lint_score_sheets, make_official, update_stats]
 
     @staticmethod
     def opponents(obj):
@@ -375,7 +384,7 @@ class ScoreSheetAdmin(admin.ModelAdmin):
     @staticmethod
     def links(obj):
         score_sheet_links = format_html('<a href="{}">view</a>'.format(reverse('score_sheet', args=(obj.id,))))
-        if not obj.official:
+        if obj.official != 1:
             score_sheet_links += '/' + format_html('<a href="{}">edit</a>'.format(
                 reverse('score_sheet_edit', args=(obj.id,))))
         return mark_safe(score_sheet_links)
