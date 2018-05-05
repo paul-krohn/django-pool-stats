@@ -146,6 +146,7 @@ class Team(models.Model):
 
     @classmethod
     def update_rankings(cls, season_id):
+        Team.update_teams_stats(season_id)
         # first, the divisions
         for division in Division.objects.filter(season_id=season_id):
             # print('ranking things for division {}/{}'.format(division, division.id))
@@ -276,7 +277,6 @@ class Team(models.Model):
         teams = cls.objects.filter(season=season_id)
         for this_team in teams:
             this_team.count_games()
-        cls.rank_teams(season_id)
 
 
 class PlayerSeasonSummary(models.Model):
