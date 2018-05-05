@@ -126,23 +126,25 @@ class Team(models.Model):
         return forfeit_wins
 
     def net_game_wins_against(self, other_teams):
-        wins = 0
-        losses = 0
-        if self.id in other_teams:  # this makes it easier to use a sorted/lambda thing
-            other_teams.remove(self.id)
-        for score_sheet in ScoreSheet.objects.filter(
+        net_wins = 0
+
+        # we need a shallow copy of other_teams here, so we can both call this function as a lambda, and
+        # not alter the list in the calling context
+        local_other_teams = [x for x in other_teams if x != self.id]
+
+        # find all the score sheets where this team is home, and one of the others is away, and vice versa
+        score_sheets = ScoreSheet.objects.filter(
             official=1
         ).filter(
-            match__home_team_id__in=[self] + other_teams,
-            match__away_team_id__in=[self] + other_teams
-        ):
+            models.Q(match__away_team__in=local_other_teams) & models.Q(match__home_team__id=self.id)
+            |
+            models.Q(match__home_team__in=local_other_teams) & models.Q(match__away_team__id=self.id)
+        )
+        for score_sheet in score_sheets:
             away_match = 1 if score_sheet.match.away_team == self else -1
-            # print('adding {} to wins'.format(score_sheet.away_wins() * away_match))
-            wins += score_sheet.away_wins() * away_match
-            # print('adding {} to losses'.format(score_sheet.home_wins() * away_match))
-            losses += score_sheet.home_wins() * away_match
+            net_wins += score_sheet.away_wins() * away_match - score_sheet.home_wins() * away_match
 
-        return wins - losses
+        return net_wins
 
     @classmethod
     def update_rankings(cls, season_id):
