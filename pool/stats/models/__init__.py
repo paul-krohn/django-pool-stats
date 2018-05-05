@@ -130,12 +130,16 @@ class Team(models.Model):
         losses = 0
         if self.id in other_teams:  # this makes it easier to use a sorted/lambda thing
             other_teams.remove(self.id)
-        for score_sheet in ScoreSheet.objects.filter(
+
+        # find all the score sheets where this team is home, and one of the others is away, and vice versa
+        score_sheets = ScoreSheet.objects.filter(
             official=1
         ).filter(
-            match__home_team_id__in=[self] + other_teams,
-            match__away_team_id__in=[self] + other_teams
-        ):
+            models.Q(match__away_team__in=other_teams) & models.Q(match__home_team__id=self.id)
+            |
+            models.Q(match__home_team__in=other_teams) & models.Q(match__away_team__id=self.id)
+        )
+        for score_sheet in score_sheets:
             away_match = 1 if score_sheet.match.away_team == self else -1
             # print('adding {} to wins'.format(score_sheet.away_wins() * away_match))
             wins += score_sheet.away_wins() * away_match
