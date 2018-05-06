@@ -280,7 +280,7 @@ class Week(models.Model):
         return self.get_weeks_in_season(before_after='before', week=self)
 
     def unused_teams(self):
-        matches_this_week = Match.objects.filter(week=self)
+        matches_this_week = self.match_set.all()
         used_teams = set([])
         for m in matches_this_week:
             used_teams.add(m.away_team.id)
@@ -288,7 +288,7 @@ class Week(models.Model):
         return Team.objects.filter(season__is_default=True).exclude(id__in=used_teams)
 
     def used_teams(self, teams=[]):
-        matches_this_week = Match.objects.filter(week=self)
+        matches_this_week = self.match_set.all()
         used_teams = set([])
         for m in matches_this_week:
             if hasattr(m.away_team, 'id') and m.away_team.id not in teams:
