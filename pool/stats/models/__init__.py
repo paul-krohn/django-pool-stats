@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
 
+from .division import Division
 from .player import Player, AwayPlayer, HomePlayer
 from .playposition import PlayPosition, AwayPlayPosition, HomePlayPosition
 from .season import Season
@@ -17,14 +18,6 @@ def get_default_season():
         return Season.objects.get(is_default=True)
     except ObjectDoesNotExist:
         return None
-
-
-class Division(models.Model):
-    season = models.ForeignKey(Season, on_delete=models.CASCADE)
-    name = models.CharField(max_length=64)
-
-    def __str__(self):
-        return self.name
 
 
 class Team(models.Model):
