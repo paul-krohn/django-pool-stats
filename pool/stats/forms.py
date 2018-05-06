@@ -115,7 +115,7 @@ class MatchForm(django.forms.ModelForm):
             for loc in ['away', 'home']:
                 self.fields['{}_team'.format(loc)].queryset = Team.objects.filter(
                     season__is_default=True).exclude(
-                    id__in=self.instance.week.used_teams(teams=this_match_teams)
+                    id__in=self.instance.week.used_teams(team_ids=this_match_teams)
                 )
         else:
             self.fields['away_team'].queryset = Team.objects.filter(season__is_default=True)
