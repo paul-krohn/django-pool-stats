@@ -14,17 +14,3 @@ from .season import Season
 from .sponsor import Sponsor
 from .toobig import Team, AwayTeam, HomeTeam
 from .week import Week
-
-import logging
-logger = logging.getLogger(__name__)
-
-away_home = ['away', 'home']
-
-
-def get_default_season():
-    try:
-        return Season.objects.get(is_default=True)
-    except ObjectDoesNotExist:
-        return None
-
-
