@@ -10,7 +10,8 @@ from .playposition import PlayPosition, AwayPlayPosition, HomePlayPosition
 from .playersummary import PlayerSeasonSummary
 from .season import Season
 from .sponsor import Sponsor
-from .toobig import ScoreSheet, Team, AwayTeam, HomeTeam, Match, Week
+from .toobig import ScoreSheet, Team, AwayTeam, HomeTeam, Match
+from .week import Week
 
 import logging
 logger = logging.getLogger(__name__)

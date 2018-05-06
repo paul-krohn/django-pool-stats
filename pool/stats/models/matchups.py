@@ -1,7 +1,7 @@
 from django.db import models
 
 from .division import Division
-from .toobig import Week
+from .week import Week
 
 
 class WeekDivisionMatchup(models.Model):
