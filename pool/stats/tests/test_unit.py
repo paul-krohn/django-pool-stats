@@ -4,8 +4,8 @@ from django.test import RequestFactory
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.exceptions import ValidationError
 
-from ..models import Season, PlayerSeasonSummary, GameOrder, ScoreSheet, Game, Team, Week, Match
-from ..models import PlayPosition, AwayLineupEntry, HomeLineupEntry
+from ..models import Season, PlayerSeasonSummary, ScoreSheet, Game, Team, Week
+from ..models import PlayPosition, AwaySubstitution, HomeSubstitution, GameOrder
 
 from ..views import expire_page, get_current_week
 from ..forms import ScoreSheetGameForm
@@ -171,6 +171,75 @@ class ScoreSheetTests(BasePoolStatsTestCase):
 
         self.assertEqual(ss.away_wins(), 7)
         self.assertEqual(ss.home_wins(), 8)
+
+    def test_player_win_totals(self):
+        response = self.client.post(reverse('score_sheet_create'), data={'match_id': self.sample_match_id}, follow=True)
+        # the score sheet id is the -2th component when split on /
+        ss = ScoreSheet.objects.get(id=int(response.request['PATH_INFO'].split('/')[-2]))
+
+        # how long should the lineups be? add 1 fewer players than that
+        lineup_len = len(PlayPosition.objects.filter(tiebreaker=False))
+        populate_lineup_entries(ss, lineup_len - 1)
+
+        away_players = ss.match.away_team.players.all()
+        home_players = ss.match.home_team.players.all()
+
+        away_substitution = AwaySubstitution(
+            game_order=GameOrder.objects.get(order=10),
+            player=away_players[lineup_len],
+            play_position=PlayPosition.objects.get(id=2),
+        )
+        away_substitution.save()
+        ss.away_substitutions.add(
+            away_substitution
+        )
+
+        home_substitution = HomeSubstitution(
+            game_order=GameOrder.objects.get(order=11),
+            player=home_players[lineup_len],
+            play_position=PlayPosition.objects.get(id=2),
+        )
+        home_substitution.save()
+        ss.home_substitutions.add(home_substitution)
+
+        ss.set_games()
+        for game in ss.games.all():
+            # print("game {} has away player {} and home player {}".format(game, game.away_player, game.home_player))
+            if game.away_player is None and game.home_player is None:
+                # print("game {} has no players".format(game))
+                continue
+            if game.away_player is None:
+                game.winner = 'home'
+            elif game.home_player is None:
+                game.winner = 'away'
+            else:
+                game.winner = 'home'
+            game.save()
+
+        ss.official = 1
+        ss.save()
+
+        Team.update_teams_stats(season_id=self.default_season)
+        for team in Team.objects.filter(season_id=self.default_season):
+            team.count_games()
+
+        PlayerSeasonSummary.update_all(season_id=self.default_season)
+        summaries = PlayerSeasonSummary.objects.filter(
+            season=self.default_season,
+        )
+        stats = {
+            'wins': 0,
+            'losses': 0,
+            'trs': 0,
+        }
+        for summary in summaries:
+            # print(summary.wins, summary.losses)
+            stats['wins'] += summary.wins
+            stats['losses'] += summary.losses
+            stats['trs'] += summary.table_runs
+
+        self.assertEqual(stats['wins'], 15)
+        self.assertEqual(stats['losses'], 11)
 
 
 class GameTests(BasePoolStatsTestCase):

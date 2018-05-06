@@ -217,34 +217,3 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
             list_of_outcomes.append([team.wins(), team.losses()])
 
         self.assertTrue(list(win_counts.values()) in list_of_outcomes)
-
-    def test_player_win_totals(self):
-        self.score_sheet_create()
-        self.populate_lineup()
-        self.set_substitution('away', 10)
-        self.set_substitution('home', 10)
-        # we need the scoresheet id from the current URL
-        scoresheet_id = self.selenium.current_url.split('/')[-2]
-        self.set_winners(forfeits=1, table_runs=2, random_wins=False)
-        ss = ScoreSheet.objects.get(id=scoresheet_id)
-        ss.official = True
-        ss.save()
-
-        update_stats(False, self.factory.get(reverse('players')), [ss])
-        PlayerSeasonSummary.update_all(season_id=self.default_season)
-        summaries = PlayerSeasonSummary.objects.filter(
-            season=self.default_season,
-        )
-        stats = {
-            'wins': 0,
-            'losses': 0,
-            'trs': 0,
-        }
-        for summary in summaries:
-            stats['wins'] += summary.wins
-            stats['losses'] += summary.losses
-            stats['trs'] += summary.table_runs
-
-        self.assertEqual(stats['wins'], 15)
-        self.assertEqual(stats['losses'], 15)
-        self.assertEqual(stats['trs'], 2)
