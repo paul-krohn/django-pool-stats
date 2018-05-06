@@ -2,6 +2,7 @@ from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
 
 from .playposition import PlayPosition, AwayPlayPosition, HomePlayPosition
+from .season import Season
 
 import logging
 logger = logging.getLogger(__name__)
@@ -20,16 +21,6 @@ class Sponsor(models.Model):
     name = models.CharField(max_length=200)
     address = models.CharField(max_length=200)
     link = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.name
-
-
-class Season(models.Model):
-    name = models.CharField(max_length=200)
-    pub_date = models.DateTimeField('date of first week')
-    is_default = models.BooleanField(default=False)
-    minimum_games = models.IntegerField(null=True)
 
     def __str__(self):
         return self.name
