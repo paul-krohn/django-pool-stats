@@ -3,6 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from .playposition import PlayPosition, AwayPlayPosition, HomePlayPosition
 from .season import Season
+from .sponsor import Sponsor
 
 import logging
 logger = logging.getLogger(__name__)
@@ -15,15 +16,6 @@ def get_default_season():
         return Season.objects.get(is_default=True)
     except ObjectDoesNotExist:
         return None
-
-
-class Sponsor(models.Model):
-    name = models.CharField(max_length=200)
-    address = models.CharField(max_length=200)
-    link = models.CharField(max_length=200)
-
-    def __str__(self):
-        return self.name
 
 
 class Player(models.Model):
