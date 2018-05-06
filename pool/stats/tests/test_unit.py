@@ -12,15 +12,17 @@ from .base_cases import BasePoolStatsTestCase
 import random
 
 
-def populate_lineup_entries(score_sheet):
+def populate_lineup_entries(score_sheet, count=None):
     inc = 0
-    for away_lineup_entry in score_sheet.away_lineup.all():
+
+    if count is None:
+        count = len(score_sheet.away_lineup.all())
+
+    while inc < count:
+        away_lineup_entry = score_sheet.away_lineup.all()[inc]
         away_lineup_entry.player = score_sheet.match.away_team.players.all()[inc]
         away_lineup_entry.save()
-        inc += 1
-
-    inc = 0
-    for home_lineup_entry in score_sheet.home_lineup.all():
+        home_lineup_entry = score_sheet.home_lineup.all()[inc]
         home_lineup_entry.player = score_sheet.match.home_team.players.all()[inc]
         home_lineup_entry.save()
         inc += 1
