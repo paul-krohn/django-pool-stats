@@ -23,5 +23,3 @@ class Game(models.Model):
     order = models.ForeignKey(GameOrder, null=True, on_delete=models.CASCADE)
     table_run = models.BooleanField(default=False)
     forfeit = models.BooleanField(default=False)
-
-
