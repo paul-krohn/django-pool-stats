@@ -4,7 +4,9 @@ from django.test import RequestFactory
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.exceptions import ValidationError
 
-from ..models import Season, PlayerSeasonSummary, GameOrder, ScoreSheet, Game, Team, Week
+from ..models import Season, PlayerSeasonSummary, GameOrder, ScoreSheet, Game, Team, Week, Match
+from ..models import PlayPosition, AwayLineupEntry, HomeLineupEntry
+
 from ..views import expire_page, get_current_week
 from ..forms import ScoreSheetGameForm
 from .base_cases import BasePoolStatsTestCase
