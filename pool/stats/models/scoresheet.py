@@ -69,17 +69,11 @@ class ScoreSheet(models.Model):
 
     def initialize_games(self):
         # now create games, per the game order table
-        for g in GameOrder.objects.filter(tiebreaker=False):
+        for g in GameOrder.objects.filter(tiebreaker=self.match.playoff):
             game = Game()
             game.order = g
             game.save()
             self.games.add(game)
-        if self.match.playoff:
-            game = Game()
-            game.order = GameOrder.objects.get(tiebreaker=True)
-            game.save()
-            self.games.add(game)
-
         self.save()
 
     def copy_game_orders_to_positions(self):
