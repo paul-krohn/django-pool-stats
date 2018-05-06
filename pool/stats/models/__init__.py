@@ -2,6 +2,8 @@ from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
 
 from .division import Division
+from .lineup import GameOrder, LineupEntry, AwayLineupEntry, HomeLineupEntry
+from .lineup import Substitution, AwaySubstitution, HomeSubstitution
 from .player import Player, AwayPlayer, HomePlayer
 from .playposition import PlayPosition, AwayPlayPosition, HomePlayPosition
 from .season import Season
@@ -470,29 +472,6 @@ class Match(models.Model):
         verbose_name_plural = 'Matches'
 
 
-class GameOrder(models.Model):
-    away_position = models.ForeignKey(
-        AwayPlayPosition,
-        related_name='away_position',
-        on_delete=models.CASCADE,
-    )
-    home_position = models.ForeignKey(
-        HomePlayPosition,
-        related_name='home_position',
-        on_delete=models.CASCADE,
-    )
-    home_breaks = models.BooleanField(default=True)
-    order = models.IntegerField(null=True)
-    tiebreaker = models.BooleanField(default=False)
-
-    def __str__(self):
-        return "{} ({} vs {})".format(self.order, self.away_position, self.home_position)
-
-    class Meta:
-        # the default/primary key sort is sometimes wrong
-        ordering = ['order']
-
-
 class Game(models.Model):
     away_player = models.ForeignKey(
         AwayPlayer,
@@ -512,47 +491,6 @@ class Game(models.Model):
     order = models.ForeignKey(GameOrder, null=True, on_delete=models.CASCADE)
     table_run = models.BooleanField(default=False)
     forfeit = models.BooleanField(default=False)
-
-
-class LineupEntry(models.Model):
-    player = models.ForeignKey(Player, null=True, blank=True, on_delete=models.CASCADE)
-    position = models.ForeignKey(PlayPosition, null=True, on_delete=models.CASCADE)
-
-
-class AwayLineupEntry(LineupEntry):
-    class Meta:
-        proxy = True
-
-
-class HomeLineupEntry(LineupEntry):
-    class Meta:
-        proxy = True
-
-
-class Substitution(models.Model):
-    game_order = models.ForeignKey(GameOrder, on_delete=models.CASCADE)
-    player = models.ForeignKey(Player, null=True, blank=True, on_delete=models.CASCADE)
-    play_position = models.ForeignKey(PlayPosition, null=True, blank=True, on_delete=models.CASCADE)
-
-
-class AwaySubstitution(Substitution):
-    class Meta:
-        proxy = True
-
-    def __str__(self):
-        return "{} enters as {} starting with game {}".format(
-            self.player, self.play_position.away_name, self.game_order
-        )
-
-
-class HomeSubstitution(Substitution):
-    class Meta:
-        proxy = True
-
-    def __str__(self):
-        return "{} enters as {} starting with game {}".format(
-            self.player, self.play_position.home_name, self.game_order
-        )
 
 
 class ScoreSheet(models.Model):
