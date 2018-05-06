@@ -248,28 +248,3 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         self.assertEqual(stats['wins'], 15)
         self.assertEqual(stats['losses'], 15)
         self.assertEqual(stats['trs'], 2)
-
-    def test_both_teams_shorthanded(self):
-
-        self.score_sheet_create()
-        self.populate_lineup(home_players=3, away_players=3)
-        self.set_winners(table_runs=2)
-        scoresheet_id = self.selenium.current_url.split('/')[-2]
-        ss = ScoreSheet.objects.get(id=scoresheet_id)
-        ss.official = True
-        ss.save()
-
-        update_stats(False, self.factory.get(reverse('players')), [ss])
-        PlayerSeasonSummary.update_all(season_id=self.default_season)
-        summaries = PlayerSeasonSummary.objects.filter(
-            season=self.default_season,
-        )
-        wins = 0
-        losses = 0
-        for summary in summaries:
-            wins += summary.wins
-            losses += summary.losses
-        self.assertEqual(wins + losses, 24)
-        # we can't really test table runs here, because one or more of the TRs could land on games with
-        # the player still anonymous/not set.
-        # self.assertEqual(stats['trs'], 2)
