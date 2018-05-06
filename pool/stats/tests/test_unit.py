@@ -241,6 +241,44 @@ class ScoreSheetTests(BasePoolStatsTestCase):
         self.assertEqual(stats['wins'], 15)
         self.assertEqual(stats['losses'], 11)
 
+    def test_scoresheet_forfeit_win_counts(self):
+        """
+        Test that when there are forfeits, the teams get credit for the wins, but not the players.
+        """
+
+        forfeit_count = 3
+
+        response = self.client.post(reverse('score_sheet_create'), data={'match_id': self.sample_match_id}, follow=True)
+        # the score sheet id is the -2th component when split on /
+        ss = ScoreSheet.objects.get(id=int(response.request['PATH_INFO'].split('/')[-2]))
+
+        populate_lineup_entries(ss)
+        ss.set_games()
+        game_count = len(ss.games.all())
+        i = 0
+        for game in ss.games.all():
+            if i > game_count - (forfeit_count + 1):
+                game.forfeit = True
+                if game.order.home_breaks:
+                    game.winner = 'home'
+                else:
+                    game.winner = 'away'
+            else:
+                game.winner = 'home'
+            game.save()
+            i += 1
+        ss.official = 1
+        ss.save()
+
+        player_win_counts = {'away': 0, 'home': 0}
+        for ah in player_win_counts:
+            summaries = ss.player_summaries(ah)
+            for x in summaries:
+                player_win_counts[ah] += x['wins']
+
+        self.assertEqual(player_win_counts['home'], game_count - forfeit_count)
+        self.assertEqual(ss.away_wins() + ss.home_wins(), game_count)
+
 
 class GameTests(BasePoolStatsTestCase):
 
