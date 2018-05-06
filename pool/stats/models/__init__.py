@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
 
+from .player import Player, AwayPlayer, HomePlayer
 from .playposition import PlayPosition, AwayPlayPosition, HomePlayPosition
 from .season import Season
 from .sponsor import Sponsor
@@ -16,21 +17,6 @@ def get_default_season():
         return Season.objects.get(is_default=True)
     except ObjectDoesNotExist:
         return None
-
-
-class Player(models.Model):
-    first_name = models.CharField(max_length=64)
-    last_name = models.CharField(max_length=64)
-    display_name = models.CharField(max_length=128, null=True, blank=True)
-    email = models.EmailField(null=True, blank=True)
-
-    def __str__(self):
-        return self.display_name or "%s %s" % (self.first_name, self.last_name)
-
-    class Meta:
-        # Players with a display_name that sorts differently from their
-        # first name will appear to be out of order in form selects.
-        ordering = ['first_name', 'last_name']
 
 
 class Division(models.Model):
@@ -489,16 +475,6 @@ class Match(models.Model):
     class Meta:
         verbose_name = 'Match'
         verbose_name_plural = 'Matches'
-
-
-class AwayPlayer(Player):
-    class Meta:
-        proxy = True
-
-
-class HomePlayer(Player):
-    class Meta:
-        proxy = True
 
 
 class GameOrder(models.Model):
