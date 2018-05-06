@@ -160,43 +160,6 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
             player_summary_rows = player_summary_table.find_elements_by_tag_name('tr')
             self.assertEqual(len(player_summary_rows), 5)  # 4 players plus a header row
 
-    def test_scoresheet_forfeit_win_counts(self):
-        """
-        Test that when there are forfeits, the teams get credit for the wins, but not the players.
-        """
-
-        forfeit_count = 3
-        table_run_count = 0
-
-        self.score_sheet_create()
-        self.populate_lineup()
-        self.set_substitution('away', 10)
-        self.set_substitution('home', 10)
-        win_counts = self.set_winners(forfeits=forfeit_count, table_runs=table_run_count, random_wins=False)
-        self.selenium.get('{}score_sheet_edit/{}/'.format(self.base_url, 1))
-        wins_set = 0
-        total_wins = 0
-        for location_name in location_names:
-            wins_set += win_counts[location_name]
-            total_wins += int(self.selenium.find_element_by_id('{}-wins-total'.format(location_name)).text)
-        self.assertEqual(
-            total_wins,
-            wins_set
-        )
-        # add up the player win totals; it should be 16 - forfeit count
-        player_wins = 0
-        tr_count = 0
-        for location_name in location_names:
-            player_summary_div = self.selenium.find_element_by_id('{}-player-summaries'.format(location_name))
-            player_summary_table = player_summary_div.find_element_by_tag_name('table')
-            player_summary_rows = player_summary_table.find_elements_by_tag_name('tr')
-            for player_summary_row in player_summary_rows[1:]:  # skip the header row
-                player_summary_cells = player_summary_row.find_elements_by_tag_name('td')
-                player_wins += int(player_summary_cells[1].text)
-                tr_count += int(player_summary_cells[3].text)
-        self.assertEqual(player_wins + forfeit_count, 16)
-        self.assertEqual(tr_count, table_run_count)
-
     def test_team_win_totals(self):
         self.score_sheet_create()
         self.populate_lineup()
@@ -217,59 +180,3 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
             list_of_outcomes.append([team.wins(), team.losses()])
 
         self.assertTrue(list(win_counts.values()) in list_of_outcomes)
-
-    def test_player_win_totals(self):
-        self.score_sheet_create()
-        self.populate_lineup()
-        self.set_substitution('away', 10)
-        self.set_substitution('home', 10)
-        # we need the scoresheet id from the current URL
-        scoresheet_id = self.selenium.current_url.split('/')[-2]
-        self.set_winners(forfeits=1, table_runs=2, random_wins=False)
-        ss = ScoreSheet.objects.get(id=scoresheet_id)
-        ss.official = True
-        ss.save()
-
-        update_stats(False, self.factory.get(reverse('players')), [ss])
-        PlayerSeasonSummary.update_all(season_id=self.default_season)
-        summaries = PlayerSeasonSummary.objects.filter(
-            season=self.default_season,
-        )
-        stats = {
-            'wins': 0,
-            'losses': 0,
-            'trs': 0,
-        }
-        for summary in summaries:
-            stats['wins'] += summary.wins
-            stats['losses'] += summary.losses
-            stats['trs'] += summary.table_runs
-
-        self.assertEqual(stats['wins'], 15)
-        self.assertEqual(stats['losses'], 15)
-        self.assertEqual(stats['trs'], 2)
-
-    def test_both_teams_shorthanded(self):
-
-        self.score_sheet_create()
-        self.populate_lineup(home_players=3, away_players=3)
-        self.set_winners(table_runs=2)
-        scoresheet_id = self.selenium.current_url.split('/')[-2]
-        ss = ScoreSheet.objects.get(id=scoresheet_id)
-        ss.official = True
-        ss.save()
-
-        update_stats(False, self.factory.get(reverse('players')), [ss])
-        PlayerSeasonSummary.update_all(season_id=self.default_season)
-        summaries = PlayerSeasonSummary.objects.filter(
-            season=self.default_season,
-        )
-        wins = 0
-        losses = 0
-        for summary in summaries:
-            wins += summary.wins
-            losses += summary.losses
-        self.assertEqual(wins + losses, 24)
-        # we can't really test table runs here, because one or more of the TRs could land on games with
-        # the player still anonymous/not set.
-        # self.assertEqual(stats['trs'], 2)

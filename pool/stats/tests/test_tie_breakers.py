@@ -1,6 +1,6 @@
 from django.test import LiveServerTestCase
 
-from ..models import Season, Team
+from ..models import Season, Team, ScoreSheet, Match
 
 from unittest import mock
 
@@ -37,3 +37,30 @@ class ScoreSheetTests(LiveServerTestCase):
         Team.break_tie(found_ties[0], 'forfeit_wins')
         self.assertEqual(self.team_b.ranking, 1)
         self.assertEqual(self.team_a.ranking, 2)
+
+    def test_net_game_wins_against(self):
+
+        score_sheet_a = ScoreSheet()
+        score_sheet_a.match = Match(away_team=self.team_a, home_team=self.team_b)
+        score_sheet_a.away_wins = mock.MagicMock(return_value=7)
+        score_sheet_a.home_wins = mock.MagicMock(return_value=9)
+
+        score_sheet_b = ScoreSheet()
+        score_sheet_b.match = Match(away_team=self.team_b, home_team=self.team_a)
+        score_sheet_b.away_wins = mock.MagicMock(return_value=1)
+        score_sheet_b.home_wins = mock.MagicMock(return_value=15)
+
+        self.assertEqual(self.team_a.net_game_wins_against([self.team_b], score_sheets=[score_sheet_a]), -2)
+        self.assertEqual(self.team_b.net_game_wins_against([self.team_a], score_sheets=[score_sheet_a]), 2)
+
+        self.assertEqual(self.team_a.net_game_wins_against([self.team_b], score_sheets=[score_sheet_b]), 14)
+        self.assertEqual(self.team_b.net_game_wins_against([self.team_a], score_sheets=[score_sheet_b]), -14)
+
+        self.assertEqual(
+            self.team_a.net_game_wins_against([self.team_b], score_sheets=[score_sheet_a, score_sheet_b]),
+            12
+        )
+        self.assertEqual(
+            self.team_b.net_game_wins_against([self.team_a], score_sheets=[score_sheet_a, score_sheet_b]),
+            -12
+        )

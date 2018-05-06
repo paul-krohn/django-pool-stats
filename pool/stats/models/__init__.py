@@ -125,21 +125,25 @@ class Team(models.Model):
                 forfeit_wins += len(s.games.filter(winner=home_away).filter(forfeit=True))
         return forfeit_wins
 
-    def net_game_wins_against(self, other_teams):
+    def find_score_sheets_against(self, other_teams, official=1):
+        return ScoreSheet.objects.filter(
+            official=official
+        ).filter(
+            models.Q(match__away_team__in=other_teams) & models.Q(match__home_team__id=self.id)
+            |
+            models.Q(match__home_team__in=other_teams) & models.Q(match__away_team__id=self.id)
+        )
+
+    def net_game_wins_against(self, other_teams, score_sheets=None):
         net_wins = 0
 
         # we need a shallow copy of other_teams here, so we can both call this function as a lambda, and
         # not alter the list in the calling context
         local_other_teams = [x for x in other_teams if x != self.id]
+        if score_sheets is None:  # this is just here to allow passing in score sheets for tests
+            score_sheets = self.find_score_sheets_against(local_other_teams)
 
         # find all the score sheets where this team is home, and one of the others is away, and vice versa
-        score_sheets = ScoreSheet.objects.filter(
-            official=1
-        ).filter(
-            models.Q(match__away_team__in=local_other_teams) & models.Q(match__home_team__id=self.id)
-            |
-            models.Q(match__home_team__in=local_other_teams) & models.Q(match__away_team__id=self.id)
-        )
         for score_sheet in score_sheets:
             away_match = 1 if score_sheet.match.away_team == self else -1
             net_wins += score_sheet.away_wins() * away_match - score_sheet.home_wins() * away_match
