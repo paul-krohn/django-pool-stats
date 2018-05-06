@@ -241,9 +241,7 @@ class TeamTests(BasePoolStatsTestCase):
         expire_page(request, reverse('team', kwargs={'team_id': self.TEST_TEAM_ID}))
 
         response = self.client.get(reverse('team', kwargs={'team_id': self.TEST_TEAM_ID}))
-
-        # broken for ... unknown reason.
-        # self.assertEqual(len(response.context['players']), self.TEST_TEAM_PLAYER_COUNT)
+        self.assertEqual(len(response.context['players']), self.TEST_TEAM_PLAYER_COUNT)
 
     def test_team_count(self):
 
