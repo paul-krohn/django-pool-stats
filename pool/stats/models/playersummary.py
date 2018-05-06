@@ -3,7 +3,8 @@ from django.db import models
 from .game import Game
 from .player import Player
 from .season import Season
-from .toobig import ScoreSheet, Team
+from .scoresheet import ScoreSheet
+from .toobig import Team
 
 from .globals import away_home, logger
 
