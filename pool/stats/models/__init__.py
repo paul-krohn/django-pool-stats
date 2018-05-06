@@ -1,5 +1,3 @@
-from django.core.exceptions import ObjectDoesNotExist
-
 from .division import Division
 from .game import Game
 from .lineup import GameOrder, LineupEntry, AwayLineupEntry, HomeLineupEntry
@@ -12,5 +10,5 @@ from .playersummary import PlayerSeasonSummary
 from .scoresheet import ScoreSheet
 from .season import Season
 from .sponsor import Sponsor
-from .toobig import Team, AwayTeam, HomeTeam
+from .team import Team, AwayTeam, HomeTeam
 from .week import Week

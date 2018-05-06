@@ -4,7 +4,7 @@ from .game import Game
 from .player import Player
 from .season import Season
 from .scoresheet import ScoreSheet
-from .toobig import Team
+from .team import Team
 
 from .globals import away_home, logger
 

@@ -2,11 +2,7 @@
 from django.db import models
 
 from .division import Division
-from .game import Game, GameOrder
-from .lineup import AwayLineupEntry, HomeLineupEntry, AwaySubstitution, HomeSubstitution
-from .match import Match
-from .player import Player, AwayPlayer, HomePlayer
-from .playposition import PlayPosition
+from .player import Player
 from .scoresheet import ScoreSheet
 from .season import Season
 from .sponsor import Sponsor
