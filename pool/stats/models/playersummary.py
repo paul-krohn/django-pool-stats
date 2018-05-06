@@ -5,8 +5,7 @@ from .player import Player
 from .season import Season
 from .toobig import ScoreSheet, Team
 
-import logging
-logger = logging.getLogger(__name__)
+from .globals import away_home, logger
 
 
 class PlayerSeasonSummary(models.Model):
@@ -39,12 +38,12 @@ class PlayerSeasonSummary(models.Model):
         sweeps = 0
 
         for score_sheet in score_sheets:
-            for away_home in ['away', 'home']:
-                score_sheet_filter_args = {'{}_player'.format(away_home): self.player}
+            for ah in away_home:
+                score_sheet_filter_args = {'{}_player'.format(ah): self.player}
                 if len(score_sheet.games.filter(
                     **score_sheet_filter_args
                 ).filter(
-                    winner=away_home
+                    winner=ah
                 )) == 4:
                     sweeps += 1
         self.four_ohs = sweeps

@@ -1,8 +1,5 @@
 from django.db import models
 
-import logging
-logger = logging.getLogger(__name__)
-
 
 class Player(models.Model):
     first_name = models.CharField(max_length=64)

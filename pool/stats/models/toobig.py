@@ -9,12 +9,7 @@ from .playposition import PlayPosition
 from .season import Season
 from .sponsor import Sponsor
 
-import logging
-logger = logging.getLogger(__name__)
-
-
-# from . import away_home
-away_home = ['away', 'home']
+from .globals import away_home, logger
 
 
 class Team(models.Model):
@@ -78,7 +73,7 @@ class Team(models.Model):
 
     def forfeit_wins(self):
         forfeit_wins = 0
-        for home_away in ['away', 'home']:
+        for home_away in away_home:
             ss_filter_args = {'match__{}_team'.format(home_away): self}
             home_ss = ScoreSheet.objects.filter(official=1).filter(match__season=self.season).filter(
                 **ss_filter_args
@@ -411,10 +406,10 @@ class ScoreSheet(models.Model):
         This ugly hack allows substitutions to be set by just game order, instead of
          also specifying the play position.
         """
-        for away_home in ['away', 'home']:
-            list_subs = getattr(self, '{}_substitutions'.format(away_home))
+        for ah in away_home:
+            list_subs = getattr(self, '{}_substitutions'.format(ah))
             for substitution in list_subs.all():
-                position_m = getattr(substitution.game_order, '{}_position'.format(away_home))
+                position_m = getattr(substitution.game_order, '{}_position'.format(ah))
                 substitution.play_position = position_m
                 substitution.save()
 
