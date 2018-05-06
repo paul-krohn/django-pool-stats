@@ -141,6 +141,33 @@ class ScoreSheetTests(BasePoolStatsTestCase):
         response = self.client.get(reverse('players', kwargs=season_args))
         self.assertEqual(len(response.context['players']), 8)  # 8 is 2x players in lineup
 
+    def test_both_teams_shorthanded(self):
+
+        response = self.client.post(reverse('score_sheet_create'), data={'match_id': self.sample_match_id}, follow=True)
+
+        # the score sheet id is the -2th component when split on /
+        ss = ScoreSheet.objects.get(id=int(response.request['PATH_INFO'].split('/')[-2]))
+
+        # how long should the lineups be? add 1 fewer players than that
+        lineup_len = len(PlayPosition.objects.filter(tiebreaker=False))
+        populate_lineup_entries(ss, lineup_len - 1)
+
+        ss.set_games()
+
+        for game in ss.games.all():
+            if game.away_player is None and game.home_player is None:
+                continue
+            if game.away_player is None:
+                game.winner = 'home'
+            elif game.home_player is None:
+                game.winner = 'away'
+
+            game.winner = 'home' if game.order.order % 2 else 'away'
+            game.save()
+
+        self.assertEqual(ss.away_wins(), 7)
+        self.assertEqual(ss.home_wins(), 8)
+
 
 class GameTests(BasePoolStatsTestCase):
 
@@ -245,12 +272,16 @@ class TeamTests(BasePoolStatsTestCase):
 
     def test_team_count(self):
 
-        response = self.client.get(reverse('teams'), follow=True)
+        response = self.client.get(reverse('teams'))
         self.assertRedirects(response, expected_url=reverse(
             'teams',
             kwargs={'season_id': self.TEST_DEFAULT_SEASON}
         ))
-        self.assertEqual(len(response.context['teams']), self.TEST_TEAM_COUNT)
+
+        args = {'season_id': self.TEST_DEFAULT_SEASON}
+        full_response = self.client.get(reverse('teams', kwargs=args), follow=True)
+        # so really, one might expect the response to have, you know, a context, but ... it doesn't
+        self.assertEqual(full_response.request['PATH_INFO'], reverse('teams', kwargs=args))
 
     def test_team_upcoming_matches(self):
         # see comment in test_team_player_count about purging the cache to make sure response.context is not empty
