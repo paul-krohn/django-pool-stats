@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -x
+set -ex
 
 # update all the things
 sudo apt-get update -qq
@@ -10,7 +10,7 @@ sudo apt-get upgrade -y
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password password janet'
 sudo debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password janet'
 sudo apt-get install -y mysql-common mysql-server mysql-client
-sudo apt-get install -y python3.5 python3.5-dev python-virtualenv python-pip
+sudo apt-get install -y python3 python3-dev python-virtualenv python-pip
 sudo apt-get install -y libmysqlclient-dev memcached
 sudo apt-get install -y firefox
 
@@ -35,7 +35,7 @@ sudo chown ${USER}:${USER} ~vagrant/.bash_profile
 
 # python virtualenv
 if [ ! -d ${VE_DIR} ] ; then
-    virtualenv ${VE_DIR} -p python3.5
+    virtualenv ${VE_DIR} -p python3
     . ${VE_DIR}/bin/activate
     pip install --upgrade pip
 #    chown -R vagrant:vagrant ${VE_DIR}
