@@ -6,6 +6,7 @@ from .player import Player
 from .scoresheet import ScoreSheet
 from .season import Season
 from .sponsor import Sponsor
+from .table import Table
 
 
 from .globals import away_home, logger
@@ -14,7 +15,7 @@ from .globals import away_home, logger
 class Team(models.Model):
     # a default season that doesn't bork migrations would be nice
     season = models.ForeignKey(Season, on_delete=models.CASCADE)
-    sponsor = models.ForeignKey(Sponsor, null=True, on_delete=models.CASCADE)
+    # sponsor = models.ForeignKey(Sponsor, null=True, on_delete=models.CASCADE)
     division = models.ForeignKey(Division, null=True, limit_choices_to=models.Q(
         season__is_default=True), on_delete=models.CASCADE)
     name = models.CharField(max_length=200)
@@ -27,12 +28,16 @@ class Team(models.Model):
     ranking = models.IntegerField(null=True, blank=True)
     division_ranking = models.IntegerField(null=True, blank=True)
     rank_tie_breaker = models.IntegerField(default=0, null=True, blank=True)
+    table = models.ForeignKey(Table, blank=True, null=True, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['name']
 
     def __str__(self):
         return "{}".format(self.name)
+
+    def sponsor(self):
+        return self.table.venue
 
     def wins(self):
         return self.away_wins + self.home_wins

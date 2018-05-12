@@ -8,7 +8,7 @@ from django.contrib.admin import SimpleListFilter
 from django.shortcuts import redirect
 
 from .models import Division, GameOrder, Match, Player, PlayPosition, WeekDivisionMatchup
-from .models import PlayerSeasonSummary, ScoreSheet, Season, Sponsor, Team, Week
+from .models import PlayerSeasonSummary, ScoreSheet, Season, Sponsor, Table, Team, Week
 from .forms import MatchForm
 from .views import expire_page
 
@@ -256,6 +256,7 @@ class WeekAdmin(admin.ModelAdmin):
 
     intra_division_matches.short_description = "Set intra-division ranked matches"
 
+
 admin.site.register(Week, WeekAdmin)
 
 
@@ -263,7 +264,7 @@ class TeamAdmin(admin.ModelAdmin):
     list_display = ('name', 'record', 'season', 'ranking', 'forfeit_wins', 'rank_tie_breaker')
     list_filter = [SeasonFilter, 'rank_tie_breaker']
     filter_horizontal = ['players']
-    fields = ['season', 'sponsor', 'division', 'name', 'players', 'rank_tie_breaker']
+    fields = ['season', 'table', 'division', 'name', 'players', 'rank_tie_breaker']
     actions = ['clear_tie_breakers', 'add_tie_breakers']
     save_as = True
 
@@ -415,6 +416,13 @@ class MatchAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Match, MatchAdmin)
+
+
+class TableAdmin(admin.ModelAdmin):
+    pass
+
+
+admin.site.register(Table, TableAdmin)
 
 
 # TODO:
