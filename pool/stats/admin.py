@@ -15,6 +15,20 @@ from .views import expire_page
 admin.AdminSite.site_header = "{} stats admin".format(settings.LEAGUE['name'])
 
 
+def find_duplicate_table_assignments(week):
+
+    used_tables = []
+    double_booked_tables = []
+    week_matches = Match.objects.filter(week=week)
+    inc = 0
+    while inc < len(week_matches):
+        if week_matches[inc].table() in used_tables:
+            double_booked_tables.append(week_matches[inc].table())
+        used_tables.append(week_matches[inc].table())
+        inc += 1
+    return double_booked_tables
+
+
 class SeasonFilter(SimpleListFilter):
     # a custom filter that defaults to the 'default' season, instead of a 'All'
     # cribbed/modified from https://stackoverflow.com/questions/851636/default-filter-in-django-admin
@@ -99,8 +113,30 @@ class WeekDivisionMatchupInline(admin.StackedInline):
 class WeekAdmin(admin.ModelAdmin):
     list_filter = ['season']
     list_display = ['name', 'season', 'date']
-    actions = ['division_matchups', 'intra_division_matches', 'league_rank_matches']
+    actions = ['division_matchups', 'intra_division_matches', 'league_rank_matches', 'lint_table_assignments']
     inlines = [WeekDivisionMatchupInline]
+
+    def lint_table_assignments(self, request, queryset):
+        # queryset should be 1 week
+        if len(queryset) == 1:  # and type(queryset[0], 'Week'):
+            duplicates = find_duplicate_table_assignments(week=queryset[0])
+            if len(duplicates):
+                for duplicate in duplicates:
+                    self.message_user(
+                        request,
+                        level='ERROR',
+                        message='{} is double-booked'.format(duplicate),
+                    )
+                return False
+            else:
+                return True
+        else:
+            self.message_user(
+                request,
+                level='ERROR',
+                message='you must select exactly one week to lint table assignments',
+            )
+            return False
 
     def check_matchup_length(self, request, week):
         division_matchups = WeekDivisionMatchup.objects.filter(week=week)
@@ -404,8 +440,30 @@ admin.site.register(GameOrder, GameOrderAdmin)
 class MatchAdmin(admin.ModelAdmin):
     list_filter = ['week', SeasonFilter, 'playoff']
     list_display = ['id', 'away_team', 'home_team', 'week']
+    actions = ['lint_table_assignments']
 
     form = MatchForm
+
+    def lint_table_assignments(self, request, queryset):
+        # we'll just use the week from the first match
+        if len(queryset) < 1:  # or not type(queryset[0], 'Match'):
+            self.message_user(
+                request,
+                level='ERROR',
+                message='you must select a match to check table assignments for it\'s week of play',
+            )
+            return False
+        duplicates = find_duplicate_table_assignments(week=queryset[0].week)
+        if len(duplicates):
+            for duplicate in duplicates:
+                self.message_user(
+                    request,
+                    level='ERROR',
+                    message='{} is double-booked'.format(duplicate)
+                )
+            return False
+        else:
+            return True
 
     def get_changeform_initial_data(self, request):
         try:
