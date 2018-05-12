@@ -15,7 +15,7 @@ from .views import expire_page
 admin.AdminSite.site_header = "{} stats admin".format(settings.LEAGUE['name'])
 
 
-def find_duplicate_table_assignments(week):
+def find_duplicate_table_assignments(obj, request, week):
 
     used_tables = []
     double_booked_tables = []
@@ -26,7 +26,29 @@ def find_duplicate_table_assignments(week):
             double_booked_tables.append(week_matches[inc].table())
         used_tables.append(week_matches[inc].table())
         inc += 1
-    return double_booked_tables
+    if len(double_booked_tables):
+        teams = Team.objects.filter(season_id=week.season.id)
+        # used_tables = list(set([m.table() for m in ms]))
+        available_tables = list(set([t.table for t in teams]))
+        for used_table in used_tables:
+            if used_table in available_tables:
+                available_tables.remove(used_table)
+        obj.message_user(
+            request,
+            level='ERROR',
+            message='Double-booked tables: {}'.format('; '.join([d.__str__() for d in double_booked_tables])),
+        )
+        obj.message_user(
+            request,
+            level='INFO',
+            message='Available tables: {}'.format('; '. join([a.__str__() for a in available_tables]))
+        )
+    else:
+        obj.message_user(
+            request,
+            level='INFO',
+            message='No double-booked tables.',
+        )
 
 
 class SeasonFilter(SimpleListFilter):
@@ -119,17 +141,7 @@ class WeekAdmin(admin.ModelAdmin):
     def lint_table_assignments(self, request, queryset):
         # queryset should be 1 week
         if len(queryset) == 1:  # and type(queryset[0], 'Week'):
-            duplicates = find_duplicate_table_assignments(week=queryset[0])
-            if len(duplicates):
-                for duplicate in duplicates:
-                    self.message_user(
-                        request,
-                        level='ERROR',
-                        message='{} is double-booked'.format(duplicate),
-                    )
-                return False
-            else:
-                return True
+            find_duplicate_table_assignments(self, request, queryset[0])
         else:
             self.message_user(
                 request,
@@ -453,17 +465,7 @@ class MatchAdmin(admin.ModelAdmin):
                 message='you must select a match to check table assignments for it\'s week of play',
             )
             return False
-        duplicates = find_duplicate_table_assignments(week=queryset[0].week)
-        if len(duplicates):
-            for duplicate in duplicates:
-                self.message_user(
-                    request,
-                    level='ERROR',
-                    message='{} is double-booked'.format(duplicate)
-                )
-            return False
-        else:
-            return True
+        find_duplicate_table_assignments(self, request, queryset[0].week)
 
     def get_changeform_initial_data(self, request):
         try:
