@@ -1,0 +1,32 @@
+[
+  {
+    "model": "stats.table",
+    "pk": 1,
+    "fields": {
+      "venue": 4
+    }
+  },
+  {
+    "model": "stats.table",
+    "pk": 2,
+    "fields": {
+      "venue": 5,
+      "name": "Front"
+    }
+  },
+  {
+    "model": "stats.table",
+    "pk": 3,
+    "fields": {
+      "venue": 5,
+      "name": "Back"
+    }
+  },
+  {
+    "model": "stats.table",
+    "pk": 4,
+    "fields": {
+      "venue": 6
+    }
+  }
+]

@@ -4,7 +4,7 @@ from django.test import RequestFactory
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.exceptions import ValidationError
 
-from ..models import Season, PlayerSeasonSummary, ScoreSheet, Game, Team, Week
+from ..models import Season, PlayerSeasonSummary, ScoreSheet, Game, Match, Table, Team, Week
 from ..models import PlayPosition, AwaySubstitution, HomeSubstitution, GameOrder
 
 from ..views import expire_page, get_current_week
@@ -411,3 +411,34 @@ class TeamTests(BasePoolStatsTestCase):
                 matches[match_number].week.date,
                 matches[match_number - 1].week.date
             )
+
+
+class TestTables(BasePoolStatsTestCase):
+
+    def setUp(self):
+        super(TestTables, self).setUp()
+        self.t1 = Team(season_id=self.default_season)
+        self.t2 = Team(season_id=self.default_season, table_id=self.DEFAULT_TEST_TABLE_ID)
+        self.test_override_table = Table.objects.get(id=2)
+
+    def test_no_table_set(self):
+
+        self.assertEqual(self.t1.table, None)
+
+    def test_match_table_set(self):
+        # t1 = Team(season_id=self.default_season)
+        # t2 = Team(season_id=self.default_season, table_id=self.DEFAULT_TEST_TABLE)
+
+        m = Match(home_team=self.t2, away_team=self.t1, week_id=self.PLAYOFF_TEST_MATCH_ID)
+        self.assertEqual(m.table(), Table.objects.get(id=self.DEFAULT_TEST_TABLE_ID))
+
+    def test_match_override_table(self):
+
+        m = Match(
+            home_team=self.t2,
+            away_team=self.t1,
+            week_id=self.PLAYOFF_TEST_MATCH_ID,
+            alternate_table=self.test_override_table,
+        )
+
+        self.assertEqual(m.table(), self.test_override_table)

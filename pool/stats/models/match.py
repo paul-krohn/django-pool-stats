@@ -1,6 +1,7 @@
 from django.db import models
 
 from .season import Season
+from .table import Table
 from .week import Week
 
 
@@ -23,11 +24,14 @@ class Match(models.Model):
         blank=True, null=True,
         on_delete=models.CASCADE
     )
+    alternate_table = models.ForeignKey(Table, default=None, null=True, blank=True, on_delete=models.CASCADE)
     playoff = models.BooleanField(default=False)
 
     def __str__(self):
-        # return "{} @ {} ({} {})".format(self.away_team, self.home_team, self.season, self.week)
         return "{} @ {}".format(self.away_team, self.home_team)
+
+    def table(self):
+        return self.alternate_table if self.alternate_table else self.home_team.table
 
     class Meta:
         verbose_name = 'Match'

@@ -10,5 +10,6 @@ from .playersummary import PlayerSeasonSummary
 from .scoresheet import ScoreSheet
 from .season import Season
 from .sponsor import Sponsor
+from .table import Table
 from .team import Team, AwayTeam, HomeTeam
 from .week import Week
