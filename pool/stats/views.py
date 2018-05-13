@@ -339,6 +339,7 @@ def week(request, week_id):
 
     official_matches = []
     unofficial_matches = []
+    alternate_tables = []
 
     for a_match in _week.match_set.all():
         # an 'official' match has exactly one score sheet, which has been marked official;
@@ -352,9 +353,13 @@ def week(request, week_id):
                 'score_sheet_form': ScoreSheetCreationForm(instance=a_match),
                 'score_sheets': match_score_sheets,
             })
+            # some matches have alternate locations; the are separate so they can be called out in the template
+            if a_match.alternate_table:
+                alternate_tables.append(a_match)
 
     context = {
         'week': _week,
+        'alternate_tables': alternate_tables,
         'unofficial_matches': unofficial_matches,
         'official_matches': official_matches
     }
