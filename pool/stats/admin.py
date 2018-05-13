@@ -8,11 +8,47 @@ from django.contrib.admin import SimpleListFilter
 from django.shortcuts import redirect
 
 from .models import Division, GameOrder, Match, Player, PlayPosition, WeekDivisionMatchup
-from .models import PlayerSeasonSummary, ScoreSheet, Season, Sponsor, Team, Week
+from .models import PlayerSeasonSummary, ScoreSheet, Season, Sponsor, Table, Team, Week
 from .forms import MatchForm
 from .views import expire_page
 
 admin.AdminSite.site_header = "{} stats admin".format(settings.LEAGUE['name'])
+
+
+def find_duplicate_table_assignments(obj, request, week):
+
+    used_tables = []
+    double_booked_tables = []
+    week_matches = Match.objects.filter(week=week)
+    inc = 0
+    while inc < len(week_matches):
+        if week_matches[inc].table() in used_tables:
+            double_booked_tables.append(week_matches[inc].table())
+        used_tables.append(week_matches[inc].table())
+        inc += 1
+    if len(double_booked_tables):
+        teams = Team.objects.filter(season_id=week.season.id)
+        # used_tables = list(set([m.table() for m in ms]))
+        available_tables = list(set([t.table for t in teams]))
+        for used_table in used_tables:
+            if used_table in available_tables:
+                available_tables.remove(used_table)
+        obj.message_user(
+            request,
+            level='ERROR',
+            message='Double-booked tables: {}'.format('; '.join([d.__str__() for d in double_booked_tables])),
+        )
+        obj.message_user(
+            request,
+            level='INFO',
+            message='Available tables: {}'.format('; '. join([a.__str__() for a in available_tables]))
+        )
+    else:
+        obj.message_user(
+            request,
+            level='INFO',
+            message='No double-booked tables.',
+        )
 
 
 class SeasonFilter(SimpleListFilter):
@@ -99,8 +135,20 @@ class WeekDivisionMatchupInline(admin.StackedInline):
 class WeekAdmin(admin.ModelAdmin):
     list_filter = ['season']
     list_display = ['name', 'season', 'date']
-    actions = ['division_matchups', 'intra_division_matches', 'league_rank_matches']
+    actions = ['division_matchups', 'intra_division_matches', 'league_rank_matches', 'lint_table_assignments']
     inlines = [WeekDivisionMatchupInline]
+
+    def lint_table_assignments(self, request, queryset):
+        # queryset should be 1 week
+        if len(queryset) == 1:  # and type(queryset[0], 'Week'):
+            find_duplicate_table_assignments(self, request, queryset[0])
+        else:
+            self.message_user(
+                request,
+                level='ERROR',
+                message='you must select exactly one week to lint table assignments',
+            )
+            return False
 
     def check_matchup_length(self, request, week):
         division_matchups = WeekDivisionMatchup.objects.filter(week=week)
@@ -256,6 +304,7 @@ class WeekAdmin(admin.ModelAdmin):
 
     intra_division_matches.short_description = "Set intra-division ranked matches"
 
+
 admin.site.register(Week, WeekAdmin)
 
 
@@ -263,7 +312,7 @@ class TeamAdmin(admin.ModelAdmin):
     list_display = ('name', 'record', 'season', 'ranking', 'forfeit_wins', 'rank_tie_breaker')
     list_filter = [SeasonFilter, 'rank_tie_breaker']
     filter_horizontal = ['players']
-    fields = ['season', 'sponsor', 'division', 'name', 'players', 'rank_tie_breaker']
+    fields = ['season', 'table', 'division', 'name', 'players', 'rank_tie_breaker']
     actions = ['clear_tie_breakers', 'add_tie_breakers']
     save_as = True
 
@@ -315,21 +364,30 @@ def update_stats(modeladmin, request, queryset):
         for team in [score_sheet.match.home_team, score_sheet.match.away_team]:
             team.count_games()
             expire_page(request, reverse('team', kwargs={'team_id': team.id}), '')
-        players = [x.player for x in list(score_sheet.away_lineup.all()) + list(score_sheet.home_lineup.all())]
-        for substitution in list(score_sheet.away_substitutions.all()) + list(score_sheet.home_substitutions.all()):
-            players.append(substitution.player)
-        for player in players:
-            if player is None:
-                continue
-            summary = PlayerSeasonSummary.objects.get_or_create(player=player, season=score_sheet.match.season)[0]
-            summary.update()
-            expire_page(request, reverse('player', kwargs={'player_id': player.id}), '')
+    PlayerSeasonSummary.update_all(season_id=expire_season_id)
+    for pss in PlayerSeasonSummary.objects.filter(season_id=expire_season_id):
+        expire_page(request, reverse('player', kwargs={'player_id': pss.player.id}))
     Team.update_rankings(season_id=expire_season_id)
     expire_page(request, reverse('divisions', kwargs={'season_id': expire_season_id}), '')
     expire_page(request, reverse('players', kwargs={'season_id': expire_season_id}), '')
     expire_page(request, reverse('teams', kwargs={'season_id': expire_season_id}), '')
     # see comment about redirect_to above
     return redirect(redirect_to)
+
+
+def lint_score_sheets(modeladmin, request, queryset):
+
+    for score_sheet in queryset:
+        warnings = score_sheet.self_check(mark_for_review=True)
+        if len(warnings):
+            score_sheet.official = 2
+            score_sheet.save()
+        for warning in warnings:
+            modeladmin.message_user(
+                request=request,
+                message="{}/{}: {}".format(score_sheet, score_sheet.id, warning),
+                level='WARNING'
+            )
 
 
 class BlankScoreSheetFilter(admin.SimpleListFilter):
@@ -363,10 +421,10 @@ class BlankScoreSheetFilter(admin.SimpleListFilter):
 
 
 class ScoreSheetAdmin(admin.ModelAdmin):
-    list_display = ['opponents', 'links', 'away_wins', 'home_wins', 'official', 'complete', 'comment']
+    list_display = ['id', 'match', 'links', 'away_wins', 'home_wins', 'official', 'complete', 'comment']
     fields = ['official', 'complete', 'comment']
     list_filter = [MatchSeasonFilter, 'official', 'complete', BlankScoreSheetFilter, 'match__week']
-    actions = [make_official, update_stats]
+    actions = [lint_score_sheets, make_official, update_stats]
 
     @staticmethod
     def opponents(obj):
@@ -375,7 +433,7 @@ class ScoreSheetAdmin(admin.ModelAdmin):
     @staticmethod
     def links(obj):
         score_sheet_links = format_html('<a href="{}">view</a>'.format(reverse('score_sheet', args=(obj.id,))))
-        if not obj.official:
+        if obj.official != 1:
             score_sheet_links += '/' + format_html('<a href="{}">edit</a>'.format(
                 reverse('score_sheet_edit', args=(obj.id,))))
         return mark_safe(score_sheet_links)
@@ -394,8 +452,20 @@ admin.site.register(GameOrder, GameOrderAdmin)
 class MatchAdmin(admin.ModelAdmin):
     list_filter = ['week', SeasonFilter, 'playoff']
     list_display = ['id', 'away_team', 'home_team', 'week']
+    actions = ['lint_table_assignments']
 
     form = MatchForm
+
+    def lint_table_assignments(self, request, queryset):
+        # we'll just use the week from the first match
+        if len(queryset) < 1:  # or not type(queryset[0], 'Match'):
+            self.message_user(
+                request,
+                level='ERROR',
+                message='you must select a match to check table assignments for it\'s week of play',
+            )
+            return False
+        find_duplicate_table_assignments(self, request, queryset[0].week)
 
     def get_changeform_initial_data(self, request):
         try:
@@ -406,6 +476,13 @@ class MatchAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Match, MatchAdmin)
+
+
+class TableAdmin(admin.ModelAdmin):
+    pass
+
+
+admin.site.register(Table, TableAdmin)
 
 
 # TODO:

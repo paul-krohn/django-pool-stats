@@ -4,7 +4,7 @@
     "pk": 6,
     "fields": {
       "season": 4,
-      "sponsor": 4,
+      "table": 1,
       "division": 10,
       "name": "The Thunder Down Under",
       "away_wins": 0,
@@ -28,7 +28,7 @@
     "pk": 7,
     "fields": {
       "season": 4,
-      "sponsor": 4,
+      "table": 2,
       "division": 11,
       "name": "Swamp Donkeys",
       "away_wins": 0,
@@ -53,7 +53,7 @@
     "pk": 8,
     "fields": {
       "season": 4,
-      "sponsor": 5,
+      "table": 2,
       "division": 10,
       "name": "The Cereal Killers",
       "away_wins": 0,
@@ -77,7 +77,7 @@
     "pk": 9,
     "fields": {
       "season": 4,
-      "sponsor": 5,
+      "table": 3,
       "division": 11,
       "name": "Walla Walla Weasels",
       "away_wins": 0,
@@ -102,7 +102,7 @@
     "pk": 10,
     "fields": {
       "season": 4,
-      "sponsor": 6,
+      "table": 3,
       "division": 10,
       "name": "Spider Pigs",
       "away_wins": 0,
@@ -126,7 +126,7 @@
     "pk": 11,
     "fields": {
       "season": 4,
-      "sponsor": 6,
+      "table": 4,
       "division": 11,
       "name": "Sand People",
       "away_wins": 0,

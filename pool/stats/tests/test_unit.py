@@ -4,24 +4,27 @@ from django.test import RequestFactory
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.exceptions import ValidationError
 
-from ..models import Season, Player, PlayerSeasonSummary, GameOrder, ScoreSheet, Game, Team, Week
+from ..models import Season, PlayerSeasonSummary, ScoreSheet, Game, Match, Table, Team, Week
+from ..models import PlayPosition, AwaySubstitution, HomeSubstitution, GameOrder
+
 from ..views import expire_page, get_current_week
 from ..forms import ScoreSheetGameForm
 from .base_cases import BasePoolStatsTestCase
 
-import datetime
 import random
 
 
-def populate_lineup_entries(score_sheet):
+def populate_lineup_entries(score_sheet, count=None):
     inc = 0
-    for away_lineup_entry in score_sheet.away_lineup.all():
+
+    if count is None:
+        count = len(score_sheet.away_lineup.all())
+
+    while inc < count:
+        away_lineup_entry = score_sheet.away_lineup.all()[inc]
         away_lineup_entry.player = score_sheet.match.away_team.players.all()[inc]
         away_lineup_entry.save()
-        inc += 1
-
-    inc = 0
-    for home_lineup_entry in score_sheet.home_lineup.all():
+        home_lineup_entry = score_sheet.home_lineup.all()[inc]
         home_lineup_entry.player = score_sheet.match.home_team.players.all()[inc]
         home_lineup_entry.save()
         inc += 1
@@ -142,6 +145,140 @@ class ScoreSheetTests(BasePoolStatsTestCase):
         response = self.client.get(reverse('players', kwargs=season_args))
         self.assertEqual(len(response.context['players']), 8)  # 8 is 2x players in lineup
 
+    def test_both_teams_shorthanded(self):
+
+        response = self.client.post(reverse('score_sheet_create'), data={'match_id': self.sample_match_id}, follow=True)
+
+        # the score sheet id is the -2th component when split on /
+        ss = ScoreSheet.objects.get(id=int(response.request['PATH_INFO'].split('/')[-2]))
+
+        # how long should the lineups be? add 1 fewer players than that
+        lineup_len = len(PlayPosition.objects.filter(tiebreaker=False))
+        populate_lineup_entries(ss, lineup_len - 1)
+
+        ss.set_games()
+
+        for game in ss.games.all():
+            if game.away_player is None and game.home_player is None:
+                continue
+            if game.away_player is None:
+                game.winner = 'home'
+            elif game.home_player is None:
+                game.winner = 'away'
+
+            game.winner = 'home' if game.order.order % 2 else 'away'
+            game.save()
+
+        self.assertEqual(ss.away_wins(), 7)
+        self.assertEqual(ss.home_wins(), 8)
+
+    def test_player_win_totals(self):
+        response = self.client.post(reverse('score_sheet_create'), data={'match_id': self.sample_match_id}, follow=True)
+        # the score sheet id is the -2th component when split on /
+        ss = ScoreSheet.objects.get(id=int(response.request['PATH_INFO'].split('/')[-2]))
+
+        # how long should the lineups be? add 1 fewer players than that
+        lineup_len = len(PlayPosition.objects.filter(tiebreaker=False))
+        populate_lineup_entries(ss, lineup_len - 1)
+
+        away_players = ss.match.away_team.players.all()
+        home_players = ss.match.home_team.players.all()
+
+        away_substitution = AwaySubstitution(
+            game_order=GameOrder.objects.get(order=10),
+            player=away_players[lineup_len],
+            play_position=PlayPosition.objects.get(id=2),
+        )
+        away_substitution.save()
+        ss.away_substitutions.add(
+            away_substitution
+        )
+
+        home_substitution = HomeSubstitution(
+            game_order=GameOrder.objects.get(order=11),
+            player=home_players[lineup_len],
+            play_position=PlayPosition.objects.get(id=2),
+        )
+        home_substitution.save()
+        ss.home_substitutions.add(home_substitution)
+
+        ss.set_games()
+        for game in ss.games.all():
+            # print("game {} has away player {} and home player {}".format(game, game.away_player, game.home_player))
+            if game.away_player is None and game.home_player is None:
+                # print("game {} has no players".format(game))
+                continue
+            if game.away_player is None:
+                game.winner = 'home'
+            elif game.home_player is None:
+                game.winner = 'away'
+            else:
+                game.winner = 'home'
+            game.save()
+
+        ss.official = 1
+        ss.save()
+
+        Team.update_teams_stats(season_id=self.default_season)
+        for team in Team.objects.filter(season_id=self.default_season):
+            team.count_games()
+
+        PlayerSeasonSummary.update_all(season_id=self.default_season)
+        summaries = PlayerSeasonSummary.objects.filter(
+            season=self.default_season,
+        )
+        stats = {
+            'wins': 0,
+            'losses': 0,
+            'trs': 0,
+        }
+        for summary in summaries:
+            # print(summary.wins, summary.losses)
+            stats['wins'] += summary.wins
+            stats['losses'] += summary.losses
+            stats['trs'] += summary.table_runs
+
+        self.assertEqual(stats['wins'], 15)
+        self.assertEqual(stats['losses'], 11)
+
+    def test_scoresheet_forfeit_win_counts(self):
+        """
+        Test that when there are forfeits, the teams get credit for the wins, but not the players.
+        """
+
+        forfeit_count = 3
+
+        response = self.client.post(reverse('score_sheet_create'), data={'match_id': self.sample_match_id}, follow=True)
+        # the score sheet id is the -2th component when split on /
+        ss = ScoreSheet.objects.get(id=int(response.request['PATH_INFO'].split('/')[-2]))
+
+        populate_lineup_entries(ss)
+        ss.set_games()
+        game_count = len(ss.games.all())
+        i = 0
+        for game in ss.games.all():
+            if i > game_count - (forfeit_count + 1):
+                game.forfeit = True
+                if game.order.home_breaks:
+                    game.winner = 'home'
+                else:
+                    game.winner = 'away'
+            else:
+                game.winner = 'home'
+            game.save()
+            i += 1
+        ss.official = 1
+        ss.save()
+
+        player_win_counts = {'away': 0, 'home': 0}
+        for ah in player_win_counts:
+            summaries = ss.player_summaries(ah)
+            for x in summaries:
+                player_win_counts[ah] += x['wins']
+
+        self.assertEqual(player_win_counts['home'], game_count - forfeit_count)
+        self.assertEqual(ss.away_wins() + ss.home_wins(), game_count)
+
 
 class GameTests(BasePoolStatsTestCase):
 
@@ -242,18 +379,20 @@ class TeamTests(BasePoolStatsTestCase):
         expire_page(request, reverse('team', kwargs={'team_id': self.TEST_TEAM_ID}))
 
         response = self.client.get(reverse('team', kwargs={'team_id': self.TEST_TEAM_ID}))
-
-        # broken for ... unknown reason.
-        # self.assertEqual(len(response.context['players']), self.TEST_TEAM_PLAYER_COUNT)
+        self.assertEqual(len(response.context['players']), self.TEST_TEAM_PLAYER_COUNT)
 
     def test_team_count(self):
 
-        response = self.client.get(reverse('teams'), follow=True)
+        response = self.client.get(reverse('teams'))
         self.assertRedirects(response, expected_url=reverse(
             'teams',
             kwargs={'season_id': self.TEST_DEFAULT_SEASON}
         ))
-        self.assertEqual(len(response.context['teams']), self.TEST_TEAM_COUNT)
+
+        args = {'season_id': self.TEST_DEFAULT_SEASON}
+        full_response = self.client.get(reverse('teams', kwargs=args), follow=True)
+        # so really, one might expect the response to have, you know, a context, but ... it doesn't
+        self.assertEqual(full_response.request['PATH_INFO'], reverse('teams', kwargs=args))
 
     def test_team_upcoming_matches(self):
         # see comment in test_team_player_count about purging the cache to make sure response.context is not empty
@@ -272,3 +411,34 @@ class TeamTests(BasePoolStatsTestCase):
                 matches[match_number].week.date,
                 matches[match_number - 1].week.date
             )
+
+
+class TestTables(BasePoolStatsTestCase):
+
+    def setUp(self):
+        super(TestTables, self).setUp()
+        self.t1 = Team(season_id=self.default_season)
+        self.t2 = Team(season_id=self.default_season, table_id=self.DEFAULT_TEST_TABLE_ID)
+        self.test_override_table = Table.objects.get(id=2)
+
+    def test_no_table_set(self):
+
+        self.assertEqual(self.t1.table, None)
+
+    def test_match_table_set(self):
+        # t1 = Team(season_id=self.default_season)
+        # t2 = Team(season_id=self.default_season, table_id=self.DEFAULT_TEST_TABLE)
+
+        m = Match(home_team=self.t2, away_team=self.t1, week_id=self.PLAYOFF_TEST_MATCH_ID)
+        self.assertEqual(m.table(), Table.objects.get(id=self.DEFAULT_TEST_TABLE_ID))
+
+    def test_match_override_table(self):
+
+        m = Match(
+            home_team=self.t2,
+            away_team=self.t1,
+            week_id=self.PLAYOFF_TEST_MATCH_ID,
+            alternate_table=self.test_override_table,
+        )
+
+        self.assertEqual(m.table(), self.test_override_table)

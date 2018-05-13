@@ -13,12 +13,13 @@ form_length_map = {
 
 class BasePoolStatsTestCase(LiveServerTestCase):
 
-    fixtures = ['sample_seasons', 'sample_game_setup', 'sample_sponsors',
+    fixtures = ['sample_seasons', 'sample_game_setup', 'sample_sponsors', 'sample_tables',
                 'sample_players', 'sample_divisions', 'sample_teams', 'sample_weeks',
                 'sample_matches']
 
     DEFAULT_TEST_MATCH_ID = 5
     DEFAULT_TEST_WEEK_ID = 5
+    DEFAULT_TEST_TABLE_ID = 1
 
     PLAYOFF_TEST_MATCH_ID = 11
     PLAYOFF_TEST_WEEK_ID = 11
