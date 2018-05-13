@@ -38,6 +38,21 @@
 {% endif %}
 
 {% if unofficial_matches|length %}
+{%  if alternate_tables|length %}
+<div style="padding-bottom: 20px;">
+    <h4>Matches on Alternate Tables</h4>
+    <table class="table table-striped" data-sort-name="Away" data-toggle="table" data-sort-order="asc" id="week_schedule">
+        <thead>
+            <tr><th>Match</th><th>Table</th></tr>
+        </thead>
+        <tbody>
+        {% for alternate_table in alternate_tables %}
+            <tr><td>{{ alternate_table }}</td><td><a href="{% url 'sponsor' alternate_table.alternate_table.venue.id %}">{{  alternate_table.alternate_table }}</a></td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{%  endif %}
 <h4>Unofficial Results</h4>
 <div class="pull-right search"><input id="schedule_filter" class="form-control" type="search" placeholder="Filter"></div>
 <table class="table table-striped" data-sort-name="Away" data-toggle="table" data-sort-order="asc" id="week_schedule">
@@ -45,7 +60,6 @@
     <tr>
         <th data-field="Away" data-sortable="true" align="right">Away</th>
         <th data-field="Home" data-sortable="true">Home</th>
-        <th>Table</th>
         <th>Score Sheets</th>
     </tr>
     </thead>
@@ -64,7 +78,6 @@
             {{ score_sheet_form.instance.home_team }}</a>
             </div>
         </td>
-        <td>{{ score_sheet_form.instance.table }}</td>
         <td>
             <form
                     id="score_sheet_create_form_{{ score_sheet_form.instance.id }}"
