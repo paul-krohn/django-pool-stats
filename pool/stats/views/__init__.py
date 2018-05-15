@@ -1,10 +1,8 @@
 import time
 
-from django.shortcuts import render, redirect, get_object_or_404
-from ..models import Division, ScoreSheet, Season, Sponsor, Team
+from django.shortcuts import render, redirect
+from ..models import Division, ScoreSheet, Season, Team
 from ..models import PlayerSeasonSummary
-
-# from .score_sheet import *
 
 from django.core.cache import cache
 from django.utils.cache import get_cache_key
@@ -90,22 +88,6 @@ def seasons(request):
         'seasons': _seasons
     }
     return render(request, 'stats/seasons.html', context)
-
-
-def sponsor(request, sponsor_id):
-    _sponsor = get_object_or_404(Sponsor, id=sponsor_id)
-    context = {
-        'sponsor': _sponsor
-    }
-    return render(request, 'stats/sponsor.html', context)
-
-
-def sponsors(request):
-    _sponsors = Sponsor.objects.all()
-    context = {
-        'sponsors': _sponsors
-    }
-    return render(request, 'stats/sponsors.html', context)
 
 
 def divisions(request, season_id=None):

@@ -6,6 +6,7 @@ from . import views, status
 from .views import score_sheet
 from .views import week
 from .views import player
+from .views import sponsor
 from .views import team
 
 
@@ -34,8 +35,8 @@ urlpatterns = [
     url(r'^player/(?P<player_id>[0-9]+)/$', cache_page(view_cache_time)(player.player), name='player'),
     url(r'^player_create/', player.player_create, name='player_create'),
 
-    url(r'^sponsors/', views.sponsors, name='sponsors'),
-    url(r'^sponsor/(?P<sponsor_id>[0-9]+)/$', views.sponsor, name='sponsor'),
+    url(r'^sponsors/', sponsor.sponsors, name='sponsors'),
+    url(r'^sponsor/(?P<sponsor_id>[0-9]+)/$', sponsor.sponsor, name='sponsor'),
 
     url(r'^score_sheet_create/$', score_sheet.score_sheet_create, name='score_sheet_create'),
 
