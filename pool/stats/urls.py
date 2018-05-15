@@ -3,6 +3,7 @@ from django.views.decorators.cache import cache_page
 from django.conf import settings
 from . import views, status
 from .views import score_sheet
+from .views import week
 
 
 view_cache_time = settings.VIEW_CACHE_TIME
@@ -19,10 +20,10 @@ urlpatterns = [
     url(r'^teams/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(views.teams), name='teams'),
     url(r'^teams/', views.index, name='teams'),
 
-    url(r'^week/(?P<week_id>[0-9]+)/$', views.week, name='week'),
-    url(r'^weeks/', views.weeks, name='weeks'),
-    url(r'^nextweek/(?P<today_date>[0-9-]+)', views.get_current_week, name='nextweek'),
-    url(r'^nextweek/', views.get_current_week, name='nextweek'),
+    url(r'^week/(?P<week_id>[0-9]+)/$', week.week, name='week'),
+    url(r'^weeks/', week.weeks, name='weeks'),
+    url(r'^nextweek/(?P<today_date>[0-9-]+)', week.get_current_week, name='nextweek'),
+    url(r'^nextweek/', week.get_current_week, name='nextweek'),
 
     url(r'^players/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(views.players), name='players'),
     url(r'^players/', views.players, name='players'),
