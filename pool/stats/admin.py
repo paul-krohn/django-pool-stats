@@ -10,7 +10,7 @@ from django.shortcuts import redirect
 from .models import Division, GameOrder, Match, Player, PlayPosition, WeekDivisionMatchup
 from .models import PlayerSeasonSummary, ScoreSheet, Season, Sponsor, Table, Team, Week
 from .forms import MatchForm
-from .views import expire_page
+from .utils import expire_page
 
 admin.AdminSite.site_header = "{} stats admin".format(settings.LEAGUE['name'])
 

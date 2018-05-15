@@ -7,7 +7,8 @@ from django.core.exceptions import ValidationError
 from ..models import Season, PlayerSeasonSummary, ScoreSheet, Game, Match, Table, Team, Week
 from ..models import PlayPosition, AwaySubstitution, HomeSubstitution, GameOrder
 
-from ..views import expire_page, get_current_week
+from ..utils import expire_page
+from ..views.week import get_current_week
 from ..forms import ScoreSheetGameForm
 from .base_cases import BasePoolStatsTestCase
 
