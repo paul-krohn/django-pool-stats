@@ -3,7 +3,8 @@ from django.shortcuts import get_object_or_404, render, redirect
 
 from ..forms import PlayerForm
 from ..models import Player, PlayerSeasonSummary, ScoreSheet
-from ..views import check_season, logger
+from ..views import logger
+from ..views import check_season
 
 
 def player(request, player_id):

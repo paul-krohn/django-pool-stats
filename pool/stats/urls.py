@@ -8,6 +8,7 @@ from .views import division
 from .views import score_sheet
 from .views import week
 from .views import player
+from .views import season
 from .views import sponsor
 from .views import team
 
@@ -51,8 +52,8 @@ urlpatterns = [
 
     url(r'^score_sheet/(?P<score_sheet_id>[0-9]+)/$', score_sheet.score_sheet, name='score_sheet'),
 
-    url(r'^seasons/', views.seasons, name='seasons'),
-    url(r'^set_season/(?P<season_id>[0-9]+)/$', views.set_season, name='set_season'),
+    url(r'^seasons/', season.seasons, name='seasons'),
+    url(r'^set_season/(?P<season_id>[0-9]+)/$', season.set_season, name='set_season'),
 
     url(r'^update_stats/', views.update_stats, name='update_stats'),
 

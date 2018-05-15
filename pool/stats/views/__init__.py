@@ -1,7 +1,10 @@
 import time
 
-from django.shortcuts import render, redirect
-from ..models import ScoreSheet, Season, Team
+from django.shortcuts import redirect
+
+from ..views import check_season
+from .season import set_season, check_season
+from ..models import ScoreSheet, Team
 from ..models import PlayerSeasonSummary
 
 from django.core.cache import cache
@@ -39,21 +42,6 @@ def expire_page(request, path=None, query_string=None, method='GET'):
         cache.delete(key)
 
 
-def set_season(request, season_id=None):
-    """
-    Allow the user to set their season to a value other than the default.
-    :param request:
-    :param season_id: the season to use, if not the current default
-    :return: bool
-    """
-    if season_id is None:
-        season_id = Season.objects.get(is_default=True).id
-    request.session['season_id'] = season_id
-    request.session.save()
-    # hard-coded urls are bad okay?
-    return redirect(request.META.get('HTTP_REFERER', '/stats/'))
-
-
 def is_stats_master(user):
     return user.groups.filter(name='statsmaster').exists()
 
@@ -70,24 +58,9 @@ def user_can_edit_scoresheet(request, score_sheet_id):
         return False
 
 
-def check_season(request):
-    if 'season_id' in request.session:
-        return
-    else:
-        set_season(request)
-
-
 def index(request):
     check_season(request)
     return redirect('teams', season_id=request.session['season_id'])
-
-
-def seasons(request):
-    _seasons = Season.objects.all()
-    context = {
-        'seasons': _seasons
-    }
-    return render(request, 'stats/seasons.html', context)
 
 
 def update_stats(request):
