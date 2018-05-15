@@ -1,9 +1,11 @@
 from django.conf.urls import url
 from django.views.decorators.cache import cache_page
 from django.conf import settings
+
 from . import views, status
 from .views import score_sheet
 from .views import week
+from .views import player
 
 
 view_cache_time = settings.VIEW_CACHE_TIME
@@ -25,11 +27,11 @@ urlpatterns = [
     url(r'^nextweek/(?P<today_date>[0-9-]+)', week.get_current_week, name='nextweek'),
     url(r'^nextweek/', week.get_current_week, name='nextweek'),
 
-    url(r'^players/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(views.players), name='players'),
-    url(r'^players/', views.players, name='players'),
+    url(r'^players/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(player.players), name='players'),
+    url(r'^players/', player.players, name='players'),
 
-    url(r'^player/(?P<player_id>[0-9]+)/$', cache_page(view_cache_time)(views.player), name='player'),
-    url(r'^player_create/', views.player_create, name='player_create'),
+    url(r'^player/(?P<player_id>[0-9]+)/$', cache_page(view_cache_time)(player.player), name='player'),
+    url(r'^player_create/', player.player_create, name='player_create'),
 
     url(r'^sponsors/', views.sponsors, name='sponsors'),
     url(r'^sponsor/(?P<sponsor_id>[0-9]+)/$', views.sponsor, name='sponsor'),
