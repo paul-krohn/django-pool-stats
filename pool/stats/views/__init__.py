@@ -1,31 +1,14 @@
 from django.shortcuts import redirect
 
-from ..utils import session_uid, expire_page
-# from ..views import check_season
+from ..utils import expire_page
 from .season import set_season, check_season
-from ..models import ScoreSheet, Team
+from ..models import Team
 from ..models import PlayerSeasonSummary
 
 from django.urls import reverse
 
 import logging
 logger = logging.getLogger(__name__)
-
-
-def is_stats_master(user):
-    return user.groups.filter(name='statsmaster').exists()
-
-
-def user_can_edit_scoresheet(request, score_sheet_id):
-
-    s = ScoreSheet.objects.get(id=score_sheet_id)
-    # you can edit a score sheet if it is not official and either you created it,
-    # or you are an admin
-    if (not s.official) and ((session_uid(request) == s.creator_session) or
-                             request.user.is_superuser or is_stats_master(request.user)):
-        return True
-    else:
-        return False
 
 
 def index(request):
