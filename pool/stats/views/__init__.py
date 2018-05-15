@@ -283,14 +283,6 @@ def divisions(request, season_id=None):
     return render(request, 'stats/divisions.html', context)
 
 
-class ScoreSheetCreationForm(django.forms.ModelForm):
-
-    class Meta:
-        model = Match
-        # fields = ['id']
-        exclude = []
-
-
 def update_stats(request):
     # be sure about what season we are working on
     check_season(request)

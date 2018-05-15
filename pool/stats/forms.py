@@ -1,5 +1,5 @@
 import django.forms
-from .models import Player, Team, Game, ScoreSheet, Week
+from .models import Player, Team, Game, ScoreSheet, Match
 from django.core.exceptions import ValidationError
 
 WINNER_CHOICES = (
@@ -81,6 +81,13 @@ class LineupFormSet(django.forms.BaseModelFormSet):
         if len(player_values) > len(set(player_values)):
             raise ValidationError('All players must be unique, there is at least one player in 2 positions.',
                                   code='lineup_duplicate_player')
+
+
+class ScoreSheetCreationForm(django.forms.ModelForm):
+
+    class Meta:
+        model = Match
+        exclude = []
 
 
 class SubstitutionFormSet(django.forms.BaseModelFormSet):
