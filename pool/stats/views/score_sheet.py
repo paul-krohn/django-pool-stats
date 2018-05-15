@@ -10,7 +10,8 @@ from ..forms import DisabledScoreSheetGameForm, ScoreSheetGameForm, ScoreSheetCo
     ScoreSheetStatusForm, LineupFormSet, SubstitutionFormSet
 from ..models import ScoreSheet, Game, Match, AwayLineupEntry, HomeLineupEntry, PlayPosition, AwaySubstitution, \
     HomeSubstitution
-from ..views import user_can_edit_scoresheet, is_stats_master, session_uid
+from ..views import user_can_edit_scoresheet, is_stats_master
+from ..utils import session_uid
 
 
 def score_sheet(request, score_sheet_id):

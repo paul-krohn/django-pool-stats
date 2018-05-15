@@ -1,6 +1,6 @@
 from django.shortcuts import redirect, render
 
-from pool.stats.models import Season
+from ..models import Season
 
 
 def set_season(request, season_id=None):

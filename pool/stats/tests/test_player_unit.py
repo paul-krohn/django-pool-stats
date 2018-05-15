@@ -2,7 +2,7 @@ from django.urls import reverse
 from django.test import RequestFactory
 
 from ..models import Season, Player, PlayerSeasonSummary, Team
-from ..views import expire_page
+from ..utils import expire_page
 from .base_cases import BasePoolStatsTestCase
 
 
