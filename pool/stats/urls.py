@@ -6,6 +6,7 @@ from . import views, status
 from .views import score_sheet
 from .views import week
 from .views import player
+from .views import team
 
 
 view_cache_time = settings.VIEW_CACHE_TIME
@@ -17,9 +18,9 @@ urlpatterns = [
     url(r'^divisions/', views.divisions, name='divisions'),
 
     # the 'after' parameter is really just to make it testable
-    url(r'^team/(?P<team_id>[0-9]+)/(?P<after>[0-9-]+)?$', views.team, name='team'),
+    url(r'^team/(?P<team_id>[0-9]+)/(?P<after>[0-9-]+)?$', team.team, name='team'),
 
-    url(r'^teams/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(views.teams), name='teams'),
+    url(r'^teams/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(team.teams), name='teams'),
     url(r'^teams/', views.index, name='teams'),
 
     url(r'^week/(?P<week_id>[0-9]+)/$', week.week, name='week'),
