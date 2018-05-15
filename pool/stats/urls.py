@@ -2,6 +2,8 @@ from django.conf.urls import url
 from django.views.decorators.cache import cache_page
 from django.conf import settings
 from . import views, status
+from .views import score_sheet
+
 
 view_cache_time = settings.VIEW_CACHE_TIME
 
@@ -31,16 +33,16 @@ urlpatterns = [
     url(r'^sponsors/', views.sponsors, name='sponsors'),
     url(r'^sponsor/(?P<sponsor_id>[0-9]+)/$', views.sponsor, name='sponsor'),
 
-    url(r'^score_sheet_create/$', views.score_sheet_create, name='score_sheet_create'),
+    url(r'^score_sheet_create/$', score_sheet.score_sheet_create, name='score_sheet_create'),
 
     url(r'^score_sheet_lineup/(?P<score_sheet_id>[0-9]+)/(?P<away_home>[a-z]+)$',
-        views.score_sheet_lineup, name='score_sheet_lineup'),
+        score_sheet.score_sheet_lineup, name='score_sheet_lineup'),
     url(r'^score_sheet_substitutions/(?P<score_sheet_id>[0-9]+)/(?P<away_home>[a-z]+)$',
-        views.score_sheet_substitutions, name='score_sheet_substitutions'),
+        score_sheet.score_sheet_substitutions, name='score_sheet_substitutions'),
 
-    url(r'^score_sheet_edit/(?P<score_sheet_id>[0-9]+)/$', views.score_sheet_edit, name='score_sheet_edit'),
+    url(r'^score_sheet_edit/(?P<score_sheet_id>[0-9]+)/$', score_sheet.score_sheet_edit, name='score_sheet_edit'),
 
-    url(r'^score_sheet/(?P<score_sheet_id>[0-9]+)/$', views.score_sheet, name='score_sheet'),
+    url(r'^score_sheet/(?P<score_sheet_id>[0-9]+)/$', score_sheet.score_sheet, name='score_sheet'),
 
     url(r'^seasons/', views.seasons, name='seasons'),
     url(r'^set_season/(?P<season_id>[0-9]+)/$', views.set_season, name='set_season'),
