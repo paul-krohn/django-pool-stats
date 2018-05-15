@@ -3,6 +3,8 @@ from django.views.decorators.cache import cache_page
 from django.conf import settings
 
 from . import views, status
+
+from .views import division
 from .views import score_sheet
 from .views import week
 from .views import player
@@ -15,8 +17,8 @@ view_cache_time = settings.VIEW_CACHE_TIME
 urlpatterns = [
     url(r'^$', views.index, name='index'),
 
-    url(r'^divisions/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(views.divisions), name='divisions'),
-    url(r'^divisions/', views.divisions, name='divisions'),
+    url(r'^divisions/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(division.divisions), name='divisions'),
+    url(r'^divisions/', division.divisions, name='divisions'),
 
     # the 'after' parameter is really just to make it testable
     url(r'^team/(?P<team_id>[0-9]+)/(?P<after>[0-9-]+)?$', team.team, name='team'),
