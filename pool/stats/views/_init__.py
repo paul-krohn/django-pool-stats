@@ -2,14 +2,14 @@ import time
 import datetime
 
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Division, AwayLineupEntry, Game, HomeLineupEntry, Match, Player, \
+from ..models import Division, AwayLineupEntry, Game, HomeLineupEntry, Match, Player, \
     ScoreSheet, Season, Sponsor, Team, Week
-from .models import PlayPosition
-from .models import PlayerSeasonSummary
-from .models import AwaySubstitution, HomeSubstitution
-from .forms import PlayerForm, ScoreSheetGameForm, DisabledScoreSheetGameForm, ScoreSheetCompletionForm
-from .forms import ScoreSheetStatusForm
-from .forms import LineupFormSet, SubstitutionFormSet
+from ..models import PlayPosition
+from ..models import PlayerSeasonSummary
+from ..models import AwaySubstitution, HomeSubstitution
+from ..forms import PlayerForm, ScoreSheetGameForm, DisabledScoreSheetGameForm, ScoreSheetCompletionForm
+from ..forms import ScoreSheetStatusForm
+from ..forms import LineupFormSet, SubstitutionFormSet
 from django.forms import modelformset_factory
 
 import django.forms
