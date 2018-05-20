@@ -118,6 +118,58 @@ class ScoreSheet(models.Model):
                     game.home_player = HomePlayer.objects.get(id=home_substitution.player.id)
             game.save()
 
+    def copy(self, session_id):
+        """
+
+        :param session_id:
+        :return: new scoresheet id
+        """
+
+        old_ss = self
+
+        new_ss = ScoreSheet(
+            match=old_ss.match,
+            comment=old_ss.comment,
+            creator_session=session_id,
+        )
+        new_ss.save()
+
+        for ah in away_home:
+            lineup_entries = getattr(self, '{}_lineup'.format(ah))
+            new_lineup = getattr(new_ss, '{}_lineup'.format(ah))
+            for lineup_entry in lineup_entries.all():
+                le = eval('{}LineupEntry'.format(ah.capitalize()))(
+                    player=lineup_entry.player,
+                    position=lineup_entry.position,
+                )
+                le.save()
+                new_lineup.add(le)
+            old_substitutions = getattr(self, '{}_substitutions'.format(ah))
+            new_subs = getattr(new_ss, '{}_substitutions'.format(ah))
+            for old_substitution in old_substitutions.all():
+                new_sub = eval('{}Substitution'.format(ah.capitalize()))(
+                    game_order=old_substitution.game_order,
+                    player=old_substitution.player,
+                    play_position=old_substitution.play_position,
+                )
+                new_sub.save()
+                new_subs.add(new_sub)
+
+        for old_game in old_ss.games.all():
+            new_game = Game(
+                away_player=old_game.away_player,
+                home_player=old_game.home_player,
+                winner=old_game.winner,
+                order=old_game.order,
+                table_run=old_game.table_run,
+                forfeit=old_game.forfeit
+            )
+            new_game.save()
+            new_ss.games.add(new_game)
+
+        new_ss.save()
+        return new_ss.id
+
     def player_summary(self, a_player):
 
         away_wins = self.games.filter(winner='away', away_player=a_player, forfeit=False)

@@ -111,6 +111,19 @@ def score_sheet_create(request):
         return HttpResponseBadRequest()
 
 
+def score_sheet_copy(request):
+
+    if request.method == 'POST' and 'scoresheet_id' in request.POST:
+        s = ScoreSheet.objects.get(id=request.POST['scoresheet_id'])
+        # don't copy 'official' score sheets, that would be bad!
+        if s.official == 1:
+            return redirect('score_sheet', request.POST['scoresheet_id'])
+        new_scoresheet_id = s.copy(session_id=session_uid(request))
+        return redirect('score_sheet_edit', new_scoresheet_id)
+    else:
+        return HttpResponseBadRequest
+
+
 def score_sheet_lineup_formset(score_sheet_id, away_home):
     s = ScoreSheet.objects.get(id=score_sheet_id)
 
