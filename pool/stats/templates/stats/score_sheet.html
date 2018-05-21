@@ -29,4 +29,37 @@
 </div>
 {% endif %}
 {% endblock %}
+{% if not edit_link %}
+<div align="right">
+<form
+        id="score_sheet_copy_form_{{ score_sheet.id }}"
+        method="post"
+        action="{% url 'score_sheet_copy' %}">
+    {% csrf_token %}
+    <input
+        type="hidden"
+        value="{{ score_sheet.id }}"
+        name="scoresheet_id"
+    />
+    <input
+        id="score_sheet_copy_button_match_{{ score_sheet.id }}"
+        data-text="Copy scoresheet for {{ score_sheet.match.away_team }} @ {{score_sheet.match.home_team }}?"
+        class="btn btn-primary btn-sm confirm"
+        type="submit"
+        value="Copy"
+    />
+</form>
+<script language="JavaScript">
+    $("#score_sheet_copy_form_{{ score_sheet.id }}").confirm({
+        submitForm: true,
+        post: true,
+        text: "Copy scoresheet for {{ score_sheet.match.away_team }} @ {{score_sheet.match.home_team }}?",
+        confirm: function(button) {
+            $("#score_sheet_copy_form_{{ score_sheet.id }}").submit();
+        }
+    });
+</script>
+</div>
+{%  endif %}
 {% endblock %}
+

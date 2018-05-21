@@ -280,6 +280,34 @@ class ScoreSheetTests(BasePoolStatsTestCase):
         self.assertEqual(player_win_counts['home'], game_count - forfeit_count)
         self.assertEqual(ss.away_wins() + ss.home_wins(), game_count)
 
+    def test_score_sheet_copy_access(self):
+        """
+        Test that you can copy a score sheet you don't have access to
+        """
+        response = self.client.post(reverse('score_sheet_create'), data={'match_id': self.sample_match_id}, follow=True)
+        ss = ScoreSheet.objects.get(id=int(response.request['PATH_INFO'].split('/')[-2]))
+        # now spin up another client which should get bounced to the view page when it requests the edit page
+        c = Client()
+        no_access_response = c.get(reverse('score_sheet_edit', kwargs={'score_sheet_id': ss.id}))
+        self.assertRedirects(no_access_response, reverse('score_sheet', kwargs={'score_sheet_id': ss.id}))
+
+        # now try to copy the score sheet with the 2nd client
+        copy_response = c.post(reverse('score_sheet_copy'), data={'scoresheet_id': ss.id})
+        self.assertRedirects(copy_response, reverse('score_sheet_edit', kwargs={'score_sheet_id': ss.id + 1}))
+
+    def test_no_copy_official_score_sheet(self):
+        """
+        Test that if you try to copy an 'official' score sheet, you get redirected to the view version of the original.
+        :return:
+        """
+        response = self.client.post(reverse('score_sheet_create'), data={'match_id': self.sample_match_id}, follow=True)
+        ss = ScoreSheet.objects.get(id=int(response.request['PATH_INFO'].split('/')[-2]))
+        ss.official = 1
+        ss.save()
+        c = Client()
+        copy_response = c.post(reverse('score_sheet_copy'), data={'scoresheet_id': ss.id})
+        self.assertRedirects(copy_response, reverse('score_sheet',  kwargs={'score_sheet_id': ss.id}))
+
 
 class GameTests(BasePoolStatsTestCase):
 

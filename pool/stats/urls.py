@@ -42,6 +42,7 @@ urlpatterns = [
     url(r'^sponsor/(?P<sponsor_id>[0-9]+)/$', sponsor.sponsor, name='sponsor'),
 
     url(r'^score_sheet_create/$', score_sheet.score_sheet_create, name='score_sheet_create'),
+    url(r'^score_sheet_copy/$', score_sheet.score_sheet_copy, name='score_sheet_copy'),
 
     url(r'^score_sheet_lineup/(?P<score_sheet_id>[0-9]+)/(?P<away_home>[a-z]+)$',
         score_sheet.score_sheet_lineup, name='score_sheet_lineup'),
