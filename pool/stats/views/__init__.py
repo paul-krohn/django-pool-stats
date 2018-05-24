@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 def index(request):
     check_season(request)
+    logger.warning("hello from the index page")
     return redirect('teams', season_id=request.session['season_id'])
 
 

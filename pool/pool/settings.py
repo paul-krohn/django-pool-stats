@@ -162,6 +162,9 @@ LOGGING = {
             'format': '[%(asctime)s] %(name)s %(levelname)s %(message)s',
             'datefmt': '%d/%b/%Y %H:%M:%S'
         },
+        'custom': {
+            'format': '%(name)s %(levelname)s %(funcName)s/%(lineno)d: %(message)s',
+        }
     },
     'handlers': {
         # 'console': {
@@ -170,26 +173,35 @@ LOGGING = {
         #     'class': 'logging.StreamHandler',
         #     'formatter': 'simple'
         # },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            # 'formatter': 'krux_format',
+            # 'filters': ['require_debug_true'],
+        },
         'syslog': {
             'level': 'DEBUG',
             'class': 'logging.handlers.SysLogHandler',
             'facility': 'local7',
             # on macOS, you need:
-            # 'address': '/var/run/syslog',
-            'formatter': 'verbose'
+            'address': '/var/run/syslog',
+            # 'address': '/dev/log',
+            'formatter': 'custom',
         },
     },
     'loggers': {
         # root logger
         '': {
-            # 'handlers': ['console', 'syslog'],
-            'handlers': ['syslog'],
-            'level': 'INFO',
+            'handlers': ['console', 'syslog'],
+            # 'handlers': ['syslog'],
+            'facility': 'local7',
+            'level': 'DEBUG',
             'disabled': False
         },
         'stats.*': {
             'handlers': ['syslog'],
             'level': 'DEBUG',
+            'facility': 'local7',
             'propagate': False,
         },
     },
