@@ -94,9 +94,25 @@ $(document).ready(function(){
             <td id="away-wins-total" class="scoresheet-square"><b>{{ score_sheet.away_wins }}</b></td>
             <td colspan="4"></td>
         </tr>
+        <tr>
+            <td></td>
+            <td colspan="5">
+                <div class="text-center">
+                    <input id="games-save-button" name="games" class="btn btn-primary" type="submit" value="Save games"/>
+                </div>
+            </td>
+            <td colspan="4"></td>
+        </tr>
+        <tr>
+            <td></td>
+            <td colspan="5">
+                <div class="text-center">
+                    <input id="last-game-reset-button" class="btn btn-default" type="button" value="reset last game" />
+                </div>
+            </td>
+            <td colspan="4"></td>
+        </tr>
     </table>
-    <div class="text-center">
-        <input id="games-save-button" name="games" class="btn btn-primary" type="submit" value="Save games"/>
     </div>
 </form>
     {%  with score_sheet.self_check as issues %}
@@ -130,4 +146,11 @@ $(document).ready(function(){
         <input name="complete" class="btn btn-primary" type="submit" value="Mark complete"/>
     </div>
 </form>
+<script language="JavaScript">
+$('#last-game-reset-button').confirm({
+    text: 'remove winner of last game?',
+    confirm: reset_last_game
+});
+</script>
+
 {% endblock %}
