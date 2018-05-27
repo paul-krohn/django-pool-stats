@@ -259,7 +259,7 @@ class WeekAdmin(admin.ModelAdmin):
         for tie in ties:
             self.message_user(
                 request=request,
-                message='{} and {} are tied; no matches set'.format(tie[0], tie[1]),
+                message='{} are tied; no matches set'.format(', '.join(tie.teams.all())),
                 level='ERROR'
             )
             return

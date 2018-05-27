@@ -11,5 +11,5 @@ from .scoresheet import ScoreSheet
 from .season import Season
 from .sponsor import Sponsor
 from .table import Table
-from .team import Team, AwayTeam, HomeTeam
+from .team import Team, AwayTeam, HomeTeam, Tie, TieBreakerResult
 from .week import Week

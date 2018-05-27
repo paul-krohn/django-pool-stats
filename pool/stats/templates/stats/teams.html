@@ -5,15 +5,46 @@
 <div class="text-center">
 <h2>Teams</h2>
 </div>
+    {% with tiebreakers|length as tb_count %}
+    {% if tb_count %}
+        <p>There {% if tb_count > 1 %}are{% else %}is{% endif %} {{ tiebreakers|length }} <a href="#tiebreakers">tiebreaker{% if tb_count > 1 %}s{% endif %}</a>.</p>
+    {% endif %}
+    {% endwith %}
 {% if teams %}
 <div class="pull-right search"><input id="filter" class="form-control" type="text" placeholder="Filter"></div>
 {% include "stats/team_table.html" %}
 <script>
 $(document).ready(function () {
     filterer('#filter', '.searchable');
+    filterer('#tb-filter', '.tb-searchable');
 });
     </script>
 
 {% endif %}
+<h3><a name="tiebreakers">Tie Breakers</a></h3>
+    <div class="pull-right search"><input id="tb-filter" class="form-control" type="text" placeholder="Filter"></div>
+
+        <table data-sort-name="Team" data-toggle="table" data-sort-order="asc" class="table" id="team-tiebreakers-table{% if wrapper_division.division %}-division-{{ wrapper_division.division.id }}{% endif %}">
+      <thead>
+        <tr>
+            <th data-field="Team" data-sortable="true">Team</th>
+            <th data-field="scope" data-sortabke="true">Scope</th>
+            <th data-field="Rank chg" data-sortable="true">Change</th>
+            <th data-field="Tied Teams" data-sortable="true">Tied Teams</th>
+            <th data-field="Tie-breaker" data-sortable="true">Tie Breaker</th>
+        </tr>
+      </thead>
+      <tbody class="tb-searchable">
+        {% for tb in tiebreakers %}
+        <tr>
+            <td><!-- {{ tb.team }} sort lexically --><a href="{% url 'team' tb.team.id %}">{{ tb.team }}</a></td>
+            <td>{% if tb.divisional %}Division{% else %}Overall{%  endif %}</td>
+            <td>{{ tb.rank_change }}</td>
+            <td>{{ tb.tie.teams.all|join:", " }}</td>
+            <td>{{ tb.attribute }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
 
 {% endblock %}
