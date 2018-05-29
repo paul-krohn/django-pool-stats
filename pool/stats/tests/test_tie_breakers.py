@@ -1,66 +1,72 @@
-from django.test import LiveServerTestCase
+from django.urls import reverse
 
-from ..models import Season, Team, ScoreSheet, Match
+from .base_cases import BasePoolStatsTestCase
+from .test_unit import populate_lineup_entries
+from ..models import Team, ScoreSheet
 
-from unittest import mock
 
-
-class ScoreSheetTests(LiveServerTestCase):
-
-    # TODO: test counting forfeit wins, net wins against another team.
+class TieBreakerTestCase(BasePoolStatsTestCase):
 
     def setUp(self):
-        self.season = Season(name='test_season', pub_date='2012-08-01 00:00:00Z', is_default=True)
-        self.season.save()
-        self.team_a = Team(name='Team A', season=self.season)
-        self.team_b = Team(name='Team B', season=self.season)
-        self.team_a.win_percentage = 0.5
-        self.team_b.win_percentage = 0.5
+        super(TieBreakerTestCase, self).setUp()
+
+    def create_score_sheet(self, match_id):
+        # create a score sheet with a set number of wins, so we can test
+        # forfeit and net wins tie-breakers
+        response = self.client.post(reverse('score_sheet_create'), data={'match_id': match_id})
+        return int(response.url.split('/')[-2])  # url has a trailing slash
 
     def test_net_game_tie_break(self):
-        found_ties = Team.find_ties([self.team_a, self.team_b], 'win_percentage', False, set_rankings=True)
-        self.team_a.net_game_wins_against = mock.MagicMock(return_value=4)
-        self.team_b.net_game_wins_against = mock.MagicMock(return_value=8)
-        self.assertEqual(found_ties, [[self.team_a, self.team_b]])
+        score_sheet_id = self.create_score_sheet(self.DEFAULT_TEST_MATCH_ID)
+        score_sheet = ScoreSheet.objects.get(id=score_sheet_id)
 
-        Team.break_tie(found_ties[0], 'net_game_wins_against', tie_arg=True)
-        self.assertEqual(self.team_b.ranking, 2)
-        self.assertEqual(self.team_a.ranking, 1)
+        # creating the score sheet above creates the lineup entries, now we need to populate them
+        populate_lineup_entries(score_sheet)
+        # and the games
+        score_sheet.set_games()
+        # now set winners, 9 - 7 for the home team
+        inc = 0
+        for game in score_sheet.games.all():
+            game.winner = 'home' if inc < 9 else 'away'
+            game.save()
+            inc += 1
+        score_sheet.official = 1
+        score_sheet.save()
+        # now set up the tie by win pct
+        teams = Team.objects.filter(id__in=[score_sheet.match.away_team.id, score_sheet.match.home_team_id])
+        for team in teams:
+            team.win_percentage = 0.5
+            team.save()
+        # now find and break the set-up tie
+        the_ties = Team.find_ties(teams, 'win_percentage', False, set_rankings=True)
+        for a_tie in the_ties:
+            a_tie.break_it('net_game_wins_against', False, tie_arg=True, reverse_order=True)
+
+        # we have to re-get the teams; the versions in the tie won't reflect the updated ranking.
+        self.assertEqual(Team.objects.get(id=score_sheet.match.home_team.id).ranking, 1)
+        self.assertEqual(Team.objects.get(id=score_sheet.match.away_team.id).ranking, 2)
 
     def test_forfeit_wins_tie_break(self):
-        # first we need to set up the tied situation
-        found_ties = Team.find_ties([self.team_a, self.team_b], 'win_percentage', False, set_rankings=True)
-        self.team_a.forfeit_wins = mock.MagicMock(return_value=1)
-        self.team_b.forfeit_wins = mock.MagicMock(return_value=0)
-        self.assertEqual(found_ties, [[self.team_a, self.team_b]])
+        score_sheet_id = self.create_score_sheet(self.DEFAULT_TEST_MATCH_ID)
+        score_sheet = ScoreSheet.objects.get(id=score_sheet_id)
 
-        Team.break_tie(found_ties[0], 'forfeit_wins')
-        self.assertEqual(self.team_b.ranking, 1)
-        self.assertEqual(self.team_a.ranking, 2)
+        # creating the score sheet above creates the lineup entries, now we need to populate them
+        populate_lineup_entries(score_sheet)
+        # and the games
+        score_sheet.set_games()
+        # now set winners, 8 each so the teams are tied, one forfeit
+        inc = 0
+        for game in score_sheet.games.all():
+            if inc == 0:
+                game.forfeit = True
+            game.winner = 'home' if game.order.order % 2 else 'away'
+            game.save()
+            inc += 1
+        score_sheet.official = 1
+        score_sheet.save()
+        self.assertEqual(score_sheet.forfeit_wins('away'), 0)
+        self.assertEqual(score_sheet.forfeit_wins('home'), 1)
 
-    def test_net_game_wins_against(self):
-
-        score_sheet_a = ScoreSheet()
-        score_sheet_a.match = Match(away_team=self.team_a, home_team=self.team_b)
-        score_sheet_a.away_wins = mock.MagicMock(return_value=7)
-        score_sheet_a.home_wins = mock.MagicMock(return_value=9)
-
-        score_sheet_b = ScoreSheet()
-        score_sheet_b.match = Match(away_team=self.team_b, home_team=self.team_a)
-        score_sheet_b.away_wins = mock.MagicMock(return_value=1)
-        score_sheet_b.home_wins = mock.MagicMock(return_value=15)
-
-        self.assertEqual(self.team_a.net_game_wins_against([self.team_b], score_sheets=[score_sheet_a]), -2)
-        self.assertEqual(self.team_b.net_game_wins_against([self.team_a], score_sheets=[score_sheet_a]), 2)
-
-        self.assertEqual(self.team_a.net_game_wins_against([self.team_b], score_sheets=[score_sheet_b]), 14)
-        self.assertEqual(self.team_b.net_game_wins_against([self.team_a], score_sheets=[score_sheet_b]), -14)
-
-        self.assertEqual(
-            self.team_a.net_game_wins_against([self.team_b], score_sheets=[score_sheet_a, score_sheet_b]),
-            12
-        )
-        self.assertEqual(
-            self.team_b.net_game_wins_against([self.team_a], score_sheets=[score_sheet_a, score_sheet_b]),
-            -12
-        )
+        Team.update_rankings(season_id=self.default_season)
+        self.assertEqual(Team.objects.get(id=score_sheet.match.home_team.id).ranking, 2)
+        self.assertEqual(Team.objects.get(id=score_sheet.match.away_team.id).ranking, 1)

@@ -51,6 +51,9 @@ class ScoreSheet(models.Model):
     def home_wins(self):
         return len(self.games.filter(winner='home'))
 
+    def forfeit_wins(self, ah):
+        return len(self.games.filter(winner=ah).filter(forfeit=True))
+
     def wins(self, away_home):
         return len(self.games.filter(winner=away_home))
 
