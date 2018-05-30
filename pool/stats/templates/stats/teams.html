@@ -28,10 +28,10 @@ $(document).ready(function () {
       <thead>
         <tr>
             <th data-field="Team" data-sortable="true">Team</th>
-            <th data-field="scope" data-sortabke="true">Scope</th>
-            <th data-field="Rank chg" data-sortable="true">Change</th>
-            <th data-field="Tied Teams" data-sortable="true">Tied Teams</th>
+            <th data-field="Scope" data-sortable="true">Scope</th>
+            <th data-field="New Rank" data-sortable="true">New Rank</th>
             <th data-field="Tie-breaker" data-sortable="true">Tie Breaker</th>
+            <th data-field="Results" data-sortable="true">Results</th>
         </tr>
       </thead>
       <tbody class="tb-searchable">
@@ -39,9 +39,9 @@ $(document).ready(function () {
         <tr>
             <td><!-- {{ tb.team }} sort lexically --><a href="{% url 'team' tb.team.id %}">{{ tb.team }}</a></td>
             <td>{% if tb.divisional %}Division{% else %}Overall{%  endif %}</td>
-            <td>{{ tb.rank_change }}</td>
-            <td>{{ tb.tie.teams.all|join:", " }}</td>
+            <td style=" text-align: right;">{{ tb.team.ranking }}</td>
             <td>{{ tb.attribute }}</td>
+            <td>{{ tb.summary }}</td>
         </tr>
         {% endfor %}
       </tbody>
