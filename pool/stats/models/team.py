@@ -1,3 +1,5 @@
+import json
+
 from django.db import models
 
 from .division import Division
@@ -244,8 +246,11 @@ class Tie(models.Model):
         # print('breaking ties based on {}'.format(attribute))
         the_teams = list(self.teams.all())
         sorted_teams = sorted(the_teams, key=lambda team: get_value(team))
+        tie_breaker_values = {}
         if reverse_order:
             sorted_teams.reverse()
+        for t in sorted_teams:
+            tie_breaker_values[t.name] = get_value(t)
 
         inc = 0
         de_tying_array = []  # will be the number to add to the ranking
@@ -253,23 +258,24 @@ class Tie(models.Model):
         while inc < len(sorted_teams):
             offset = 1
             tiebreaker_value = get_value(sorted_teams[inc])
-            de_tying_array.append(inc)
+            de_tying_array.append([inc, tiebreaker_value])
 
             while inc + offset < len(sorted_teams) and \
                     tiebreaker_value == \
                     get_value(sorted_teams[inc + offset]):
-                de_tying_array.append(inc)
+                de_tying_array.append([inc, tiebreaker_value])
                 offset += 1
             inc += offset
 
         rank_set_inc = 0
-        for rank_change in de_tying_array:
+        for (rank_change, value) in de_tying_array:
             if rank_change:
                 TieBreakerResult(
                     tie=self, rank_change=rank_change,
                     team_id=sorted_teams[rank_set_inc].id,
                     attribute=attribute,
                     divisional=divisional,
+                    summary='; '.join(['%s: %s' % (x, tie_breaker_values[x]) for x in tie_breaker_values])
                 ).save()
                 prev_rank = sorted_teams[rank_set_inc].get_ranking(divisional)
                 sorted_teams[rank_set_inc].set_ranking(prev_rank + rank_change, divisional)
@@ -282,3 +288,4 @@ class TieBreakerResult(models.Model):
     divisional = models.BooleanField(default=False)
     rank_change = models.IntegerField()
     attribute = models.CharField(max_length=64)
+    summary = models.TextField(max_length=1024, default=None)
