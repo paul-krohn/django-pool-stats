@@ -56,8 +56,8 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         games_form_inputs = games_form.find_elements_by_tag_name('input')
 
         # there should be 16 forms in the playoff div; 5 inputs in each is 80 inputs.
-        # plus 5 at the top of the form ... plus 1 more somewhere? total is 86.
-        self.assertEqual(86, len(games_form_inputs))
+        # plus 5 at the top of the form ... plus the submit and game reset button. total is 86.
+        self.assertEqual(87, len(games_form_inputs))
 
     def test_match_create_playoff_scoresheet(self):
         self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
@@ -69,8 +69,8 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         self.assertEqual(int(form_count_input.get_attribute('value')), 17)
 
         # there should be 17 forms in the playoff div; 5 inputs in each is 85 inputs.
-        # plus 5 at the top of the form ... plus 1 more somewhere? total is 91.
-        self.assertEqual(91, len(games_form_inputs))
+        # plus 5 at the top of the form ... plus the submit and game reset button. total is 92.
+        self.assertEqual(92, len(games_form_inputs))
 
     def test_match_scoresheet_set_lineup(self):
         self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)

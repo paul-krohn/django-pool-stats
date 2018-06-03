@@ -11,3 +11,13 @@ function filterer(filter_box_selector, table_body_selector){
         }).show();
     });
 }
+
+function reset_last_game(){
+    // Find the last checked radio button and uncheck it
+    var set_radio_buttons = $('input[type=radio]').filter(function () {
+        return this.checked === true;
+    });
+    if (set_radio_buttons.length) {
+        set_radio_buttons[set_radio_buttons.length - 1].checked = false;
+    }
+}
