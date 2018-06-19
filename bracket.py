@@ -55,7 +55,7 @@ class Match(object):
         description = "winner of {} vs {}".format(self.team_a, self.team_b)
         src_m = getattr(self, 'source_match_{}'.format(side), None)
         if src_m is not None:
-            description = "winner of match {}".format(src_m.id)
+            description = "winner of match {}".format(self.id)
         return description
 
     def __repr__(self):
@@ -70,12 +70,14 @@ class Match(object):
 teams = []
 if args.team_file is not None:
     teams = json.load(open(args.team_file))['teams']
-    print(json.dumps(teams,indent=2))
+    print(json.dumps(teams, indent=2))
 
-br_size = bracket_size(args.size)
 
 if len(teams):
     br_size = len(teams)
+else:
+    br_size = bracket_size(args.size)
+
 print("the bracket size is: {}".format(bracket_size(br_size)))
 
 # round 1 matches
@@ -83,15 +85,12 @@ i = 0
 first_round_matches = []
 first_round_match_objects = []
 while i < (br_size / 2):
-    # first_round_matches.append('{} vs {}'.format(i, br_size - (i - 1)))
     if len(teams):
         team_a = teams[i]
         team_b = teams[(br_size -1) - i]
-        # team_b = teams[:-i]
-        # team_b = teams[]
     else:
-        team_a = 'Team {}'.format(i),
-        team_b = 'Team {}'.format(br_size - (i - 1)),
+        team_a = 'Team {}'.format(i + 1)
+        team_b = 'Team {}'.format(br_size - (i))
     first_round_match_objects.append(
         Match(
             source_match_a=None,
@@ -111,13 +110,15 @@ def new_round_object_matches(existing_round_matches, offset):
     these_matches = []
     inc = 0
     while inc < len(existing_round_matches) / 2:
+        source_match_a = existing_round_matches[inc]
+        source_match_b = existing_round_matches[int(len(existing_round_matches) - inc - 1)]
         these_matches.append(
             Match(
-                source_match_a=existing_round_matches[inc],
-                source_match_b=existing_round_matches[int(len(existing_round_matches) - inc - 1)],
+                source_match_a=source_match_a,
+                source_match_b=source_match_b,
                 team_a=None,
                 team_b=None,
-                id=offset + inc,
+                id=offset + inc + 1,
             )
         )
         inc += 1
@@ -129,7 +130,7 @@ round_count = int(log(br_size, 2))
 prev_round_match_objects = first_round_match_objects
 while len(match_objects) < round_count:
     this_round_match_objects = new_round_object_matches(
-        prev_round_match_objects, running_match_count
+        deepcopy(prev_round_match_objects), running_match_count
     )
     running_match_count += len(this_round_match_objects)
     match_objects.append(this_round_match_objects)
