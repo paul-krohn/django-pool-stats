@@ -52,18 +52,22 @@ class Match(object):
         self.id = id
 
     def teams_desc(self, side):
-        description = "winner of {} vs {}".format(self.team_a, self.team_b)
+        if self.team_a and self.team_b:
+            description = "winner of {} vs {}".format(self.team_a, self.team_b)
+        else:
+            description = "{}".format(self.team_a or self.team_b)
+
         src_m = getattr(self, 'source_match_{}'.format(side), None)
         if src_m is not None:
             description = "winner of match {}".format(self.id)
         return description
 
     def __repr__(self):
-        # print("repr fired")
+
         return("match {}: {} vs {}".format(
             self.id,
-            self.team_a or self.source_match_a.teams_desc('a'),
-            self.team_b or self.source_match_b.teams_desc('b'),
+            'bye' if self.team_a is False else self.team_a or self.source_match_a.teams_desc('a'),
+            'bye' if self.team_b is False else self.team_b or self.source_match_b.teams_desc('b'),
         ))
 
 
@@ -74,7 +78,7 @@ if args.team_file is not None:
 
 
 if len(teams):
-    br_size = len(teams)
+    br_size = bracket_size(len(teams))
 else:
     br_size = bracket_size(args.size)
 
@@ -87,7 +91,7 @@ first_round_match_objects = []
 while i < (br_size / 2):
     if len(teams):
         team_a = teams[i]
-        team_b = teams[(br_size -1) - i]
+        team_b = teams[(br_size - 1) - i] if len(teams) > (br_size - 1) - i else False
     else:
         team_a = 'Team {}'.format(i + 1)
         team_b = 'Team {}'.format(br_size - (i))
