@@ -12,13 +12,18 @@ parser.add_argument(
     '--size',
     type=int,
     help='number of participants in the bracket',
-    required=True,
+    # required=True,
 )
 parser.add_argument(
     '--type',
     help='bracket type; default: %(default)s',
     default=BRACKET_TYPES[0],
     choices=BRACKET_TYPES,
+)
+parser.add_argument(
+    '--team-file',
+    help='file with one team per line',
+    default=None
 )
 
 args = parser.parse_args()
@@ -62,21 +67,38 @@ class Match(object):
         ))
 
 
-print("the bracket size is: {}".format(bracket_size(args.size)))
+teams = []
+if args.team_file is not None:
+    teams = json.load(open(args.team_file))['teams']
+    print(json.dumps(teams,indent=2))
+
 br_size = bracket_size(args.size)
+
+if len(teams):
+    br_size = len(teams)
+print("the bracket size is: {}".format(bracket_size(br_size)))
+
 # round 1 matches
-i = 1
+i = 0
 first_round_matches = []
 first_round_match_objects = []
-while i < (br_size / 2) + 1:
+while i < (br_size / 2):
     # first_round_matches.append('{} vs {}'.format(i, br_size - (i - 1)))
+    if len(teams):
+        team_a = teams[i]
+        team_b = teams[(br_size -1) - i]
+        # team_b = teams[:-i]
+        # team_b = teams[]
+    else:
+        team_a = 'Team {}'.format(i),
+        team_b = 'Team {}'.format(br_size - (i - 1)),
     first_round_match_objects.append(
         Match(
             source_match_a=None,
             source_match_b=None,
-            team_a='Team {}'.format(i),
-            team_b='Team {}'.format(br_size - (i - 1)),
-            id=i,
+            team_a=team_a,
+            team_b=team_b,
+            id=i+1,
         )
     )
     i += 1
