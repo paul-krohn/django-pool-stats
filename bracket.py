@@ -30,8 +30,7 @@ args = parser.parse_args()
 
 # double elimination winners/single elimination bracket
 
-matches = []
-match_objects = []
+match_rounds = []
 
 
 def bracket_size(participant_count):
@@ -106,7 +105,7 @@ while i < (br_size / 2):
     i += 1
 
 running_match_count = i
-match_objects.append(first_round_matches)
+match_rounds.append(first_round_matches)
 
 
 def new_round_matches(existing_round_matches, offset):
@@ -132,14 +131,14 @@ round_count = int(log(br_size, 2))
 
 prev_round_matches = first_round_matches
 
-while len(match_objects) < round_count:
+while len(match_rounds) < round_count:
     this_round_match_objects = new_round_matches(
         deepcopy(prev_round_matches), running_match_count
     )
     running_match_count += len(this_round_match_objects)
-    match_objects.append(this_round_match_objects)
+    match_rounds.append(this_round_match_objects)
     prev_round_matches = this_round_match_objects
 
-for match_object_list in match_objects:
-    for match_object in match_object_list:
-        print(match_object)
+for match_round in match_rounds:
+    for match in match_round:
+        print(match)
