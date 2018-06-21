@@ -87,7 +87,6 @@ print("the bracket size is: {}".format(bracket_size(br_size)))
 # round 1 matches
 i = 0
 first_round_matches = []
-first_round_match_objects = []
 while i < (br_size / 2):
     if len(teams):
         team_a = teams[i]
@@ -95,7 +94,7 @@ while i < (br_size / 2):
     else:
         team_a = 'Team {}'.format(i + 1)
         team_b = 'Team {}'.format(br_size - (i))
-    first_round_match_objects.append(
+    first_round_matches.append(
         Match(
             source_match_a=None,
             source_match_b=None,
@@ -107,10 +106,10 @@ while i < (br_size / 2):
     i += 1
 
 running_match_count = i
-match_objects.append(first_round_match_objects)
+match_objects.append(first_round_matches)
 
 
-def new_round_object_matches(existing_round_matches, offset):
+def new_round_matches(existing_round_matches, offset):
     these_matches = []
     inc = 0
     while inc < len(existing_round_matches) / 2:
@@ -131,14 +130,15 @@ def new_round_object_matches(existing_round_matches, offset):
 
 round_count = int(log(br_size, 2))
 
-prev_round_match_objects = first_round_match_objects
+prev_round_matches = first_round_matches
+
 while len(match_objects) < round_count:
-    this_round_match_objects = new_round_object_matches(
-        deepcopy(prev_round_match_objects), running_match_count
+    this_round_match_objects = new_round_matches(
+        deepcopy(prev_round_matches), running_match_count
     )
     running_match_count += len(this_round_match_objects)
     match_objects.append(this_round_match_objects)
-    prev_round_match_objects = this_round_match_objects
+    prev_round_matches = this_round_match_objects
 
 for match_object_list in match_objects:
     for match_object in match_object_list:
