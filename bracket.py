@@ -90,17 +90,17 @@ i = 0
 first_round_matches = []
 while i < (br_size / 2):
     if len(teams):
-        team_a = teams[i]
-        team_b = teams[(br_size - 1) - i] if len(teams) > (br_size - 1) - i else False
+        team_one = teams[i]
+        team_two = teams[(br_size - 1) - i] if len(teams) > (br_size - 1) - i else False
     else:
-        team_a = 'Team {}'.format(i + 1)
-        team_b = 'Team {}'.format(br_size - (i))
+        team_one = 'Team {}'.format(i + 1)
+        team_two = 'Team {}'.format(br_size - i)
     first_round_matches.append(
         Match(
             source_match_a=None,
             source_match_b=None,
-            team_a=team_a,
-            team_b=team_b,
+            team_a=team_one,
+            team_b=team_two,
             id=i+1,
         )
     )
@@ -114,12 +114,12 @@ def new_round_matches(existing_round_matches, offset):
     these_matches = []
     inc = 0
     while inc < len(existing_round_matches) / 2:
-        source_match_a = existing_round_matches[inc]
-        source_match_b = existing_round_matches[int(len(existing_round_matches) - inc - 1)]
+        this_source_match_a = existing_round_matches[inc]
+        this_source_match_b = existing_round_matches[int(len(existing_round_matches) - inc - 1)]
         these_matches.append(
             Match(
-                source_match_a=source_match_a,
-                source_match_b=source_match_b,
+                source_match_a=this_source_match_a,
+                source_match_b=this_source_match_b,
                 team_a=None,
                 team_b=None,
                 id=offset + inc + 1,
@@ -162,7 +162,10 @@ while len(match_rounds) < round_count:
     if args.type == 'double':
         print("the remainder is: {}".format(len(match_rounds) % 2))
         if (len(match_rounds) % 2) == 1:
-            losers_bracket_new_matches = losers_bracket_matches(match_rounds[len(match_rounds) - 1], running_match_count)
+            losers_bracket_new_matches = losers_bracket_matches(
+                match_rounds[len(match_rounds) - 1],
+                running_match_count
+            )
             running_match_count += len(losers_bracket_new_matches)
             losers_bracket_rounds.append(losers_bracket_new_matches)
         else:
@@ -170,15 +173,16 @@ while len(match_rounds) < round_count:
             losers_bracket_new_matches = []
             i = 0
             while i < len(match_rounds[-1]):
-                source_match_a = match_rounds[-1][i]
-                source_match_b = losers_bracket_rounds[-1][i]
+                winners_source_match = match_rounds[-1][i]
+                # source_match_b = losers_bracket_rounds[-1][i]
+                losers_source_match = losers_bracket_rounds[-1][len(match_rounds[-1]) - (i + 1)]
                 new_match_id = running_match_count + i + 1
                 print("setting up match {}; {} from winners bracket and {} from losers".format(
-                    new_match_id, source_match_a.id, source_match_b.id)
+                    new_match_id, winners_source_match.id, losers_source_match.id)
                 )
                 m = Match(
-                    source_match_a=source_match_a,
-                    source_match_b=source_match_b,
+                    source_match_a=winners_source_match,
+                    source_match_b=losers_source_match,
                     team_a=None,
                     team_b=None,
                     id=new_match_id,
