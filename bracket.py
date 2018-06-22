@@ -129,7 +129,7 @@ def new_round_matches(existing_round_matches, offset):
     return these_matches
 
 
-def losers_bracket_matches(winners_round_matches, offset):
+def losers_bracket_matches(winners_round_matches, offset, first_round=False):
     new_matches = []
     inc = 0
     while inc < len(winners_round_matches) / 2:
@@ -144,7 +144,7 @@ def losers_bracket_matches(winners_round_matches, offset):
                 team_b=None,
                 number=offset + inc + 1,
                 a_want_winner=False,
-                b_want_winner=True,
+                b_want_winner=False if first_round else True,
             )
         )
         inc += 1
@@ -164,7 +164,8 @@ while len(match_rounds) < round_count:
         if (len(match_rounds) % 2) == 1:
             losers_bracket_new_matches = losers_bracket_matches(
                 match_rounds[len(match_rounds) - 1],
-                running_match_count
+                running_match_count,
+                first_round=len(match_rounds) == 1,
             )
             running_match_count += len(losers_bracket_new_matches)
             losers_bracket_rounds.append(losers_bracket_new_matches)
