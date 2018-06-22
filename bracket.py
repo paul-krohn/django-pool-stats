@@ -134,6 +134,7 @@ def losers_bracket_matches(winners_round_matches, offset):
     while inc < len(winners_round_matches) / 2:
         source_match_a = winners_round_matches[2 * inc]
         source_match_b = winners_round_matches[2 * inc + 1]
+        print("adding losers bracket match: {}".format(offset + inc + 1))
         new_matches.append(
             Match(
                 source_match_a=source_match_a,
@@ -148,11 +149,20 @@ def losers_bracket_matches(winners_round_matches, offset):
     return new_matches
 
 
-round_count = int(log(br_size, 2))
+round_count = int(log(br_size, 2)) + (1 if args.type == 'double' else 0)
 
 prev_round_matches = first_round_matches
+losers_bracket_rounds = []
 
 while len(match_rounds) < round_count:
+    # loser's bracket initial round
+    print("currently have {} rounds".format(len(match_rounds)))
+    if args.type == 'double':
+        print("the remainder is: {}".format(len(match_rounds) % 2))
+        if (len(match_rounds) % 2) == 1:
+            losers_bracket_new_matches = losers_bracket_matches(match_rounds[len(match_rounds) - 1], running_match_count)
+            running_match_count += len(losers_bracket_new_matches)
+            losers_bracket_rounds.append(losers_bracket_new_matches)
     this_round_match_objects = new_round_matches(
         deepcopy(prev_round_matches), running_match_count
     )
@@ -160,12 +170,11 @@ while len(match_rounds) < round_count:
     match_rounds.append(this_round_match_objects)
     prev_round_matches = this_round_match_objects
 
-
-# loser's bracket initial round
-if args.type == 'double':
-    match_rounds.append(losers_bracket_matches(match_rounds[0], running_match_count))
-
-
 for match_round in match_rounds:
     for match in match_round:
+        print(match)
+
+print("there are {} losers bracket rounds".format(len(losers_bracket_rounds)))
+for losers_bracket_round in losers_bracket_rounds:
+    for match in losers_bracket_round:
         print(match)
