@@ -42,13 +42,13 @@ def bracket_size(participant_count):
 
 class Match(object):
 
-    def __init__(self, source_match_a, source_match_b, team_a, team_b, id, a_want_winner=True, b_want_winner=True):
+    def __init__(self, source_match_a, source_match_b, team_a, team_b, number, a_want_winner=True, b_want_winner=True):
         self.source_match_a = source_match_a
         self.source_match_b = source_match_b
         self.team_a = team_a
         self.team_b = team_b
         self.winner = None
-        self.id = id
+        self.number = number
         self.a_want_winner = a_want_winner
         self.b_want_winner = b_want_winner
 
@@ -60,13 +60,13 @@ class Match(object):
 
         src_m = getattr(self, 'source_match_{}'.format(side), None)
         if src_m is not None:
-            description = "{} of match {}".format("winner" if want else "loser", self.id)
+            description = "{} of match {}".format("winner" if want else "loser", self.number)
         return description
 
     def __repr__(self):
 
         return("match {}: {} vs {}".format(
-            self.id,
+            self.number,
             'bye' if self.team_a is False else self.team_a or self.source_match_a.teams_desc('a', self.a_want_winner),
             'bye' if self.team_b is False else self.team_b or self.source_match_b.teams_desc('b', self.b_want_winner),
         ))
@@ -101,7 +101,7 @@ while i < (br_size / 2):
             source_match_b=None,
             team_a=team_one,
             team_b=team_two,
-            id=i+1,
+            number=i + 1,
         )
     )
     i += 1
@@ -122,7 +122,7 @@ def new_round_matches(existing_round_matches, offset):
                 source_match_b=this_source_match_b,
                 team_a=None,
                 team_b=None,
-                id=offset + inc + 1,
+                number=offset + inc + 1,
             )
         )
         inc += 1
@@ -142,7 +142,7 @@ def losers_bracket_matches(winners_round_matches, offset):
                 source_match_b=this_source_match_b,
                 team_a=None,
                 team_b=None,
-                id=offset + inc + 1,
+                number=offset + inc + 1,
                 a_want_winner=False,
                 b_want_winner=True,
             )
@@ -178,14 +178,14 @@ while len(match_rounds) < round_count:
                 losers_source_match = losers_bracket_rounds[-1][len(match_rounds[-1]) - (i + 1)]
                 new_match_id = running_match_count + i + 1
                 print("setting up match {}; {} from winners bracket and {} from losers".format(
-                    new_match_id, winners_source_match.id, losers_source_match.id)
+                    new_match_id, winners_source_match.number, losers_source_match.number)
                 )
                 m = Match(
                     source_match_a=winners_source_match,
                     source_match_b=losers_source_match,
                     team_a=None,
                     team_b=None,
-                    id=new_match_id,
+                    number=new_match_id,
                     a_want_winner=False,
                     b_want_winner=True,
                 )
