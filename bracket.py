@@ -164,7 +164,7 @@ round_count = int(log(br_size, 2))  # + (2 if args.type == 'double' else 0)
 prev_round_matches = first_round_matches
 losers_bracket_rounds = []
 
-while len(match_rounds) <= round_count:
+while len(match_rounds) < round_count:
     # loser's bracket initial round
     print("currently have {} rounds".format(len(match_rounds)))
 
@@ -179,34 +179,36 @@ if args.type == 'double':
 
     # there are log(n, 2) + (log(n, 2) / 2) rounds in the losers bracket
     losers_bracket_round_count = round_count + round_count / 2
-    while len(losers_bracket_rounds) < losers_bracket_round_count:
+    # first, seed the losers bracket
+    losers_bracket_rounds.append(new_round_matches(
+            existing_round_matches=match_rounds[0],
+            offset=running_match_count,
+            winners=False,
+        )
+    )
+    running_match_count += len(losers_bracket_rounds[-1])
 
-        losers_bracket_new_matches = []
-        if len(losers_bracket_rounds) == 0:  # losers bracket first round only is losers of the winners bracket
-            losers_bracket_new_matches = new_round_matches(
-                existing_round_matches=match_rounds[0],
-                offset=running_match_count,
-                winners=False,
-            )
-        elif len(losers_bracket_rounds) % 2 == 0:
-            # in this case, we want a regular elimination bracket from the previous round of the losers bracket
-            losers_bracket_new_matches = new_round_matches(
-                existing_round_matches=losers_bracket_rounds[-1],
-                offset=running_match_count,
-                outside_in=False,
-            )
-        else:
-            # we want to reverse the order of the winners round losers if the length of the losers bracket will not be
-            # (ie after we add this round) divisible by 4
-            reverse_it = True if (len(losers_bracket_rounds) + 1) % 4 != 0 else False
-            losers_bracket_new_matches = losers_bracket_matches(
-                winners_round_matches=match_rounds[-1],
-                losers_round_matches=losers_bracket_rounds[-1],
-                offset=running_match_count,
-                reverse=True,
-            )
-        running_match_count += len(losers_bracket_new_matches)
-        losers_bracket_rounds.append(losers_bracket_new_matches)
+    # while len(losers_bracket_rounds) < losers_bracket_round_count:
+    for match_round in match_rounds[1:-1]:
+        # losers_bracket_new_matches = []
+        # reverse_it = True if (len(losers_bracket_rounds) + 1) % 4 != 0 else False
+        losers_bracket_dropin_matches = losers_bracket_matches(
+            winners_round_matches=match_round,
+            losers_round_matches=losers_bracket_rounds[-1],
+            offset=running_match_count,
+            reverse=True,
+        )
+        losers_bracket_rounds.append(losers_bracket_dropin_matches)
+        running_match_count += len(losers_bracket_dropin_matches)
+        # in this case, we want a regular elimination bracket from the previous round of the losers bracket
+        losers_bracket_elimination_matches = new_round_matches(
+            existing_round_matches=losers_bracket_rounds[-1],
+            offset=running_match_count,
+            outside_in=False,
+        )
+
+        running_match_count += len(losers_bracket_elimination_matches)
+        losers_bracket_rounds.append(losers_bracket_elimination_matches)
 
 i = 0
 for match_round in match_rounds:
