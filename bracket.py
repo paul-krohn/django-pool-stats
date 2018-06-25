@@ -209,6 +209,35 @@ if args.type == 'double':
 
         running_match_count += len(losers_bracket_elimination_matches)
         losers_bracket_rounds.append(losers_bracket_elimination_matches)
+    # one more losers bracket round; this one between the winner of the losers bracket and the loser of the last match
+    # of the winners
+    losers_bracket_last_round = losers_bracket_matches(
+        winners_round_matches=match_rounds[-1],
+        losers_round_matches=losers_bracket_rounds[-1],
+        offset=running_match_count,
+    )
+    losers_bracket_rounds.append(losers_bracket_last_round)
+    running_match_count += len(losers_bracket_last_round)
+
+    # now the winners vs losers match
+    bracket_joining_match = Match(
+        source_match_a=match_rounds[-1][0],
+        source_match_b=losers_bracket_last_round[0],
+        team_a=None,
+        team_b=None,
+        number=running_match_count + 1,
+    )
+    match_rounds.append([bracket_joining_match])
+    running_match_count += 1
+    # and the "if-necessary" match
+    if_necessary_match = Match(
+        source_match_a=bracket_joining_match,
+        source_match_b=bracket_joining_match,
+        team_a=None,
+        team_b=None,
+        number=running_match_count + 1,
+    )
+    match_rounds.append([if_necessary_match])
 
 i = 0
 for match_round in match_rounds:
@@ -225,3 +254,4 @@ for losers_bracket_round in losers_bracket_rounds:
     for match in losers_bracket_round:
         print(match)
     i += 1
+
