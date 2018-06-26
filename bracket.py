@@ -51,6 +51,7 @@ class Match(object):
         self.number = number
         self.a_want_winner = a_want_winner
         self.b_want_winner = b_want_winner
+        self.play_order = 0
 
     def teams_desc(self, side, want):
         if self.team_a and self.team_b:
@@ -239,19 +240,49 @@ if args.type == 'double':
     )
     match_rounds.append([if_necessary_match])
 
+# now set the play order ...
+
+# first the first round from each of the brackets
+play_order_inc = 1
+for match in match_rounds[0] + losers_bracket_rounds[0]:
+    match.play_order = play_order_inc
+    play_order_inc += 1
+
+# 1 - 1, 2
+# 2 - 3, 4
+# 3 - 5, (6)
+
+round_inc = 1
+while round_inc < round_count:
+    for match in match_rounds[round_inc]:
+        match.play_order = play_order_inc
+        play_order_inc += 1
+    for losers_bracket_match in losers_bracket_rounds[2 * round_inc - 1]:
+        losers_bracket_match.play_order = play_order_inc
+        play_order_inc += 1
+    if len(losers_bracket_rounds) > 2 * round_inc:
+        for losers_bracket_match in losers_bracket_rounds[2 * round_inc]:
+            losers_bracket_match.play_order = play_order_inc
+            play_order_inc += 1
+    round_inc += 1
+
+print("match rounds: %s losers rounds: %s" % (len(match_rounds), len(losers_bracket_rounds)))
+
 i = 0
 for match_round in match_rounds:
     print("winners round %d" % (i + 1))
     for match in match_round:
-        print(match)
+        # print(" %s: %s" % (match, match.play_order or match.number))
+        print(" %s: %s" % (match, match.play_order))
+        # print(match)
     i += 1
 
-print("there are {} losers bracket rounds".format(len(losers_bracket_rounds)))
+# print("there are {} losers bracket rounds".format(len(losers_bracket_rounds)))
 i = 0
-
 for losers_bracket_round in losers_bracket_rounds:
     print("losers round %d" % (i + 1))
     for match in losers_bracket_round:
-        print(match)
+        # print(" %s: %s" % (match, match.play_order or match.number))
+        print(" %s: %s" % (match, match.play_order))
+        # print(match)
     i += 1
-
