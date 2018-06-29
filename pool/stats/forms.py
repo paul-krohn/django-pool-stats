@@ -9,6 +9,14 @@ WINNER_CHOICES = (
 )
 
 
+class TeamForm(django.forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(TeamForm, self).__init__(*args, **kwargs)
+
+        self.fields['captain'].queryset = self.instance.players
+
+
 class PlayerForm(django.forms.ModelForm):
     class Meta:
         model = Player
