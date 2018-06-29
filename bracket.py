@@ -61,13 +61,13 @@ class Match(object):
 
         src_m = getattr(self, 'source_match_{}'.format(side), None)
         if src_m is not None:
-            description = "{} of match {}".format("winner" if want else "loser", self.number)
+            description = "{} of match {}".format("winner" if want else "loser", self.play_order)
         return description
 
     def __repr__(self):
 
         return("match {}: {} vs {}".format(
-            self.number,
+            self.play_order,
             'bye' if self.team_a is False else self.team_a or self.source_match_a.teams_desc('a', self.a_want_winner),
             'bye' if self.team_b is False else self.team_b or self.source_match_b.teams_desc('b', self.b_want_winner),
         ))
@@ -76,7 +76,7 @@ class Match(object):
 teams = []
 if args.team_file is not None:
     teams = json.load(open(args.team_file))['teams']
-    print(json.dumps(teams, indent=2))
+    # print(json.dumps(teams, indent=2))
 
 
 if len(teams):
@@ -84,7 +84,7 @@ if len(teams):
 else:
     br_size = bracket_size(args.size)
 
-print("the bracket size is: {}".format(bracket_size(br_size)))
+# print("the bracket size is: {}".format(bracket_size(br_size)))
 
 # round 1 matches
 i = 0
@@ -142,7 +142,7 @@ def losers_bracket_matches(winners_round_matches, losers_round_matches, offset, 
     inc = 0
     size = len(winners_round_matches)
     while inc < size:
-        print("adding losers bracket match: {}".format(offset + inc + 1))
+        # print("adding losers bracket match: {}".format(offset + inc + 1))
         this_source_match_a = winners_round_matches[size - 1 - inc] if reverse else winners_round_matches[inc]
         this_source_match_b = losers_round_matches[inc]
         new_matches.append(
@@ -167,7 +167,7 @@ losers_bracket_rounds = []
 
 while len(match_rounds) < round_count:
     # loser's bracket initial round
-    print("currently have {} rounds".format(len(match_rounds)))
+    # print("currently have {} rounds".format(len(match_rounds)))
 
     this_round_match_objects = new_round_matches(
         deepcopy(prev_round_matches), running_match_count
@@ -237,52 +237,64 @@ if args.type == 'double':
         team_a=None,
         team_b=None,
         number=running_match_count + 1,
+        a_want_winner=False,
     )
     match_rounds.append([if_necessary_match])
 
 # now set the play order ...
-
+all_matches = []
 # first the first round from each of the brackets
 play_order_inc = 1
-for match in match_rounds[0] + losers_bracket_rounds[0]:
+for match in match_rounds[0] + (losers_bracket_rounds[0] if len(losers_bracket_rounds) else []):
     match.play_order = play_order_inc
+    all_matches.append(match)
     play_order_inc += 1
-
-# 1 - 1, 2
-# 2 - 3, 4
-# 3 - 5, (6)
 
 round_inc = 1
 while round_inc < round_count:
+    print("working on round {}".format(round_inc))
     for match in match_rounds[round_inc]:
         match.play_order = play_order_inc
+        print("set order for match {} to {}".format(match.number, match.play_order))
+        all_matches.append(match)
         play_order_inc += 1
-    for losers_bracket_match in losers_bracket_rounds[2 * round_inc - 1]:
+    for losers_bracket_match in \
+            losers_bracket_rounds[2 * round_inc - 1] + \
+            losers_bracket_rounds[2 * round_inc] if len(losers_bracket_rounds) > 2 * round_inc else []:
         losers_bracket_match.play_order = play_order_inc
+        all_matches.append(losers_bracket_match)
         play_order_inc += 1
-    if len(losers_bracket_rounds) > 2 * round_inc:
-        for losers_bracket_match in losers_bracket_rounds[2 * round_inc]:
-            losers_bracket_match.play_order = play_order_inc
-            play_order_inc += 1
     round_inc += 1
 
-print("match rounds: %s losers rounds: %s" % (len(match_rounds), len(losers_bracket_rounds)))
+# now add and order the matches that are on the winners and losers side, but aren't in the order in the predictable way
+# print("the rounds expected not to be ordered are: %s" % [match_rounds[round_count:] + losers_bracket_rounds[-1]])
+if args.type == 'double':
+    for match in losers_bracket_rounds[-1] + match_rounds[round_count] + match_rounds[-1]:
+        match.play_order = play_order_inc
+        all_matches.append(match)
+        play_order_inc += 1
 
-i = 0
-for match_round in match_rounds:
-    print("winners round %d" % (i + 1))
-    for match in match_round:
-        # print(" %s: %s" % (match, match.play_order or match.number))
-        print(" %s: %s" % (match, match.play_order))
-        # print(match)
-    i += 1
+# print("match rounds: %s losers rounds: %s" % (len(match_rounds), len(losers_bracket_rounds)))
 
-# print("there are {} losers bracket rounds".format(len(losers_bracket_rounds)))
-i = 0
-for losers_bracket_round in losers_bracket_rounds:
-    print("losers round %d" % (i + 1))
-    for match in losers_bracket_round:
-        # print(" %s: %s" % (match, match.play_order or match.number))
-        print(" %s: %s" % (match, match.play_order))
-        # print(match)
-    i += 1
+# i = 0
+# for match_round in match_rounds:
+#     print("winners round %d" % (i + 1))
+#     for match in match_round:
+#         # print(" %s: %s" % (match, match.play_order or match.number))
+#         print(" %s: %s" % (match, match.play_order))
+#         # print(match)
+#     i += 1
+#
+# # print("there are {} losers bracket rounds".format(len(losers_bracket_rounds)))
+# i = 0
+# for losers_bracket_round in losers_bracket_rounds:
+#     print("losers round %d" % (i + 1))
+#     for match in losers_bracket_round:
+#         # print(" %s: %s" % (match, match.play_order or match.number))
+#         print(" %s: %s" % (match, match.play_order))
+#         # print(match)
+#     i += 1
+#
+
+for match in all_matches:
+    print("{} has number {} and order {}".format(match, match.number, match.play_order))
