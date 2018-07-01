@@ -9,7 +9,7 @@ from django.shortcuts import redirect
 
 from .models import Division, GameOrder, Match, Player, PlayPosition, WeekDivisionMatchup
 from .models import PlayerSeasonSummary, ScoreSheet, Season, Sponsor, Table, Team, Week
-from .forms import MatchForm
+from .forms import TeamForm, MatchForm
 from .utils import expire_page
 
 admin.AdminSite.site_header = "{} stats admin".format(settings.LEAGUE['name'])
@@ -312,9 +312,11 @@ class TeamAdmin(admin.ModelAdmin):
     list_display = ('name', 'record', 'season', 'ranking', 'forfeit_wins', 'rank_tie_breaker')
     list_filter = [SeasonFilter, 'rank_tie_breaker']
     filter_horizontal = ['players']
-    fields = ['season', 'table', 'division', 'name', 'players', 'rank_tie_breaker']
+    fields = ['season', 'table', 'division', 'name', 'captain', 'players', 'rank_tie_breaker']
     actions = ['clear_tie_breakers', 'add_tie_breakers']
     save_as = True
+
+    form = TeamForm
 
     @staticmethod
     def record(obj):
