@@ -94,10 +94,8 @@ class TeamPlayoffMatchup(models.Model):
 
         return ("match {}: {} vs {}".format(
             self.play_order,
-            'bye' if self.team_a is False else self.team_a or self.source_match_a.teams_desc('a',
-                                                                                             self.a_want_winner),
-            'bye' if self.team_b is False else self.team_b or self.source_match_b.teams_desc('b',
-                                                                                             self.b_want_winner),
+            'bye' if self.team_a is False else self.team_a or self.source_match_a.teams_desc('a', self.a_want_winner),
+            'bye' if self.team_b is False else self.team_b or self.source_match_b.teams_desc('b', self.b_want_winner),
         ))
 
 
