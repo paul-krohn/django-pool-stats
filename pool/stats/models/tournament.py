@@ -16,6 +16,7 @@ BRACKET_TYPES = [
     ('l', 'Losers'),
 ]
 
+# these do/must match the field names in Participant, below
 PARTICIPANT_TYPES = [
     ('team', 'Team'),
     ('player', 'Player'),
@@ -27,13 +28,29 @@ class Tournament(models.Model):
     name = models.TextField()
     type = models.TextField(choices=TOURNAMENT_TYPES)
     elimination = models.TextField(choices=ELIMINATION_TYPES)
+    season = models.ForeignKey('Season', on_delete=models.CASCADE, null=True)
 
-    # class Meta:
-    #     abstract = True
+    def __str__(self):
+        return self.name
+
+    def create_brackets(self):
+        winners_bracket = Bracket(tournament=self, type='w')
+        winners_bracket.save()
+        if self.elimination is 'double':
+            losers_bracket = Bracket(tournament=self, type='l')
+            losers_bracket.save()
 
 
-class TeamPlayoffTournament(Tournament):
-    pass
+class Participant(models.Model):
+    type = models.TextField(choices=PARTICIPANT_TYPES)
+    tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
+    # these field names do/must match the PARTICIPANT_TYPES list above
+    player = models.ForeignKey('Player', on_delete=models.DO_NOTHING, null=True)
+    team = models.ForeignKey('Team', on_delete=models.DO_NOTHING, null=True)
+    scotch = models.ForeignKey('ScotchDoublesTeam', on_delete=models.DO_NOTHING, null=True)
+
+    def __str__(self):
+        return getattr(self, '{}'.format(self.type)).__str__()
 
 
 class Bracket(models.Model):
@@ -49,29 +66,29 @@ class Round(models.Model):
         return '{}-{}'.format(self.bracket.type, self.number)
 
 
-class TeamPlayoffMatchup(models.Model):
+class TournamentMatchup(models.Model):
 
     round = models.ForeignKey(Round, on_delete=models.DO_NOTHING)
     source_match_a = models.ForeignKey(
-        'TeamPlayoffMatchup', on_delete=models.DO_NOTHING, null=True,
+        'stats.TournamentMatchup', on_delete=models.DO_NOTHING, null=True,
         related_name='match_a',
     )
     source_match_b = models.ForeignKey(
-        'TeamPlayoffMatchup', on_delete=models.DO_NOTHING, null=True,
+        'stats.TournamentMatchup', on_delete=models.DO_NOTHING, null=True,
         related_name='match_b',
     )
 
-    team_a = models.ForeignKey(
-        'Team', on_delete=models.DO_NOTHING, null=True,
-        related_name='team_a'
+    participant_a = models.ForeignKey(
+        Participant, on_delete=models.DO_NOTHING, null=True,
+        related_name='participant_a'
     )
-    team_b = models.ForeignKey(
-        'Team', on_delete=models.DO_NOTHING, null=True,
-        related_name='team_b'
+    participant_b = models.ForeignKey(
+        Participant, on_delete=models.DO_NOTHING, null=True,
+        related_name='participant_b'
     )
 
     winner = models.ForeignKey(
-        'Team', on_delete=models.DO_NOTHING, null=True,
+        Participant, on_delete=models.DO_NOTHING, null=True,
     )
 
     number = models.IntegerField()
@@ -79,11 +96,11 @@ class TeamPlayoffMatchup(models.Model):
     b_want_winner = models.BooleanField()
     play_order = models.IntegerField()
 
-    def teams_desc(self, side, want):
-        if self.team_a and self.team_b:
-            description = "{} of {} vs {}".format("winner" if want else "loser", self.team_a, self.team_b)
+    def description(self, side, want):
+        if self.participant_a and self.participant_b:
+            description = "{} of {} vs {}".format("winner" if want else "loser", self.participant_a, self.participant_b)
         else:
-            description = "{}".format(self.team_a or self.team_b)
+            description = "{}".format(self.participant_a or self.participant_b)
 
         src_m = getattr(self, 'source_match_{}'.format(side), None)
         if src_m is not None:
@@ -94,19 +111,10 @@ class TeamPlayoffMatchup(models.Model):
 
         return ("match {}: {} vs {}".format(
             self.play_order,
-            'bye' if self.team_a is False else self.team_a or self.source_match_a.teams_desc('a', self.a_want_winner),
-            'bye' if self.team_b is False else self.team_b or self.source_match_b.teams_desc('b', self.b_want_winner),
-        ))
+            'bye' if self.participant_a is False else self.participant_a or
+                self.source_match_a.description('a', self.a_want_winner),
+            'bye' if self.participant_b is False else self.participant_b or
+                self.source_match_b.description('b', self.b_want_winner),
+                )
+        )
 
-
-class Participant(models.Model):
-    type = models.TextField(choices=PARTICIPANT_TYPES)
-    team = models.ForeignKey('Team', on_delete=models.DO_NOTHING, null=True, blank=True)
-    player = models.ForeignKey(
-        'Player',
-        related_name='tournament_player',
-        on_delete=models.DO_NOTHING, null=True, blank=True)
-    scotch_team = models.ManyToManyField(
-        'Player',
-        related_name='scotch_team_member',
-    )

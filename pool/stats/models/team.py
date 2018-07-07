@@ -1,5 +1,3 @@
-import json
-
 from django.db import models
 
 from .division import Division
@@ -7,9 +5,14 @@ from .player import Player
 from .scoresheet import ScoreSheet
 from .season import Season
 from .table import Table
+from .globals import away_home
 
 
-from .globals import away_home, logger
+class ScotchDoublesTeam(models.Model):
+    players = models.ManyToManyField('Player')
+
+    def __str__(self):
+        return ', '.join(self.players.all())
 
 
 class Team(models.Model):

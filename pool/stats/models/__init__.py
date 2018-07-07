@@ -12,5 +12,5 @@ from .season import Season
 from .sponsor import Sponsor
 from .table import Table
 from .team import Team, AwayTeam, HomeTeam, Tie, TieBreakerResult
-from .tournament import Tournament, Bracket, Round, TeamPlayoffMatchup
+from .tournament import Participant, Tournament, Bracket, Round, TournamentMatchup
 from .week import Week
