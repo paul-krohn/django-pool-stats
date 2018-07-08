@@ -65,38 +65,14 @@ class Tournament(models.Model):
             losers_bracket_round_inc = 0
             losers_bracket_round_count = 2 * (self.round_count() - 1)
             while losers_bracket_round_inc < losers_bracket_round_count:
-                lbr = Round(
+                lbr, created = Round.objects.get_or_create(
                     bracket=self.bracket_set.get(type='l'),
-                    number=round_inc + 1,
+                    number=losers_bracket_round_inc + 1,
                 )
                 lbr.save()
                 losers_bracket_round_inc += 1
 
-    def create_matchups(self, side='w'):
 
-        # first round winners side matchups; assumes participant_set is in the desired order
-        i = 0
-        br_size = self.bracket_size()
-
-        while i < (br_size / 2):
-            participant_one = self.participant_set.all()[i]
-            participant_two = False
-            if len(self.participant_set.all()) > (br_size - 1) - i:
-                participant_two = self.participant_set.all()[(br_size - 1) - i]
-                # TournamentMatchup.objects.get_or_create()
-            tm, created = TournamentMatchup.objects.get_or_create(
-                source_match_a=None,
-                source_match_b=None,
-                participant_a=participant_one,
-                participant_b=participant_two,
-                round=self.bracket_set.get(type=side).round_set.get(number=1),
-                number=i + 1,
-            )
-            print("matchup {} vs {}:  was created: {}".format(
-                tm.participant_a, tm.participant_b, created)
-            )
-            tm.save()
-            i += 1
 
 class Participant(models.Model):
     type = models.TextField(choices=PARTICIPANT_TYPES)
@@ -121,6 +97,63 @@ class Round(models.Model):
 
     def __str__(self):
         return '{}-{}'.format(self.bracket.type, self.number)
+
+
+    def matchup_count(self):
+        if self.bracket.type is 'w':
+            # return log(foo, 2) - (self.number - 1)
+            return int(self.bracket.tournament.bracket_size() / 2 ** self.number)
+        else:
+            # LS round sizes from bracket of 64: 16, 16, 8, 8, 4, 4, 2, 2, 1
+            # if round number is not divisible by 2, add 1, then use that as the power of 2 for the divisor
+            return int(self.bracket.tournament.bracket_size() / (2 ** (self.number + ceil(self.number % 2))))
+
+    def create_matchups(self):
+
+        # first round winners side matchups; assumes participant_set is in the desired order
+        i = 0
+        matchup_count = self.matchup_count()
+        br_size = 2 * matchup_count
+
+        while i < matchup_count:
+            # source matches; not set in first round
+            sma = None
+            smb = None
+            if self.number > 1:  # _and_ winners side?
+                pass
+            # participants; only set in first round winner's side
+            pa = None
+            pb = None
+            if self.number == 1:
+                if self.bracket.type is 'w':
+                    pa = self.bracket.tournament.participant_set.all()[i]
+                    pb = None  # allows for byes when the bracket is not full
+                    if len(self.bracket.tournament.participant_set.all()) > (br_size - 1) - i:
+                        pb = self.bracket.tournament.participant_set.all()[(br_size - 1) - i]
+                else:
+                    # losers bracket round one is also a special case; we initialize from losers of all the
+                    # round one winners side matches
+                    # source_round = self.bracket.tournament.bracket_set.get(type__eq='w').round_set.get(number=1)
+                    source_round_matchups = self.bracket.tournament.bracket_set.get(type='w').round_set.get(number=1).tournamentmatchup_set.all()
+                    sma = source_round_matchups[i]
+                    smb = source_round_matchups[br_size - i - 1]
+            else:
+                return
+
+            tm, created = TournamentMatchup.objects.get_or_create(
+                source_match_a=sma,
+                source_match_b=smb,
+                participant_a=pa,
+                participant_b=pb,
+                # round=self.bracket_set.get(type=side).round_set.get(number=1),
+                round=self,
+                number=i + 1,
+            )
+            print("matchup {} vs {}:  was created: {}".format(
+                tm.participant_a, tm.participant_b, created)
+            )
+            tm.save()
+            i += 1
 
 
 class TournamentMatchup(models.Model):
