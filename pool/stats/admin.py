@@ -9,6 +9,8 @@ from django.shortcuts import redirect
 
 from .models import Division, GameOrder, Match, Player, PlayPosition, WeekDivisionMatchup
 from .models import PlayerSeasonSummary, ScoreSheet, Season, Sponsor, Table, Team, Week
+from .models import Tournament, Participant
+
 from .forms import TeamForm, MatchForm
 from .utils import expire_page
 
@@ -486,6 +488,67 @@ class TableAdmin(admin.ModelAdmin):
 
 admin.site.register(Table, TableAdmin)
 
+
+class TournamentAdmin(admin.ModelAdmin):
+    list_filter = [SeasonFilter]
+
+
+admin.site.register(Tournament, TournamentAdmin)
+
+
+class TournamentSeasonFilter(SeasonFilter):
+    # for admin views where the object's match is via the season
+    parameter_name = 'tournament__season'
+
+    def queryset(self, request, queryset):
+        if self.value() == 'all':
+            return queryset
+        elif self.value() is None:
+            return queryset.filter(tournament__season__is_default=True)
+        else:
+            return queryset.filter(tournament__season=self.value())
+
+
+class TournamentFilter(SimpleListFilter):
+    # a custom filter that defaults to the 'default' season, instead of a 'All'
+    # cribbed/modified from https://stackoverflow.com/questions/851636/default-filter-in-django-admin
+    title = _('Tournament')
+
+    parameter_name = 'Tournament'
+
+    def lookups(self, request, model_admin):
+        # we want to return a list of tuples of the query value and display value;
+        # in this case, all the tournaments in the default season, plus 'all'
+        choices = [(tournament.id, tournament) for tournament in Tournament.objects.filter(season__is_default=True)]
+        choices.append(('all', _('All')))
+        return choices
+
+    def choices(self, cl):
+        for lookup, title in self.lookup_choices:
+            yield {
+                'selected': self.value() == lookup,
+                'query_string': cl.get_query_string({
+                    self.parameter_name: lookup,
+                }, []),
+                'display': title,
+            }
+
+    def queryset(self, request, queryset):
+        if self.value() == 'all':
+            return queryset
+        elif self.value() is None:
+            return queryset.filter(tournament__season__is_default=True)
+        else:
+            return queryset.filter(tournament=self.value())
+
+
+class ParticipantAdmin(admin.ModelAdmin):
+    list_filter = [TournamentSeasonFilter, TournamentFilter]
+    # TODO: add a participant name attribute that picks the right thing from player/team/scotch
+    list_display = ['player', 'team', 'scotch', 'tournament']
+
+
+admin.site.register(Participant, ParticipantAdmin)
 
 # TODO:
 # It would be pretty to have, in the match admin, the teams filtered by season
