@@ -97,7 +97,6 @@ class Round(models.Model):
     def __str__(self):
         return '{}-{}'.format(self.bracket.type, self.number)
 
-
     def matchup_count(self):
         if self.bracket.type is 'w':
             # return log(foo, 2) - (self.number - 1)
