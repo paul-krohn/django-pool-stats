@@ -11,6 +11,7 @@ from .views import player
 from .views import season
 from .views import sponsor
 from .views import team
+from .views import tournament
 
 
 view_cache_time = settings.VIEW_CACHE_TIME
@@ -55,6 +56,10 @@ urlpatterns = [
 
     url(r'^seasons/', season.seasons, name='seasons'),
     url(r'^set_season/(?P<season_id>[0-9]+)/$', season.set_season, name='set_season'),
+
+    url(r'^tournaments/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(tournament.tournaments), name='tournaments'),
+    url(r'^tournaments/', tournament.tournaments, name='tournaments'),
+    url(r'^tournament/(?P<tournament_id>[0-9]+)', tournament.tournament, name='tournament'),
 
     url(r'^update_stats/', views.update_stats, name='update_stats'),
 

@@ -1,0 +1,20 @@
+{% extends "stats/base.html" %}
+{% block title %}SFPA :: Teams{% endblock %}
+
+{% block content %}
+<div class="text-center">
+<h2>{{ tournament }}</h2>
+{% for bracket in tournament.bracket_set.all %}
+    {% for round in bracket.round_set.all %}
+    <p>{{ round }}</p>
+        {% for matchup in round.tournamentmatchup_set.all %}
+            <p>
+            {% if matchup %}
+                {{ matchup }}
+            {% endif %}
+            </p>
+        {%  endfor %}
+    {%  endfor %}
+{%  endfor %}
+</div>
+{% endblock %}

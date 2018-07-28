@@ -73,14 +73,13 @@ class Tournament(models.Model):
                 losers_bracket_round_inc += 1
 
 
-
 class Participant(models.Model):
     type = models.TextField(choices=PARTICIPANT_TYPES)
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
     # these field names do/must match the PARTICIPANT_TYPES list above
-    player = models.ForeignKey('Player', on_delete=models.DO_NOTHING, null=True)
-    team = models.ForeignKey('Team', on_delete=models.DO_NOTHING, null=True)
-    scotch = models.ForeignKey('ScotchDoublesTeam', on_delete=models.DO_NOTHING, null=True)
+    player = models.ForeignKey('Player', on_delete=models.DO_NOTHING, null=True, blank=True)
+    team = models.ForeignKey('Team', on_delete=models.DO_NOTHING, null=True, blank=True)
+    scotch = models.ForeignKey('ScotchDoublesTeam', on_delete=models.DO_NOTHING, null=True, blank=True)
 
     def __str__(self):
         return getattr(self, '{}'.format(self.type)).__str__()
@@ -125,6 +124,9 @@ class Round(models.Model):
             # participants; only set in first round winner's side
             pa = None
             pb = None
+            # do we want winners? mostly yes; override for drop-in matches
+            wwa = True
+            wwb = True
             if self.number == 1:
                 if self.bracket.type is 'w':
                     pa = self.bracket.tournament.participant_set.all()[i]
@@ -154,6 +156,7 @@ class Round(models.Model):
                     winners_source_matches = winners_side_rounds.get(number=self.number - 1).tournamentmatchup_set.all()
                     losers_source_matches = losers_side_rounds.get(number=self.number - 1).tournamentmatchup_set.all()
                     sma = winners_source_matches[i]
+                    wwa = False
                     smb = losers_source_matches[i]
 
             tm, created = TournamentMatchup.objects.get_or_create(
@@ -161,6 +164,8 @@ class Round(models.Model):
                 source_match_b=smb,
                 participant_a=pa,
                 participant_b=pb,
+                a_want_winner=wwa,
+                b_want_winner=wwb,
                 # round=self.bracket_set.get(type=side).round_set.get(number=1),
                 round=self,
                 number=i + 1,
@@ -175,6 +180,7 @@ class Round(models.Model):
 class TournamentMatchup(models.Model):
 
     round = models.ForeignKey(Round, on_delete=models.DO_NOTHING)
+    # TODO: make deleting a round delete a matchup
     source_match_a = models.ForeignKey(
         'stats.TournamentMatchup', on_delete=models.DO_NOTHING, null=True,
         related_name='match_a',
@@ -203,6 +209,7 @@ class TournamentMatchup(models.Model):
     play_order = models.IntegerField(null=True)
 
     def description(self, side, want):
+        print('describing match {}'.format(self.number))
         if self.participant_a and self.participant_b:
             description = "{} of {} vs {}".format("winner" if want else "loser", self.participant_a, self.participant_b)
         else:
@@ -214,13 +221,23 @@ class TournamentMatchup(models.Model):
         return description
 
     def __str__(self):
+        print('stringing match number {} in bracket {}/{} tournament {} between {} and {}'.format(
+            self.play_order, self.round.bracket, self.round.bracket.type, self.round.bracket.tournament,
+            self.participant_a, self.participant_b,
+        ))
+
+        participant_b_string = self.participant_b
+        if self.participant_b is None:
+            if self.source_match_b is not None:
+                participant_b_string = self.source_match_b.description('b', self.b_want_winner)
+            else:
+                participant_b_string = 'bye'
 
         return ("match {}: {} vs {}".format(
             self.play_order,
             'bye' if self.participant_a is False else self.participant_a or
                 self.source_match_a.description('a', self.a_want_winner),
-            'bye' if self.participant_b is False else self.participant_b or
-                self.source_match_b.description('b', self.b_want_winner),
-                )
+                participant_b_string
+            )
         )
 
