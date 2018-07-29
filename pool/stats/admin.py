@@ -11,6 +11,7 @@ from .models import Division, GameOrder, Match, Player, PlayPosition, WeekDivisi
 from .models import PlayerSeasonSummary, ScoreSheet, Season, Sponsor, Table, Team, Week
 from .forms import TeamForm, MatchForm
 from .utils import expire_page
+from .views.season import get_default_season
 
 admin.AdminSite.site_header = "{} stats admin".format(settings.LEAGUE['name'])
 
@@ -137,6 +138,11 @@ class WeekAdmin(admin.ModelAdmin):
     list_display = ['name', 'season', 'date']
     actions = ['division_matchups', 'intra_division_matches', 'league_rank_matches', 'lint_table_assignments']
     inlines = [WeekDivisionMatchupInline]
+
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(WeekAdmin, self).get_form(request, obj, **kwargs)
+        form.base_fields['season'].initial = get_default_season()
+        return form
 
     def lint_table_assignments(self, request, queryset):
         # queryset should be 1 week
