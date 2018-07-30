@@ -18,8 +18,10 @@ class TeamForm(django.forms.ModelForm):
 
         default_season = get_default_season()
 
-        if getattr(self, 'id', None) is not None:
-            self.fields['captain'].queryset = self.instance.players
+        if getattr(self.instance, 'id') is None:
+            self.fields['captain'].queryset = Player.objects.none()
+        else:
+            self.fields['captain'].queryset = self.instance.players.all()
         self.fields['season'].initial = default_season
 
 
