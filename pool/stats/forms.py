@@ -1,6 +1,8 @@
 import django.forms
-from .models import Player, Team, Game, ScoreSheet, Match
 from django.core.exceptions import ValidationError
+
+from .models import Player, Team, Game, ScoreSheet, Match
+from .views.season import get_default_season
 
 WINNER_CHOICES = (
     ('home', 'Home'),
@@ -14,7 +16,13 @@ class TeamForm(django.forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super(TeamForm, self).__init__(*args, **kwargs)
 
-        self.fields['captain'].queryset = self.instance.players
+        default_season = get_default_season()
+
+        if getattr(self.instance, 'id') is None:
+            self.fields['captain'].queryset = Player.objects.none()
+        else:
+            self.fields['captain'].queryset = self.instance.players.all()
+        self.fields['season'].initial = default_season
 
 
 class PlayerForm(django.forms.ModelForm):
@@ -135,3 +143,4 @@ class MatchForm(django.forms.ModelForm):
         else:
             self.fields['away_team'].queryset = Team.objects.filter(season__is_default=True)
             self.fields['home_team'].queryset = Team.objects.filter(season__is_default=True)
+        self.fields['season'].initial = get_default_season()

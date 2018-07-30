@@ -100,13 +100,12 @@ class MatchSeasonFilter(SeasonFilter):
 
 class DivisionAdmin(admin.ModelAdmin):
     list_filter = ['season']
+    list_display = ['__str__', 'season']
 
-    def get_queryset(self, request):
-        qs = super(DivisionAdmin, self).get_queryset(request)
-        if 'season_id' in request.session.keys():
-            return qs.filter(season=request.session['season_id'])
-        else:
-            return qs
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(DivisionAdmin, self).get_form(request, obj, **kwargs)
+        form.base_fields['season'].initial = get_default_season()
+        return form
 
 
 admin.site.register(Division, DivisionAdmin)
@@ -477,9 +476,10 @@ class MatchAdmin(admin.ModelAdmin):
 
     def get_changeform_initial_data(self, request):
         try:
-            default_season = Season.objects.filter(is_default=True)[0]
+            # default_season = Season.objects.filter(is_default=True)[0]
+            default_season = Season.objects.get(is_default=True)
             return {'season': default_season.id}
-        except ValueError:
+        except Season.DoesNotExist as e:
             return {}
 
 
