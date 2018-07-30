@@ -100,18 +100,12 @@ class MatchSeasonFilter(SeasonFilter):
 
 class DivisionAdmin(admin.ModelAdmin):
     list_filter = ['season']
+    list_display = ['__str__', 'season']
 
     def get_form(self, request, obj=None, **kwargs):
         form = super(DivisionAdmin, self).get_form(request, obj, **kwargs)
         form.base_fields['season'].initial = get_default_season()
         return form
-
-    def get_queryset(self, request):
-        qs = super(DivisionAdmin, self).get_queryset(request)
-        if 'season_id' in request.session.keys():
-            return qs.filter(season=request.session['season_id'])
-        else:
-            return qs
 
 
 admin.site.register(Division, DivisionAdmin)
