@@ -9,6 +9,7 @@ from ..models import PlayPosition, AwaySubstitution, HomeSubstitution, GameOrder
 
 from ..utils import expire_page
 from ..views.week import get_current_week
+from ..views.season import get_default_season
 from ..forms import ScoreSheetGameForm
 from .base_cases import BasePoolStatsTestCase
 
@@ -36,6 +37,40 @@ def add_session_to_request(request):
     middleware = SessionMiddleware()
     middleware.process_request(request)
     request.session.save()
+
+
+class SeasonTestCases(BasePoolStatsTestCase):
+
+    # this value is assumed given the fixtures
+    latest_season_by_date = 5
+
+    def test_get_default_season(self):
+        """
+        Verify that from the fixture data, we get the correct season as the default.
+        """
+
+        self.assertEqual(self.default_season, get_default_season())
+
+    def test_get_default_season_when_no_default(self):
+        """
+        Verify that when there is no default season, we return the latest one
+        """
+
+        default_season = Season.objects.get(id=self.default_season)
+        default_season.is_default = False
+        default_season.save()
+
+        retrieved_default_season_id = get_default_season()
+        self.assertEqual(retrieved_default_season_id, self.latest_season_by_date)
+
+    def test_get_default_season_when_no_seasons(self):
+        """
+        Verify that when there are no seasons (ie the fixture data seasons
+        have been deleted), the default season id is 0.
+        """
+        for s in Season.objects.all():
+            s.delete()
+        self.assertEqual(0, get_default_season())
 
 
 class ScoreSheetTests(BasePoolStatsTestCase):

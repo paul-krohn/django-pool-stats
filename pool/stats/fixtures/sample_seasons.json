@@ -8,5 +8,15 @@
       "is_default": true,
       "minimum_games": 1
     }
+  },
+  {
+    "model": "stats.season",
+    "pk": 5,
+    "fields": {
+      "name": "Spring 2011",
+      "pub_date": "2011-01-08T12:00:00Z",
+      "is_default": false,
+      "minimum_games": 1
+    }
   }
 ]
