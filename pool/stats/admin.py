@@ -7,7 +7,7 @@ from django.utils.safestring import mark_safe
 from django.contrib.admin import SimpleListFilter
 from django.shortcuts import redirect
 
-from pool.stats.utils import update_season_stats, expire_caches
+from .utils import update_season_stats, expire_caches
 from .models import Division, GameOrder, Match, Player, PlayPosition, WeekDivisionMatchup
 from .models import ScoreSheet, Season, Sponsor, Table, Team, Week
 from .forms import TeamForm, MatchForm

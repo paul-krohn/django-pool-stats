@@ -5,8 +5,8 @@ from selenium.webdriver.support.ui import Select
 
 from .base_cases import BaseSeleniumPoolStatsTestCase, form_length_map, location_names
 
-from pool.stats.models import ScoreSheet, Team, PlayerSeasonSummary
-from pool.stats.utils import expire_page
+from ..models import ScoreSheet, Team, PlayerSeasonSummary
+from ..utils import expire_page
 
 
 class BaseViewRedirectTestCase(BaseSeleniumPoolStatsTestCase):

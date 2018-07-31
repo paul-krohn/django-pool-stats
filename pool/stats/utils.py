@@ -4,7 +4,7 @@ from django.core.cache import cache
 from django.urls import reverse
 from django.utils.cache import get_cache_key
 
-from pool.stats.models import Season, PlayerSeasonSummary, Team
+from .models import Season, PlayerSeasonSummary, Team
 
 
 def session_uid(request):
