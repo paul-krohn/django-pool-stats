@@ -489,7 +489,7 @@ class ScoreSheetAdmin(admin.ModelAdmin):
             self.message_user(
                 request,
                 level='ERROR',
-                message='You must select exactly one season to update stats for.',
+                message='You must select exactly one score sheet to update stats for.',
             )
         # see comment about redirect_to above
         return redirect(redirect_to)
