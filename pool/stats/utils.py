@@ -1,7 +1,10 @@
 import time
 
 from django.core.cache import cache
+from django.urls import reverse
 from django.utils.cache import get_cache_key
+
+from pool.stats.models import Season, PlayerSeasonSummary, Team
 
 
 def session_uid(request):
@@ -29,3 +32,19 @@ def expire_page(request, path=None, query_string=None, method='GET'):
     key = get_cache_key(request)
     if key in cache:
         cache.delete(key)
+
+
+def update_season_stats(season_id):
+    for team in Season.objects.get(id=season_id).team_set.all():
+            team.count_games()
+    PlayerSeasonSummary.update_all(season_id=season_id)
+    Team.update_rankings(season_id=season_id)
+
+
+def expire_caches(request, season_id):
+
+    for pss in PlayerSeasonSummary.objects.filter(season_id=season_id):
+        expire_page(request, reverse('player', kwargs={'player_id': pss.player.id}))
+    expire_page(request, reverse('divisions', kwargs={'season_id': season_id}), '')
+    expire_page(request, reverse('players', kwargs={'season_id': season_id}), '')
+    expire_page(request, reverse('teams', kwargs={'season_id': season_id}), '')

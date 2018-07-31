@@ -7,10 +7,10 @@ from django.utils.safestring import mark_safe
 from django.contrib.admin import SimpleListFilter
 from django.shortcuts import redirect
 
+from pool.stats.utils import update_season_stats, expire_caches
 from .models import Division, GameOrder, Match, Player, PlayPosition, WeekDivisionMatchup
-from .models import PlayerSeasonSummary, ScoreSheet, Season, Sponsor, Table, Team, Week
+from .models import ScoreSheet, Season, Sponsor, Table, Team, Week
 from .forms import TeamForm, MatchForm
-from .utils import expire_page
 from .views.season import get_default_season
 
 admin.AdminSite.site_header = "{} stats admin".format(settings.LEAGUE['name'])
@@ -404,22 +404,6 @@ admin.site.register(PlayPosition, PlayPositionAdmin)
 
 def make_official(modeladmin, request, queryset):
     queryset.update(official=1)
-
-
-def update_season_stats(season_id):
-    for team in Season.objects.get(id=season_id).team_set.all():
-            team.count_games()
-    PlayerSeasonSummary.update_all(season_id=season_id)
-    Team.update_rankings(season_id=season_id)
-
-
-def expire_caches(request, season_id):
-
-    for pss in PlayerSeasonSummary.objects.filter(season_id=season_id):
-        expire_page(request, reverse('player', kwargs={'player_id': pss.player.id}))
-    expire_page(request, reverse('divisions', kwargs={'season_id': season_id}), '')
-    expire_page(request, reverse('players', kwargs={'season_id': season_id}), '')
-    expire_page(request, reverse('teams', kwargs={'season_id': season_id}), '')
 
 
 def lint_score_sheets(modeladmin, request, queryset):
