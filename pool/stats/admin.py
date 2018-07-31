@@ -7,10 +7,10 @@ from django.utils.safestring import mark_safe
 from django.contrib.admin import SimpleListFilter
 from django.shortcuts import redirect
 
+from .utils import update_season_stats, expire_caches
 from .models import Division, GameOrder, Match, Player, PlayPosition, WeekDivisionMatchup
-from .models import PlayerSeasonSummary, ScoreSheet, Season, Sponsor, Table, Team, Week
+from .models import ScoreSheet, Season, Sponsor, Table, Team, Week
 from .forms import TeamForm, MatchForm
-from .utils import expire_page
 from .views.season import get_default_season
 
 admin.AdminSite.site_header = "{} stats admin".format(settings.LEAGUE['name'])
@@ -121,6 +121,53 @@ admin.site.register(Player, PlayerAdmin)
 
 class SeasonAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_default', 'pub_date')
+    actions = ['set_default_season', 'update_stats']
+
+    def set_default_season(self, request, queryset):
+        # queryset should be 1 season
+        if len(queryset) == 1:
+            # make sure all the other seasons aren't the default
+            for a_season in Season.objects.all().exclude(id__in=[queryset[0].id]):
+                a_season.is_default = False
+                a_season.save()
+            queryset[0].is_default = True
+            queryset[0].save()
+            self.message_user(
+                request,
+                level='INFO',
+                message='{} is now the default season.'.format(queryset[0])
+            )
+        else:
+            self.message_user(
+                request,
+                level='ERROR',
+                message='You must select exactly one season to be the default.',
+            )
+            return False
+
+    def update_stats(self, request, queryset):
+        # We need to redirect to this path later, because when we want to expire the cache,
+        # we have to change the path of the request object, resulting in a redirect to the player page
+        # of the last object expired, which is confusing. We can't copy.deepcopy() the request object,
+        # due to a "TypeError: cannot serialize '_io.BufferedReader' object" error.
+        redirect_to = request.get_full_path()
+        if len(queryset) == 1:
+            season_id = queryset[0].id
+            update_season_stats(season_id)
+            expire_caches(request, season_id)
+            self.message_user(
+                request,
+                level='INFO',
+                message='Stats updated and caches expired.',
+            )
+        else:
+            self.message_user(
+                request,
+                level='ERROR',
+                message='You must select exactly one season to update stats for.',
+            )
+        # see comment about redirect_to above
+        return redirect(redirect_to)
 
 
 admin.site.register(Season, SeasonAdmin)
@@ -359,29 +406,6 @@ def make_official(modeladmin, request, queryset):
     queryset.update(official=1)
 
 
-def update_stats(modeladmin, request, queryset):
-    # We need to redirect to this path later, because when we want to expire the cache,
-    # we have to change the path of the request object, resulting in a redirect to the player page
-    # of the last player updated, which is confusing. We can't copy.deepcopy() the request object,
-    # due to a "TypeError: cannot serialize '_io.BufferedReader' object" error.
-    redirect_to = request.get_full_path()
-    # we'll assume the season is the same for all the score sheets and use the first one
-    expire_season_id = queryset[0].match.season.id
-    for score_sheet in queryset:
-        for team in [score_sheet.match.home_team, score_sheet.match.away_team]:
-            team.count_games()
-            expire_page(request, reverse('team', kwargs={'team_id': team.id}), '')
-    PlayerSeasonSummary.update_all(season_id=expire_season_id)
-    for pss in PlayerSeasonSummary.objects.filter(season_id=expire_season_id):
-        expire_page(request, reverse('player', kwargs={'player_id': pss.player.id}))
-    Team.update_rankings(season_id=expire_season_id)
-    expire_page(request, reverse('divisions', kwargs={'season_id': expire_season_id}), '')
-    expire_page(request, reverse('players', kwargs={'season_id': expire_season_id}), '')
-    expire_page(request, reverse('teams', kwargs={'season_id': expire_season_id}), '')
-    # see comment about redirect_to above
-    return redirect(redirect_to)
-
-
 def lint_score_sheets(modeladmin, request, queryset):
 
     for score_sheet in queryset:
@@ -431,7 +455,7 @@ class ScoreSheetAdmin(admin.ModelAdmin):
     list_display = ['id', 'match', 'links', 'away_wins', 'home_wins', 'official', 'complete', 'comment']
     fields = ['official', 'complete', 'comment']
     list_filter = [MatchSeasonFilter, 'official', 'complete', BlankScoreSheetFilter, 'match__week']
-    actions = [lint_score_sheets, make_official, update_stats]
+    actions = [lint_score_sheets, make_official, 'update_stats']
 
     @staticmethod
     def opponents(obj):
@@ -444,6 +468,31 @@ class ScoreSheetAdmin(admin.ModelAdmin):
             score_sheet_links += '/' + format_html('<a href="{}">edit</a>'.format(
                 reverse('score_sheet_edit', args=(obj.id,))))
         return mark_safe(score_sheet_links)
+
+    def update_stats(self, request, queryset):
+        # We need to redirect to this path later, because when we want to expire the cache,
+        # we have to change the path of the request object, resulting in a redirect to the player page
+        # of the last player updated, which is confusing. We can't copy.deepcopy() the request object,
+        # due to a "TypeError: cannot serialize '_io.BufferedReader' object" error.
+        redirect_to = request.get_full_path()
+        # we'll assume the season is the same for all the score sheets and use the first one
+        update_season_id = queryset[0].match.season.id
+        if len(queryset) == 1:
+            update_season_stats(update_season_id)
+            expire_caches(request, update_season_id)
+            self.message_user(
+                request,
+                level='INFO',
+                message='Stats updated and caches expired.',
+            )
+        else:
+            self.message_user(
+                request,
+                level='ERROR',
+                message='You must select exactly one score sheet to update stats for.',
+            )
+        # see comment about redirect_to above
+        return redirect(redirect_to)
 
 
 admin.site.register(ScoreSheet, ScoreSheetAdmin)

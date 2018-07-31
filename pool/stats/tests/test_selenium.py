@@ -4,8 +4,9 @@ from django.urls import reverse
 from selenium.webdriver.support.ui import Select
 
 from .base_cases import BaseSeleniumPoolStatsTestCase, form_length_map, location_names
+
 from ..models import ScoreSheet, Team, PlayerSeasonSummary
-from ..admin import update_stats
+from ..utils import expire_page
 
 
 class BaseViewRedirectTestCase(BaseSeleniumPoolStatsTestCase):
@@ -172,8 +173,12 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         ss.official = True
         ss.save()
 
-        update_stats(False, self.factory.get(reverse('players')), [ss])
         Team.update_rankings(season_id=self.default_season)
+        # expire_page(self.factory.get(reverse('players')), reverse('player', kwargs={'player_id': player.id}))
+        expire_page(
+            RequestFactory().get(reverse('teams', kwargs={'season_id': self.default_season})),
+            reverse('teams', kwargs={'season_id': self.default_season})
+        )
         teams = Team.objects.filter(season_id=self.default_season)
         list_of_outcomes = []
         for team in teams:
