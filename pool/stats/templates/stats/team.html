@@ -6,8 +6,9 @@
 {% if team %}
 <h2>{{ team.name }}</h2>
 <h4>{{ team.wins }}-{{ team.losses }} ({{ team.win_percentage|floatformat:3 }})</h4>
-<h4><a href="{% url 'sponsor' team.sponsor.id %}">{{ team.sponsor }}</a></h4>
-
+{% if team.table and team.table.sponsor %}
+    <h4><a href="{% url 'sponsor' team.sponsor.id %}">{{ team.sponsor }}</a></h4>
+{%  endif %}
 {% if team.captain %}<p>Captain: <a href="{% url 'player' team.captain.id %}">{{ team.captain }}</a></p>{% endif %}
 {% include "stats/player_table.html" %}
 {% endif %}
