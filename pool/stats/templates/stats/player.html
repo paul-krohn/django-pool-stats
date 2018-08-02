@@ -5,8 +5,7 @@
 
 {% block content %}
 {% if player %}
-<h2>{{ player }}</h2>
-<h3>{{ request.session.season }}</h3>
+<h3>{{ player }} / {{ detail_season }}</h3>
 <div>
 {% for score_sheet_summary in score_sheet_summaries %}
 <div class="player-games"><h5>{{ score_sheet_summary.match.week.date}}: {{ score_sheet_summary.match.week }}</h5>
@@ -36,16 +35,19 @@
 </div>
 <table class="table sortable">
   <thead>
-    <tr><th>Season</th><th>Team</th><th>Wins</th><th>Losses</th><th>Percentage</th></tr>
+    <tr><th>Season</th><th>Team</th><th>Wins</th><th>Losses</th>
+        <th>Percentage</th><th>TRs</th><th>4-0s</th></tr>
   </thead>
   <tbody>
     {% for summary in summaries %}
     <tr>
-        <td>{{ summary.season }}</td>
+        <td><a href="{% url 'player' summary.player.id summary.season.id %}">{{ summary.season }}</a></td>
         <td><a href="{% url 'team' summary.team.id %}">{{ summary.team }}</a></td>
         <td>{{ summary.wins }}</td>
         <td>{{ summary.losses }}</td>
         <td>{{ summary.win_percentage|floatformat:3 }}</td>
+        <td>{{ summary.table_runs }}</td>
+        <td>{{ summary.four_ohs }}</td>
     </tr>
     {% endfor %}
   <tbody>

@@ -2,13 +2,14 @@ from django.db import models
 from django.shortcuts import get_object_or_404, render, redirect
 
 from ..forms import PlayerForm
-from ..models import Player, PlayerSeasonSummary, ScoreSheet
+from ..models import Player, PlayerSeasonSummary, ScoreSheet, Season
 from ..views import logger
 from ..views import check_season
 
 
-def player(request, player_id):
+def player(request, player_id, season_id=None):
     check_season(request)
+    detail_season = Season.objects.get(id=season_id or request.session['season_id'])
     _player = get_object_or_404(Player, id=player_id)
     summaries = PlayerSeasonSummary.objects.filter(player__exact=_player).order_by('-season')
     _score_sheets_with_dupes = ScoreSheet.objects.filter(official=True).filter(
@@ -16,7 +17,7 @@ def player(request, player_id):
         models.Q(home_lineup__player=_player) |
         models.Q(away_substitutions__player=_player) |
         models.Q(home_substitutions__player=_player)
-    ).order_by('match__week__date').filter(match__week__season=request.session['season_id'])
+    ).order_by('match__week__date').filter(match__week__season=detail_season)
     # there are dupes in _score_sheets at this point, so we have to remove them; method is cribbed from:
     # http://stackoverflow.com/questions/480214/how-do-you-remove-duplicates-from-a-list-in-python-whilst-preserving-order
     seen = set()
@@ -47,6 +48,7 @@ def player(request, player_id):
             this_score_sheet['games'].append(this_game)
         score_sheet_summaries.append(this_score_sheet)
     context = {
+        'detail_season': detail_season,
         'score_sheet_summaries': score_sheet_summaries,
         'summaries': summaries,
         'player': _player,

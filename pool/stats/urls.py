@@ -23,6 +23,7 @@ urlpatterns = [
 
     # the 'after' parameter is really just to make it testable
     url(r'^team/(?P<team_id>[0-9]+)/(?P<after>[0-9-]+)?$', team.team, name='team'),
+    url(r'^team/(?P<team_id>[0-9]+)/', team.team, name='team'),
 
     url(r'^teams/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(team.teams), name='teams'),
     url(r'^teams/', views.index, name='teams'),
@@ -35,6 +36,8 @@ urlpatterns = [
     url(r'^players/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(player.players), name='players'),
     url(r'^players/', player.players, name='players'),
 
+    url(r'^player/(?P<player_id>[0-9]+)/(?P<season_id>[0-9]+)/$',
+        player.player, name='player'),
     url(r'^player/(?P<player_id>[0-9]+)/$', cache_page(view_cache_time)(player.player), name='player'),
     url(r'^player_create/', player.player_create, name='player_create'),
 
