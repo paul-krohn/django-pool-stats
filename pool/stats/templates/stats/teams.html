@@ -21,6 +21,8 @@ $(document).ready(function () {
     </script>
 
 {% endif %}
+{% with tiebreakers|length as tb_count %}
+{% if tb_count %}
 <h3><a name="tiebreakers">Tie Breakers</a></h3>
     <div class="pull-right search"><input id="tb-filter" class="form-control" type="text" placeholder="Filter"></div>
 
@@ -46,5 +48,6 @@ $(document).ready(function () {
         {% endfor %}
       </tbody>
     </table>
-
+{% endif %}
+{% endwith %}
 {% endblock %}
