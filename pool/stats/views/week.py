@@ -58,31 +58,35 @@ def get_current_week(request, today_date=''):
     # now get the time range that is Sun-Sat this week; start with the DOW now
     today = datetime.date.today()
     if today_date != '':  # this param is really just here for tests.
-        # print('we got the arg: {}'.format(today_date))
         (year, month, day) = today_date.split('-')
         today = datetime.date(year=int(year), month=int(month), day=int(day))
 
-    # in datetime, Monday -> 0 :/
-    prev_sunday = today - datetime.timedelta(days=(today.weekday()+1))
+    prev_sunday = today - datetime.timedelta(days=(6 - today.weekday()))
     next_saturday = prev_sunday + datetime.timedelta(days=6)
 
-    _weeks = Week.objects.filter(
-        date__lt=next_saturday,
-        date__gt=prev_sunday,
+    season_weeks = Week.objects.filter(
         season_id=request.session['season_id'],
     ).order_by('date')
-
-    if len(_weeks) == 1:
-        # print('redirecting to {}/{}'.format(_weeks[0], _weeks[0].date))
-        return redirect('week', week_id=_weeks[0].id)
-    elif len(_weeks) == 2:
-        closest_week = _weeks[0]
-        closest_week_gap = abs(today - _weeks[0].date)
-        for _week in _weeks:
-            if abs(today - _week.date) < closest_week_gap:
-                closest_week_gap = abs(_week.date - today)
-                closest_week = _week
-        # print('redirecting to {}/{}'.format(closest_week, closest_week.date))
+    closest_week = None
+    if today <= season_weeks.first().date:
+        closest_week = season_weeks.first()
+    elif today >= season_weeks.last().date:
+        closest_week = season_weeks.last()
+    else:
+        close_weeks = season_weeks.filter(
+            date__lt=next_saturday,
+            date__gt=prev_sunday,
+        )
+        if len(close_weeks) == 1:
+            closest_week = close_weeks[0]
+        elif len(close_weeks) == 2:
+            closest_week = close_weeks[0]
+            closest_week_gap = abs(today - close_weeks[0].date)
+            for close_week in close_weeks:
+                if abs(today - close_week.date) < closest_week_gap:
+                    closest_week_gap = abs(close_week.date - today)
+                    closest_week = close_week
+    if closest_week:
         return redirect('week', week_id=closest_week.id)
     else:
         return redirect('weeks')
