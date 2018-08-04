@@ -1,3 +1,5 @@
+import datetime
+
 from django.urls import reverse
 from django.test import Client
 from django.test import RequestFactory
@@ -387,28 +389,35 @@ class WeekTests(BasePoolStatsTestCase):
         first_week = Week.objects.get(id=self.TEST_WEEK_FIRST)
         self.assertIsNone(first_week.previous())
 
-    def test_get_next_week_no_matching_weeks(self):
+    def test_get_next_week_date_after_last_week(self):
+        # presumably it is after TEST_WEEK_LAST
         response = self.client.get(reverse('nextweek'))
-        self.assertEqual(response.url, '/stats/weeks/')
+        self.assertEqual(response.url, '/stats/week/{}/'.format(self.TEST_WEEK_LAST))
+
+    def test_get_next_week_date_before_first_week(self):
+
+        first_week = Week.objects.all().order_by('date').first()
+        date_before_first_week = first_week.date - datetime.timedelta(days=1)
+
+        response = self.client.get(reverse('nextweek', kwargs={'today_date': date_before_first_week.strftime('%F')}))
+        self.assertEqual(response.url, '/stats/week/{}/'.format(self.TEST_WEEK_FIRST))
 
     def test_get_next_week(self):
         factory = RequestFactory()
         request = factory.get(reverse('nextweek'))
         add_session_to_request(request)
-        foo = get_current_week(request)
-        # test that this way-in-the-past season doesn't have a week close to now
-        self.assertEqual(foo.url, '/stats/weeks/')
 
         # on sunday, I should get the next tuesday
-        current_week_from_sunday = get_current_week(request, '2010-08-09')
+        current_week_from_sunday = get_current_week(request, '2010-08-08')
         self.assertEqual(current_week_from_sunday.url, reverse('week', kwargs={'week_id': 4}))
 
+        # on Wednesday, I should get the Tuesday/night before
         current_week_from_wednesday = get_current_week(request, '2010-08-11')
         self.assertEqual(current_week_from_wednesday.url, reverse('week', kwargs={'week_id': 4}))
 
         current_week_between_playoff_dates = get_current_week(request, '2010-09-15')
         self.assertEqual(current_week_between_playoff_dates.url, reverse('week', kwargs={'week_id': 10}))
-        #
+
         current_week_on_playoff_dates = get_current_week(request, '2010-09-16')
         self.assertEqual(current_week_on_playoff_dates.url, reverse('week', kwargs={'week_id': 11}))
 
