@@ -40,6 +40,11 @@
   </thead>
   <tbody>
     {% for summary in summaries %}
+        {% comment %}
+        This is not the ideal place to defend against summaries we shouldn't have for players that
+        didn't play that don't have team linked to them, but here it is.
+        {% endcomment %}
+    {% if summary.team %}
     <tr>
         <td><a href="{% url 'player' summary.player.id summary.season.id %}">{{ summary.season }}</a></td>
         <td><a href="{% url 'team' summary.team.id %}">{{ summary.team }}</a></td>
@@ -49,6 +54,7 @@
         <td>{{ summary.table_runs }}</td>
         <td>{{ summary.four_ohs }}</td>
     </tr>
+    {% endif %}
     {% endfor %}
   <tbody>
 </table>
