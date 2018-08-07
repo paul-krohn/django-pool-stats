@@ -81,7 +81,8 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
         self.selenium.find_element_by_id('toggle-{}_substitutions'.format(away_home)).click()
         substitution_form = self.selenium.find_element_by_id('{}_substitutions'.format(away_home))
         game_select = Select(substitution_form.find_element_by_id('id_form-{}-game_order'.format(substitution_index)))
-        game_select.select_by_index(game_index)
+        if game_index is not None:
+            game_select.select_by_index(game_index)
         player_select = Select(substitution_form.find_element_by_id('id_form-{}-player'.format(substitution_index)))
         # select the 1th player; zero is '------' or similar
         player_select.select_by_index(player_index)
