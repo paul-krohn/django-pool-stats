@@ -112,10 +112,15 @@ class SubstitutionFormSet(django.forms.BaseModelFormSet):
 
         player_values = []
         for form in self.forms:
-            # if form.cleaned_data['id'].position.tiebreaker:
-            #     continue
-            if 'player' in form.cleaned_data.keys() and form.cleaned_data['player'] is not None:
+            if form.cleaned_data == {}:
+                pass  # there is an empty form in every formset; assume that is valid
+            elif 'DELETE' in form.cleaned_data and form.cleaned_data['DELETE'] is True:
+                pass  # assume deletions are valid
+            elif 'player' in form.cleaned_data and form.cleaned_data['player'] is not None and \
+                    'game_order' in form.cleaned_data and form.cleaned_data['game_order'] is not None:
                 player_values.append(form.cleaned_data['player'])
+            else:
+                raise ValidationError("You must set the player and the game order of each substitution")
         if len(player_values) > len(set(player_values)):
             raise ValidationError('You may not substitute in the same player twice',
                                   code='lineup_duplicate_player')

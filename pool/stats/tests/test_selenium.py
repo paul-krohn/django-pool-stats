@@ -5,7 +5,7 @@ from selenium.webdriver.support.ui import Select
 
 from .base_cases import BaseSeleniumPoolStatsTestCase, form_length_map, location_names
 
-from ..models import ScoreSheet, Team, PlayerSeasonSummary
+from ..models import ScoreSheet, Team
 from ..utils import expire_page
 
 
@@ -86,6 +86,20 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
             games_form_table.find_elements_by_class_name('scoresheet-even')
         for table_row in table_rows[0:-1]:  # skip the tie-breaker, which will be the last row
             self.assertEqual(len(table_row.find_elements_by_xpath('td[div[a]]')), 2)
+
+    def test_score_sheet_incomplete_substitution(self):
+
+        self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
+        self.populate_lineup()
+        score_sheet_id = self.selenium.current_url.split('/')[-2]
+        arguments = {
+            'away_home': 'away',
+            'game_index': None,
+            'player_index': 1
+        }
+        self.set_substitution(**arguments)
+        self.assertEqual(self.selenium.current_url, '{}score_sheet_substitutions/{}/away'.format(
+            self.base_url, score_sheet_id))
 
     def test_score_sheet_lineup_duplicate_player(self):
 
