@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.db import models
 
 from .game import Game
@@ -5,6 +7,7 @@ from .player import Player
 from .season import Season
 from .scoresheet import ScoreSheet
 from .team import Team
+from .week import Week
 
 from .globals import away_home, logger
 
@@ -51,12 +54,15 @@ class PlayerSeasonSummary(models.Model):
         self.save()
 
     @classmethod
-    def update_rankings(cls, season_id):
+    def update_rankings(cls, season_id, minimum_games=None):
         all_summaries = cls.objects.filter(season=season_id).order_by('-win_percentage', '-wins')
         # remove the players with < the minimum number of games in the current season
         summaries = []
+        if minimum_games is None:
+            minimum_games = len(Week.objects.filter(season_id=season_id, date__lt=date.today())) * \
+                Season.objects.get(id=season_id).minimum_games
         for summary in all_summaries:
-            if summary.wins + summary.losses >= summary.season.minimum_games:
+            if summary.wins + summary.losses >= minimum_games:
                 summaries.append(summary)
             else:
                 summary.ranking = 0
@@ -109,7 +115,7 @@ class PlayerSeasonSummary(models.Model):
         self.save()
 
     @classmethod
-    def update_all(cls, season_id):
+    def update_all(cls, season_id, minimum_games=None):
         # find all the players on teams in this season
         teams = Team.objects.filter(season=season_id)
         for team in teams:
@@ -120,4 +126,4 @@ class PlayerSeasonSummary(models.Model):
 
         for summary in cls.objects.filter(season=season_id):
             summary.update()
-        cls.update_rankings(season_id)
+        cls.update_rankings(season_id, minimum_games)
