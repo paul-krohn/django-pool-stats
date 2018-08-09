@@ -172,9 +172,15 @@ class ScoreSheetTests(BasePoolStatsTestCase):
         summaries = PlayerSeasonSummary.objects.all()
         self.assertEqual(0, len(summaries))
 
-        season_args = {'season_id': Season.objects.get(is_default=True).id}
+        season_args = {
+            'season_id': Season.objects.get(is_default=True).id,
+        }
+        update_args = {
+            'season_id': Season.objects.get(is_default=True).id,
+            'minimum_games': 2,
+        }
 
-        PlayerSeasonSummary.update_all(**season_args)
+        PlayerSeasonSummary.update_all(**update_args)
         summaries = PlayerSeasonSummary.objects.all()
         self.assertEqual(37, len(summaries))  # 37 is a magic number, where does that come from?
 
