@@ -2,12 +2,10 @@
 
 ### Creating a new season
 
-Seasons are a top-level object in Django, just go ahead and create one. Unset **is default** on the current default season before setting it on the new one.
+Seasons are a top-level object in Django, just go ahead and create one. Set the _minimum games_ value to the minimum number of games per week players have to have played to appear in the overall standings. 
 
+When you are ready to start creating the divisions and teams for the season, use the _Set default season_ action in the Seasons admin page.
 
-### Divisions
-
-Divisions need to be created each season, create new ones with the desired labels and set the season to the one created above.
 
 ### Players
 
@@ -16,6 +14,15 @@ Players persist across seasons, so you will only need to add new players at the 
 Use the "display name" field to override the default of "First Last".
 
 The email address field is not displayed on the public web site, just in the admin area.
+
+### Sponsors and tables
+
+You don't need to set up sponsors and tables, but if you do, and your league has ranked play, the system can flag when their are, for example, conflicts between sister teams and/or teams with the same "home" table.
+
+### Divisions
+
+Divisions need to be created each season, create new ones with the desired labels and set the season to the one created above.
+
 
 ### Teams
 
