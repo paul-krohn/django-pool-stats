@@ -417,6 +417,10 @@ class WeekTests(BasePoolStatsTestCase):
         current_week_from_sunday = get_current_week(request, '2010-08-08')
         self.assertEqual(current_week_from_sunday.url, reverse('week', kwargs={'week_id': 4}))
 
+        # on saturday, I should get the previous tuesday
+        current_week_from_sunday = get_current_week(request, '2010-08-14')
+        self.assertEqual(current_week_from_sunday.url, reverse('week', kwargs={'week_id': 4}))
+
         # on Wednesday, I should get the Tuesday/night before
         current_week_from_wednesday = get_current_week(request, '2010-08-11')
         self.assertEqual(current_week_from_wednesday.url, reverse('week', kwargs={'week_id': 4}))
