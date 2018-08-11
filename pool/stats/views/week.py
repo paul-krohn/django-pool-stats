@@ -61,7 +61,8 @@ def get_current_week(request, today_date=''):
         (year, month, day) = today_date.split('-')
         today = datetime.date(year=int(year), month=int(month), day=int(day))
 
-    prev_sunday = today - datetime.timedelta(days=(6 - today.weekday()))
+    offset_days = today.weekday() % 6 + 1  # the number of days since Sunday.
+    prev_sunday = today - datetime.timedelta(days=offset_days)
     next_saturday = prev_sunday + datetime.timedelta(days=6)
 
     season_weeks = Week.objects.filter(
