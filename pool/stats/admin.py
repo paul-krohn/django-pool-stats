@@ -264,7 +264,14 @@ class WeekAdmin(admin.ModelAdmin):
                 self.create_match_if_not_exist(_week, request, away_team=away_teams[i], home_team=home_teams[i])
 
         else:
-            print('divisions are uneven: away teams: {} and home teams: {}'.format(away_teams, home_teams))
+            self.message_user(
+                request,
+                level='WARNING',
+                message='divisions {} and {} are uneven, {} and {} teams; no matches created'.format(
+                    division_matchup.away_division,
+                    division_matchup.home_division,
+                    len(away_teams), len(home_teams)),
+            )
 
     def division_matchups(self, request, queryset):
 
