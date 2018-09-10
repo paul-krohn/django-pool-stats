@@ -215,8 +215,7 @@ class WeekAdmin(admin.ModelAdmin):
         else:
             return True
 
-    def check_division_ties(self, request, division):
-        teams = Team.objects.filter(division=division).order_by('-ranking')
+    def check_ties(self, request, teams):
         ties = []
         for i in range(0, len(teams) - 1):
             if teams[i].ranking == teams[i+1].ranking:
@@ -288,8 +287,15 @@ class WeekAdmin(admin.ModelAdmin):
             return
         tied_divisions = 0
         for division in Division.objects.filter(season=_week.season):
-            if self.check_division_ties(request, division):
-                tied_divisions += 1
+            teams = Team.objects.filter(division=division).order_by('-ranking')
+            ties = Team.find_ties(teams, 'ranking')
+            for tie in ties:
+                self.message_user(
+                    request=request,
+                    message='{} are tied; no matches set'.format(', '.join([t.name for t in tie.teams.all()])),
+                    level='ERROR',
+                )
+                return
         if tied_divisions:
             return
         division_matchups = WeekDivisionMatchup.objects.filter(week=_week)
@@ -318,7 +324,7 @@ class WeekAdmin(admin.ModelAdmin):
         for tie in ties:
             self.message_user(
                 request=request,
-                message='{} are tied; no matches set'.format(', '.join(tie.teams.all())),
+                message='{} are tied; no matches set'.format(', '.join([team.name for team in tie.teams.all()])),
                 level='ERROR'
             )
             return
@@ -372,7 +378,7 @@ class TeamAdmin(admin.ModelAdmin):
     list_filter = [SeasonFilter, 'rank_tie_breaker']
     filter_horizontal = ['players']
     fields = ['season', 'table', 'division', 'name', 'captain', 'players', 'rank_tie_breaker']
-    actions = ['clear_tie_breakers', 'add_tie_breakers']
+    actions = ['clear_tie_breakers', 'add_tie_breakers', 'detect_ties']
     save_as = True
 
     form = TeamForm
@@ -397,6 +403,25 @@ class TeamAdmin(admin.ModelAdmin):
             team.save()
 
     add_tie_breakers.short_description = "Add 1 to tie-breaker"
+
+    def detect_ties(self, request, queryset):
+
+        ties = Team.find_ties(queryset, 'ranking')
+        if len(ties):
+            for tie in ties:
+                self.message_user(
+                    request=request,
+                    message='{} are tied.'.format(', '.join([t.name for t in tie.teams.all()])),
+                    level='WARNING'
+                )
+        else:
+            self.message_user(
+                request=request,
+                message='No ties detected.',
+                level='INFO',
+            )
+
+    detect_ties.short_description = "Detect ties"
 
 
 admin.site.register(Team, TeamAdmin)
@@ -514,7 +539,7 @@ admin.site.register(GameOrder, GameOrderAdmin)
 
 class MatchAdmin(admin.ModelAdmin):
     list_filter = ['week', SeasonFilter, 'playoff']
-    list_display = ['id', 'away_team', 'home_team', 'week']
+    list_display = ['id', 'away_team', 'home_team', 'week', 'table']
     actions = ['lint_table_assignments']
 
     form = MatchForm
