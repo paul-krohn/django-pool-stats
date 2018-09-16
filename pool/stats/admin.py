@@ -190,9 +190,26 @@ class WeekAdmin(admin.ModelAdmin):
         form.base_fields['season'].initial = get_default_season()
         return form
 
+    @staticmethod
+    def find_unscheduled_teams(week):
+        # get all the teams in the season
+        season_teams = set(Team.objects.filter(season=week.season))
+        matches = Match.objects.filter(week=week)
+        for match in matches:
+            season_teams.discard(match.home_team)
+            season_teams.discard(match.away_team)
+        return season_teams
+
     def lint_table_assignments(self, request, queryset):
         # queryset should be 1 week
         if len(queryset) == 1:  # and type(queryset[0], 'Week'):
+            unscheduled_teams = self.find_unscheduled_teams(week=queryset[0])
+            if len(unscheduled_teams):
+                self.message_user(
+                    request,
+                    level='WARNING',
+                    message="there are unscheduled teams: {ts}".format(ts=', '.join([t.name for t in unscheduled_teams]))
+                )
             find_duplicate_table_assignments(self, request, queryset[0])
         else:
             self.message_user(
@@ -258,15 +275,14 @@ class WeekAdmin(admin.ModelAdmin):
         home_teams = Team.objects.filter(
             division=division_matchup.home_division
         ).filter(season=_week.season).order_by('ranking')
-        if len(away_teams) == len(home_teams):
-            for i in range(0, len(away_teams)):
-                self.create_match_if_not_exist(_week, request, away_team=away_teams[i], home_team=home_teams[i])
+        for i in range(0, min(len(away_teams), len(home_teams))):
+            self.create_match_if_not_exist(_week, request, away_team=away_teams[i], home_team=home_teams[i])
 
-        else:
+        if len(away_teams) != len(home_teams):
             self.message_user(
                 request,
                 level='WARNING',
-                message='divisions {} and {} are uneven, {} and {} teams; no matches created'.format(
+                message='divisions {} and {} are uneven, {} and {} teams; manual matches needed'.format(
                     division_matchup.away_division,
                     division_matchup.home_division,
                     len(away_teams), len(home_teams)),
@@ -287,7 +303,7 @@ class WeekAdmin(admin.ModelAdmin):
             return
         tied_divisions = 0
         for division in Division.objects.filter(season=_week.season):
-            teams = Team.objects.filter(division=division).order_by('-ranking')
+            teams = Team.objects.filter(division=division).order_by('ranking')
             ties = Team.find_ties(teams, 'ranking')
             for tie in ties:
                 self.message_user(
@@ -343,17 +359,13 @@ class WeekAdmin(admin.ModelAdmin):
         _week = queryset[0]
         divisions = Division.objects.filter(season=_week.season)
         for division in divisions:
-            div_teams = Team.objects.filter(division=division)
+            div_teams = Team.objects.filter(division=division).order_by('ranking')
             if len(div_teams) % 2:
                 self.message_user(request,
-                                  message="{} has an uneven team count, no matches created".format(division),
-                                  level='ERROR'
+                                  message="{d} has an uneven team count, no match created for {t}".format(
+                                      d=division, t=div_teams[len(div_teams)-1]),
+                                  level='WARNING'
                                   )
-                self.message_user(request,
-                                  message="teams are: {}".format(div_teams),
-                                  level='ERROR'
-                                  )
-                continue
             div_ties = Team.find_ties(div_teams, 'division_ranking')
             if div_ties:
                 self.message_user(
@@ -363,9 +375,14 @@ class WeekAdmin(admin.ModelAdmin):
                 )
                 continue
             inc = 0
-            while inc + 1 < len(div_teams):
-                self.create_match_if_not_exist(_week, request, away_team=div_teams[inc+1], home_team=div_teams[inc])
-                inc += 2
+            match_count = int((len(div_teams) - (len(div_teams) % 2)) / 2)
+            print("we should create {} matches in division {}".format(match_count, division))
+            while inc < match_count:
+                self.create_match_if_not_exist(_week, request,
+                                               away_team=div_teams[2 * inc + 1],
+                                               home_team=div_teams[2 * inc]
+                                               )
+                inc += 1
 
     intra_division_matches.short_description = "Set intra-division ranked matches"
 
