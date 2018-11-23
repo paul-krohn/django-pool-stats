@@ -16,6 +16,8 @@ before_install:
   - sudo mv geckodriver /usr/local/bin
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
+install:
+  - pip install -r dev-requirements.txt
 
 script:
   - cd pool && DJANGO_SETTINGS_MODULE=pool.travis_settings python manage.py test stats -v 2

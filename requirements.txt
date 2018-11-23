@@ -5,10 +5,6 @@ Django==2.1.3
 mysqlclient==1.3.13
 python3-memcached==1.51
 uWSGI==2.0.17.1
-# for tests
-num2words==0.5.7
-selenium==3.14.0
-xvfbwrapper==0.2.9
 
 # indirect dependencies
 flake8==3.5.0
