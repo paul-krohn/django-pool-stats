@@ -18,4 +18,4 @@ install:
   - pip install -r dev-requirements.txt
 
 script:
-  - cd pool && DJANGO_SETTINGS_MODULE=pool.travis_settings xvfb-run --server-args="-screen 0 1280x1024x24" python manage.py test stats.tests.test_selenium.BaseViewRedirectTestCase.test_default_view_redirect -v 2
+  - cd pool && xvfb-run --server-args="-screen 0 1280x1024x24" python manage.py test stats.tests.test_selenium.BaseViewRedirectTestCase.test_default_view_redirect -v 2
