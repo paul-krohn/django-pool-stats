@@ -8,6 +8,7 @@ uWSGI==2.0.17.1
 # for tests
 num2words==0.5.9
 selenium==3.141
+xvfbwrapper
 
 # indirect dependencies
 flake8==3.6.0
