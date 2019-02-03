@@ -2,7 +2,6 @@ from django.test import LiveServerTestCase
 from selenium import webdriver
 from selenium.webdriver.support.ui import Select
 from random import randrange
-from xvfbwrapper import Xvfb
 
 location_names = ['home', 'away']
 
