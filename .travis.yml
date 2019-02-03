@@ -11,7 +11,7 @@ before_install:
   - mysql -u root -e "GRANT ALL ON test_pool_stats.* TO 'pool_stats'@'localhost';"
   - sudo apt-get -qq update
   - sudo apt-get install -y firefox
-  - wget https://github.com/mozilla/geckodriver/releases/download/v0.23.0/geckodriver-v0.23.0-linux64.tar.gz
+  - wget https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz
   - tar -zxvf geckodriver*
   - sudo mv geckodriver /usr/local/bin
 install:
