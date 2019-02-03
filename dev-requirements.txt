@@ -1,0 +1,5 @@
+-r requirements.txt
+
+xvfbwrapper
+num2words
+selenium==3.141
