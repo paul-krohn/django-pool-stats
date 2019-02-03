@@ -1,6 +1,5 @@
 # for tests
-num2words==0.5.7
-selenium==3.14.0
-xvfbwrapper==0.2.9
+num2words==0.5.9
+selenium==3.141
 
 -r requirements.txt
