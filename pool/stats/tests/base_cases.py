@@ -1,7 +1,9 @@
 from django.test import LiveServerTestCase
-from selenium import webdriver
 from selenium.webdriver.support.ui import Select
+from selenium.webdriver.firefox.webdriver import WebDriver
+
 from random import randrange
+from xvfbwrapper import Xvfb
 
 location_names = ['home', 'away']
 
@@ -49,12 +51,15 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
 
     def setUp(self):
 
-        self.selenium = webdriver.Firefox()
+        self.vdisplay = Xvfb(width=1280, height=1024)
+        self.vdisplay.start()
+        self.selenium = WebDriver()
         super(BaseSeleniumPoolStatsTestCase, self).setUp()
 
     def tearDown(self):
 
         self.selenium.quit()
+        self.vdisplay.stop()
         super(BaseSeleniumPoolStatsTestCase, self).tearDown()
 
     def score_sheet_create(self,
