@@ -1,5 +1,5 @@
 -r requirements.txt
 
-xvfbwrapper
-num2words
+xvfbwrapper==0.2.9
+num2words==0.5.9
 selenium==3.141
