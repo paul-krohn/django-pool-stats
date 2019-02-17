@@ -1,18 +1,18 @@
-Django==2.1.5
+Django==2.1.7
 
 # mysql client on OS X needs an install from source with:
 # CFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform
-mysqlclient==1.4.1
+mysqlclient==1.4.2.post1
 python3-memcached==1.51
-uWSGI==2.0.17.1
+uWSGI==2.0.18
 
 # indirect dependencies
-flake8==3.6.0
+flake8==3.7.5
 mccabe==0.6.1
 mock==2.0.0
 pbr==5.1.1
-pycodestyle==2.4.0
-pyflakes==2.0.0
+pycodestyle==2.5.0
+pyflakes==2.1.0
 pytz==2018.9
 six==1.12.0
 urllib3==1.24.1
