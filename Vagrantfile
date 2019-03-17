@@ -21,4 +21,8 @@ Vagrant.configure(2) do |config|
   config.vm.network "forwarded_port", guest: 8000, host: 8000
   config.vm.network "forwarded_port", guest: 3306, host: 13306
 
+  if ENV.has_key?('DJANGO_CHEF_ROOT') do
+    config.vm.synced_folder "#{ENV['DJANGO_CHEF_ROOT']}", "/chef"
+  end
+
 end
