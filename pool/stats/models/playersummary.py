@@ -1,6 +1,7 @@
 from datetime import date
 
 from django.db import models
+from trueskill import Rating
 
 from .game import Game
 from .player import Player
@@ -21,12 +22,17 @@ class PlayerSeasonSummary(models.Model):
     table_runs = models.IntegerField(verbose_name='Table Runs', default=0)
     win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0, null=True)
     ranking = models.IntegerField(null=True)
+    trueskill_mu = models.FloatField(null=True, blank=True)
+    trueskill_sigma = models.FloatField(null=True, blank=True)
 
     def __str__(self):
         return "{} {}".format(self.player, self.season)
 
     class Meta:
         ordering = ['-win_percentage']
+
+    def rating(self):
+        return Rating(self.trueskill_mu, self.trueskill_sigma)
 
     def team(self):
         return self.player.team_set.filter(season=self.season).first()
