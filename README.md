@@ -23,6 +23,17 @@ grant all privileges on test_pool_stats.* to 'pool_stats'@'localhost';
 flush privileges;
 ```
 
+#### Installing on OS X
+
+If you install `libssl` via Homebrew, it told you to do this:
+
+```shell
+export LDFLAGS="-L/usr/local/opt/openssl/lib"
+export CPPFLAGS="-I/usr/local/opt/openssl/include"
+```
+
+You need that for `MySQL-python` to compile it's C interface. But you forgot that, because it was ages ago.
+
 ### Override settings ###
 
 Any setting can be over-ridden in `pool/pool/override_settings.py`; for example, database passwords:
