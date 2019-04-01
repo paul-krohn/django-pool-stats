@@ -1,7 +1,7 @@
 from datetime import date
 
 from django.db import models
-from trueskill import Rating
+from trueskill import Rating, setup as ts_setup
 
 from .game import Game
 from .player import Player
@@ -11,6 +11,8 @@ from .team import Team
 from .week import Week
 
 from .globals import away_home, logger
+
+ts_setup(beta=16.0, draw_probability=0.0)
 
 
 class PlayerSeasonSummary(models.Model):

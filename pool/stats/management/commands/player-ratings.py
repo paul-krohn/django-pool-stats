@@ -28,7 +28,7 @@ class Command(BaseCommand):
             # Season -> official score sheets -> games
             score_sheets = ScoreSheet.objects.filter(match__season_id=season_id, official=True)
             # print(score_sheets[0].games.all())
-            ratings = dict()
+            # ratings = dict()
             for score_sheet in score_sheets:
                 for game in score_sheet.games.filter(forfeit=False):
                     # print(game)
@@ -38,23 +38,23 @@ class Command(BaseCommand):
                     away_player = PlayerSeasonSummary.objects.get(
                         player_id=game.away_player.id, season_id=season_id)
 
-                    if str(home_player.id) not in ratings:
-                        ratings[str(home_player.id)] = Rating()
-                    if str(away_player.id) not in ratings:
-                        ratings[str(away_player.id)] = Rating()
-
                     winner = home_player
                     loser = away_player
                     if game.winner == 'away':
                         winner = away_player
                         loser = home_player
 
-                    if home_player.id == self.sample_season_summary_id or \
-                            away_player.id == self.sample_season_summary_id:
-                        print("winner: %s loser: %s" % (winner, loser))
-
-                    ratings[str(winner.id)], ratings[str(loser.id)] = \
-                        rate_1vs1(ratings[str(winner.id)], ratings[str(loser.id)])
-
+                    new_winner_rating, new_loser_rating = rate_1vs1(winner.rating(), loser.rating())
                     if winner.id == self.sample_season_summary_id or loser.id == self.sample_season_summary_id:
-                        print(ratings[str(self.sample_season_summary_id)].mu)
+                        print("old mus -- winner: %s loser: %s" % (winner.trueskill_mu, loser.trueskill_mu))
+                        print("winner: %s loser: %s" % (winner.player, loser.player))
+                        print("new winner mu: %s new loser mu: %s" % (winner.trueskill_mu, loser.trueskill_mu))
+
+                    winner.trueskill_mu = new_winner_rating.mu
+                    winner.sigma = new_winner_rating.sigma
+                    loser.trueskill_mu = new_loser_rating.mu
+                    loser.sigma = new_loser_rating.sigma
+
+                    winner.save()
+                    loser.save()
+
