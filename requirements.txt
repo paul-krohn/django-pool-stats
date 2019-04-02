@@ -5,6 +5,7 @@ Django==2.1.7
 mysqlclient==1.4.2.post1
 python3-memcached==1.51
 uWSGI==2.0.18
+elo==0.1.1
 
 # indirect dependencies
 flake8==3.7.5
