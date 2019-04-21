@@ -50,6 +50,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
+        # your linter may flag this as outside of init, but that's ok, `handle()` is as close as we'll get to `__init__()`.
         self.verbosity = options['verbosity']
 
         for season_id in options['season_id']:
