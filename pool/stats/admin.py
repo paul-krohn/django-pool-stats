@@ -5,6 +5,8 @@ from django.utils.translation import ugettext_lazy as _
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.contrib.admin import SimpleListFilter
+from django.contrib.admin.models import LogEntry
+from django.contrib.contenttypes.models import ContentType
 from django.shortcuts import redirect
 
 from .utils import update_season_stats, expire_caches
@@ -50,6 +52,10 @@ def find_duplicate_table_assignments(obj, request, week):
             level='INFO',
             message='No double-booked tables.',
         )
+
+def log_action(user_id, content_type_id, object_id, object_repr, action_flag, change_message=''):
+
+    LogEntry.objects.log_action(user_id, content_type_id, object_id, object_repr, action_flag, change_message)
 
 
 class SeasonFilter(SimpleListFilter):
@@ -152,13 +158,19 @@ class SeasonAdmin(admin.ModelAdmin):
         # due to a "TypeError: cannot serialize '_io.BufferedReader' object" error.
         redirect_to = request.get_full_path()
         if len(queryset) == 1:
-            season_id = queryset[0].id
-            update_season_stats(season_id)
-            expire_caches(request, season_id)
+            season = queryset[0]
+            update_season_stats(season.id)
+            expire_caches(request, season.id)
             self.message_user(
                 request,
                 level='INFO',
                 message='Stats updated and caches expired.',
+            )
+            log_action(
+                user_id=request.user.id,
+                content_type_id=ContentType.objects.get_for_model(Season).id,
+                object_id=season.id, object_repr="{}".format(season),
+                action_flag=2, change_message='updated stats for {}'.format(season)
             )
         else:
             self.message_user(
