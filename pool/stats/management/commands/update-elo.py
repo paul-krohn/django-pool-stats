@@ -46,60 +46,60 @@ class Command(BaseCommand):
     help = 'Calculates players\' ELO rating'
 
     def add_arguments(self, parser):
-        parser.add_argument('season_id', nargs='+', type=int)
+        parser.add_argument('season_id', type=int)
 
     def handle(self, *args, **options):
 
         # your linter may flag this as outside of init, but that's ok, `handle()` is as close as we'll get to `__init__()`.
         self.verbosity = options['verbosity']
 
-        for season_id in options['season_id']:
+        season_id = options['season_id']
 
-            games = Game.objects.filter(
-                scoresheet__match__season_id=season_id
-            ).filter(
-                scoresheet__official=True
-            ).filter(
-                scoresheet__match__playoff=False
-            ).filter(
-                forfeit=False
-            ).exclude(
-                winner=''
+        games = Game.objects.filter(
+            scoresheet__match__season_id=season_id
+        ).filter(
+            scoresheet__official=True
+        ).filter(
+            scoresheet__match__playoff=False
+        ).filter(
+            forfeit=False
+        ).exclude(
+            winner=''
+        )
+        count = 0
+        for game in games:
+            count += 1
+            if game.away_player is None or game.home_player is None:
+                continue
+            summary = dict()
+            for ah in away_home:
+                player = getattr(game, '{}_player'.format(ah))
+                try:
+                    summary[ah] = PlayerSeasonSummary.objects.get(season_id=season_id, player=player)
+                except PlayerSeasonSummary.DoesNotExist as e:
+                    print("no season summary for {} based on game id {}. error: {}".format(player, game.id, e))
+
+            winner = game.winner
+
+            # if the winner is 'home'
+            winner_index = away_home.index(winner)
+            loser_index = 1 - away_home.index(winner)
+
+            new_winner, new_loser = rate_1vs1(
+                Rating(get_old_elo(summary[away_home[winner_index]])),
+                Rating(get_old_elo(summary[away_home[loser_index]])),
             )
-            count = 0
-            for game in games:
-                count += 1
-                if game.away_player is None or game.home_player is None:
-                    continue
-                summary = dict()
-                for ah in away_home:
-                    player = getattr(game, '{}_player'.format(ah))
-                    try:
-                        summary[ah] = PlayerSeasonSummary.objects.get(season_id=season_id, player=player)
-                    except PlayerSeasonSummary.DoesNotExist as e:
-                        print("no season summary for {} based on game id {}. error: {}".format(player, game.id, e))
 
-                winner = game.winner
+            summary[away_home[winner_index]].elo = new_winner
+            summary[away_home[loser_index]].elo = new_loser
 
-                # if the winner is 'home'
-                winner_index = away_home.index(winner)
-                loser_index = 1 - away_home.index(winner)
+            summary[away_home[winner_index]].save()
+            summary[away_home[loser_index]].save()
 
-                new_winner, new_loser = rate_1vs1(
-                    Rating(get_old_elo(summary[away_home[winner_index]])),
-                    Rating(get_old_elo(summary[away_home[loser_index]])),
+            if self.verbosity >= 3:
+                self.stdout.write("{} def {} new ratings: {}, {}".format(
+                    summary[away_home[winner_index]].player,
+                    summary[away_home[loser_index]].player,
+                    new_winner,
+                    new_loser)
                 )
-
-                summary[away_home[winner_index]].elo = new_winner
-                summary[away_home[loser_index]].elo = new_loser
-
-                summary[away_home[winner_index]].save()
-                summary[away_home[loser_index]].save()
-
-                if self.verbosity >= 3:
-                    self.stdout.write("{} def {} new ratings: {}, {}".format(
-                        summary[away_home[winner_index]].player,
-                        summary[away_home[loser_index]].player,
-                        new_winner,
-                        new_loser)
-                    )
