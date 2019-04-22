@@ -18,6 +18,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('the_id', type=int)
         parser.add_argument('-s', dest='scoresheet', default=False, action='store_true')
+        parser.add_argument('-k', dest='skip_players', nargs='+', type=int)
 
     @staticmethod
     def get_matchups(options):
@@ -31,7 +32,11 @@ class Command(BaseCommand):
         else:
             match = Match.objects.get(id=options['the_id'])
             for ap in match.away_team.players.all():
+                if ap.id in options['skip_players']:
+                    continue
                 for hp in match.home_team.players.all():
+                    if hp.id in options['skip_players']:
+                        continue
                     matchups.append({
                         'away': PlayerSeasonSummary.objects.get(
                             season=match.season, player=ap
