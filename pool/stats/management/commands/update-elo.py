@@ -119,9 +119,7 @@ class Command(BaseCommand):
         season_id = options['the_id']
         if options['type'] == 'scoresheet':
             season_id = ScoreSheet.objects.get(id=options['the_id']).match.season.id
-        print('the season id is {}'.format(season_id))
         main_filter_args = self.get_games_filter(options)
-        print("filter args are: {}".format(main_filter_args))
         games = Game.objects.filter(
             **main_filter_args
         ).exclude(
@@ -137,8 +135,6 @@ class Command(BaseCommand):
         ).exclude(
             home_player=None
         )
-        # count = 0
         for game in games:
-            # print(game.id)
             self.update_elo_from_game(game, season_id)
 
