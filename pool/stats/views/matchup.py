@@ -60,6 +60,8 @@ def matchup(request):
 
     if kind and thing:
         for m in get_player_matchups(kind, int(thing)):
+            if not(m['away'].elo and m['home'].elo):
+                continue
             away_pct = e.expect(m['away'].elo, m['home'].elo)
             expected_wins += away_pct
             match_ups.append({
