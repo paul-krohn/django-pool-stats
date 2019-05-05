@@ -1,0 +1,87 @@
+{% extends "stats/base.html" %}
+
+{% block title %}SFPA :: matchup{% endblock %}
+
+{% block content %}
+<div class="text-center">
+<h2>Matchup</h2>
+</div>
+<form id='the_form' action="{% url 'matchup' %}" method="get">
+    {% csrf_token %}
+    {{ form }}
+</form>
+<hr />
+<h3>Weeks</h3>
+{%  for week in weeks %}
+    <a href="#" onclick="setThing('#id_week', {{ week.id }}, '#id_thing');">{{ week }}</a>
+{%  endfor %}
+<hr />
+
+{% if score_sheets %}
+    <h3>Score sheets</h3>
+    <ul>
+        {% for score_sheet in score_sheets %}
+            <li><a href="#" onclick="setThing('#id_thing', {{ score_sheet.id }});">{{ score_sheet }}</a></li>
+        {% endfor %}
+    </ul>
+<hr />
+{% endif %}
+
+
+{% if matches %}
+<h3>Matches</h3>
+    <ul>
+    {% for match in matches %}
+        <li><a href="#" onclick="setThing('#id_thing', {{ match.id }});">{{ match }}</a></li>
+    {% endfor %}
+    </ul>
+<hr/>
+{% endif %}
+
+<script type="application/javascript">
+
+function setThing(id, value, clear=undefined) {
+    $(id).val(value);
+    if (clear) {
+        $(clear).val('')
+    }
+    $( "#the_form" ).submit();
+}
+$(document).ready(function () {
+    console.log('doc is ready');
+    filterer('#filter', '.searchable');
+});
+</script>
+
+<div class="pull-right search"><input id="filter" class="form-control" type="search" placeholder="Filter"></div>
+
+<table class="table table-condensed table-responsive" data-sort-name="Rank" data-toggle="table" data-sort-order="asc" id="foo">
+  <thead>
+    <tr>
+        <th data-field="away_player" data-sortable="true">{{ match.away_team }}</th>
+        <th data-field="ELO" data-sortable="true">Away ELO</th>
+        <th data-field="a_pct" data-sortable="true">A pct</th>
+        <th data-field="home_player" data-sortable="true">{{ match.home_team }}</th>
+        <th data-field="home_elo" data-sortable="true">Home ELO</th>
+    </tr>
+  </thead>
+  <tbody class="searchable">
+    {% for match_up in match_ups %}
+    <tr>
+        <td style="text-align:right;" class="scoresheet-cell">
+            <div class="scoresheet-cell">
+                <a href="{% url 'player' match_up.away.player.id %}">{{ match_up.away.player }}</a>
+            </div>
+        </td>
+        <td>{{ match_up.away.elo|floatformat:0 }}</td>
+        <td>{{ match_up.pct|floatformat:0 }}</td>
+        <td><a href="{% url 'player' match_up.home.player.id %}">{{ match_up.home.player }}</a>
+        <td>{{ match_up.home.elo|floatformat:0 }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+<p>expected wins for away team: {{ expected_wins|floatformat:3 }}</p>
+
+
+{% endblock %}

@@ -21,6 +21,8 @@ class PlayerSeasonSummary(models.Model):
     table_runs = models.IntegerField(verbose_name='Table Runs', default=0)
     win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0, null=True)
     ranking = models.IntegerField(null=True)
+    elo = models.FloatField(null=True)
+    last_rated_game = models.IntegerField(null=True)
 
     def __str__(self):
         return "{} {}".format(self.player, self.season)
