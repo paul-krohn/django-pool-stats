@@ -6,7 +6,7 @@
 <div class="text-center">
 <h2>Matchup</h2>
 </div>
-<form action="{% url 'matchup' %}" method="get">
+<form id='the_form' action="{% url 'matchup' %}" method="get">
     {% csrf_token %}
     {{ form }}
     <input type="submit" value="Submit">
@@ -14,7 +14,8 @@
 <hr />
 <h3>Weeks</h3>
 {%  for week in weeks %}
-    <a href="#" id="week_{{ week.id }}">{{ week }}</a>
+{#    <a href="#" id="week_{{ week.id }}">{{ week }}</a>#}
+    <a href="#" onclick="setThing('#id_week', {{ week.id }}, '#id_thing');">{{ week }}</a>
 {%  endfor %}
 <hr />
 
@@ -22,7 +23,7 @@
     <h3>Score sheets</h3>
     <ul>
         {% for score_sheet in score_sheets %}
-            <li><a href="#" id="score_sheet_{{ score_sheet.id }}">{{ score_sheet }}</a></li>
+            <li><a href="#" onclick="setThing('#id_thing', {{ score_sheet.id }});">{{ score_sheet }}</a></li>
         {% endfor %}
     </ul>
 <hr />
@@ -33,30 +34,20 @@
 <h3>Matches</h3>
     <ul>
     {% for match in matches %}
-    <li><a href="#" id="match_{{ match.id }}">{{ match }}</a></li>
+        <li><a href="#" onclick="setThing('#id_thing', {{ match.id }});">{{ match }}</a></li>
     {% endfor %}
     </ul>
 <hr/>
 {% endif %}
 <script type="application/javascript">
 
-{%  for week in weeks %}
-$("#week_{{ week.id }}").click(function(){
-    $('#id_week').val({{ week.id }});
-});
-{% endfor %}
-
-{% for match in matches %}
-$("#match_{{ match.id }}").click(function(){
-    $('#id_thing').val({{ match.id }});
-});
-{% endfor %}
-
-{% for score_sheet in score_sheets %}
-$("#score_sheet_{{ score_sheet.id }}").click(function(){
-    $('#id_thing').val({{ score_sheet.id }});
-});
-{% endfor %}
+function setThing(id, value, clear=undefined) {
+    $(id).val(value);
+    if (clear) {
+        $(clear).val('')
+    }
+    $( "#the_form" ).submit();
+}
 
 </script>
 
