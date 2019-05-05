@@ -9,12 +9,10 @@
 <form id='the_form' action="{% url 'matchup' %}" method="get">
     {% csrf_token %}
     {{ form }}
-    <input type="submit" value="Submit">
 </form>
 <hr />
 <h3>Weeks</h3>
 {%  for week in weeks %}
-{#    <a href="#" id="week_{{ week.id }}">{{ week }}</a>#}
     <a href="#" onclick="setThing('#id_week', {{ week.id }}, '#id_thing');">{{ week }}</a>
 {%  endfor %}
 <hr />
