@@ -37,6 +37,7 @@
     </ul>
 <hr/>
 {% endif %}
+
 <script type="application/javascript">
 
 function setThing(id, value, clear=undefined) {
@@ -46,8 +47,13 @@ function setThing(id, value, clear=undefined) {
     }
     $( "#the_form" ).submit();
 }
-
+$(document).ready(function () {
+    console.log('doc is ready');
+    filterer('#filter', '.searchable');
+});
 </script>
+
+<div class="pull-right search"><input id="filter" class="form-control" type="search" placeholder="Filter"></div>
 
 <table class="table table-condensed table-responsive" data-sort-name="Rank" data-toggle="table" data-sort-order="asc" id="foo">
   <thead>
@@ -55,11 +61,11 @@ function setThing(id, value, clear=undefined) {
         <th data-field="away_player" data-sortable="true">Away player</th>
         <th data-field="ELO" data-sortable="true">Away ELO</th>
         <th data-field="a_pct" data-sortable="true">A pct</th>
-        <th data-field="home_player" data-sortable="true">Home</th>
+        <th data-field="home_player" data-sortable="true">Home player</th>
         <th data-field="home_elo" data-sortable="true">Home ELO</th>
     </tr>
   </thead>
-  <tbody>
+  <tbody class="searchable">
     {% for match_up in match_ups %}
     <tr>
         <td style="text-align:right;" class="scoresheet-cell">
