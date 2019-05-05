@@ -8,13 +8,59 @@
 </div>
 <form action="{% url 'matchup' %}" method="get">
     {% csrf_token %}
-    <select name="kind">
-        <option value="scoresheet">scoresheet</option>
-        <option value="match">match</option>
-    </select>
-    <input type="text" name="thing"/>
+    {{ form }}
+    <input type="submit" value="Submit">
 </form>
-    <table class="table" data-sort-name="Rank" data-toggle="table" data-sort-order="asc" id="foo">
+<hr />
+<h3>Weeks</h3>
+{%  for week in weeks %}
+    <a href="#" id="week_{{ week.id }}">{{ week }}</a>
+{%  endfor %}
+<hr />
+
+{% if score_sheets %}
+    <h3>Score sheets</h3>
+    <ul>
+        {% for score_sheet in score_sheets %}
+            <li><a href="#" id="score_sheet_{{ score_sheet.id }}">{{ score_sheet }}</a></li>
+        {% endfor %}
+    </ul>
+<hr />
+{% endif %}
+
+
+{% if matches %}
+<h3>Matches</h3>
+    <ul>
+    {% for match in matches %}
+    <li><a href="#" id="match_{{ match.id }}">{{ match }}</a></li>
+    {% endfor %}
+    </ul>
+<hr/>
+{% endif %}
+<script type="application/javascript">
+
+{%  for week in weeks %}
+$("#week_{{ week.id }}").click(function(){
+    $('#id_week').val({{ week.id }});
+});
+{% endfor %}
+
+{% for match in matches %}
+$("#match_{{ match.id }}").click(function(){
+    $('#id_thing').val({{ match.id }});
+});
+{% endfor %}
+
+{% for score_sheet in score_sheets %}
+$("#score_sheet_{{ score_sheet.id }}").click(function(){
+    $('#id_thing').val({{ score_sheet.id }});
+});
+{% endfor %}
+
+</script>
+
+<table class="table" data-sort-name="Rank" data-toggle="table" data-sort-order="asc" id="foo">
   <thead>
     <tr>
         <th style="text-align:right;">Away</th>

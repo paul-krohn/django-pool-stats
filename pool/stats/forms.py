@@ -149,3 +149,11 @@ class MatchForm(django.forms.ModelForm):
             self.fields['away_team'].queryset = Team.objects.filter(season__is_default=True)
             self.fields['home_team'].queryset = Team.objects.filter(season__is_default=True)
         self.fields['season'].initial = get_default_season()
+
+
+class MatchupForm(django.forms.Form):
+
+    kind = django.forms.ChoiceField(choices=[('match', 'match'), ('scoresheet', 'scoresheet')])
+    week = django.forms.CharField(required=False)
+    thing = django.forms.CharField(required=False)
+

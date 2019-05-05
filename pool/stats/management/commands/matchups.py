@@ -22,6 +22,7 @@ class Command(BaseCommand):
 
     @staticmethod
     def get_matchups(options):
+        print('the players to skip are: {}'.format(options['skip_players']))
         matchups = []
         if options['scoresheet']:
             scoresheet = ScoreSheet.objects.get(id=options['the_id'])
@@ -48,7 +49,7 @@ class Command(BaseCommand):
         return matchups
 
     def handle(self, *args, **options):
-        e = Elo(beta=40)
+        e = Elo(beta=80)
         matchups = self.get_matchups(options)
         away_win_cumul = 0.0
         for matchup in matchups:
