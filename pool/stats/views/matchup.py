@@ -65,7 +65,7 @@ def matchup(request):
             away_pct = e.expect(m['away'].elo, m['home'].elo)
             expected_wins += away_pct
             match_ups.append({
-                'away': m['away'], 'home': m['home'], 'pct': away_pct
+                'away': m['away'], 'home': m['home'], 'pct': away_pct * 100
             })
         context.update({
             'match_ups': match_ups,
