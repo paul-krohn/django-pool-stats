@@ -58,10 +58,10 @@ $(document).ready(function () {
 <table class="table table-condensed table-responsive" data-sort-name="Rank" data-toggle="table" data-sort-order="asc" id="foo">
   <thead>
     <tr>
-        <th data-field="away_player" data-sortable="true">Away player</th>
+        <th data-field="away_player" data-sortable="true">{{ match.away_team }}</th>
         <th data-field="ELO" data-sortable="true">Away ELO</th>
         <th data-field="a_pct" data-sortable="true">A pct</th>
-        <th data-field="home_player" data-sortable="true">Home player</th>
+        <th data-field="home_player" data-sortable="true">{{ match.home_team }}</th>
         <th data-field="home_elo" data-sortable="true">Home ELO</th>
     </tr>
   </thead>

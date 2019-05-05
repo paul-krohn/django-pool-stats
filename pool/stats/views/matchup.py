@@ -40,6 +40,19 @@ def get_player_matchups(kind, thing):
                 })
     return matchups
 
+
+def get_match(kind, thing):
+    match = None
+    if kind == 'match':
+        matches = Match.objects.filter(id=thing)
+        if len(matches):
+            match = matches[0]
+    elif kind == 'scoresheet':
+        scoresheets = ScoreSheet.objects.filter(id=thing)
+        if len(scoresheets):
+            match = scoresheets[0].match
+    return match
+
 def matchup(request):
     e = Elo(beta=80)
     # kind = 'scoresheet', thing = None
@@ -68,9 +81,11 @@ def matchup(request):
                 'away': m['away'], 'home': m['home'], 'pct': away_pct * 100
             })
         context.update({
+            'match': get_match(kind, thing),
             'match_ups': match_ups,
             'expected_wins': 0 if not len(match_ups) else expected_wins / (len(match_ups) / 16.0)
         })
+
     if week_id:
         matches = Match.objects.filter(week_id=week_id)
         if kind == 'match':
