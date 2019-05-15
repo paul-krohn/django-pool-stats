@@ -7,6 +7,7 @@ from . import views, status
 from .views import division
 from .views import score_sheet
 from .views import week
+from .views import matchup
 from .views import player
 from .views import season
 from .views import sponsor
@@ -32,6 +33,8 @@ urlpatterns = [
     url(r'^weeks/', week.weeks, name='weeks'),
     url(r'^nextweek/(?P<today_date>[0-9-]+)', week.get_current_week, name='nextweek'),
     url(r'^nextweek/', week.get_current_week, name='nextweek'),
+
+    url(r'^matchup/', matchup.matchup, name='matchup'),
 
     url(r'^players/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(player.players), name='players'),
     url(r'^players/', player.players, name='players'),

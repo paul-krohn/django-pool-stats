@@ -70,6 +70,7 @@ def players(request, season_id=None):
     show_teams = True
 
     context = {
+        'elo': request.GET.get('elo', False),
         'players': _players,
         'show_teams': show_teams,  # referenced in the player_table.html template
         'season_id': request.session['season_id'],

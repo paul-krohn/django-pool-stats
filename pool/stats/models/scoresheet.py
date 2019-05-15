@@ -121,6 +121,9 @@ class ScoreSheet(models.Model):
                     game.home_player = HomePlayer.objects.get(id=home_substitution.player.id)
             game.save()
 
+    # def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+    #     super(ScoreSheet, self).save(*args, **kwargs)
+    #
     def copy(self, session_id):
         """
 
