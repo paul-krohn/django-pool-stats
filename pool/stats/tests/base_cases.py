@@ -23,6 +23,9 @@ class BasePoolStatsTestCase(LiveServerTestCase):
     DEFAULT_TEST_WEEK_ID = 5
     DEFAULT_TEST_TABLE_ID = 1
 
+    DEFAULT_TEST_AWAY_TEAM_ID = 6
+    DEFAULT_TEST_HOME_TEAM_ID = 7
+
     PLAYOFF_TEST_MATCH_ID = 11
     PLAYOFF_TEST_WEEK_ID = 11
 
@@ -32,8 +35,8 @@ class BasePoolStatsTestCase(LiveServerTestCase):
         "fields": {
             "season": default_season,
             "week": DEFAULT_TEST_WEEK_ID,
-            "home_team": 6,
-            "away_team": 7,
+            "home_team": DEFAULT_TEST_HOME_TEAM_ID,
+            "away_team": DEFAULT_TEST_AWAY_TEAM_ID,
             "playoff": False
         }
     }
