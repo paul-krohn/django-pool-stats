@@ -5,6 +5,7 @@ from django.test import Client
 from django.test import RequestFactory
 from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.exceptions import ValidationError
+from django.db.utils import IntegrityError
 
 from ..models import Season, PlayerSeasonSummary, ScoreSheet, Game, Match, Table, Team, Week
 from ..models import PlayPosition, AwaySubstitution, HomeSubstitution, GameOrder
@@ -364,6 +365,25 @@ class GameTests(BasePoolStatsTestCase):
         test_game_form = ScoreSheetGameForm({'winner': 'home', 'forfeit': True, 'table_run': True})
         self.assertEqual(test_game_form.is_valid(), False)  # forfeit + tr -> not valid
         self.assertRaises(ValidationError, test_game_form.clean)   # and raises ValidationError
+
+
+class MatchTests(BasePoolStatsTestCase):
+
+    def test_home_team_exception(self):
+        m = Match(
+            season_id=self.default_season,
+            week_id=self.DEFAULT_TEST_WEEK_ID,
+            away_team_id=self.test_match['fields']['away_team']
+        )
+        self.assertRaises(IntegrityError, m.save)
+
+    def test_away_team_exception(self):
+        m = Match(
+            season_id=self.default_season,
+            week_id=self.DEFAULT_TEST_WEEK_ID,
+            away_team_id=self.test_match['fields']['home_team']
+        )
+        self.assertRaises(IntegrityError, m.save)
 
 
 class WeekTests(BasePoolStatsTestCase):

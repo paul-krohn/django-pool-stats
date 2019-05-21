@@ -14,14 +14,12 @@ class Match(models.Model):
         'HomeTeam',
         limit_choices_to=models.Q(season__is_default=True),
         related_name='home_team',
-        blank=True, null=True,
         on_delete=models.CASCADE
     )
     away_team = models.ForeignKey(
         'AwayTeam',
         limit_choices_to=models.Q(season__is_default=True),
         related_name='away_team',
-        blank=True, null=True,
         on_delete=models.CASCADE
     )
     alternate_table = models.ForeignKey(Table, default=None, null=True, blank=True, on_delete=models.CASCADE)
