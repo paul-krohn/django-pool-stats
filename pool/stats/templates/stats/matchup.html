@@ -7,7 +7,6 @@
 <h2>Matchup</h2>
 </div>
 <form id='the_form' action="{% url 'matchup' %}" method="get">
-    {% csrf_token %}
     {{ form }}
 </form>
 <hr />
