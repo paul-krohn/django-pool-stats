@@ -155,7 +155,9 @@ class MatchupForm(django.forms.Form):
 
     kind = django.forms.ChoiceField(
         widget=django.forms.RadioSelect(attrs={"onChange": "$('#id_thing').val('');$('#the_form').submit()"}),
-        choices=[('match', 'match'), ('scoresheet', 'scoresheet')]
+        choices=[('match', 'match'), ('scoresheet', 'scoresheet')],
+        required=False,
+        label='',
     )
     week = django.forms.CharField(required=False, widget=django.forms.HiddenInput)
     thing = django.forms.CharField(required=False, widget=django.forms.HiddenInput)
