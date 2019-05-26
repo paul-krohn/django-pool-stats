@@ -52,6 +52,7 @@ def team(request, team_id, after=None):
     ).order_by('week__date')
 
     context = {
+        'elo': request.GET.get('elo', False),
         'team': _team,
         'players': _players,
         'show_players': False,

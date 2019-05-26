@@ -1,9 +1,7 @@
-from elo import Elo, Rating, expect
+from elo import Elo
 from django.core.management.base import BaseCommand
-from django.db import models
 
-from stats.models import Game, Match, PlayerSeasonSummary, ScoreSheet, Season
-from stats.models.globals import away_home
+from ...models import Match, PlayerSeasonSummary, ScoreSheet, Season
 
 
 def get_previous_season(season_id):

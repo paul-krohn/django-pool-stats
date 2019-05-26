@@ -3,10 +3,9 @@ import logging
 from elo import Rating, rate_1vs1
 
 from django.core.management.base import BaseCommand
-from django.db import models
 
-from stats.models import Game, PlayerSeasonSummary, ScoreSheet, Season
-from stats.models.globals import away_home
+from ...models import Game, PlayerSeasonSummary, ScoreSheet, Season
+from ...models.globals import away_home
 
 logger = logging.getLogger('stats')
 logger.debug("message")
