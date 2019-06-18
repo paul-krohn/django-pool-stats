@@ -6,11 +6,30 @@
 <div class="text-center">
 <h2>Players</h2>
 </div>
+{% if elo %}
+<div>
+    <canvas id="elo_chart" style="width:600px; height:150px"></canvas>
+</div>
+{% endif %}
+
 <div class="pull-right search"><input id="filter" class="form-control" type="search" placeholder="Filter"></div>
 {% include "stats/player_table.html" %}
 <script>
 $(document).ready(function () {
     filterer('#filter', '.searchable');
+    let n = 1;
+    $('#elo_chart').each(function () {
+        let element = this;
+        console.log('the element is: ' + this);
+        let player = $(this).attr('data-player');
+        let season = $(this).attr('data-season');
+        if (n < 17) {
+            addEloGraphLine(element, player, season);
+            n += 1;
+        }
+    });
 });
+
 </script>
+
 {% endblock %}

@@ -39,6 +39,8 @@ urlpatterns = [
     url(r'^players/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(player.players), name='players'),
     url(r'^players/', player.players, name='players'),
 
+    url(r'^player_elo_history/(?P<player_id>[0-9]+)/(?P<season_id>[0-9]+)/$',
+        cache_page(view_cache_time)(player.player_elo_history), name='player_elo_history'),
     url(r'^player/(?P<player_id>[0-9]+)/(?P<season_id>[0-9]+)/$',
         player.player, name='player'),
     url(r'^player/(?P<player_id>[0-9]+)/$', cache_page(view_cache_time)(player.player), name='player'),

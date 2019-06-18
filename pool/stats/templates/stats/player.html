@@ -6,7 +6,11 @@
 {% block content %}
 {% if player %}
 <h3>{{ player }} / {{ detail_season }}</h3>
-<div>
+{% if elo %}
+    <div>
+        <canvas data-player="{{ player.id }}" data-season="{{ detail_season.id }}" id="elo_chart" style="width:600px; height:150px"></canvas>
+    </div>
+{% endif %}
 {% for score_sheet_summary in score_sheet_summaries %}
 <div class="player-games"><h5>{{ score_sheet_summary.match.week.date}}: {{ score_sheet_summary.match.week }}</h5>
 <table style="width: auto;" class="table table-condensed table-responsive">
@@ -60,4 +64,16 @@
 </table>
 {{ player.season_summary_set }}
 {% endif %}
+
+<script>
+
+$(document).ready(function () {
+
+    if ($('#elo_chart').length > 0) {
+        playerEloChart($('#elo_chart'));
+    }
+
+});
+
+</script>
 {% endblock %}

@@ -28,7 +28,7 @@
     <td>{{ player_summary.wins }}</td>
     <td>{{ player_summary.losses }}</td>
     <td>{{ player_summary.win_percentage|floatformat:3 }}</td>
-    {% if elo %}<td>{{ player_summary.elo|floatformat:0 }}</td>{% endif %}
+    {% if elo %}<td>{{ player_summary.elo|floatformat:0 }}<canvas class="small_sparkline" data-player="{{ player_summary.player.id }}" data-season="{{ player_summary.season.id }}" style="width:200px;height:60px"></canvas></td>{% endif %}
     <td>{{ player_summary.four_ohs }}</td>
     <td>{{ player_summary.table_runs }}</td>
     </tr>
