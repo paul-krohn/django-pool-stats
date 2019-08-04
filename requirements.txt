@@ -1,4 +1,4 @@
-Django==2.1.7
+Django==2.1.11
 
 # mysql client on OS X needs an install from source with:
 # CFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform
@@ -16,4 +16,4 @@ pycodestyle==2.5.0
 pyflakes==2.1.0
 pytz==2018.9
 six==1.12.0
-urllib3==1.24.2
+urllib3==1.25.3
