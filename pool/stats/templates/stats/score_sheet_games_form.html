@@ -4,7 +4,7 @@
 <tr>
     <th colspan="1" class="scoresheet-small-header" style="text-align:right;"><h5>Home</h5></th>
     <th colspan="5" class="scoresheet-small-header"></th>
-    <th colspan="3" class="scoresheet-small-header"><h5>Away</h5></th>
+    <th colspan="4" class="scoresheet-small-header"><h5>Away</h5></th>
 </tr>
 <tr>
     <th style="text-align:right;"><h4><a href="{% url 'team' score_sheet.match.home_team_id %}">{{ score_sheet.match.home_team }}</a></h4></th>
@@ -14,7 +14,9 @@
     <th></th>
     <th class="scoresheet-cell"><h4>{{ score_sheet.away_wins }}</h4></th>
     <th><h4><a href="{% url 'team' score_sheet.match.away_team_id %}">{{ score_sheet.match.away_team }}</a></h4></th>
-    <th class="scoresheet-square">TR</th><th class="scoresheet-square">F</th>
+    <th class="scoresheet-square">Time Marked</th>
+    <th class="scoresheet-square">TR</th>
+    <th class="scoresheet-square">F</th>
 </tr>
     {% for game_form in games_formset %}
         {{ game_form.id }}
@@ -43,6 +45,7 @@
         {% else %}
         <td class="scoresheet-cell" align="left"><div class="scoresheet-cell">--</div></td>
         {% endif %}
+        <td class="scoresheet-square">{{ game_form.instance.timestamp|date:"H:i" }}</td>
         <td class="scoresheet-square">{{ game_form.table_run }}</td>
         <td class="scoresheet-square">{{ game_form.forfeit }}</td>
     </tr>

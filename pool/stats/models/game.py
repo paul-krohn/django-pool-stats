@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from django.db import models
 
 from .player import AwayPlayer, HomePlayer
@@ -25,3 +27,19 @@ class Game(models.Model):
     order = models.ForeignKey(GameOrder, null=True, on_delete=models.CASCADE)
     table_run = models.BooleanField(default=False)
     forfeit = models.BooleanField(default=False)
+    timestamp = models.DateTimeField(default=None, blank=True, null=True)
+
+    __original_winner = None
+
+    def __init__(self, *args, **kwargs):
+        super(Game, self).__init__(*args, **kwargs)
+        self.__original_winner = self.winner
+
+    def save(self, force_insert=False, force_update=False, using=None,
+             update_fields=None):
+
+        if self.__original_winner in [None, ''] and self.winner not in [None, '']:
+            self.timestamp = datetime.now()
+
+        super(Game, self).save(force_insert=force_insert, force_update=force_update)
+        self.__original_winner = self.winner
