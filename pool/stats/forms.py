@@ -36,7 +36,7 @@ class ScoreSheetGameForm(django.forms.ModelForm):
 
     class Meta:
         model = Game
-        fields = ['winner', 'table_run', 'forfeit']
+        fields = ['winner', 'table_run', 'forfeit', 'timestamp']
         extra = 0
         widgets = {
             'winner': django.forms.RadioSelect(
