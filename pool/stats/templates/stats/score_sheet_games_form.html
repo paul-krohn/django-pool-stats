@@ -1,6 +1,8 @@
 
 {% load scoresheet %}
+{% load tz %}
 {% spaceless %}
+{% timezone "America/Los_Angeles" %}
 <tr>
     <th colspan="1" class="scoresheet-small-header" style="text-align:right;"><h5>Home</h5></th>
     <th colspan="5" class="scoresheet-small-header"></th>
@@ -65,4 +67,5 @@
     {% endif %}
     {% endwith %}
     {% endfor %}
+{% endtimezone %}
 {% endspaceless %}

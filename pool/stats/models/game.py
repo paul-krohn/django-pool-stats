@@ -1,6 +1,5 @@
-from datetime import datetime
-
 from django.db import models
+from django.utils import timezone
 
 from .player import AwayPlayer, HomePlayer
 from .lineup import GameOrder
@@ -39,7 +38,7 @@ class Game(models.Model):
              update_fields=None):
 
         if self.__original_winner in [None, ''] and self.winner not in [None, '']:
-            self.timestamp = datetime.now()
+            self.timestamp = timezone.now()
 
         super(Game, self).save(force_insert=force_insert, force_update=force_update)
         self.__original_winner = self.winner

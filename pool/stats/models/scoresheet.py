@@ -168,7 +168,8 @@ class ScoreSheet(models.Model):
                 winner=old_game.winner,
                 order=old_game.order,
                 table_run=old_game.table_run,
-                forfeit=old_game.forfeit
+                forfeit=old_game.forfeit,
+                timestamp=old_game.timestamp,
             )
             new_game.save()
             new_ss.games.add(new_game)
