@@ -30,6 +30,8 @@ class Game(models.Model):
 
     __original_winner = None
 
+    # this method of adding a timestamp cribbed from:
+    # https://stackoverflow.com/questions/1355150/django-when-saving-how-can-you-check-if-a-field-has-changed
     def __init__(self, *args, **kwargs):
         super(Game, self).__init__(*args, **kwargs)
         self.__original_winner = self.winner
