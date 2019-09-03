@@ -1,5 +1,4 @@
-from elo import Elo, Rating, setup as elo_setup
-
+from elo import Rating, setup as elo_setup
 
 from django.db import models
 
@@ -24,7 +23,7 @@ class PlayerElo(models.Model):
         on_delete=models.CASCADE
     )
 
-    rater = elo_setup(initial=100, beta=15)
+    rater = elo_setup(initial=1200, beta=80)
 
     @classmethod
     def get_season_rateable_games(cls, season_id):
@@ -50,7 +49,7 @@ class PlayerElo(models.Model):
             home_player=None
         )
 
-        return games[0:100]
+        return games
 
     @classmethod
     def update_season(cls, season_id):
@@ -61,8 +60,7 @@ class PlayerElo(models.Model):
 
     @classmethod
     def update_from_game(cls, game, season_id):  # summaries, winner_index, loser_index):
-        # if game.away_player is None or game.home_player is None:
-        #     return False
+
         wl = ['winner', 'loser']
         summaries = get_summaries(game, season_id)
         winner = game.winner
@@ -70,14 +68,20 @@ class PlayerElo(models.Model):
         # if the winner is 'home'
         winner_index = away_home.index(winner)
         loser_index = 1 - away_home.index(winner)
+
         new_elos = dict()
-        # print(new_elos.get('winner'))
-        # new_winner, new_loser = rate_1vs1(
         new_elos['winner'], new_elos['loser'] = cls.rater.rate_1vs1(
             cls.rater.create_rating(get_old_elo(summaries[away_home[winner_index]])),
             cls.rater.create_rating(get_old_elo(summaries[away_home[loser_index]])),
         )
-        print('new elos are: {}'.format(new_elos))
+        # logger.debug(
+        #     "new elos: {}/{} and {}/{}".format(
+        #         game.away_player,
+        #         new_elos[wl[winner_index]],
+        #         game.home_player,
+        #         new_elos[wl[loser_index]],
+        #     )
+        # )
         PlayerElo(
             rating=new_elos[wl[winner_index]],
             player=game.away_player,
@@ -95,13 +99,6 @@ class PlayerElo(models.Model):
         summaries[away_home[winner_index]].save()
         summaries[away_home[loser_index]].save()
 
-        # if self.verbosity >= 3:
-        #     self.stdout.write("{} def {} new ratings: {:.1f}, {:.1f}".format(
-        #         summaries[away_home[winner_index]].player,
-        #         summaries[away_home[loser_index]].player,
-        #         new_elos['winner'],
-        #         new_elos['loser'])
-        #     )
 
 def get_summaries(game, season_id):
     summaries = dict()
