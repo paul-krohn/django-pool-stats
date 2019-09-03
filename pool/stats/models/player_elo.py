@@ -32,8 +32,7 @@ class PlayerElo(models.Model):
             'scoresheet__official': True,
             'scoresheet__match__playoff': False,
             'scoresheet__match__season_id': season_id,
-            'away_player__playerelo__isnull': True,
-            'home_player__playerelo__isnull': True,
+            'playerelo__isnull': True,
             'forfeit': False,
         }
 
