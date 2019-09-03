@@ -3,8 +3,8 @@ from django.core.management.base import BaseCommand
 from django.db import models
 from django.shortcuts import get_object_or_404, render, redirect
 
-from stats.models import Game, Match, PlayerSeasonSummary, ScoreSheet, Season, Week
-from stats.models.globals import away_home
+from ..models import Game, Match, PlayerSeasonSummary, ScoreSheet, Season, Week
+from ..models.globals import away_home
 
 from ..forms import MatchupForm
 
