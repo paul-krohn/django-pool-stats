@@ -20,8 +20,6 @@ class Game(models.Model):
         related_name='home_player',
         on_delete=models.CASCADE,
     )
-    away_elo = models.FloatField(null=True)
-    home_elo = models.FloatField(null=True)
     winner = models.CharField(max_length=4, blank=True)
     order = models.ForeignKey(GameOrder, null=True, on_delete=models.CASCADE)
     table_run = models.BooleanField(default=False)
