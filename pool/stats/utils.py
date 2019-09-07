@@ -1,11 +1,12 @@
 import time
 
 from django.core.cache import cache
-from django.urls import reverse
+from django.core.cache import caches
 from django.utils.cache import get_cache_key
 
 from .models import Season, PlayerSeasonSummary, Team
 
+page_cache = caches['page']
 
 def session_uid(request):
     if 'uid' not in request.session.keys():
@@ -41,10 +42,5 @@ def update_season_stats(season_id):
     Team.update_rankings(season_id=season_id)
 
 
-def expire_caches(request, season_id):
-
-    for pss in PlayerSeasonSummary.objects.filter(season_id=season_id):
-        expire_page(request, reverse('player', kwargs={'player_id': pss.player.id}))
-    expire_page(request, reverse('divisions', kwargs={'season_id': season_id}), '')
-    expire_page(request, reverse('players', kwargs={'season_id': season_id}), '')
-    expire_page(request, reverse('teams', kwargs={'season_id': season_id}), '')
+def expire_caches():
+    cache.clear()
