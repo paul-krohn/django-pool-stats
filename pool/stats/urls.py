@@ -26,7 +26,7 @@ urlpatterns = [
     url(r'^team/(?P<team_id>[0-9]+)/(?P<after>[0-9-]+)?$', team.team, name='team'),
     url(r'^team/(?P<team_id>[0-9]+)/', team.team, name='team'),
 
-    url(r'^teams/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(team.teams), name='teams'),
+    url(r'^teams/(?P<season_id>[0-9]+)', team.teams, name='teams'),
     url(r'^teams/', views.index, name='teams'),
 
     url(r'^week/(?P<week_id>[0-9]+)/$', week.week, name='week'),
@@ -36,7 +36,7 @@ urlpatterns = [
 
     url(r'^matchup/', matchup.matchup, name='matchup'),
 
-    url(r'^players/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(player.players), name='players'),
+    url(r'^players/(?P<season_id>[0-9]+)', player.players, name='players'),
     url(r'^players/', player.players, name='players'),
 
     url(r'^player/(?P<player_id>[0-9]+)/(?P<season_id>[0-9]+)/$',
@@ -61,8 +61,6 @@ urlpatterns = [
 
     url(r'^seasons/', season.seasons, name='seasons'),
     url(r'^set_season/(?P<season_id>[0-9]+)/$', season.set_season, name='set_season'),
-
-    url(r'^update_stats/', views.update_stats, name='update_stats'),
 
     url(r'^__status', status.index),
 
