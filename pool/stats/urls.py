@@ -5,6 +5,7 @@ from django.conf import settings
 from . import views, status
 
 from .views import division
+from .views import feature
 from .views import score_sheet
 from .views import week
 from .views import matchup
@@ -18,6 +19,9 @@ view_cache_time = settings.VIEW_CACHE_TIME
 
 urlpatterns = [
     url(r'^$', views.index, name='index'),
+
+    url(r'^feature/$', feature.index, name='feature'),
+    url(r'^feature/(?P<feature>[\w]+)/(?P<setting>[\w]+)', feature.save, name='feature_set'),
 
     url(r'^divisions/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(division.divisions), name='divisions'),
     url(r'^divisions/', division.divisions, name='divisions'),
