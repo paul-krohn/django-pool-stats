@@ -1,8 +1,10 @@
 from django.db import models
 from django.shortcuts import get_object_or_404, render, redirect
+from django.template import loader
 
 from ..forms import PlayerForm
 from ..models import Player, PlayerSeasonSummary, ScoreSheet, Season
+from ..utils import page_cache as cache
 from ..views import logger
 from ..views import check_season
 
@@ -63,17 +65,30 @@ def players(request, season_id=None):
     if season_id is None:
         return redirect('players', season_id=request.session['season_id'])
 
-    _players = PlayerSeasonSummary.objects.filter(
-        season=season_id,
-        ranking__gt=0
-    ).order_by('-win_percentage', '-wins')
-    show_teams = True
+    elo = request.session.get('elo', False)
+    players_table_cache_key = '.'.join(['players_table', str(season_id), str(elo)])
+    players_table = cache.get(players_table_cache_key)
+
+    if not players_table:
+        order_by_args = ('-win_percentage', '-wins')
+        if elo:
+            order_by_args = ('-elo',)
+        _players = PlayerSeasonSummary.objects.filter(
+            season=season_id,
+            ranking__gt=0
+        ).order_by(*order_by_args)
+
+        template = loader.get_template('stats/player_table.html')
+
+        players_table = template.render(request=request, context={
+            'elo': elo,
+            'players': _players,
+            'show_teams': True,
+        })
+        cache.set(players_table_cache_key, players_table)
 
     context = {
-        'elo': request.GET.get('elo', False),
-        'players': _players,
-        'show_teams': show_teams,  # referenced in the player_table.html template
-        'season_id': request.session['season_id'],
+        'players_table':  players_table
     }
     view = render(request, 'stats/players.html', context)
     return view

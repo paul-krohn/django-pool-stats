@@ -2,8 +2,10 @@ import datetime
 
 from django.db.models import Q
 from django.shortcuts import redirect, render, get_object_or_404
+from django.template import loader
 
 from ..models import Team, Tie, TieBreakerResult, Season, PlayerSeasonSummary, ScoreSheet, Match
+from ..utils import page_cache as cache
 from ..views import check_season
 
 
@@ -28,10 +30,27 @@ def team(request, team_id, after=None):
     check_season(request)
 
     _team = get_object_or_404(Team, id=team_id)
-    _players = PlayerSeasonSummary.objects.filter(
-        player_id__in=list([x.id for x in _team.players.all()]),
-        season_id=_team.season.id,
-    ).order_by('player__last_name')
+
+    elo = request.session.get('elo', False)
+    players_table_cache_key = '.'.join(['players_table', 'team', str(team_id), str(elo)])
+    players_table = cache.get(players_table_cache_key)
+
+    if not players_table:
+        _players = PlayerSeasonSummary.objects.filter(
+            player_id__in=list([x.id for x in _team.players.all()]),
+            season_id=_team.season.id,
+        ).order_by('player__last_name')
+
+        template = loader.get_template('stats/player_table.html')
+
+        players_table = template.render(request=request, context={
+            'elo': elo,
+            'players': _players,
+            'show_teams': False,
+        })
+        cache.set(players_table_cache_key, players_table)
+
+
     official_score_sheets = ScoreSheet.objects.filter(official=True).filter(
         Q(match__away_team=_team) | Q(match__home_team=_team)
     ).order_by('match__week__date')
@@ -51,11 +70,10 @@ def team(request, team_id, after=None):
         Q(away_team=_team) | Q(home_team=_team)
     ).order_by('week__date')
 
+    _elo = request.session.get('elo', False)
     context = {
-        'elo': request.GET.get('elo', False),
         'team': _team,
-        'players': _players,
-        'show_players': False,
+        'players_table': players_table,
         'official_score_sheets': official_score_sheets,
         'unofficial_score_sheets': unofficial_score_sheets,
         'matches': _matches,

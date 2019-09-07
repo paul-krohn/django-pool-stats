@@ -1,5 +1,4 @@
 {% extends "stats/base.html" %}
-
 {% block title %}SFPA :: Players{% endblock %}
 
 {% block content %}
@@ -7,7 +6,9 @@
 <h2>Players</h2>
 </div>
 <div class="pull-right search"><input id="filter" class="form-control" type="search" placeholder="Filter"></div>
-{% include "stats/player_table.html" %}
+
+    {{ players_table }}
+
 <script>
 $(document).ready(function () {
     filterer('#filter', '.searchable');
