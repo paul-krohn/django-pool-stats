@@ -1,4 +1,4 @@
-<table class="table" data-sort-name="Rank" data-toggle="table" data-sort-order="asc" id="player_rankings_table">
+<table class="table" data-sort-name={% if elo %}"ELO" {% else %}"Rank" {% endif %} data-toggle="table" data-sort-order="asc" id="player_rankings_table">
   <thead>
     <tr>
       <th data-field="Rank" data-sortable="true">Rank</th>
@@ -21,7 +21,7 @@
     {% if player_summary.team %}
     <tr>
     <td>{% if player_summary.ranking %}{{ player_summary.ranking }}{% endif %}</td>
-    <td><!-- {{ player_summary.player }} sort lexically --><a href="{% url 'player' player_summary.player.id %}">{{ player_summary.player }}</a></td>
+    <td><!-- {{ player_summary.player }} sort lexically --><a href="{% url 'player' player_summary.player.id player_summary.season.id %}">{{ player_summary.player }}</a></td>
     {% if show_teams %}
     <td><!-- {{ player_summary.team }} sort lexically --><a href="{% url 'team' player_summary.team.id %}">{{ player_summary.team }}</a></td>
     {% endif %}

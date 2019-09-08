@@ -5,6 +5,7 @@ from django.conf import settings
 from . import views, status
 
 from .views import division
+from .views import feature
 from .views import score_sheet
 from .views import week
 from .views import matchup
@@ -19,6 +20,9 @@ view_cache_time = settings.VIEW_CACHE_TIME
 urlpatterns = [
     url(r'^$', views.index, name='index'),
 
+    url(r'^feature/$', feature.index, name='feature'),
+    url(r'^feature/(?P<feature>[\w]+)/(?P<setting>[\w]+)', feature.save, name='feature_set'),
+
     url(r'^divisions/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(division.divisions), name='divisions'),
     url(r'^divisions/', division.divisions, name='divisions'),
 
@@ -26,7 +30,7 @@ urlpatterns = [
     url(r'^team/(?P<team_id>[0-9]+)/(?P<after>[0-9-]+)?$', team.team, name='team'),
     url(r'^team/(?P<team_id>[0-9]+)/', team.team, name='team'),
 
-    url(r'^teams/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(team.teams), name='teams'),
+    url(r'^teams/(?P<season_id>[0-9]+)', team.teams, name='teams'),
     url(r'^teams/', views.index, name='teams'),
 
     url(r'^week/(?P<week_id>[0-9]+)/$', week.week, name='week'),
@@ -36,7 +40,7 @@ urlpatterns = [
 
     url(r'^matchup/', matchup.matchup, name='matchup'),
 
-    url(r'^players/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(player.players), name='players'),
+    url(r'^players/(?P<season_id>[0-9]+)', player.players, name='players'),
     url(r'^players/', player.players, name='players'),
 
     url(r'^player/(?P<player_id>[0-9]+)/(?P<season_id>[0-9]+)/$',
@@ -61,8 +65,6 @@ urlpatterns = [
 
     url(r'^seasons/', season.seasons, name='seasons'),
     url(r'^set_season/(?P<season_id>[0-9]+)/$', season.set_season, name='set_season'),
-
-    url(r'^update_stats/', views.update_stats, name='update_stats'),
 
     url(r'^__status', status.index),
 

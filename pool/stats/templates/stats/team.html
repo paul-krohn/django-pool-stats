@@ -10,7 +10,7 @@
     <h4><a href="{% url 'sponsor' team.sponsor.id %}">{{ team.sponsor }}</a></h4>
 {%  endif %}
 {% if team.captain %}<p>Captain: <a href="{% url 'player' team.captain.id %}">{{ team.captain }}</a></p>{% endif %}
-{% include "stats/player_table.html" %}
+{{ players_table }}
 {% endif %}
 {% if official_score_sheets %}
 <h3>Official Results</h3>

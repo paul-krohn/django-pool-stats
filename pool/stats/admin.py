@@ -154,7 +154,7 @@ class SeasonAdmin(admin.ModelAdmin):
         if len(queryset) == 1:
             season_id = queryset[0].id
             update_season_stats(season_id)
-            expire_caches(request, season_id)
+            expire_caches()
             self.message_user(
                 request,
                 level='INFO',
@@ -528,7 +528,7 @@ class ScoreSheetAdmin(admin.ModelAdmin):
         update_season_id = queryset[0].match.season.id
         if len(queryset) == 1:
             update_season_stats(update_season_id)
-            expire_caches(request, update_season_id)
+            expire_caches()
             self.message_user(
                 request,
                 level='INFO',

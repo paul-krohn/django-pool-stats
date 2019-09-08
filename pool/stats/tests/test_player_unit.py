@@ -2,7 +2,7 @@ from django.urls import reverse
 from django.test import RequestFactory
 
 from ..models import Season, Player, PlayerSeasonSummary, Team
-from ..utils import expire_page
+from ..utils import page_cache
 from .base_cases import BasePoolStatsTestCase
 
 
@@ -21,10 +21,7 @@ class PlayerViewTests(BasePoolStatsTestCase):
         player.save()
 
         url_args = {'season_id':  Season.objects.get(is_default=True).id}
-        expire_page(self.factory.get(reverse('players')), reverse(
-            'players',
-            kwargs=url_args,
-        ))
+        page_cache.clear()
 
         response = self.client.get(reverse('players', kwargs=url_args))
         self.assertQuerysetEqual(response.context['players'], [])
@@ -49,7 +46,7 @@ class PlayerViewTests(BasePoolStatsTestCase):
             season=s
         )
         summary.save()
-        expire_page(self.factory.get(reverse('players')), reverse('player', kwargs={'player_id': player.id}))
+        page_cache.clear()
 
         response = self.client.get(reverse('player', kwargs={'player_id': player.id}))
         self.assertQuerysetEqual(
