@@ -14,8 +14,7 @@
 {% for game in history %}
     <tr>
         <td>
-            <a href="{% url  'score_sheet' game.game.scoresheet_set.all.0.id %}">{{ game.game.scoresheet_set.all.0.match.week.date }}</a>
-
+            <a href="{% url 'score_sheet' game.game.scoresheet_set.all.0.id %}">{{ game.game.scoresheet_set.all.0.match.week.date }}</a>
         </td>
         <td>
             {% if game.game.away_player_id == player.id %}
