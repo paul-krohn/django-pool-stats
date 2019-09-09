@@ -43,4 +43,4 @@ def update_season_stats(season_id):
 
 
 def expire_caches():
-    cache.clear()
+    page_cache.clear()
