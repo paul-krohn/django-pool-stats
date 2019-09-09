@@ -1,0 +1,50 @@
+{% extends "stats/base.html" %}
+{% block title %}SFPA :: ELO history :: {{ player }}{% endblock %}
+{% block content %}
+
+    <h2>{{ player }}</h2>
+
+<table style="width: auto;" class="table table-condensed table-responsive">
+    <tr>
+        <th>date</th>
+        <th>vs</th>
+        <th>w/l</th>
+        <th>new rating</th>
+    </tr>
+{% for game in history %}
+    <tr>
+        <td>
+            <a href="{% url  'score_sheet' game.game.scoresheet_set.all.0.id %}">{{ game.game.scoresheet_set.all.0.match.week.date }}</a>
+
+        </td>
+        <td>
+            {% if game.game.away_player_id == player.id %}
+            <a href="{% url 'player_elo' game.game.home_player_id %}">{{ game.game.home_player }}</a>
+            {% else %}
+            <a href="{% url 'player_elo' game.game.away_player_id %}">{{ game.game.away_player }}</a>
+            {% endif %}
+        </td>
+        <td>
+            {% if game.game.away_player_id == player.id %}
+                {% if game.game.winner == 'away' %}
+                    w
+                {% else %}
+                    l
+                {% endif %}
+            {% else %}
+                {% if game.game.winner == 'home' %}
+                    w
+                {% else %}
+                    l
+                {% endif %}
+            {% endif %}
+        </td>
+        <td>
+            {{ game.rating|floatformat:0 }}
+        </td>
+    </tr>
+{% endfor %}
+
+    </table>
+
+{% endblock %}

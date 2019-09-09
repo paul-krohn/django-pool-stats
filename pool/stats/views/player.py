@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.template import loader
 
 from ..forms import PlayerForm
-from ..models import Player, PlayerSeasonSummary, ScoreSheet, Season
+from ..models import Player, PlayerElo, PlayerSeasonSummary, ScoreSheet, Season
 from ..utils import page_cache as cache
 from ..views import logger
 from ..views import check_season
@@ -92,6 +92,22 @@ def players(request, season_id=None):
     }
     view = render(request, 'stats/players.html', context)
     return view
+
+
+def player_elo(request, player_id):
+    check_season(request)
+
+    player = Player.objects.get(id=player_id)
+
+    elo_history = PlayerElo.objects.filter(
+        player_id=player_id
+    ).order_by('game_id')
+
+    context = {
+        'player': player,
+        'history': elo_history,
+    }
+    return render(request, 'stats/player_elo.html', context)
 
 
 def player_create(request):
