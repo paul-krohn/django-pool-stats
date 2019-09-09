@@ -45,7 +45,7 @@ urlpatterns = [
 
     url(r'^player/(?P<player_id>[0-9]+)/(?P<season_id>[0-9]+)/$',
         player.player, name='player'),
-    url(r'^player/(?P<player_id>[0-9]+)/$', cache_page(view_cache_time)(player.player), name='player'),
+    url(r'^player/(?P<player_id>[0-9]+)/$', player.player, name='player'),
     url(r'^player_create/', player.player_create, name='player_create'),
 
     url(r'^sponsors/', sponsor.sponsors, name='sponsors'),
