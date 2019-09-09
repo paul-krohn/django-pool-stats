@@ -10,7 +10,7 @@ from django.db.utils import IntegrityError
 from ..models import Season, PlayerSeasonSummary, ScoreSheet, Game, Match, Table, Team, Week
 from ..models import PlayPosition, AwaySubstitution, HomeSubstitution, GameOrder
 
-from ..utils import expire_page
+from ..utils import page_cache as cache
 from ..views.week import get_current_week
 from ..views.season import get_default_season
 from ..forms import ScoreSheetGameForm
@@ -186,7 +186,7 @@ class ScoreSheetTests(BasePoolStatsTestCase):
         self.assertEqual(37, len(summaries))  # 37 is a magic number, where does that come from?
 
         # there should now be six players with enough games to be in the standings
-        expire_page(self.factory.get(reverse('players')), reverse('players', kwargs=season_args))
+        cache.clear()
         response = self.client.get(reverse('players', kwargs=season_args))
         self.assertEqual(len(response.context['players']), 8)  # 8 is 2x players in lineup
 
@@ -476,11 +476,7 @@ class TeamTests(BasePoolStatsTestCase):
 
         # a bit of artful dodging here; in order to purge a page/view from the cache, we need a request pointing
         # at the page ... so create a request object, request the page with it, then delete it from cache, then
-        # request it again for the actual test.
-        factory = RequestFactory()
-        request = factory.get(reverse('team', kwargs={'team_id': self.TEST_TEAM_ID}))
-        expire_page(request, reverse('team', kwargs={'team_id': self.TEST_TEAM_ID}))
-
+        cache.clear()
         response = self.client.get(reverse('team', kwargs={'team_id': self.TEST_TEAM_ID}))
         self.assertEqual(len(response.context['players']), self.TEST_TEAM_PLAYER_COUNT)
 
@@ -500,9 +496,7 @@ class TeamTests(BasePoolStatsTestCase):
     def test_team_upcoming_matches(self):
         # see comment in test_team_player_count about purging the cache to make sure response.context is not empty
         request_args = {'team_id': self.TEST_TEAM_ID, 'after': '2010-01-01'}
-        factory = RequestFactory()
-        request = factory.get(reverse('team', kwargs=request_args))
-        expire_page(request, reverse('team', kwargs=request_args))
+        cache.clear()
 
         response = self.client.get(reverse('team', kwargs=request_args))
         matches = response.context['matches'].all()
