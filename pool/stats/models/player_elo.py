@@ -46,7 +46,7 @@ class PlayerElo(models.Model):
             away_player=None
         ).exclude(
             home_player=None
-        )
+        ).order_by('scoresheet__match__week__date', 'order')
 
         return games
 
