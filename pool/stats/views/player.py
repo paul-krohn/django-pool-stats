@@ -99,32 +99,42 @@ def player_elo(request, player_id):
 
     _player = Player.objects.get(id=player_id)
 
-    elo_history = PlayerElo.objects.filter(
-        player_id=player_id
-    ).order_by('game_id')
+    player_elo_cache_key = '.'.join([
+        'player_elo_history',
+        str(_player.id),
+        str(request.session['season_id']),
+    ])
 
+    page = cache.get(player_elo_cache_key)
 
-    rows = list()
-    for player_history_item in elo_history:
-        wl = 'l'
-        if player_history_item.game.away_player == _player:
-            if player_history_item.game.winner == 'away':
-                wl = 'w'
-        else:
-            if player_history_item.game.winner == 'home':
-                wl = 'w'
-        opponent_history_item = PlayerElo.objects.filter(game=player_history_item.game).exclude(player=_player)[0]
-        rows.append({
-            'wl': wl,
-            'opponent': opponent_history_item,
-            'player': player_history_item,
-        })
+    if not page:
+        elo_history = PlayerElo.objects.filter(
+            player_id=player_id
+        ).order_by('game_id')
 
-    context = {
-        'player': _player,
-        'history': rows,
-    }
-    return render(request, 'stats/player_elo.html', context)
+        rows = list()
+        for player_history_item in elo_history:
+            wl = 'l'
+            if player_history_item.game.away_player == _player:
+                if player_history_item.game.winner == 'away':
+                    wl = 'w'
+            else:
+                if player_history_item.game.winner == 'home':
+                    wl = 'w'
+            opponent_history_item = PlayerElo.objects.filter(game=player_history_item.game).exclude(player=_player)[0]
+            rows.append({
+                'wl': wl,
+                'opponent': opponent_history_item,
+                'player': player_history_item,
+            })
+
+        context = {
+            'player': _player,
+            'history': rows,
+        }
+        page = render(request, 'stats/player_elo.html', context)
+        cache.set(player_elo_cache_key, page)
+    return page
 
 
 def player_create(request):
