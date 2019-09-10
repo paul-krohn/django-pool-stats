@@ -2,25 +2,32 @@
 {% block title %}SFPA :: ELO history :: {{ player }}{% endblock %}
 {% block content %}
 
-    <h2>{{ player }}</h2>
+<h2>{{ player }}</h2>
 
-<table style="width: auto;" class="table table-condensed table-responsive">
-    <tr>
-        <th>date</th>
-        <th>vs</th>
-        <th>opp rating</th>
-        <th>w/l</th>
-        <th>new rating</th>
-    </tr>
+<div class="pull-right search"><input id="filter" class="form-control" type="search" placeholder="Opponent filter"></div>
+<table class="table table-responsive" data-toggle="table" data-sort-order="asc" data-sort-name="date" id="player_elo_history">
+    <thead>
+        <tr>
+            <th data-sortable="true" data-field="Date">Date</th>
+            <th data-sortable="true" data-field="Opponent">Opponent</th>
+            <th data-sortable="true" data-field="Opp. rating">Opp. rating</th>
+            <th>w/l</th>
+            <th data-sortable="true" data-field="New rating">New rating</th>
+        </tr>
+    </thead>
+    <tbody class="searchable">
 {% for item in history %}
     <tr>
         <td>
-            <a href="{% url 'score_sheet' item.player.game.scoresheet_set.all.0.id %}">{{ item.player.game.scoresheet_set.all.0.match.week.date }}</a>
+            <!-- {{ item.player.game.scoresheet_set.all.0.match.week.date|date:"Y-m-d" }} -->
+            <a href="{% url 'score_sheet' item.player.game.scoresheet_set.all.0.id %}">{{ item.player.game.scoresheet_set.all.0.match.week.date|date:"Y-m-d" }}</a>
         </td>
         <td>
             {% if item.player.game.away_player_id == player.id %}
+            <!-- {{ item.player.game.home_player.last_name }},  {{ item.player.game.home_player.first_name }} -->
             <a href="{% url 'player_elo' item.player.game.home_player_id %}">{{ item.player.game.home_player }}</a>
             {% else %}
+            <!-- {{ item.player.game.away_player.last_name }},  {{ item.player.game.away_player.first_name }} -->
             <a href="{% url 'player_elo' item.player.game.away_player_id %}">{{ item.player.game.away_player }}</a>
             {% endif %}
         </td>
@@ -35,7 +42,12 @@
         </td>
     </tr>
 {% endfor %}
-
-    </table>
+</tbody>
+</table>
+<script>
+$(document).ready(function () {
+    filterer('#filter', '.searchable');
+});
+</script>
 
 {% endblock %}
