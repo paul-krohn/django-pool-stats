@@ -97,15 +97,32 @@ def players(request, season_id=None):
 def player_elo(request, player_id):
     check_season(request)
 
-    player = Player.objects.get(id=player_id)
+    _player = Player.objects.get(id=player_id)
 
     elo_history = PlayerElo.objects.filter(
         player_id=player_id
     ).order_by('game_id')
 
+
+    rows = list()
+    for player_history_item in elo_history:
+        wl = 'l'
+        if player_history_item.game.away_player == _player:
+            if player_history_item.game.winner == 'away':
+                wl = 'w'
+        else:
+            if player_history_item.game.winner == 'home':
+                wl = 'w'
+        opponent_history_item = PlayerElo.objects.filter(game=player_history_item.game).exclude(player=_player)[0]
+        rows.append({
+            'wl': wl,
+            'opponent': opponent_history_item,
+            'player': player_history_item,
+        })
+
     context = {
-        'player': player,
-        'history': elo_history,
+        'player': _player,
+        'history': rows,
     }
     return render(request, 'stats/player_elo.html', context)
 
