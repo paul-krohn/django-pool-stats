@@ -23,7 +23,7 @@ urlpatterns = [
     url(r'^feature/$', feature.index, name='feature'),
     url(r'^feature/(?P<feature>[\w]+)/(?P<setting>[\w]+)', feature.save, name='feature_set'),
 
-    url(r'^divisions/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(division.divisions), name='divisions'),
+    url(r'^divisions/(?P<season_id>[0-9]+)', division.divisions, name='divisions'),
     url(r'^divisions/', division.divisions, name='divisions'),
 
     # the 'after' parameter is really just to make it testable
