@@ -36,5 +36,5 @@ def divisions(request, season_id=None):
 
         }
         page = render(request, 'stats/divisions.html', context)
-        cache.setb(divisions_cache_key, page)
+        cache.set(divisions_cache_key, page)
     return page
