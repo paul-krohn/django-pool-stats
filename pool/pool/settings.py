@@ -211,6 +211,7 @@ LEAGUE = {
     'logo': None,
     'tag_line': '',
     'game_group_size': 4,
+    'url': '/'
 }
 
 VIEW_CACHE_TIME = 86400
