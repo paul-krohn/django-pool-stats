@@ -9,7 +9,7 @@
 <div>
 {% for score_sheet_summary in score_sheet_summaries %}
 <div class="player-games"><h5>{{ score_sheet_summary.match.week.date}}: {{ score_sheet_summary.match.week }}</h5>
-<table style="width: auto;" class="table table-condensed table-responsive">
+<table style="width: auto;" class="table table-sm table-responsive">
   <thead>
     <tr>
         <th colspan="4"><a href="{% url 'score_sheet' score_sheet_summary.id %}">{{ score_sheet_summary.match.away_team }} @ {{ score_sheet_summary.match.home_team }}</a></th>
