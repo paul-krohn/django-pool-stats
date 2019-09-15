@@ -77,7 +77,7 @@ class Participant(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
     # these field names do/must match the PARTICIPANT_TYPES list above;
     # for scotch-doubles tournaments, we'll add 2 players
-    players = models.ForeignKey('Player', on_delete=models.DO_NOTHING, null=True, blank=True)
+    players = models.ManyToManyField('Player', blank=True)
     team = models.ForeignKey('Team', on_delete=models.DO_NOTHING, null=True, blank=True)
 
     def __str__(self):
