@@ -1,6 +1,7 @@
 from django.db import models
 from math import ceil, log
 
+from ..models import Player
 
 TOURNAMENT_TYPES = [
     ('team_playoff', 'Team Playoff'),
@@ -39,10 +40,10 @@ class Tournament(models.Model):
         return self.name
 
     def create_brackets(self):
-        winners_bracket = Bracket(tournament=self, type='w')
+        winners_bracket, created = Bracket.objects.get_or_create(tournament=self, type='w')
         winners_bracket.save()
-        if self.elimination is 'double':
-            losers_bracket = Bracket(tournament=self, type='l')
+        if self.elimination == 'double':
+            losers_bracket, created = Bracket.objects.get_or_create(tournament=self, type='l')
             losers_bracket.save()
 
     def round_count(self):
@@ -54,7 +55,7 @@ class Tournament(models.Model):
     def create_rounds(self):
         round_inc = 0
         while round_inc < self.round_count():
-            wbr = Round(
+            wbr, created = Round.objects.get_or_create(
                 bracket=self.bracket_set.get(type='w'),
                 number=round_inc + 1,
             )
@@ -77,10 +78,12 @@ class Participant(models.Model):
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
     # these field names do/must match the PARTICIPANT_TYPES list above;
     # for scotch-doubles tournaments, we'll add 2 players
-    players = models.ManyToManyField('Player', blank=True)
+    player = models.ManyToManyField('Player', blank=True)
     team = models.ForeignKey('Team', on_delete=models.DO_NOTHING, null=True, blank=True)
 
     def __str__(self):
+        if self.type == 'player':
+            return ', '.join([p.__str__() for p in self.player.all()])
         return getattr(self, '{}'.format(self.type)).__str__()
 
 
