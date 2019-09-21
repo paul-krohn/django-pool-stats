@@ -18,6 +18,10 @@ BRACKET_TYPES = [
     ('l', 'Losers'),
 ]
 
+BRACKET_TYPES_DICT = {
+    x[0]: x[1] for x in BRACKET_TYPES
+}
+
 ROUND_TYPES = [
     'elimination',
     'drop_in',
@@ -90,6 +94,9 @@ class Participant(models.Model):
 class Bracket(models.Model):
     type = models.TextField(choices=BRACKET_TYPES)
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return '{} - {}'.format(self.tournament, BRACKET_TYPES_DICT[self.type])
 
 
 class Round(models.Model):
@@ -203,6 +210,12 @@ class TournamentMatchup(models.Model):
     winner = models.ForeignKey(
         Participant, on_delete=models.DO_NOTHING, null=True,
     )
+
+    def not_winner(self):
+        # return [self.participant_a, self.participant_b].remove(self.winner)[0]
+        for p in [self.participant_a, self.participant_b]:
+            if p != self.winner:
+                return p
 
     number = models.IntegerField()
     a_want_winner = models.NullBooleanField(null=True)
