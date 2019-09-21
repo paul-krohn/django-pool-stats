@@ -1,0 +1,19 @@
+{% extends "stats/base.html" %}
+{% block title %}SFPA :: Tournament :: {{ tournament }}{% endblock %}
+
+{% block content %}
+<div class="text-center">
+<h2>{{ tournament }}</h2>
+{% for bracket in tournament.bracket_set.all %}
+    {% for round in bracket.round_set.all %}
+    <p>{{ round }}</p>
+        {% for matchup in round.tournamentmatchup_set.all %}
+            <p>{{ matchup.participant_a }} vs {{ matchup.participant_b }}</p>
+            {% if matchup.winner %}
+                <p>winner: <b>{{ matchup.winner }}</b></p>
+            {% endif %}
+        {%  endfor %}
+    {%  endfor %}
+{%  endfor %}
+</div>
+{% endblock %}

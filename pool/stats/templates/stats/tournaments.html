@@ -1,0 +1,12 @@
+{% extends "stats/base.html" %}
+{% block title %}SFPA :: Tournament {% endblock %}
+
+{% block content %}
+<div class="text-center">
+<h2>Tournaments</h2>
+{% for tournament in tournaments %}
+    <p><a href="{% url 'tournament' tournament.id %}">{{ tournament }}</a></p>
+{#            <td><!-- {{ team }} sort lexically --><a href="{% url 'team' team.id %}">{{ team }}</a></td>#}
+{%  endfor %}
+</div>
+{% endblock %}
