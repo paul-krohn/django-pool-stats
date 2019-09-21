@@ -244,8 +244,21 @@ class TournamentMatchup(models.Model):
         if self.participant_b is None:
             if self.source_match_b is not None:
                 participant_b_string = self.source_match_b.description('b', self.b_want_winner)
+    def update(self):
+        if self.source_match_a.winner:
+            print("source match a {} has a winner".format(self.source_match_a))
+            if self.a_want_winner:
+                self.participant_a = self.source_match_a.winner
             else:
-                participant_b_string = 'bye'
+                self.participant_a = self.source_match_a.not_winner()
+        if self.source_match_b.winner:
+            print("source match b {} has a winner".format(self.source_match_b))
+            if self.b_want_winner:
+                self.participant_b = self.source_match_b.winner
+            else:
+                self.participant_b = self.source_match_b.not_winner()
+        self.save()
+
 
         return ("match {}: {} vs {}".format(
             self.play_order,
