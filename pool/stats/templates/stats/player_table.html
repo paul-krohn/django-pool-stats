@@ -28,7 +28,7 @@
     <td>{{ player_summary.wins }}</td>
     <td>{{ player_summary.losses }}</td>
     <td>{{ player_summary.win_percentage|floatformat:3 }}</td>
-        {% if elo %}<td><a href="{% url 'player_elo' player_summary.player_id  %}">{{ player_summary.elo|floatformat:0 }}</a></td>{% endif %}
+        {% if elo %}<td><!-- {{ player_summary.elo }}--><a href="{% url 'player_elo' player_summary.player_id  %}">{{ player_summary.elo|floatformat:0 }}</a></td>{% endif %}
     <td>{{ player_summary.four_ohs }}</td>
     <td>{{ player_summary.table_runs }}</td>
     </tr>
