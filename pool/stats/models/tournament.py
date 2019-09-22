@@ -90,6 +90,16 @@ class Participant(models.Model):
             return ', '.join([p.__str__() for p in self.player.all()])
         return getattr(self, '{}'.format(self.type)).__str__()
 
+    def to_dict(self):
+        if self.type == 'player':
+            players = [p.id for p in self.player.all()]
+        else:
+            players = [self.team.id]
+        return {
+            'type': self.type,
+            'reference': players,
+        }
+
 
 class Bracket(models.Model):
     type = models.TextField(choices=BRACKET_TYPES)
