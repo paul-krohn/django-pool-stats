@@ -133,7 +133,8 @@ class Round(models.Model):
         br_size = 2 * matchup_count
 
         winners_side_rounds = self.bracket.tournament.bracket_set.get(type='w').round_set.all()
-        losers_side_rounds = self.bracket.tournament.bracket_set.get(type='l').round_set.all()
+        if self.bracket.type == 'l':
+            losers_side_rounds = self.bracket.tournament.bracket_set.get(type='l').round_set.all()
 
         while i < matchup_count:
             # source matches; not set in first round
