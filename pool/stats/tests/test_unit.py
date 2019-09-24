@@ -7,6 +7,7 @@ from django.contrib.sessions.middleware import SessionMiddleware
 from django.core.exceptions import ValidationError
 from django.db.utils import IntegrityError
 
+from ..models import Division
 from ..models import Season, PlayerSeasonSummary, ScoreSheet, Game, Match, Table, Team, Week
 from ..models import PlayPosition, AwaySubstitution, HomeSubstitution, GameOrder
 
@@ -351,6 +352,20 @@ class ScoreSheetTests(BasePoolStatsTestCase):
         c = Client()
         copy_response = c.post(reverse('score_sheet_copy'), data={'scoresheet_id': ss.id})
         self.assertRedirects(copy_response, reverse('score_sheet',  kwargs={'score_sheet_id': ss.id}))
+
+
+class DivisionTests(BasePoolStatsTestCase):
+
+    def setUp(self):
+        super(DivisionTests, self).setUp()
+
+    def test_division_page_render(self):
+
+        test_divisions = Division.objects.filter()
+        self.assertEqual(len(test_divisions), 2)
+        cache.clear()
+        response = self.client.get(reverse('divisions', kwargs={'season_id': self.default_season}))
+        self.assertEqual(len(response.context['divisions']), 2)
 
 
 class GameTests(BasePoolStatsTestCase):
