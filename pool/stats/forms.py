@@ -1,8 +1,12 @@
 import django.forms
 from django.core.exceptions import ValidationError
 
+<<<<<<< HEAD
 from .models import Game, Match, Player, ScoreSheet, Table, Team
 from .utils import get_dupes_from_dict
+=======
+from .models import Participant, Player, Team, Game, ScoreSheet, Tournament, Match
+>>>>>>> basic editing of tournament participants
 from .views.season import get_default_season
 
 WINNER_CHOICES = (
@@ -83,6 +87,13 @@ class ScoreSheetStatusForm(django.forms.ModelForm):
     class Meta:
         model = ScoreSheet
         fields = ['comment', 'complete', 'official']
+
+
+class TournamentParticipantForm(django.forms.ModelForm):
+
+    class Meta:
+        model = Participant
+        fields = ['player']
 
 
 class LineupFormSet(django.forms.BaseModelFormSet):
