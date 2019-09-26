@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 from math import ceil, log
 
 from ..models import Player
@@ -91,13 +92,22 @@ class Participant(models.Model):
         return getattr(self, '{}'.format(self.type)).__str__()
 
     def to_dict(self):
+        players = []
+        team = None
         if self.type == 'player':
-            players = [p.id for p in self.player.all()]
+            players = [{
+                'id': p.id,
+                'name': p.__str__(),
+                'url': reverse('player', kwargs={'player_id': p.id})
+
+            } for p in self.player.all()]
         else:
-            players = [self.team.id]
+            team = [self.team.id]
         return {
+            'id': self.id,
             'type': self.type,
-            'reference': players,
+            'players': players,
+            'team': team,
         }
 
 
@@ -233,28 +243,6 @@ class TournamentMatchup(models.Model):
     b_want_winner = models.NullBooleanField(null=True)
     play_order = models.IntegerField(null=True)
 
-    def description(self, side, want):
-        print('describing match {}'.format(self.number))
-        if self.participant_a and self.participant_b:
-            description = "{} of {} vs {}".format("winner" if want else "loser", self.participant_a, self.participant_b)
-        else:
-            description = "{}".format(self.participant_a or self.participant_b)
-
-        src_m = getattr(self, 'source_match_{}'.format(side), None)
-        if src_m is not None:
-            description = "{} of match {}".format("winner" if want else "loser", self.play_order)
-        return description
-
-    def __str__(self):
-        print('stringing match number {} in bracket {}/{} tournament {} between {} and {}'.format(
-            self.play_order, self.round.bracket, self.round.bracket.type, self.round.bracket.tournament,
-            self.participant_a, self.participant_b,
-        ))
-
-        participant_b_string = self.participant_b
-        if self.participant_b is None:
-            if self.source_match_b is not None:
-                participant_b_string = self.source_match_b.description('b', self.b_want_winner)
     def update(self):
         if self.source_match_a.winner:
             print("source match a {} has a winner".format(self.source_match_a))
@@ -270,11 +258,41 @@ class TournamentMatchup(models.Model):
                 self.participant_b = self.source_match_b.not_winner()
         self.save()
 
+    # def description(self, side, want):
+    #     # print('describing match {}'.format(self.number))
+    #     if self.winner:
+    #         return self.participant_a if self.winner == self.participant_a else self.participant_b
+    #     else:
+    #         return "winner of "
+        # else:
+        #     if self.participant_a and self.participant_b:
+        #         description = "{} of {} vs {}".format("winner" if want else "loser", self.participant_a, self.participant_b)
+        #     else:
+        #         description = "{}".format(self.participant_a or self.participant_b)
+        #
+        #     src_m = getattr(self, 'source_match_{}'.format(side), None)
+        #     if src_m is not None:
+        #         description = "{} of match {}".format("winner" if want else "loser", self.play_order)
+        #     return description
 
-        return ("match {}: {} vs {}".format(
-            self.play_order,
-            'bye' if self.participant_a is False else self.participant_a or
-                self.source_match_a.description('a', self.a_want_winner),
-                participant_b_string
-            )
-        )
+    def __str__(self):
+        return "match in {} of {}".format(self.round, self.round.bracket)
+        # print('stringing match number {} in bracket {}/{} tournament {} between {} and {}'.format(
+        #     self.play_order, self.round.bracket, self.round.bracket.type, self.round.bracket.tournament,
+        #     self.participant_a, self.participant_b,
+        # ))
+        #
+        # participant_b_string = self.participant_b
+        # if self.participant_b is None:
+        #     if self.source_match_b is not None:
+        #         participant_b_string = self.source_match_b.description('b', self.b_want_winner)
+        #     else:
+        #         participant_b_string = 'bye'
+        #
+        # return ("match {}: {} vs {}".format(
+        #     self.play_order,
+        #     'bye' if self.participant_a is False else self.participant_a or
+        #         self.source_match_a.description('a', self.a_want_winner),
+        #         participant_b_string
+        #     )
+        # )
