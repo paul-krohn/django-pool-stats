@@ -2,7 +2,9 @@
 {% block title %}SFPA :: Tournament :: {{ tournament }}{% endblock %}
 
 {% block content %}
-<div class="text-center">
+{% comment %}
+
+    <div class="text-center" xmlns:v-bind="http://www.w3.org/1999/xhtml">
 <h2>{{ tournament }}</h2>
 {% for bracket in tournament.bracket_set.all %}
     {% for round in bracket.round_set.all %}
@@ -16,4 +18,96 @@
     {%  endfor %}
 {%  endfor %}
 </div>
+{% endcomment %}
+<div id="app">
+{% verbatim %}
+    <h2>{{ the_tournament.name }}</h2>
+    <h3>Participants</h3>
+    <ul>
+    <li v-for="participant in the_tournament.participants">
+        <template v-for="(player, index) in participant.players">
+            <a :href="player.url">{{ player.name }}</a>
+        </template>
+    </li>
+    </ul>
+    <h3>Matches</h3>
+    <ul>
+        <li v-for="matchup in the_tournament.matchups">
+            <div v-if="the_tournament.brackets.length > 1">bracket: {{ matchup.bracket }}</div>
+            <div>r{{ matchup.round }}/m{{ matchup.match.number }} <span v-html="renderParticipant (matchup.match.participant_a)"></span> vs
+                <span v-html="renderParticipant (matchup.match.participant_b)"></span>
+            <span v-if="matchup.match.winner">winner</span>
+            </div>
+        </li>
+    </ul>
+    <pre>{{ the_tournament }}</pre>
+{% endverbatim %}
+</div>
+<script>
+    function checkId(participant, id) {
+        return participant.id === id;
+    }
+    let dataUrl = '{%  url 'tournament' tournament.id %}';
+    let app = new Vue({
+        el: '#app',
+        data: {
+            the_tournament: []
+        },
+        computed: {
+            reversedMessage: function () {
+                // `this` points to the vm instance
+                return this.the_tournament.name.split('').reverse().join('')
+            },
+        },
+/*        filters: {
+            selectParticipant: function(value, id) {
+                let returnValues = Array();
+                if (value.id === id) {
+                    returnValues.append(value);
+                }
+                return returnValues;
+            }
+        }, */
+        methods: {
+            getParticipant: function(id) {
+                let self = this;
+                this.the_tournament.participants.filter(function(elem){
+                    if (elem.id === id) return elem;
+                });
+            },
+            renderParticipant: function(participant) {
+                console.log("filtering for participant: " + participant);
+                if (participant === null) {
+                    return 'TBD';
+                }
+
+//                let nonByeParticipants = this.the_tournament.participants.filter(p => p.hasOwnProperty('id'));
+//                let maybeParticipants = nonByeParticipants.filter(p => (p.id === participant.id));
+
+                if (participant.type === 'player') {
+//                    let players = maybeParticipants[0].players;
+                    let players = this.the_tournament.participants[0].players;
+                    let player_anchors = Array();
+                    players.forEach(function(player, index) {
+                        player_anchors.push(`<a href="${player.url}">${player.name}</a>`);
+                    });
+                    return player_anchors.join(', ');
+                }
+            }
+        },
+        mounted() {
+            let self = this;
+            $.ajax({
+                url: dataUrl,
+                dataType: 'json',
+                success: function(data) {
+                    self.the_tournament = data;
+                },
+                headers: {
+                    Accept: "application/json",
+                }
+            });
+        }
+    })
+</script>
 {% endblock %}

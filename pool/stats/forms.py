@@ -1,7 +1,7 @@
 import django.forms
 from django.core.exceptions import ValidationError
 
-from .models import Player, Team, Game, ScoreSheet, Match
+from .models import Participant, Player, Team, Game, ScoreSheet, Tournament, Match
 from .views.season import get_default_season
 
 WINNER_CHOICES = (
@@ -82,6 +82,13 @@ class ScoreSheetStatusForm(django.forms.ModelForm):
     class Meta:
         model = ScoreSheet
         fields = ['comment', 'complete', 'official']
+
+
+class TournamentParticipantForm(django.forms.ModelForm):
+
+    class Meta:
+        model = Participant
+        fields = ['player']
 
 
 class LineupFormSet(django.forms.BaseModelFormSet):
