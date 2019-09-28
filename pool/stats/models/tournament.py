@@ -147,57 +147,52 @@ class Round(models.Model):
             losers_side_rounds = self.bracket.tournament.bracket_set.get(type='l').round_set.all()
 
         while i < matchup_count:
-            # source matches; not set in first round
-            source_match_a = None
-            source_match_b = None
-            # participants; only set in first round winner's side
-            participant_a = None
-            participant_b = None
-            # do we want winners? mostly yes; override for drop-in matches
-            want_winner_a = True
-            want_winner_b = True
+
+            matchup_args = {
+                'source_match_a': None,
+                'source_match_b': None,
+                # participants; only set in first round winner's side
+                'participant_a': None,
+                 'participant_b': None,
+                # do we want winners? mostly yes; override for drop-in matches
+                'want_winner_a': True,
+                'want_winner_b': True,'round': self,
+                'number': i + 1,
+            }
             if self.number == 1:
                 if self.bracket.type is 'w':
-                    participant_a = self.bracket.tournament.participant_set.all()[i]
-                    participant_b = None  # allows for byes when the bracket is not full
+                    matchup_args['participant_a'] = self.bracket.tournament.participant_set.all()[i]
+                    matchup_args['participant_b'] = None  # allows for byes when the bracket is not full
                     if len(self.bracket.tournament.participant_set.all()) > (br_size - 1) - i:
-                        participant_b = self.bracket.tournament.participant_set.all()[(br_size - 1) - i]
+                        matchup_args['participant_b'] = self.bracket.tournament.participant_set.all()[(br_size - 1) - i]
                 else:
                     # losers bracket round one is also a special case; we initialize from losers of all the
                     # round one winners side matches
                     # source_round = self.bracket.tournament.bracket_set.get(type__eq='w').round_set.get(number=1)
                     source_round_matchups = winners_side_rounds.get(number=1).tournamentmatchup_set.all()
-                    source_match_a = source_round_matchups[i]
-                    source_match_b = source_round_matchups[br_size - i - 1]
+                    matchup_args['source_match_a'] = source_round_matchups[i]
+                    matchup_args['source_match_b ']= source_round_matchups[br_size - i - 1]
             else:
                 if self.bracket.type is 'w':
                     source_round_matchups = winners_side_rounds.get(number=self.number - 1).tournamentmatchup_set.all()
-                    source_match_a = source_round_matchups[i]
-                    source_match_b = source_round_matchups[br_size - i - 1]
+                    matchup_args['source_match_a'] = source_round_matchups[i]
+                    matchup_args['source_match_b'] = source_round_matchups[br_size - i - 1]
                 elif self.number % 2 == 0:
                     # this is an "elimination" losers bracket round; source matches are the previous round
                     source_round_matchups = losers_side_rounds.get(number=self.number - 1).tournamentmatchup_set.all()
                     print("source round matchups: {}".format(source_round_matchups))
-                    source_match_a = source_round_matchups[i]
-                    source_match_b = source_round_matchups[matchup_count - i - 1]  # yikes why does this work
+                    matchup_args['source_match_a'] = source_round_matchups[i]
+                    matchup_args['source_match_b'] = source_round_matchups[matchup_count - i - 1]  # yikes why does this work
                 else:
                     # this is a "drop-in" losers bracket round; we mix the losers and winners brackets
                     winners_source_matches = winners_side_rounds.get(number=self.number - 1).tournamentmatchup_set.all()
                     losers_source_matches = losers_side_rounds.get(number=self.number - 1).tournamentmatchup_set.all()
-                    source_match_a = winners_source_matches[i]
-                    want_winner_a = False
-                    source_match_b = losers_source_matches[i]
+                    matchup_args['source_match_a'] = winners_source_matches[i]
+                    matchup_args['want_winner_a'] = False
+                    matchup_args['source_match_b']= losers_source_matches[i]
 
             tm, created = TournamentMatchup.objects.get_or_create(
-                source_match_a=source_match_a,
-                source_match_b=source_match_b,
-                participant_a=participant_a,
-                participant_b=participant_b,
-                a_want_winner=want_winner_a,
-                b_want_winner=want_winner_b,
-                # round=self.bracket_set.get(type=side).round_set.get(number=1),
-                round=self,
-                number=i + 1,
+                **matchup_args,
             )
             print("matchup {} vs {}:  was created: {}".format(
                 tm.participant_a, tm.participant_b, created)
