@@ -156,7 +156,8 @@ class Round(models.Model):
                  'participant_b': None,
                 # do we want winners? mostly yes; override for drop-in matches
                 'want_winner_a': True,
-                'want_winner_b': True,'round': self,
+                'want_winner_b': True,
+                'round': self,
                 'number': i + 1,
             }
             if self.number == 1:
