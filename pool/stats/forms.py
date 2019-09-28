@@ -89,6 +89,15 @@ class ScoreSheetStatusForm(django.forms.ModelForm):
         fields = ['comment', 'complete', 'official']
 
 
+class TournamentForm(django.forms.ModelForm):
+    class Meta:
+        model = Tournament
+        exclude = []
+        widgets = {
+            'name': django.forms.TextInput(),
+        }
+
+
 class TournamentParticipantForm(django.forms.ModelForm):
 
     class Meta:

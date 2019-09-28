@@ -74,6 +74,9 @@ urlpatterns = [
     url(r'^tournaments/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(tournament.tournaments), name='tournaments'),
     url(r'^tournaments/', tournament.tournaments, name='tournaments'),
     url(r'^tournament/(?P<tournament_id>[0-9]+)', tournament.tournament, name='tournament'),
+    url(r'^tournament_edit/(?P<tournament_id>[0-9]+)', tournament.tournament_edit, name='tournament_edit'),
+    url(r'^tournament_edit/', tournament.tournament_edit, name='tournament_edit'),
+    url(r'^tournament_brackets/(?P<tournament_id>[0-9]+)', tournament.tournament_brackets, name='tournament_brackets'),
     url(r'^tournament_participants/(?P<tournament_id>[0-9]+)', tournament.tournament_participants, name='tournament_participants'),
 
 
