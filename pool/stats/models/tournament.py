@@ -153,7 +153,7 @@ class Round(models.Model):
                 'source_match_b': None,
                 # participants; only set in first round winner's side
                 'participant_a': None,
-                 'participant_b': None,
+                'participant_b': None,
                 # do we want winners? mostly yes; override for drop-in matches
                 'want_winner_a': True,
                 'want_winner_b': True,
