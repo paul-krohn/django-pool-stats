@@ -47,9 +47,9 @@ def tournament(request, tournament_id):
                         'round': round.number,
                         'match': {
                             'number': matchup.number,
-                            'participant_a': matchup.participant_a.to_dict() if matchup.participant_a else None,
-                            'participant_b': matchup.participant_b.to_dict() if matchup.participant_b else None,
-                            'winner': matchup.winner.id if matchup.winner else None,
+                            'participant_a': None if not matchup.participant_a else matchup.participant_a.to_dict(),
+                            'participant_b': None if not matchup.participant_b else matchup.participant_b.to_dict(),
+                            'winner': None if not matchup.winner else matchup.winner,
                         }
                     })
             response_dict['brackets'].append({
