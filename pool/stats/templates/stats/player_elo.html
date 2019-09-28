@@ -19,7 +19,7 @@
 {% for item in history %}
     <tr>
         <td>
-            <!-- {{ item.player.game.scoresheet_set.all.0.match.week.date|date:"Y-m-d" }}.{{ item.player.game.order }} -->
+            <!-- {{ item.player.game.scoresheet_set.all.0.match.week.date|date:"Y-m-d" }}.{{ item.player.game.order.order| stringformat:"03d" }} -->
             <a href="{% url 'score_sheet' item.player.game.scoresheet_set.all.0.id %}">{{ item.player.game.scoresheet_set.all.0.match.week.date|date:"Y-m-d" }}</a>
         </td>
         <td>
