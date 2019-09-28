@@ -1,0 +1,19 @@
+{% extends "stats/base.html" %}
+{% block title %}SFPA :: Create Tournament {% endblock %}
+
+{% block content %}
+
+{%  if tournament_form.instance.id %}
+    <form action="{% url 'tournament_edit' tournament_form.instance.id %}" method="post">
+{% else %}
+    <form action="{% url 'tournament_edit' %}" method="post">
+{% endif %}
+    {% csrf_token %}
+{{ tournament_form.management_form }}
+
+{{ tournament_form.as_table }}
+<input class="btn btn-primary" type="submit" value="Save Tournament" />
+</form>
+
+    <p>all set? on to <a href="{% url 'tournament_participants' tournament_form.instance.id %}">participants</a></p>
+{% endblock %}

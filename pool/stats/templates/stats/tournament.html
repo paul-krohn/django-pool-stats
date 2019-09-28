@@ -2,23 +2,6 @@
 {% block title %}SFPA :: Tournament :: {{ tournament }}{% endblock %}
 
 {% block content %}
-{% comment %}
-
-    <div class="text-center" xmlns:v-bind="http://www.w3.org/1999/xhtml">
-<h2>{{ tournament }}</h2>
-{% for bracket in tournament.bracket_set.all %}
-    {% for round in bracket.round_set.all %}
-    <p>{{ round }}</p>
-        {% for matchup in round.tournamentmatchup_set.all %}
-            <p>{{ matchup.participant_a }} vs {{ matchup.participant_b }}</p>
-            {% if matchup.winner %}
-                <p>winner: <b>{{ matchup.winner }}</b></p>
-            {% endif %}
-        {%  endfor %}
-    {%  endfor %}
-{%  endfor %}
-</div>
-{% endcomment %}
 <div id="app">
 {% verbatim %}
     <h2>{{ the_tournament.name }}</h2>
@@ -34,7 +17,8 @@
     <ul>
         <li v-for="matchup in the_tournament.matchups">
             <div v-if="the_tournament.brackets.length > 1">bracket: {{ matchup.bracket }}</div>
-            <div>r{{ matchup.round }}/m{{ matchup.match.number }} <span v-html="renderParticipant (matchup.match.participant_a)"></span> vs
+            <div>r{{ matchup.round }}/m{{ matchup.match.number }}
+                <span v-html="renderParticipant (matchup.match.participant_a)"></span> vs
                 <span v-html="renderParticipant (matchup.match.participant_b)"></span>
             <span v-if="matchup.match.winner">winner</span>
             </div>
@@ -53,36 +37,28 @@
         data: {
             the_tournament: []
         },
-/*        filters: {
-            selectParticipant: function(value, id) {
-                let returnValues = Array();
-                if (value.id === id) {
-                    returnValues.append(value);
-                }
-                return returnValues;
-            }
-        }, */
         methods: {
-            getParticipant: function(id) {
-                let self = this;
-                this.the_tournament.participants.filter(function(elem){
-                    if (elem.id === id) return elem;
-                });
-            },
             renderParticipant: function(participant) {
-                console.log("filtering for participant: " + participant);
+                var playerName = 'unknown';
+                if (participant !== null) {
+                    playerName = participant['players'][0].name;
+                }
+
+                console.log("filtering for participant: " + playerName);
                 if (participant === null) {
                     return 'TBD';
                 }
 
-//                let nonByeParticipants = this.the_tournament.participants.filter(p => p.hasOwnProperty('id'));
-//                let maybeParticipants = nonByeParticipants.filter(p => (p.id === participant.id));
-
+                let player_anchors = Array();
                 if (participant.type === 'player') {
-//                    let players = maybeParticipants[0].players;
-                    let players = this.the_tournament.participants[0].players;
-                    let player_anchors = Array();
-                    players.forEach(function(player, index) {
+                    let the_participant = null;
+                    this.the_tournament.participants.forEach(function(a_participant, index){
+                        if (a_participant.id === participant.id) {
+                            console.log("found it");
+                            the_participant = a_participant;
+                        }
+                    });
+                    the_participant.players.forEach(function(player, index) {
                         player_anchors.push(`<a href="${player.url}">${player.name}</a>`);
                     });
                     return player_anchors.join(', ');

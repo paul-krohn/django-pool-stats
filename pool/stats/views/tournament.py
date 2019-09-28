@@ -1,8 +1,8 @@
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
-from django.forms import modelformset_factory
+from django.forms import modelform_factory, modelformset_factory
 
-from ..forms import TournamentParticipantForm
+from ..forms import TournamentForm, TournamentParticipantForm
 from ..models import Tournament, Participant, Player
 
 from ..views import check_season
@@ -63,6 +63,29 @@ def tournament(request, tournament_id):
     return render(request, 'stats/tournament.html', context)
 
 
+def tournament_edit(request, tournament_id=None):
+
+    t = None
+    if tournament_id is not None:
+        t = Tournament.objects.get(id=tournament_id)
+
+    if request.method == 'POST':
+        tournament_form = TournamentForm(
+            request.POST,
+            instance=t
+        )
+        tournament_form.save()
+        return redirect('tournament_edit', t.id)
+    else:
+        tournament_form = TournamentForm(
+            instance=t,
+        )
+    context = {
+        'tournament_form': tournament_form,
+    }
+    return render(request, 'stats/tournament_edit.html', context)
+
+
 def tournament_participants(request, tournament_id):
 
     a_tournament = Tournament.objects.get(id=tournament_id)
@@ -76,8 +99,8 @@ def tournament_participants(request, tournament_id):
     participant_formset = participant_formset_f(
         queryset=Participant.objects.filter(tournament=a_tournament),
     )
-    if request.method == 'POST':
 
+    if request.method == 'POST':
         participant_formset = participant_formset_f(
             request.POST,
             queryset=Participant.objects.filter(tournament=a_tournament),
@@ -100,3 +123,17 @@ def tournament_participants(request, tournament_id):
     }
 
     return render(request, 'stats/tournament_participants.html', context)
+
+
+def tournament_brackets(request, tournament_id):
+    # hey ho we are creating the brackets for a tournament!
+
+    t = Tournament.objects.get(id=tournament_id)
+    t.create_brackets()
+    t.create_rounds()
+
+    for b in t.bracket_set.all():
+        for r in b.round_set.all():
+            r.create_matchups()
+
+    return redirect('tournament', tournament_id)
