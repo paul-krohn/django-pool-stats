@@ -35,23 +35,23 @@ def tournament(request, tournament_id):
         )
 
         # now the matchups
-        response_dict.update(matchups=[])
         response_dict.update(brackets=[])
         for bracket in a_tournament.bracket_set.all():
             this_bracket_round_list = []
             for round in bracket.round_set.all():
-                this_bracket_round_list.append({'id': round.id})
+                this_round = {
+                    'number': round.number,
+                    'matchups': []
+                }
                 for matchup in round.tournamentmatchup_set.all():
-                    response_dict['matchups'].append({
-                        'bracket': bracket.type,
-                        'round': round.number,
-                        'match': {
+                    # response_dict['matchups'].append({
+                    this_round['matchups'].append({
                             'number': matchup.number,
                             'participant_a': None if not matchup.participant_a else matchup.participant_a.to_dict(),
                             'participant_b': None if not matchup.participant_b else matchup.participant_b.to_dict(),
                             'winner': None if not matchup.winner else matchup.winner,
-                        }
                     })
+                this_bracket_round_list.append(this_round)
             response_dict['brackets'].append({
                 'type': bracket.type, 'rounds': this_bracket_round_list
             })
@@ -112,6 +112,8 @@ def tournament_participants(request, tournament_id):
                     p.delete()
                 obj = pform.save(commit=False)
                 obj.tournament = a_tournament
+                # also set the participant type, ugly hack alert here
+                obj.type = 'player'
             participant_formset.save()
         return redirect('tournament_participants', a_tournament.id)
 
