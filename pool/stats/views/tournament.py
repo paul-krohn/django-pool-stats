@@ -44,7 +44,6 @@ def tournament(request, tournament_id):
                     'matchups': []
                 }
                 for matchup in round.tournamentmatchup_set.all():
-                    # response_dict['matchups'].append({
                     this_round['matchups'].append({
                             'number': matchup.number,
                             'participant_a': None if not matchup.participant_a else matchup.participant_a.to_dict(),
