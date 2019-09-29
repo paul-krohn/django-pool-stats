@@ -74,8 +74,8 @@ def tournament_edit(request, tournament_id=None):
             request.POST,
             instance=t
         )
-        tournament_form.save()
-        return redirect('tournament_edit', t.id)
+        saved_tournament = tournament_form.save()
+        return redirect('tournament_edit', saved_tournament.id)
     else:
         tournament_form = TournamentForm(
             instance=t,
