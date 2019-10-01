@@ -5,6 +5,7 @@
 <div id="app">
 {% verbatim %}
     <h1>{{ the_tournament.name }}</h1>
+    <button type="button" onclick="app.updateData();">update</button>
     <h3>Participants</h3>
     <ul>
     <li v-for="participant in the_tournament.participants">
@@ -50,6 +51,19 @@
             the_tournament: []
         },
         methods: {
+            updateData: function() {
+                let self = this;
+                $.ajax({
+                    url: dataUrl,
+                    dataType: 'json',
+                    success: function(data) {
+                        self.the_tournament = data;
+                    },
+                    headers: {
+                        Accept: "application/json",
+                    }
+                });
+            },
             renderParticipant: function(participant) {
                 var playerName = 'unknown';
                 if (participant !== null) {
@@ -77,7 +91,7 @@
                 }
             }
         },
-        mounted() {
+        mounted: function() {
             let self = this;
             $.ajax({
                 url: dataUrl,
