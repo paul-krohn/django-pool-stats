@@ -165,7 +165,8 @@ class Round(models.Model):
             return source_round_matchups[self.matchup_count() - increment - 1]  # yikes why does this work
 
     def get_losers_bracket_drop_in_source_matchup(self, ab, increment):
-        winners_source_matches = self.bracket.tournament.bracket_set.get(type='w').round_set.get(number=self.number - 1).tournamentmatchup_set.all()
+        winners_source_round_number = int(self.number / 2) + 1
+        winners_source_matches = self.bracket.tournament.bracket_set.get(type='w').round_set.get(number=winners_source_round_number).tournamentmatchup_set.all()
         losers_source_matches = self.bracket.tournament.bracket_set.get(type='l').round_set.get(number=self.number - 1).tournamentmatchup_set.all()
         if ab == 'a':
             return winners_source_matches[increment]
