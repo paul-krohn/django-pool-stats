@@ -266,13 +266,13 @@ class TournamentMatchup(models.Model):
 
     def update(self):
         if self.source_match_a.winner:
-            print("source match a {} has a winner".format(self.source_match_a))
+            print("source match a {} has a winner: {}".format(self.source_match_a, self.source_match_a.winner))
             if self.a_want_winner:
                 self.participant_a = self.source_match_a.winner
             else:
                 self.participant_a = self.source_match_a.not_winner()
         if self.source_match_b.winner:
-            print("source match b {} has a winner".format(self.source_match_b))
+            print("source match b {} has a winner: {}".format(self.source_match_b, self.source_match_b.winner))
             if self.b_want_winner:
                 self.participant_b = self.source_match_b.winner
             else:
