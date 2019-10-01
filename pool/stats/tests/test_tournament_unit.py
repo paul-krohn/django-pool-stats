@@ -26,8 +26,17 @@ class TournamentLiveTestCases(LiveServerTestCase):
 class TournamentTestCases(TestCase):
 
     def test_matchup_count(self):
-        # right_answers is LS round sizes from bracket of 64:
-        right_answers = [16, 16, 8, 8, 4, 4, 2, 2, 1]
+        # right_answers is overall bracket size and first 9 LS bracket sizes for 64 and 256 participants
+        right_answers = [{
+            'participants': 64,
+            'bracket_sizes': [16, 16, 8, 8, 4, 4, 2, 2, 1],
+        },
+        {
+            'participants': 1024,
+            'bracket_sizes': [256, 256, 128, 128, 64, 64, 32, 32, 16],
+
+        }]
+
         t = Tournament()
         t.save()
         b = Bracket(
@@ -36,7 +45,9 @@ class TournamentTestCases(TestCase):
         )
         b.save()
 
-        for inc in range(0, len(right_answers)):
-            r = Round(number=inc+1, bracket=b)
-            r.bracket.tournament.bracket_size = MagicMock(return_value=64)
-            self.assertEqual(right_answers[inc], r.matchup_count())
+        for answer_set in right_answers:
+
+            for inc in range(0, len(answer_set['bracket_sizes'])):
+                r = Round(number=inc+1, bracket=b)
+                r.bracket.tournament.bracket_size = MagicMock(return_value=answer_set['participants'])
+                self.assertEqual(answer_set['bracket_sizes'][inc], r.matchup_count())
