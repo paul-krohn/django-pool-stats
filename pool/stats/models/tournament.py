@@ -130,12 +130,11 @@ class Round(models.Model):
 
     def matchup_count(self):
         if self.bracket.type is 'w':
-            # return log(foo, 2) - (self.number - 1)
             return int(self.bracket.tournament.bracket_size() / 2 ** self.number)
         else:
             # LS round sizes from bracket of 64: 16, 16, 8, 8, 4, 4, 2, 2, 1
             # if round number is not divisible by 2, add 1, then use that as the power of 2 for the divisor
-            return int(self.bracket.tournament.bracket_size() / (2 ** (self.number + ceil(self.number % 2))))
+            return int(self.bracket.tournament.bracket_size() / 2 ** ((self.number + (self.number % 2)) / 2 + 1))
 
     def get_first_round_winners_participant(self, ab, increment):
         if ab == 'a':
