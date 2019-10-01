@@ -209,14 +209,14 @@ class Round(models.Model):
                     for p in PARTICIPANT_LETTERS:
                         matchup_args['source_match_{}'.format(p)] = self.get_winners_bracket_source_matchup(p, i)
                 elif self.number % 2 == 0:
+                    # this is a "drop-in" losers bracket round; we mix the losers bracket winners and winners bracket losers
+                    matchup_args['a_want_winner'] = False
+                    matchup_args['source_match_a'] = self.get_losers_bracket_drop_in_source_matchup('a', i)
+                    matchup_args['source_match_b'] = self.get_losers_bracket_drop_in_source_matchup('b', i)
+                else:
                     # this is an "elimination" losers bracket round; source matches are the previous round
                     for p in PARTICIPANT_LETTERS:
                         matchup_args['source_match_{}'.format(p)] = self.get_losers_bracket_elimination_source_matchups(p, i)
-                else:
-                    # this is a "drop-in" losers bracket round; we mix the losers bracket winners and winners bracket losers
-                    matchup_args['want_winner_a'] = False
-                    for p in PARTICIPANT_LETTERS:
-                        matchup_args['source_match_{}'.format(p)] = self.get_losers_bracket_drop_in_source_matchup(p, i)
 
             tm, created = TournamentMatchup.objects.get_or_create(
                 **matchup_args,
