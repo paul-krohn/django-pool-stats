@@ -144,9 +144,7 @@ class Round(models.Model):
         return None
 
     def get_first_round_losers_source_matchup(self, ab, increment):
-        rounds = self.bracket.tournament.bracket_set.get(type='l').round_set.all()
-
-        source_round_matchups = rounds.get(number=1).tournamentmatchup_set.all()
+        source_round_matchups = self.bracket.tournament.bracket_set.get(type='w').round_set.get(number=1).tournamentmatchup_set.all()
         if ab == 'a':
             return source_round_matchups[increment]
         else:
