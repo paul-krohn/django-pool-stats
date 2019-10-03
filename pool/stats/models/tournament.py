@@ -1,8 +1,8 @@
 from django.db import models
 from django.urls import reverse
 from math import ceil, log
+from copy import deepcopy
 
-from ..models import Player
 
 TOURNAMENT_TYPES = [
     ('team_playoff', 'Team Playoff'),
@@ -61,14 +61,13 @@ class Tournament(models.Model):
 
     def create_rounds(self):
         round_inc = 0
-        while round_inc < self.round_count():
-            wbr, created = Round.objects.get_or_create(
-                bracket=self.bracket_set.get(type='w'),
-                number=round_inc + 1,
-            )
-            wbr.save()
-            round_inc += 1
+        winners_bracket_round_count = self.round_count()
         if self.elimination == 'double':
+            # add 2 more winners's bracket rounds, for the match between the 2 bracket
+            # winners, and the "if-necessary" match for case where the winner's bracket
+            # winner loses the first match.
+            winners_bracket_round_count += 2
+
             losers_bracket_round_inc = 0
             losers_bracket_round_count = 2 * (self.round_count() - 1)
             while losers_bracket_round_inc < losers_bracket_round_count:
@@ -78,6 +77,13 @@ class Tournament(models.Model):
                 )
                 lbr.save()
                 losers_bracket_round_inc += 1
+        while round_inc < winners_bracket_round_count:
+            wbr, created = Round.objects.get_or_create(
+                bracket=self.bracket_set.get(type='w'),
+                number=round_inc + 1,
+            )
+            wbr.save()
+            round_inc += 1
 
 
 class Participant(models.Model):
@@ -124,6 +130,17 @@ class Bracket(models.Model):
 class Round(models.Model):
     bracket = models.ForeignKey(Bracket, on_delete=models.CASCADE)
     number = models.IntegerField(null=True)
+
+    default_matchup_args = {
+        'source_match_a': None,
+        'source_match_b': None,
+        # participants; only set in first round winner's side
+        'participant_a': None,
+        'participant_b': None,
+        # do we want winners? mostly yes; override for drop-in matches
+        'a_want_winner': True,
+        'b_want_winner': True,
+    }
 
     def __str__(self):
         return '{}-{}'.format(self.bracket.type, self.number)
@@ -175,24 +192,13 @@ class Round(models.Model):
 
     def create_matchups(self):
 
-        # first round winners side matchups; assumes participant_set is in the desired order
+        # first round winners side match-ups; assumes participant_set is in the desired order
         i = 0
         matchup_count = self.matchup_count()
-
         while i < matchup_count:
-
-            matchup_args = {
-                'source_match_a': None,
-                'source_match_b': None,
-                # participants; only set in first round winner's side
-                'participant_a': None,
-                'participant_b': None,
-                # do we want winners? mostly yes; override for drop-in matches
-                'a_want_winner': True,
-                'b_want_winner': True,
-                'round': self,
-                'number': i + 1,
-            }
+            matchup_args = deepcopy(self.default_matchup_args)
+            matchup_args['round'] = self
+            matchup_args['number'] = i + 1
             if self.number == 1:
                 if self.bracket.type is 'w':
                     for p in PARTICIPANT_LETTERS:
@@ -226,6 +232,35 @@ class Round(models.Model):
             )
             tm.save()
             i += 1
+
+    def create_finals_matchup(self, step):
+
+        matchup_args = deepcopy(self.default_matchup_args)
+        matchup_args['round'] = self
+        matchup_args['number'] = 1
+
+        # the participants are the same either way, for the last 2 matches, just the round that needs over-ridden in
+        # the second case
+        winners_side_source_round_number = self.number - 1
+
+        # first need the number of rounds in the losers side
+        losers_side_round_count = 2 * (self.bracket.tournament.round_count() - 1)
+
+        losers_side_source_round = self.bracket.tournament.bracket_set.get(type='l').round_set.get(number=losers_side_round_count)
+        if step == 'second':
+            winners_side_source_round_number = self.number - 2
+        source_matchup_a = self.bracket.tournament.bracket_set.get(type='w').round_set.get(
+            number=winners_side_source_round_number).tournamentmatchup_set.all()[0] # there should be exactly one right
+        source_matchup_b = losers_side_source_round.tournamentmatchup_set.all()[0]
+
+        matchup_args['source_match_a'] = source_matchup_a
+        matchup_args['source_match_b'] = source_matchup_b
+        tm, created = TournamentMatchup.objects.get_or_create(
+            **matchup_args,
+        )
+        print("matchup {} vs {}:  was created: {}".format(
+            tm.participant_a, tm.participant_b, created)
+        )
 
 
 class TournamentMatchup(models.Model):
