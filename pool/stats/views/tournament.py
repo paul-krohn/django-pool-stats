@@ -130,6 +130,7 @@ def tournament_participants(request, tournament_id):
 def tournament_brackets(request, tournament_id):
     # hey ho we are creating the brackets for a tournament!
 
+    finals_rounds = ['first', 'second']
     t = Tournament.objects.get(id=tournament_id)
     t.create_brackets()
     t.create_rounds()
@@ -137,5 +138,14 @@ def tournament_brackets(request, tournament_id):
     for b in t.bracket_set.all():
         for r in b.round_set.all():
             r.create_matchups()
-
+    if t.elimination == 'double':
+        winners_bracket = t.bracket_set.get(type='w')
+        i = 0
+        for _round in winners_bracket.round_set.filter(number__gt=t.round_count()).order_by('number'):
+            # the first one is the "final"
+            _round.create_finals_matchup(finals_rounds[i])
+            i += 1
+            # the second is the if-necessary final
+            # _round.create_finals_matchup('second')
+            pass
     return redirect('tournament', tournament_id)
