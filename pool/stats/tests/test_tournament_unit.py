@@ -10,7 +10,7 @@ class TournamentLiveTestCases(LiveServerTestCase):
 
     def test_get_match_loser(self):
         """
-        Verify that from the fixture data, we get the correct season as the default.
+        Verify that we get the loser of a matchup.
         """
         p_a = Participant()
         p_b = Participant()
@@ -26,7 +26,7 @@ class TournamentLiveTestCases(LiveServerTestCase):
 class TournamentTestCases(TestCase):
 
     def test_matchup_count(self):
-        # right_answers is overall bracket size and first 9 LS bracket sizes for 64 and 256 participants
+        # right_answers is overall bracket size and first 9 LS bracket sizes for 64 and 1024 participants
         right_answers = [{
             'participants': 64,
             'bracket_sizes': [16, 16, 8, 8, 4, 4, 2, 2, 1],
