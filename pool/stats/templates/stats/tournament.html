@@ -2,7 +2,14 @@
 {% block title %}SFPA :: Tournament :: {{ tournament }}{% endblock %}
 
 {% block content %}
-<div id="app">
+
+<!--
+    the csrftoken is read below in javascript to satisfy django's anti-csrf implementation,
+    See: https://docs.djangoproject.com/en/2.1/ref/csrf/
+-->
+{% csrf_token %}
+
+    <div id="app">
 {% verbatim %}
     <h1>{{ the_tournament.name }}</h1>
     <button type="button" onclick="app.updateData();">update</button>
@@ -22,16 +29,35 @@
             <ul>
                 <li v-for="matchup in round.matchups">
                     <div>{{ bracket.type }}{{ round.number }}/m{{ matchup.number }} ({{ matchup.id }})
-                        <span v-if="matchup.participant_a">
-                            <span v-html="renderParticipant (matchup.participant_a)"></span>
-                        </span> vs
-                        <span v-if="matchup.participant_b">
-                            <span v-html="renderParticipant (matchup.participant_b)"></span>
+                        <span v-if="matchup.participant_a"></span>
+                        <span v-else-if="bracket.type == 'w' && round.number == '1'">
+                            Bye
                         </span>
-                        <span v-else-if="bracket.type == 'w' && round.number == '1'">bye</span>
-                        <span v-else>TBD</span>
+                        <span v-else>
+                            TBD
+                        </span>
                         <span v-if="matchup.winner">
-                            winner: <b><span v-html="renderParticipant (matchup.winner)"></span></b>
+                        </span>
+                        <span v-else>
+                            <button v-on:click="submitMatchupWinner(matchup.id, matchup.participant_a.id)">winner</button>
+                        </span>
+                        <span v-html="renderParticipant (matchup.participant_a)"></span>
+                        </span>
+                          VS
+                        <span v-if="matchup.participant_b"></span>
+                        <span v-else-if="bracket.type == 'w' && round.number == '1'">
+                            Bye
+                        </span>
+                        <span v-else>
+                            TBD
+                        </span>
+                        <span v-if="matchup.winner">
+                        </span>
+                        <span v-else>
+                            <button v-on:click="submitMatchupWinner(matchup.id, matchup.participant_b.id)">winner</button>
+                        </span>
+                        <span v-html="renderParticipant (matchup.participant_b)"></span>
+                        </span>
                         </span>
                     </div>
                 </li>
@@ -43,6 +69,28 @@
 {% endverbatim %}
 </div>
 <script>
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            let cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                let cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    let csrftoken = getCookie('csrftoken');
     function checkId(participant, id) {
         return participant.id === id;
     }
@@ -67,12 +115,12 @@
                 });
             },
             renderParticipant: function(participant) {
-                var playerName = 'unknown';
+                let playerName = 'unknown';
                 if (participant !== null) {
                     playerName = participant['players'][0].name;
                 }
 
-                console.log("filtering for participant: " + playerName);
+                // console.log("filtering for participant: " + playerName);
                 if (participant === null) {
                     return null;
                 }
@@ -82,7 +130,7 @@
                     let the_participant = null;
                     this.the_tournament.participants.forEach(function(a_participant, index){
                         if (a_participant.id === participant.id) {
-                            console.log("found it");
+                            //console.log("found it");
                             the_participant = a_participant;
                         }
                     });
@@ -91,7 +139,18 @@
                     });
                     return player_anchors.join(', ');
                 }
-            }
+            },
+            submitMatchupWinner: function(matchup, winner) {
+                $.ajaxSetup({
+                    beforeSend: function (xhr, settings) {
+                        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        }
+                    },
+                    dataType: 'application/json',
+                });
+                $.post("{% url 'tournament_mark_winner' %}", {"matchup": matchup, "winner": winner});
+            },
         },
         mounted: function() {
             let self = this;

@@ -1,9 +1,12 @@
-from django.http import JsonResponse
+import json
+
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect, render
 from django.forms import modelform_factory, modelformset_factory
+from django.db.models import Q
 
 from ..forms import TournamentForm, TournamentParticipantForm
-from ..models import Tournament, Participant, Player
+from ..models import Participant, Player, Tournament, TournamentMatchup
 
 from ..views import check_season
 
@@ -84,6 +87,31 @@ def tournament_edit(request, tournament_id=None):
         'tournament_form': tournament_form,
     }
     return render(request, 'stats/tournament_edit.html', context)
+
+
+def update_affected_matchups(a_matchup):
+    affected_matchups = TournamentMatchup.objects.filter(
+        Q(source_match_a=a_matchup) | Q(source_match_b=a_matchup)
+    )
+    for m in affected_matchups:
+        m.update()
+
+
+def tournament_mark_winner(request):
+
+    if request.method == 'POST':
+        matchup_id = request.POST.get('matchup')
+        winner_id = request.POST.get('winner')
+        if matchup_id and winner_id:
+            print("marking winner of matchup {} as {}".format(matchup_id, winner_id))
+            matchup = TournamentMatchup.objects.get(id=matchup_id)
+            winner = Participant.objects.get(id=winner_id)
+            matchup.winner = winner
+            matchup.save()
+
+            update_affected_matchups(matchup)
+
+    return HttpResponse(status=204)
 
 
 def tournament_participants(request, tournament_id):
