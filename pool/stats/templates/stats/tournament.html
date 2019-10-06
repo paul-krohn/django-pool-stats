@@ -41,9 +41,9 @@
                         <span v-else>
                             <button v-on:click="submitMatchupWinner(matchup.id, matchup.participant_a.id)">winner</button>
                         </span>
-                        <span v-html="renderParticipant (matchup.participant_a)"></span>
+                        <span v-bind:style="boldWinner(matchup, matchup.participant_a)" v-html="renderParticipant (matchup.participant_a)"></span>
                         </span>
-                          VS
+                          -vs-
                         <span v-if="matchup.participant_b"></span>
                         <span v-else-if="bracket.type == 'w' && round.number == '1'">
                             Bye
@@ -56,8 +56,7 @@
                         <span v-else>
                             <button v-on:click="submitMatchupWinner(matchup.id, matchup.participant_b.id)">winner</button>
                         </span>
-                        <span v-html="renderParticipant (matchup.participant_b)"></span>
-                        </span>
+                        <span v-bind:style="boldWinner(matchup, matchup.participant_b)" v-html="renderParticipant (matchup.participant_b)"></span>
                         </span>
                     </div>
                 </li>
@@ -113,6 +112,15 @@
                         Accept: "application/json",
                     }
                 });
+            },
+            boldWinner: function(matchup, participant) {
+                if ((matchup && participant) && (matchup.winner.id === participant.id)) {
+                    return {
+                        'font-weight': 'bold'
+                    };
+                } else {
+                    return {};
+                }
             },
             renderParticipant: function(participant) {
                 let playerName = 'unknown';
