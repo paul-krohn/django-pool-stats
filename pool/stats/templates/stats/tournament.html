@@ -19,6 +19,9 @@
         <template v-for="(player, index) in participant.players">
             <a :href="player.url">{{ player.name }} {{ participant.id }}</a>
         </template>
+        <template v-if="participant.team">
+            <span v-html="renderParticipant(participant)"></span>
+        </template>
     </li>
     </ul>
     <template v-if="the_tournament.elimination != 'single'">
@@ -39,7 +42,7 @@
                         <span v-if="matchup.winner">
                         </span>
                         <span v-else>
-                            <button v-on:click="submitMatchupWinner(matchup.id, matchup.participant_a.id)">winner</button>
+                            <button class="btn btn-primary btn-sm confirm" v-on:click="submitMatchupWinner(matchup.id, matchup.participant_a.id)">winner</button>
                         </span>
                         <span v-bind:style="boldWinner(matchup, matchup.participant_a)" v-html="renderParticipant (matchup.participant_a)"></span>
                         </span>
@@ -51,12 +54,17 @@
                         <span v-else>
                             TBD
                         </span>
+                        <span v-bind:style="boldWinner(matchup, matchup.participant_b)" v-html="renderParticipant (matchup.participant_b)"></span>
+                        </span>
                         <span v-if="matchup.winner">
                         </span>
                         <span v-else>
-                            <button v-on:click="submitMatchupWinner(matchup.id, matchup.participant_b.id)">winner</button>
-                        </span>
-                        <span v-bind:style="boldWinner(matchup, matchup.participant_b)" v-html="renderParticipant (matchup.participant_b)"></span>
+                            <span v-if="matchup.participant_a && matchup.participant_b">
+                            <button :id="matchupButtonId (matchup, matchup.participant_b)" class="btn btn-primary btn-sm confirm"
+                                    v-on:click="submitMatchupWinner(matchup.id, matchup.participant_b.id)">
+                                winner
+                            </button>
+                            </span>
                         </span>
                     </div>
                 </li>
@@ -100,6 +108,20 @@
             the_tournament: []
         },
         methods: {
+            matchupButtonId: function(matchup, participant) {
+                console.log("matchupButtonId called for matchup id " + matchup.id);
+                return("matchup_button_" + matchup.id + '_' + participant.id);
+            },
+            addConfirm: function(matchup) {
+                console.log("add confirm called for " + matchup.id);
+                $(this).confirm({
+                    text: "Are you sure you want to delete that comment?",
+                    title: "Confirmation required",
+                    confirm: function(button) {
+                    }
+                });
+
+            },
             updateData: function() {
                 let self = this;
                 $.ajax({
@@ -114,7 +136,7 @@
                 });
             },
             boldWinner: function(matchup, participant) {
-                if ((matchup && participant) && (matchup.winner.id === participant.id)) {
+                if ((matchup && participant) && matchup.winner && (matchup.winner.id === participant.id)) {
                     return {
                         'font-weight': 'bold'
                     };
@@ -123,22 +145,18 @@
                 }
             },
             renderParticipant: function(participant) {
-                let playerName = 'unknown';
-                if (participant !== null) {
-                    playerName = participant['players'][0].name;
-                }
-
-                // console.log("filtering for participant: " + playerName);
                 if (participant === null) {
                     return null;
                 }
-
-                let player_anchors = Array();
+                if (participant.type === 'team') {
+                    return('<a href="' + participant['team']['url'] + '">' + participant['team']['name'] + '</a>');
+                }
                 if (participant.type === 'player') {
+                    let player_anchors = Array();
+
                     let the_participant = null;
                     this.the_tournament.participants.forEach(function(a_participant, index){
                         if (a_participant.id === participant.id) {
-                            //console.log("found it");
                             the_participant = a_participant;
                         }
                     });
@@ -147,6 +165,10 @@
                     });
                     return player_anchors.join(', ');
                 }
+            },
+            addConfirmDialog: function(object_id, matchup, a_b){
+
+
             },
             submitMatchupWinner: function(matchup, winner) {
                 $.ajaxSetup({
