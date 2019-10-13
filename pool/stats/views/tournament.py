@@ -6,7 +6,7 @@ from django.forms import modelform_factory, modelformset_factory
 from django.db.models import Q
 
 from ..forms import TournamentForm, TournamentParticipantForm
-from ..models import Participant, Player, Tournament, TournamentMatchup
+from ..models import Participant, Player, Season, Tournament, TournamentMatchup
 
 from ..views import check_season
 
@@ -78,6 +78,9 @@ def tournament_edit(request, tournament_id=None):
             instance=t
         )
         saved_tournament = tournament_form.save()
+        # also set the season, which isn't in the form
+        saved_tournament.season_id = request.session.get('season_id', Season.objects.get(is_default=True).id)
+        saved_tournament.save()
         return redirect('tournament_edit', saved_tournament.id)
     else:
         tournament_form = TournamentForm(
