@@ -32,38 +32,22 @@
             <ul>
                 <li v-for="matchup in round.matchups">
                     <div>{{ bracket.type }}{{ round.number }}/m{{ matchup.number }} ({{ matchup.id }})
-                        <span v-if="matchup.participant_a"></span>
-                        <span v-else-if="bracket.type == 'w' && round.number == '1'">
-                            Bye
-                        </span>
-                        <span v-else>
-                            TBD
-                        </span>
-                        <span v-if="matchup.winner">
-                        </span>
-                        <span v-else>
-                            <button class="btn btn-primary btn-sm confirm" v-on:click="submitMatchupWinner(matchup.id, matchup.participant_a.id)">winner</button>
-                        </span>
-                        <span v-bind:style="boldWinner(matchup, matchup.participant_a)" v-html="renderParticipant (matchup.participant_a)"></span>
-                        </span>
-                          -vs-
-                        <span v-if="matchup.participant_b"></span>
-                        <span v-else-if="bracket.type == 'w' && round.number == '1'">
-                            Bye
-                        </span>
-                        <span v-else>
-                            TBD
-                        </span>
-                        <span v-bind:style="boldWinner(matchup, matchup.participant_b)" v-html="renderParticipant (matchup.participant_b)"></span>
-                        </span>
-                        <span v-if="matchup.winner">
-                        </span>
-                        <span v-else>
-                            <span v-if="matchup.participant_a && matchup.participant_b">
-                            <button :id="matchupButtonId (matchup, matchup.participant_b)" class="btn btn-primary btn-sm confirm"
-                                    v-on:click="submitMatchupWinner(matchup.id, matchup.participant_b.id)">
-                                winner
-                            </button>
+                        <span v-for="participant in getMatchupParticipants (matchup)">
+                            <span v-if="participant"></span>
+                            <span v-else-if="bracket.type == 'w' && round.number == '1'">
+                                Bye
+                            </span>
+                            <span v-else>
+                                TBD
+                            </span>
+                            <span v-if="matchup.winner">
+                            </span>
+                            <span v-else-if="matchup.participant_a && matchup.participant_b">
+                                <button class="btn btn-primary btn-sm confirm" v-on:click="submitMatchupWinner(matchup.id, participant.id)">winner</button>
+                            </span>
+                            <span v-bind:style="boldWinner(matchup, participant)" v-html="renderParticipant (participant)"></span>
+                            <span v-if="participant && matchup.participant_a && participant.id === matchup.participant_a.id">
+                                -VS-
                             </span>
                         </span>
                     </div>
@@ -121,6 +105,10 @@
                     }
                 });
 
+            },
+            getMatchupParticipants: function(matchup) {
+                console.log("getMatchupParticipants called for matchup " + matchup.id);
+                return([matchup['participant_a'], matchup['participant_b']]);
             },
             updateData: function() {
                 let self = this;
