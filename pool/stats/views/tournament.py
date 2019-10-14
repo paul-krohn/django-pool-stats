@@ -152,7 +152,7 @@ def tournament_participants(request, tournament_id):
     context = {
         'tournament': a_tournament,
         'players': Player.objects.all(),
-        'particpant_formset': participant_formset,
+        'participant_formset': participant_formset,
     }
 
     return render(request, 'stats/tournament_participants.html', context)

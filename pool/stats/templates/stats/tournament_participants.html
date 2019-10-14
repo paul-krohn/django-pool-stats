@@ -4,16 +4,16 @@
 {% block content %}
 
 
-    <h2>{{ tournament }} particpants</h2>
+    <h2>{{ tournament }} participants</h2>
 <form action="{% url 'tournament_participants' tournament.id %}" method="post">
-    {% if particpant_formset.non_form_errors %}
-        {{ particpant_formset.non_form_errors }}
+    {% if participant_formset.non_form_errors %}
+        {{ participant_formset.non_form_errors }}
     {% endif %}
     <table class="table" style="width: auto;">
     {% csrf_token %}
-    {{ particpant_formset.management_form }}
-    {% for particpant_form in particpant_formset %}
-        {{ particpant_form.as_p }}
+    {{ participant_formset.management_form }}
+    {% for participant_form in participant_formset %}
+        {{ participant_form.as_p }}
     {% endfor %}
     <tr>
         <td><input class="btn btn-primary" type="submit" value="Save participants" id="_lineup_save"/></td></tr>
