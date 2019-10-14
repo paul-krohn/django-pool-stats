@@ -5,8 +5,9 @@ from copy import deepcopy
 
 
 TOURNAMENT_TYPES = [
-    ('team_playoff', 'Team Playoff'),
+    ('singles', 'Singles'),
     ('scotch_doubles', 'Scotch Doubles'),
+    ('teams', 'Teams'),
 ]
 
 ELIMINATION_TYPES = [
@@ -42,6 +43,7 @@ class Tournament(models.Model):
     type = models.TextField(choices=TOURNAMENT_TYPES)
     elimination = models.TextField(choices=ELIMINATION_TYPES)
     season = models.ForeignKey('Season', on_delete=models.CASCADE, null=True)
+    seeded = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -93,6 +95,7 @@ class Participant(models.Model):
     # for scotch-doubles tournaments, we'll add 2 players
     player = models.ManyToManyField('Player', blank=True)
     team = models.ForeignKey('Team', on_delete=models.DO_NOTHING, null=True, blank=True)
+    seed = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         if self.type == 'player':
@@ -110,7 +113,11 @@ class Participant(models.Model):
 
             } for p in self.player.all()]
         else:
-            team = [self.team.id]
+            team = {
+                'id': self.team.id,
+                'name': self.team.name,
+                'url': reverse('team', kwargs={'team_id': self.team.id}),
+            }
         return {
             'id': self.id,
             'type': self.type,

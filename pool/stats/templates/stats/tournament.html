@@ -21,7 +21,7 @@
             <a :href="player.url">{{ player.name }} {{ participant.id }}</a>
         </template>
         <template v-if="participant.team">
-            <span v-html="renderParticipant(participant)"></span>
+            <span v-html="participantLinks(participant)"></span>
         </template>
     </li>
     </ul>
@@ -44,18 +44,17 @@
                             <span v-if="matchup.winner">
                             </span>
                             <span v-else-if="matchup.participant_a && matchup.participant_b">
-                                <form {% endverbatim %} action="{% url 'tournament_mark_winner' %}" {% verbatim %} :id="'form_' + matchupButtonId (matchup, participant)">
-                                    <input name="matchup" :value="matchup.id" type="hidden">
-                                    <input name="winner" :value="participant.id" type="hidden">
                                     <input
                                         type="submit"
                                         :id="matchupButtonId (matchup, participant)"
                                         class="btn btn-primary btn-sm confirm"
-                                        value="winner"
+                                        :value="participantText(participant)"
                                     >
-                                </form>
                             </span>
-                            <span v-bind:style="boldWinner(matchup, participant)" v-html="renderParticipant (participant)"></span>
+                            <span
+                                    v-bind:style="boldWinner(matchup, participant)"
+                                    v-html="participantLinks(participant)">
+                            </span>
                             <span v-if="participant && matchup.participant_a && participant.id === matchup.participant_a.id">
                                 -VS-
                             </span>
@@ -126,8 +125,8 @@
                                 [matchup.participant_a, matchup.participant_b].forEach(function(participant, index) {
                                     console.log("we need a confirm dialog for matchup " + matchup.id + " with dom id " + self.matchupButtonId(matchup, participant));
                                     $('#' + self.matchupButtonId(matchup, participant)).confirm({
-                                        title: self.renderParticipant(matchup.participant_a) + " vs " + self.renderParticipant(matchup.participant_b),
-                                        text: self.renderParticipant(participant) + " is the winner",
+                                        title: self.participantText(matchup.participant_a) + " vs " + self.participantText(matchup.participant_b),
+                                        text: '<b>' + self.participantText(participant) + "</b> is the winner",
                                         confirm: function() {
                                             self.submitMatchupWinner(matchup, participant);
                                         },
@@ -163,7 +162,7 @@
                     return {};
                 }
             },
-            renderParticipant: function(participant) {
+            participantLinks: function(participant) {
                 if (participant === null) {
                     return null;
                 }
@@ -183,6 +182,28 @@
                         player_anchors.push(`<a href="${player.url}">${player.name}</a> (${the_participant.id})`);
                     });
                     return player_anchors.join(', ');
+                }
+            },
+            participantText: function(participant) {
+                if (participant === null) {
+                    return null;
+                }
+                if (participant.type === 'team') {
+                    return (participant['team']['name']);
+                }
+                if (participant.type === 'player') {
+                    let player_names = Array();
+
+                    let the_participant = null;
+                    this.the_tournament.participants.forEach(function(a_participant, index){
+                        if (a_participant.id === participant.id) {
+                            the_participant = a_participant;
+                        }
+                    });
+                    the_participant.players.forEach(function(player, index) {
+                        player_names.push(player.name);
+                    });
+                    return player_names.join(', ');
                 }
             },
             submitMatchupWinner: function(matchup, winner) {
@@ -213,11 +234,11 @@
                     Accept: "application/json",
                 }
             });
-            /*this.$nextTick(function () {
-                console.log("in nexttick, the tournament is : " + this.the_tournament);
-                this.setConfirmDialogs();
-            });*/
-        }
+        },
+        updated: function () {
+            this.setConfirmDialogs();
+        },
+
     })
 </script>
 {% endblock %}

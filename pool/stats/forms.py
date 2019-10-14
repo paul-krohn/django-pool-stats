@@ -98,11 +98,25 @@ class TournamentForm(django.forms.ModelForm):
         }
 
 
-class TournamentParticipantForm(django.forms.ModelForm):
+class TournamentPlayerParticipantForm(django.forms.ModelForm):
 
     class Meta:
         model = Participant
         fields = ['player']
+
+
+class TournamentTeamParticipantForm(django.forms.ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super(TournamentTeamParticipantForm, self).__init__(*args, **kwargs)
+
+        self.fields['team'].queryset = Team.objects.filter(season__is_default=True)
+
+    class Meta:
+        model = Participant
+        fields = ['team']
+
+
 
 
 class LineupFormSet(django.forms.BaseModelFormSet):
