@@ -13,6 +13,7 @@
 {% verbatim %}
     <h1>{{ the_tournament.name }}</h1>
     <button type="button" onclick="app.updateData();">update</button>
+    <button type="button" onclick="app.setConfirmDialogs();">update</button>
     <h3>Participants</h3>
     <ul>
     <li v-for="participant in the_tournament.participants">
@@ -43,7 +44,7 @@
                             <span v-if="matchup.winner">
                             </span>
                             <span v-else-if="matchup.participant_a && matchup.participant_b">
-                                <button class="btn btn-primary btn-sm confirm" v-on:click="submitMatchupWinner(matchup.id, participant.id)">winner</button>
+                                <button :id="matchupButtonId (matchup, participant)" class="btn btn-primary btn-sm confirm" v-on:click="submitMatchupWinner(matchup, participant)">winner</button>
                             </span>
                             <span v-bind:style="boldWinner(matchup, participant)" v-html="renderParticipant (participant)"></span>
                             <span v-if="participant && matchup.participant_a && participant.id === matchup.participant_a.id">
@@ -93,7 +94,6 @@
         },
         methods: {
             matchupButtonId: function(matchup, participant) {
-                console.log("matchupButtonId called for matchup id " + matchup.id);
                 return("matchup_button_" + matchup.id + '_' + participant.id);
             },
             addConfirm: function(matchup) {
@@ -104,10 +104,29 @@
                     confirm: function(button) {
                     }
                 });
-
+            },
+            setConfirmDialogs: function() {
+                let self = this;
+                console.log(self.the_tournament);
+                self.the_tournament.brackets.forEach(function(bracket, index){
+                    console.log("looking at bracket " + bracket.type);
+                    bracket.rounds.forEach(function(round, index){
+                        console.log("looking at round " + round.number  );
+                        round.matchups.forEach(function(matchup, index){
+                            if (matchup.participant_a && matchup.participant_b) {
+                                [matchup.participant_a, matchup.participant_b].forEach(function(particpant, index) {
+                                    console.log("we need a confirm dialog for matchup " + matchup.id + " with dom id " + self.matchupButtonId(matchup, particpant));
+                                    $('#' + self.matchupButtonId(matchup, particpant)).confirm({
+                                        title: self.renderParticipant(matchup.participant_a) + " vs " + self.renderParticipant(matchup.participant_b),
+                                        text: self.renderParticipant(particpant) + " is the winner",
+                                    });
+                                });
+                            }
+                        });
+                    });
+                });
             },
             getMatchupParticipants: function(matchup) {
-                console.log("getMatchupParticipants called for matchup " + matchup.id);
                 return([matchup['participant_a'], matchup['participant_b']]);
             },
             updateData: function() {
@@ -154,11 +173,10 @@
                     return player_anchors.join(', ');
                 }
             },
-            addConfirmDialog: function(object_id, matchup, a_b){
-
-
-            },
             submitMatchupWinner: function(matchup, winner) {
+            //    console.log("we are about to set the winner of matchup " + matchup.id + " to " + winner.id);
+            //    let the_id = this.matchupButtonId(matchup, winner);
+            //    console.log("the id is: " + the_id);
                 $.ajaxSetup({
                     beforeSend: function (xhr, settings) {
                         if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -167,7 +185,8 @@
                     },
                     dataType: 'application/json',
                 });
-                $.post("{% url 'tournament_mark_winner' %}", {"matchup": matchup, "winner": winner});
+                $.post("{% url 'tournament_mark_winner' %}", {"matchup": matchup.id, "winner": winner.id});
+                this.updateData();
             },
         },
         mounted: function() {
@@ -182,6 +201,11 @@
                     Accept: "application/json",
                 }
             });
+            this.$nextTick(function () {
+                console.log("in nexttick, the tournament is : " + this.the_tournament);
+                this.setConfirmDialogs();
+            });
+
         }
     })
 </script>
