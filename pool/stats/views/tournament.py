@@ -5,7 +5,7 @@ from django.shortcuts import redirect, render
 from django.forms import modelform_factory, modelformset_factory
 from django.db.models import Q
 
-from ..forms import TournamentForm, TournamentParticipantForm
+from ..forms import TournamentForm, TournamentPlayerParticipantForm, TournamentTeamParticipantForm
 from ..models import Participant, Player, Season, Tournament, TournamentMatchup
 
 from ..views import check_season
@@ -121,9 +121,13 @@ def tournament_participants(request, tournament_id):
 
     a_tournament = Tournament.objects.get(id=tournament_id)
 
+    participant_form = TournamentPlayerParticipantForm
+    if a_tournament.type == 'teams':
+        participant_form = TournamentTeamParticipantForm
+
     participant_formset_f = modelformset_factory(
         model=Participant,
-        form=TournamentParticipantForm,
+        form=participant_form,
         extra=2,
         can_delete=True,
     )
@@ -145,6 +149,8 @@ def tournament_participants(request, tournament_id):
                 obj.tournament = a_tournament
                 # also set the participant type, ugly hack alert here
                 obj.type = 'player'
+                if a_tournament.type == 'teams':
+                    obj.type = 'team'
             participant_formset.save()
         return redirect('tournament_participants', a_tournament.id)
 
