@@ -102,7 +102,28 @@ class TournamentPlayerParticipantForm(django.forms.ModelForm):
 
     class Meta:
         model = Participant
-        fields = ['player']
+        fields = ['player', 'tournament']
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['tournament'].widget = django.forms.HiddenInput()
+
+
+class TournamentPlayerParticipantFormSet(django.forms.BaseModelFormSet):
+
+    def clean(self):
+        super().clean()
+        # first check that each participant has the correct number of players
+        wrong_length_players = list()
+        for form in self.forms:
+            player = form.cleaned_data.get('player')
+            if player:  # the 'extra'/empty forms are NoneType
+                if form.instance.tournament.type == 'singles':
+                    if len(player) != 1:
+                        wrong_length_players.append(player)
+            if len(wrong_length_players):
+                        print('this form has a validation error'.format(player))
+                        raise ValidationError('There should be exactly one player per participant for singles, these do not: {}'.format(wrong_length_players))
+
 
 
 class TournamentTeamParticipantForm(django.forms.ModelForm):
