@@ -2,10 +2,10 @@ import json
 
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect, render
-from django.forms import modelform_factory, modelformset_factory
+from django.forms import modelformset_factory
 from django.db.models import Q
 
-from ..forms import TournamentForm, TournamentPlayerParticipantForm, TournamentPlayerParticipantFormSet, TournamentTeamParticipantForm
+from ..forms import TournamentForm, create_tournament_participant_form
 from ..models import Participant, Player, Season, Tournament, TournamentMatchup
 
 from ..views import check_season
@@ -121,9 +121,7 @@ def tournament_participants(request, tournament_id):
 
     a_tournament = Tournament.objects.get(id=tournament_id)
 
-    participant_form = TournamentPlayerParticipantForm
-    if a_tournament.type == 'teams':
-        participant_form = TournamentTeamParticipantForm
+    participant_form = create_tournament_participant_form(a_tournament)
 
     participant_formset_f = modelformset_factory(
         model=Participant,
@@ -133,7 +131,6 @@ def tournament_participants(request, tournament_id):
     )
     participant_formset = participant_formset_f(
         queryset=Participant.objects.filter(tournament=a_tournament),
-        initial=[{'tournament': a_tournament}],
     )
 
     if request.method == 'POST':
@@ -141,6 +138,7 @@ def tournament_participants(request, tournament_id):
             request.POST,
             queryset=Participant.objects.filter(tournament=a_tournament),
         )
+
         if participant_formset.is_valid():
             for pform in participant_formset:
                 if pform.cleaned_data.get('DELETE', False):
@@ -153,8 +151,7 @@ def tournament_participants(request, tournament_id):
                 if a_tournament.type == 'teams':
                     obj.type = 'team'
             participant_formset.save()
-        return redirect('tournament_participants', a_tournament.id)
-
+            return redirect('tournament_participants', a_tournament.id)
 
     context = {
         'tournament': a_tournament,
