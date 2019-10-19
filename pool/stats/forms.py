@@ -1,12 +1,9 @@
 import django.forms
 from django.core.exceptions import ValidationError
 
-<<<<<<< HEAD
 from .models import Game, Match, Player, ScoreSheet, Table, Team
 from .utils import get_dupes_from_dict
-=======
-from .models import Participant, Player, Team, Game, ScoreSheet, Tournament, Match
->>>>>>> basic editing of tournament participants
+from .models import Participant, Player, PlayerSeasonSummary, Team, Game, ScoreSheet, Tournament, Match
 from .views.season import get_default_season
 
 WINNER_CHOICES = (
@@ -96,48 +93,6 @@ class TournamentForm(django.forms.ModelForm):
         widgets = {
             'name': django.forms.TextInput(),
         }
-
-
-class TournamentPlayerParticipantForm(django.forms.ModelForm):
-
-    class Meta:
-        model = Participant
-        fields = ['player', 'tournament']
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['tournament'].widget = django.forms.HiddenInput()
-
-
-class TournamentPlayerParticipantFormSet(django.forms.BaseModelFormSet):
-
-    def clean(self):
-        super().clean()
-        # first check that each participant has the correct number of players
-        wrong_length_players = list()
-        for form in self.forms:
-            player = form.cleaned_data.get('player')
-            if player:  # the 'extra'/empty forms are NoneType
-                if form.instance.tournament.type == 'singles':
-                    if len(player) != 1:
-                        wrong_length_players.append(player)
-            if len(wrong_length_players):
-                        print('this form has a validation error'.format(player))
-                        raise ValidationError('There should be exactly one player per participant for singles, these do not: {}'.format(wrong_length_players))
-
-
-
-class TournamentTeamParticipantForm(django.forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super(TournamentTeamParticipantForm, self).__init__(*args, **kwargs)
-
-        self.fields['team'].queryset = Team.objects.filter(season__is_default=True)
-
-    class Meta:
-        model = Participant
-        fields = ['team']
-
-
 
 
 class LineupFormSet(django.forms.BaseModelFormSet):
@@ -263,4 +218,31 @@ class MatchupForm(django.forms.Form):
     )
     week = django.forms.CharField(required=False, widget=django.forms.HiddenInput)
     thing = django.forms.CharField(required=False, widget=django.forms.HiddenInput)
+
+
+def create_tournament_participant_form(a_tournament):
+
+    participant_field = 'player'
+    participant_form_fields = ['player', 'tournament']
+    participant_queryset = Player.objects.filter(
+        id__in=[pss.player.id for pss in PlayerSeasonSummary.objects.filter(season_id=a_tournament.season_id)]
+    )
+    if a_tournament.type == 'teams':
+        participant_queryset = Team.objects.filter(season_id=a_tournament.season_id)
+        participant_field = 'team'
+        participant_form_fields = ['team', 'tournament']
+
+    class ParticipantForm(django.forms.ModelForm):
+
+        def __init__(self, *args, **kwargs):
+            super().__init__(*args, **kwargs)
+            self.fields['tournament'].widget = django.forms.HiddenInput()
+            self.fields['tournament'].initial = a_tournament
+            self.fields[participant_field].queryset = participant_queryset
+
+        class Meta:
+            model = Participant
+            fields = participant_form_fields
+
+    return ParticipantForm
 
