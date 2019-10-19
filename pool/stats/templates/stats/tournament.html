@@ -102,15 +102,6 @@
             matchupButtonId: function(matchup, participant) {
                 return("matchup_button_" + matchup.id + '_' + participant.id);
             },
-            addConfirm: function(matchup) {
-                console.log("add confirm called for " + matchup.id);
-                $(this).confirm({
-                    text: "Are you sure you want to delete that comment?",
-                    title: "Confirmation required",
-                    confirm: function(button) {
-                    }
-                });
-            },
             setConfirmDialogs: function() {
                 let self = this;
                 console.log(self.the_tournament);
