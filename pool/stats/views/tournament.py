@@ -1,5 +1,3 @@
-import json
-
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect, render
 from django.forms import modelformset_factory
