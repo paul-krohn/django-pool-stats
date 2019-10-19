@@ -31,18 +31,17 @@
             <h3>Round {{ round.number }}</h3>
             <ul>
                 <li v-for="matchup in round.matchups">
-                    <div>{{ bracket.type }}{{ round.number }}/m{{ matchup.number }} ({{ matchup.id }})
+                    <div>{{ bracket.type }}{{ round.number }}/m{{ matchup.number }} ({{ matchup.id }}) bye winner: {{ matchup.bye_winner }}
                         <span v-for="participant in getMatchupParticipants (matchup)">
-                            <span v-if="participant"></span>
-                            <span v-else-if="bracket.type == 'w' && round.number == '1'">
+                            <span v-if="matchup.bye_winner">
                                 Bye
                             </span>
-                            <span v-else>
+                            <span v-else-if="!participant">
                                 TBD
                             </span>
                             <span v-if="matchup.winner">
                             </span>
-                            <span v-else-if="matchup.participant_a && matchup.participant_b">
+                            <span v-else-if="matchup.participant_a && matchup.participant_b || (participant && ( matchup.bye_winner == participant.id))">
                                     <input
                                         type="submit"
                                         :id="matchupButtonId (matchup, participant)"
@@ -130,6 +129,20 @@
                                             self.submitMatchupWinner(matchup, participant);
                                         },
                                     });
+                                });
+                            } else if (matchup.bye_winner) {
+                                let participant = matchup.participant_a;
+                                if (matchup.participant_b) {
+                                    participant = matchup.participant_b;
+                                }
+                                console.log('bye participant:' + participant);
+                                console.log("we need a bye close dialog for matchup " + matchup.id + " with dom id " + self.matchupButtonId(matchup, participant));
+                                $('#' + self.matchupButtonId(matchup, participant)).confirm({
+                                    title: 'Close Bye',
+                                    text: '<b>' + self.participantText(participant) + "</b> gets a bye",
+                                    confirm: function() {
+                                        self.submitMatchupWinner(matchup, participant);
+                                    },
                                 });
                             }
                         });
