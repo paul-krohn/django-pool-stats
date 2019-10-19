@@ -48,6 +48,39 @@ class Tournament(models.Model):
     def __str__(self):
         return self.name
 
+    def as_dict(self):
+        response_dict = dict(
+            id=self.id,
+            name=self.name,
+            type=self.type,
+            elimination=self.elimination,
+            season=self.season_id,
+            participants=[participant.to_dict() for participant in self.participant_set.all()],
+        )
+
+        # now the matchups
+        response_dict.update(brackets=[])
+        for bracket in self.bracket_set.all():
+            this_bracket_round_list = []
+            for round in bracket.round_set.all():
+                this_round = {
+                    'number': round.number,
+                    'matchups': []
+                }
+                for matchup in round.tournamentmatchup_set.all():
+                    this_round['matchups'].append({
+                            'number': matchup.number,
+                            'id': matchup.id,
+                            'participant_a': None if not matchup.participant_a else matchup.participant_a.to_dict(),
+                            'participant_b': None if not matchup.participant_b else matchup.participant_b.to_dict(),
+                            'winner': None if not matchup.winner else matchup.winner.to_dict(),
+                    })
+                this_bracket_round_list.append(this_round)
+            response_dict['brackets'].append({
+                'type': bracket.type, 'rounds': this_bracket_round_list
+            })
+        return response_dict
+
     def create_brackets(self):
         winners_bracket, created = Bracket.objects.get_or_create(tournament=self, type='w')
         winners_bracket.save()
@@ -320,6 +353,12 @@ class TournamentMatchup(models.Model):
             else:
                 self.participant_b = self.source_match_b.not_winner()
         self.save()
+
+    def is_bye(self):
+        if self.round.number == 1 and (self.participant_a is None or self.participant_b is None):
+            return True
+
+        return False
 
     # def description(self, side, want):
     #     # print('describing match {}'.format(self.number))

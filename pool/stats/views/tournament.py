@@ -25,39 +25,7 @@ def tournament(request, tournament_id):
     a_tournament = Tournament.objects.get(id=tournament_id)
     accept = request.META.get('HTTP_ACCEPT')
     if accept == 'application/json':
-
-        response_dict = dict(
-            id=a_tournament.id,
-            name=a_tournament.name,
-            type=a_tournament.type,
-            elimination=a_tournament.elimination,
-            season=a_tournament.season_id,
-            participants=[participant.to_dict() for participant in a_tournament.participant_set.all()],
-        )
-
-        # now the matchups
-        response_dict.update(brackets=[])
-        for bracket in a_tournament.bracket_set.all():
-            this_bracket_round_list = []
-            for round in bracket.round_set.all():
-                this_round = {
-                    'number': round.number,
-                    'matchups': []
-                }
-                for matchup in round.tournamentmatchup_set.all():
-                    this_round['matchups'].append({
-                            'number': matchup.number,
-                            'id': matchup.id,
-                            'participant_a': None if not matchup.participant_a else matchup.participant_a.to_dict(),
-                            'participant_b': None if not matchup.participant_b else matchup.participant_b.to_dict(),
-                            'winner': None if not matchup.winner else matchup.winner.to_dict(),
-                    })
-                this_bracket_round_list.append(this_round)
-            response_dict['brackets'].append({
-                'type': bracket.type, 'rounds': this_bracket_round_list
-            })
-
-        return JsonResponse(response_dict, safe=False)
+        return JsonResponse(a_tournament.as_dict(), safe=False)
     context = {
         'tournament': a_tournament,
     }
