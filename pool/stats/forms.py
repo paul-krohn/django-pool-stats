@@ -1,5 +1,6 @@
 import django.forms
 from django.core.exceptions import ValidationError
+from django.db.models import Q
 
 from .models import Game, Match, Player, ScoreSheet, Table, Team
 from .utils import get_dupes_from_dict
@@ -224,8 +225,18 @@ def create_tournament_participant_form(a_tournament):
 
     participant_field = 'player'
     participant_form_fields = ['player', 'tournament']
+    player_season_summary_queryset = PlayerSeasonSummary.objects.filter(
+        season_id=a_tournament.season_id,
+    )
+    if a_tournament.seeded:
+        player_season_summary_queryset = player_season_summary_queryset.filter(
+            # filtering on "played one game"
+            Q(wins__gt=0) | Q(losses__gt=0)
+        )
     participant_queryset = Player.objects.filter(
-        id__in=[pss.player.id for pss in PlayerSeasonSummary.objects.filter(season_id=a_tournament.season_id)]
+        id__in=[
+            pss.player.id for pss in player_season_summary_queryset
+        ]
     )
     if a_tournament.type == 'teams':
         participant_queryset = Team.objects.filter(season_id=a_tournament.season_id)

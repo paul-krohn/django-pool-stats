@@ -16,12 +16,7 @@
     <h3>Participants</h3>
     <ul>
     <li v-for="participant in the_tournament.participants">
-        <template v-for="(player, index) in participant.players">
-            <a :href="player.url">{{ player.name }} {{ participant.id }}</a>
-        </template>
-        <template v-if="participant.team">
-            <span v-html="participantLinks(participant)"></span> ({{ participant.seed }})
-        </template>
+        <span v-html="participantLinks(participant)"></span> ({{ participant.seed }})
     </li>
     </ul>
     <div v-for="bracket in the_tournament.brackets" class="brackets">
@@ -188,7 +183,7 @@
                         }
                     });
                     the_participant.players.forEach(function(player, index) {
-                        player_anchors.push(`<a href="${player.url}">${player.name}</a> (${the_participant.id})`);
+                        player_anchors.push(`<a href="${player.url}">${player.name}</a>`);
                     });
                     return player_anchors.join(', ');
                 }
