@@ -3,6 +3,7 @@ from django.urls import reverse
 from math import ceil, log
 from statistics import mean
 from copy import deepcopy
+from random import choice
 
 from ..models import PlayerSeasonSummary
 
@@ -137,6 +138,21 @@ class Tournament(models.Model):
             participant.seed = seed_inc
             participant.save()
             seed_inc += 1
+
+    def randomize_seeds(self):
+        participants = Participant.objects.filter(tournament=self)
+        available_seeds = [x+1 for x in range(0, len(participants))]
+        # don't re-seed participants, I think
+        for participant in participants:
+            if participant.seed:
+                available_seeds.remove(participant.seed)
+        for participant in participants:
+            if not participant.seed:
+                this_seed = choice(available_seeds)
+                participant.seed = this_seed
+                participant.save()
+                available_seeds.remove(this_seed)
+
 
 
 class Participant(models.Model):
