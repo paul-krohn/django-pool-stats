@@ -117,6 +117,8 @@ def tournament_participants(request, tournament_id):
                 if a_tournament.type == 'teams':
                     obj.type = 'team'
             participant_formset.save()
+            if a_tournament.seeded:
+                a_tournament.update_seeds()
             return redirect('tournament_participants', a_tournament.id)
 
     context = {
