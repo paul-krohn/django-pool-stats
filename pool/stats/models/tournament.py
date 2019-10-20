@@ -1,7 +1,10 @@
 from django.db import models
 from django.urls import reverse
 from math import ceil, log
+from statistics import mean
 from copy import deepcopy
+
+from ..models import PlayerSeasonSummary
 
 
 TOURNAMENT_TYPES = [
@@ -125,12 +128,15 @@ class Tournament(models.Model):
     def update_seeds(self):
         participants = Participant.objects.filter(tournament=self)
         if self.type == 'teams':
-            #order_by_arg = 'team__ranking'
-            seed_inc = 1
-            for participant in participants.order_by('team__ranking'):
-                participant.seed = seed_inc
-                participant.save()
-                seed_inc += 1
+            sorted_participants = participants.order_by('team__ranking')
+        else:  # self.type in ['singles', 'scotch_doubles']:
+            sorted_participants = sorted(participants)
+        seed_inc = 1
+
+        for participant in sorted_participants:
+            participant.seed = seed_inc
+            participant.save()
+            seed_inc += 1
 
 
 class Participant(models.Model):
@@ -146,6 +152,35 @@ class Participant(models.Model):
         if self.type == 'player':
             return ', '.join([p.__str__() for p in self.player.all()])
         return getattr(self, '{}'.format(self.type)).__str__()
+
+    def get_player_win_pct(self):
+
+        player_season_summaries = PlayerSeasonSummary.objects.filter(
+            player__in=self.player.all(),
+            season=self.tournament.season,
+        )
+
+        # for seeded tournaments, we rely on a filter in the form to only allow the
+        # user to select players with a season summary, and at least one game played.
+        return mean([
+            p.win_percentage for p in player_season_summaries
+        ])
+
+    def __cmp__(self, other):
+        if self.type == 'player':
+            if self.tournament.type == 'singles':
+                return self.get_player_win_pct().__cmp__(other.get_player_win_pct())
+
+        elif self.type == 'team':
+            return self.team.ranking.__cmp__(other.team.ranking())
+
+    def __lt__(self, other):
+        if self.type == 'player':
+            print("looking at {} compared to {}".format(self, other))
+            return self.get_player_win_pct() < other.get_player_win_pct()
+
+        elif self.type == 'team':
+            return self.team.ranking < other.team.ranking()
 
     def to_dict(self):
         players = []
