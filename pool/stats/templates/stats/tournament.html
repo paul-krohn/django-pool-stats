@@ -20,40 +20,47 @@
             <a :href="player.url">{{ player.name }} {{ participant.id }}</a>
         </template>
         <template v-if="participant.team">
-            <span v-html="participantLinks(participant)"></span>
+            <span v-html="participantLinks(participant)"></span> ({{ participant.seed }})
         </template>
     </li>
     </ul>
-    <template v-if="the_tournament.elimination != 'single'">
     <div v-for="bracket in the_tournament.brackets" class="brackets">
-        <h2>{{ bracket.type }} Bracket</h2>
+        <template v-if="the_tournament.elimination != 'single'">
+            <h2>{{ bracket.type }} Bracket</h2>
+        </template>
         <div v-for="round in bracket.rounds">
             <h3>Round {{ round.number }}</h3>
             <ul>
                 <li v-for="matchup in round.matchups">
-                    <div>{{ bracket.type }}{{ round.number }}/m{{ matchup.number }} ({{ matchup.id }}) bye winner: {{ matchup.bye_winner }}
-                        <span v-for="participant in getMatchupParticipants (matchup)">
-                            <span v-if="matchup.bye_winner">
-                                Bye
+                    <div>{{ matchup.name }}: {{ matchup.id }}
+                        <span v-for="(participant, index) in getMatchupParticipants (matchup)">
+                            <span v-if="participant">
+                                <span v-if="matchup.winner"
+                                        v-bind:style="boldWinner(matchup, participant)"
+                                        v-html="participantLinks(participant)">
+                                </span>
+                                <span v-else-if="matchup.participant_a && matchup.participant_b || (participant && ( matchup.bye_winner == participant.id))">
+                                        <input
+                                            type="submit"
+                                            :id="matchupButtonId (matchup, participant)"
+                                            class="btn btn-primary btn-sm confirm"
+                                            :value="participantText(participant)"
+                                        >
+                                </span>
+                                <span v-else="">
+                                    <span v-html="participantLinks(participant)"></span>
+                                </span>
                             </span>
-                            <span v-else-if="!participant">
-                                TBD
+                            <span v-else="" >
+                                {{ matchup.bye_winner }}
+                                <span v-if="matchup.bye_winner > 0">
+                                    Bye
+                                </span>
+                                <span v-else="">
+                                    TBD
+                                </span>
                             </span>
-                            <span v-if="matchup.winner">
-                            </span>
-                            <span v-else-if="matchup.participant_a && matchup.participant_b || (participant && ( matchup.bye_winner == participant.id))">
-                                    <input
-                                        type="submit"
-                                        :id="matchupButtonId (matchup, participant)"
-                                        class="btn btn-primary btn-sm confirm"
-                                        :value="participantText(participant)"
-                                    >
-                            </span>
-                            <span
-                                    v-bind:style="boldWinner(matchup, participant)"
-                                    v-html="participantLinks(participant)">
-                            </span>
-                            <span v-if="participant && matchup.participant_a && participant.id === matchup.participant_a.id">
+                            <span v-if="index === 0">
                                 -VS-
                             </span>
                         </span>
@@ -62,7 +69,6 @@
             </ul>
         </div><!-- end v-for rounds -->
     </div>
-    </template>
     <pre>{{ the_tournament }}</pre>
 {% endverbatim %}
 </div>

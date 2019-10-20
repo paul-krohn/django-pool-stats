@@ -70,6 +70,7 @@ class Tournament(models.Model):
                 for matchup in round.tournamentmatchup_set.all():
                     this_round['matchups'].append({
                             'bye_winner': matchup.bye_winner(),
+                            'name': matchup.__str__(),
                             'number': matchup.number,
                             'id': matchup.id,
                             'participant_a': None if not matchup.participant_a else matchup.participant_a.to_dict(),
@@ -195,10 +196,11 @@ class Round(models.Model):
             return int(self.bracket.tournament.bracket_size() / 2 ** ((self.number + (self.number % 2)) / 2 + 1))
 
     def get_first_round_winners_participant(self, ab, increment):
+        participant_set = self.bracket.tournament.participant_set.all().order_by('seed')
         if ab == 'a':
-            return self.bracket.tournament.participant_set.all()[increment]
-        if len(self.bracket.tournament.participant_set.all()) > (2 * self.matchup_count() - 1) - increment:
-            return self.bracket.tournament.participant_set.all()[(2 * self.matchup_count()  - 1) - increment]
+            return participant_set[increment]
+        if len(participant_set) > (2 * self.matchup_count() - 1) - increment:
+            return participant_set[(2 * self.matchup_count()  - 1) - increment]
         return None
 
     def get_first_round_losers_source_matchup(self, ab, increment):
@@ -220,7 +222,7 @@ class Round(models.Model):
         if ab == 'a':
             return source_round_matchups[increment]
         else:
-            return source_round_matchups[self.matchup_count() - increment]
+            return source_round_matchups[2 * self.matchup_count() - increment - 1]
 
     def get_losers_bracket_drop_in_source_matchup(self, ab, increment):
         winners_source_round_number = int(self.number / 2) + 1
