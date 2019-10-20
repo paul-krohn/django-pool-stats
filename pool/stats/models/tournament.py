@@ -220,7 +220,7 @@ class Round(models.Model):
         if ab == 'a':
             return source_round_matchups[increment]
         else:
-            return source_round_matchups[self.matchup_count() - increment - 1]  # yikes why does this work
+            return source_round_matchups[self.matchup_count() - increment]
 
     def get_losers_bracket_drop_in_source_matchup(self, ab, increment):
         winners_source_round_number = int(self.number / 2) + 1
