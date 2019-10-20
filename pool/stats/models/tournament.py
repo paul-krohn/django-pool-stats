@@ -55,7 +55,7 @@ class Tournament(models.Model):
             type=self.type,
             elimination=self.elimination,
             season=self.season_id,
-            participants=[participant.to_dict() for participant in self.participant_set.all()],
+            participants=[participant.to_dict() for participant in self.participant_set.all().order_by('seed')],
         )
 
         # now the matchups
@@ -122,6 +122,16 @@ class Tournament(models.Model):
             wbr.save()
             round_inc += 1
 
+    def update_seeds(self):
+        participants = Participant.objects.filter(tournament=self)
+        if self.type == 'teams':
+            #order_by_arg = 'team__ranking'
+            seed_inc = 1
+            for participant in participants.order_by('team__ranking'):
+                participant.seed = seed_inc
+                participant.save()
+                seed_inc += 1
+
 
 class Participant(models.Model):
     type = models.TextField(choices=PARTICIPANT_TYPES)
@@ -155,9 +165,10 @@ class Participant(models.Model):
             }
         return {
             'id': self.id,
-            'type': self.type,
             'players': players,
+            'seed': self.seed,
             'team': team,
+            'type': self.type,
         }
 
 
