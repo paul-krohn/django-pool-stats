@@ -177,7 +177,7 @@ class Participant(models.Model):
     def __lt__(self, other):
         if self.type == 'player':
             print("looking at {} compared to {}".format(self, other))
-            return self.get_player_win_pct() < other.get_player_win_pct()
+            return self.get_player_win_pct() > other.get_player_win_pct()
 
         elif self.type == 'team':
             return self.team.ranking < other.team.ranking()
