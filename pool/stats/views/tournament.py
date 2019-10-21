@@ -3,7 +3,7 @@ from django.shortcuts import redirect, render
 from django.forms import modelformset_factory
 from django.db.models import Q
 
-from ..forms import TournamentForm, create_tournament_participant_form
+from ..forms import TournamentForm, TournamentParticipantFormSet, create_tournament_participant_form
 from ..models import Participant, Player, Season, Tournament, TournamentMatchup
 
 from ..views import check_season
@@ -90,6 +90,7 @@ def tournament_participants(request, tournament_id):
     participant_form = create_tournament_participant_form(a_tournament)
 
     participant_formset_f = modelformset_factory(
+        formset=TournamentParticipantFormSet,
         model=Participant,
         form=participant_form,
         extra=2,

@@ -221,6 +221,48 @@ class MatchupForm(django.forms.Form):
     thing = django.forms.CharField(required=False, widget=django.forms.HiddenInput)
 
 
+def get_dupes_from_dict(dictionary):
+    return ['{}'.format(p) for p in {k: v for k, v in dictionary.items() if v > 1}]
+
+
+class TournamentParticipantFormSet(django.forms.BaseModelFormSet):
+    def clean(self):
+        super().clean()
+
+        players = {}
+        player_count = 0
+        teams = {}
+        team_count = 0
+        for form in self.forms:
+            if form.cleaned_data == {}:
+                pass  # there is an empty form in every formset; assume that is valid
+            elif 'DELETE' in form.cleaned_data and form.cleaned_data['DELETE'] is True:
+                pass  # assume deletions are valid
+            form_players = form.cleaned_data.get('player')
+            if form_players:
+                for form_player in form_players:
+                    player_count += 1
+                    if form_player in players:
+                        players[form_player] += 1
+                    else:
+                        players[form_player] = 1
+            form_team = form.cleaned_data.get('team')
+            if form_team:
+                team_count += 1
+                if form_team in teams:
+                    teams[form_team] += 1
+                else:
+                    teams[form_team] = 1
+        if len(teams) < team_count:
+            raise ValidationError('there are duplicate teams: {}'.format(', '.join(
+                get_dupes_from_dict(teams)
+            )))
+        if len(players) < player_count:
+            raise ValidationError('there are duplicate players: {}'.format(', '.join(
+                get_dupes_from_dict(players)
+            )))
+
+
 def create_tournament_participant_form(a_tournament):
 
     participant_field = 'player'
@@ -250,6 +292,18 @@ def create_tournament_participant_form(a_tournament):
             self.fields['tournament'].widget = django.forms.HiddenInput()
             self.fields['tournament'].initial = a_tournament
             self.fields[participant_field].queryset = participant_queryset
+
+        def clean(self):
+            super().clean()
+            players = self.cleaned_data.get('player')
+            if players:
+                if a_tournament.type == 'single':
+                    if len(players) != 1:
+                        raise ValidationError('singles should have one player per participant')
+                if a_tournament.type == 'scotch_doubles':
+                    if len(players) != 2:
+                        raise ValidationError('scotch doubles should have 2 players per participant')
+
 
         class Meta:
             model = Participant
