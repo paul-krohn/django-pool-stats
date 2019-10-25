@@ -17,7 +17,7 @@ def tournaments(request, season_id=None):
     context = {
         'tournaments': tournament_list,
     }
-    return render(request, 'stats/tournaments.html', context)
+    return render(request, 'stats/tournament/list.html', context)
 
 
 def tournament(request, tournament_id):
@@ -29,7 +29,7 @@ def tournament(request, tournament_id):
     context = {
         'tournament': a_tournament,
     }
-    return render(request, 'stats/tournament.html', context)
+    return render(request, 'stats/tournament/view.html', context)
 
 
 def tournament_edit(request, tournament_id=None):
@@ -55,7 +55,7 @@ def tournament_edit(request, tournament_id=None):
     context = {
         'tournament_form': tournament_form,
     }
-    return render(request, 'stats/tournament_edit.html', context)
+    return render(request, 'stats/tournament/edit.html', context)
 
 
 def update_affected_matchups(a_matchup):
@@ -96,14 +96,15 @@ def tournament_participants(request, tournament_id):
         extra=2,
         can_delete=True,
     )
+    participant_queryset = Participant.objects.filter(tournament=a_tournament)
     participant_formset = participant_formset_f(
-        queryset=Participant.objects.filter(tournament=a_tournament),
+        queryset=participant_queryset,
     )
 
     if request.method == 'POST':
         participant_formset = participant_formset_f(
             request.POST,
-            queryset=Participant.objects.filter(tournament=a_tournament),
+            queryset=participant_queryset,
         )
 
         if participant_formset.is_valid():
@@ -124,11 +125,12 @@ def tournament_participants(request, tournament_id):
 
     context = {
         'tournament': a_tournament,
+        'setup_disabled': 'disabled' if len(participant_queryset) else '',
         'players': Player.objects.all(),
         'participant_formset': participant_formset,
     }
 
-    return render(request, 'stats/tournament_participants.html', context)
+    return render(request, 'stats/tournament/participants.html', context)
 
 
 def tournament_brackets(request, tournament_id):
