@@ -19,11 +19,27 @@
         <td><input class="btn btn-primary" type="submit" value="Save participants" id="_lineup_save"/></td></tr>
 </table>
 </form>
-    <p>Done setting up and saving participants? On to <a href="{% url 'tournament_brackets' tournament.id %}"> creating brackets.</a></p>
+<div>
+    <p>bracket size: {{ tournament.bracket_size }}</p>
+<p>participants: {{ tournament.participant_set.all|length }}</p>
+
+</div>
+{% with participants_disabled='disabled' %}
+    {% include 'stats/tournament/nav.html' %}
+{% endwith %}
 <script type="text/javascript">
 
     $(document).ready(function() {
         $('select').multiselect({enableCaseInsensitiveFiltering: true});
+    });
+
+    $("#create_brackets").confirm({
+        submitForm: true,
+        post: true,
+        text: "<b>Are you sure?</b><br/>Once you have created brackets, you can't change the elimination, seeding, or participant type.",
+        confirm: function(button) {
+            $("#create_brackets").submit();
+        }
     });
 
 </script>
