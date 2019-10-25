@@ -154,7 +154,6 @@ class Tournament(models.Model):
                 available_seeds.remove(this_seed)
 
 
-
 class Participant(models.Model):
     type = models.TextField(choices=PARTICIPANT_TYPES)
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
@@ -424,7 +423,7 @@ class TournamentMatchup(models.Model):
             return True
         return False
     def bye_winner(self):
-        if self.participant_a is None or self.participant_b is None:
+        if bool(self.participant_a is None) ^ bool(self.participant_b is None):
             # winners first round byes
             if self.round.number == 1 and self.round.bracket.type == 'w':
                 if self.participant_a:
