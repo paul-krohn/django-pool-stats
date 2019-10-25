@@ -121,6 +121,8 @@ def tournament_participants(request, tournament_id):
             participant_formset.save()
             if a_tournament.seeded:
                 a_tournament.update_seeds()
+            else:
+                a_tournament.randomize_seeds()
             return redirect('tournament_participants', a_tournament.id)
 
     context = {
