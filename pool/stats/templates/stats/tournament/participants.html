@@ -26,6 +26,12 @@
     {% else %}
     <p>No participants.</p>
 {% endif %}
+<p>seeding:
+{% if tournament.seeded %}
+    by win percentage.
+    {% else %}
+    randomized
+{% endif %}</p>
 </div>
 {% with participants_disabled='disabled' %}
     {% include 'stats/tournament/nav.html' %}
