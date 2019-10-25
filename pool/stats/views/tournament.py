@@ -109,7 +109,7 @@ def tournament_participants(request, tournament_id):
 
         if participant_formset.is_valid():
             for pform in participant_formset:
-                if pform.cleaned_data.get('DELETE', False):
+                if pform.cleaned_data.get('DELETE', False) and pform.cleaned_data.get('pk', False):
                     p = Participant.objects.get(id=pform.instance.id)
                     p.delete()
                 obj = pform.save(commit=False)
