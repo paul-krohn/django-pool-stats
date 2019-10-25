@@ -3,7 +3,7 @@ import datetime
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import never_cache
 
-from ..models import Match, Week, ScoreSheet, Season
+from ..models import Week, ScoreSheet, Season
 from ..views import check_season
 from ..forms import ScoreSheetCreationForm
 
