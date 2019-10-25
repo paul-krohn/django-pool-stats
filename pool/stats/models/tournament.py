@@ -95,7 +95,11 @@ class Tournament(models.Model):
             losers_bracket.save()
 
     def round_count(self):
-        return ceil(log(len(self.participant_set.all()), 2))
+        participant_count = len(self.participant_set.all())
+        if participant_count > 0:
+            return ceil(log(participant_count, 2))
+        else:
+            return 0
 
     def bracket_size(self):
         return 2 ** self.round_count()
