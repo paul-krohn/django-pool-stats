@@ -1,18 +1,33 @@
-<div class="row">
-    <div class="col-md-3">
-        <form action="{% url 'tournament_edit' tournament.id %}">
-            <input class="btn btn-primary confirm {{ setup_disabled }}" type="submit" value="Setup" />
-        </form>
-    </div>
-    <div class="col-md-3">
-        <form id="on_to_participants" action="{% url 'tournament_participants' tournament.id %}">
-            <input class="btn btn-primary confirm {{ participants_disabled }}" type="submit" value="Add Participants" />
-        </form>
-    </div>
-    <div class="col-md-3">
-        <form id="create_brackets"  action="{% url 'tournament_brackets' tournament.id %}">
-            <input class="btn btn-primary confirm {{ brackets_disabled }}" type="submit" value="Create Brackets" />
-        </form>
-    </div>
 
-</div>
+<nav arial-label="">
+    <form id="nav_edit" action="{% url 'tournament_edit' tournament.id %}"></form>
+    <form id="nav_participants" action="{% url 'tournament_participants' tournament.id %}"></form>
+    <form id="nav_brackets"  action="{% url 'tournament_brackets' tournament.id %}"></form>
+    <ul class="pager">
+        <li>
+            <button id="nav_setup_button" class="btn btn-default confirm {{ setup_disabled }}" type="submit">
+                Setup
+            </button>
+        </li>
+        <li>
+            <button id="nav_participants_button" class="btn btn-default confirm {{ participants_disabled }}" type="submit">
+                Add Participants
+            </button>
+        </li>
+        <li>
+            <button id="nav_brackets_button" class="btn btn-default confirm {{ brackets_disabled }}" type="submit">
+                Start Tournament
+            </button>
+        </li>
+    </ul>
+</nav>
+<script>
+
+    let form_names = ['nav_setup', 'nav_participants', 'nav_brackets'];
+    form_names.forEach(function(form_name, index){
+        $('#' + form_name + '_button').not('.disabled').click(function(){
+            $('#' + form_name).submit();
+        })
+    });
+
+</script>

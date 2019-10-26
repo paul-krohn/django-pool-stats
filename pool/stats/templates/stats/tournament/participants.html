@@ -22,6 +22,7 @@
 <div>
 {% if tournament.participant_set.all|length %}
     <p>bracket size: {{ tournament.bracket_size }}</p>
+    <p>elimination: {{ tournament.elimination }}</p>
     <p>participants: {{ tournament.participant_set.all|length }}</p>
     {% else %}
     <p>No participants.</p>
@@ -33,10 +34,10 @@
     randomized
 {% endif %}</p>
 </div>
-{% with participants_disabled='disabled' %}
+
     {% include 'stats/tournament/nav.html' %}
-{% endwith %}
-<script type="text/javascript">
+
+    <script type="text/javascript">
 
     $(document).ready(function() {
         $('select').multiselect({enableCaseInsensitiveFiltering: true});

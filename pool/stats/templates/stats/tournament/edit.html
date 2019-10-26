@@ -18,8 +18,8 @@
 </form>
 
 {% if tournament_form.instance.id %}
-    {% with tournament=tournament_form.instance setup_disabled='disabled' brackets_disabled='disabled' %}
-    {% include 'stats/tournament/nav.html' %}
-{% endwith %}
+    {% with tournament=tournament_form.instance %}
+        {% include 'stats/tournament/nav.html' %}
+    {% endwith %}
 {% endif %}
 {% endblock %}
