@@ -54,6 +54,9 @@ def tournament_edit(request, tournament_id=None):
         )
     context = {
         'tournament_form': tournament_form,
+        'setup_disabled': 'disabled',
+        'brackets_disabled': 'disabled',
+        'participants_disabled': '' if tournament_id else 'disabled',
     }
     return render(request, 'stats/tournament/edit.html', context)
 
@@ -124,12 +127,21 @@ def tournament_participants(request, tournament_id):
             else:
                 a_tournament.randomize_seeds()
             return redirect('tournament_participants', a_tournament.id)
+    # TODO: make double-elimination, 2-participant tournaments work
+    min_size = 2
+    if a_tournament.elimination == 'double':
+        min_size = 4
+    brackets_disabled = ''
+    if a_tournament.bracket_size() < min_size:
+        brackets_disabled = 'disabled'
 
     context = {
         'tournament': a_tournament,
-        'setup_disabled': 'disabled' if len(participant_queryset) else '',
         'players': Player.objects.all(),
         'participant_formset': participant_formset,
+        'setup_disabled': 'disabled' if len(a_tournament.bracket_set.all()) else '',
+        'brackets_disabled': brackets_disabled,
+        'participants_disabled': 'disabled',
     }
 
     return render(request, 'stats/tournament/participants.html', context)
