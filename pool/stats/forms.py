@@ -238,7 +238,11 @@ class TournamentParticipantFormSet(django.forms.BaseModelFormSet):
                 pass  # there is an empty form in every formset; assume that is valid
             elif 'DELETE' in form.cleaned_data and form.cleaned_data['DELETE'] is True:
                 pass  # assume deletions are valid
-            form_players = form.cleaned_data.get('player')
+            form_players = form.cleaned_data.get('doubles_players')
+            if not form_players:
+                form_player = form.cleaned_data.get('player')
+                if form_player:
+                    form_players = [form_player]
             if form_players:
                 for form_player in form_players:
                     player_count += 1

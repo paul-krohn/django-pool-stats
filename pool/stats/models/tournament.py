@@ -37,6 +37,7 @@ ROUND_TYPES = [
 PARTICIPANT_TYPES = [
     ('team', 'Team'),
     ('player', 'Player'),
+    ('doubles_players', 'Player'),
 ]
 
 PARTICIPANT_LETTERS = ['a', 'b']
@@ -162,21 +163,30 @@ class Participant(models.Model):
     type = models.TextField(choices=PARTICIPANT_TYPES)
     tournament = models.ForeignKey(Tournament, on_delete=models.CASCADE)
     # these field names do/must match the PARTICIPANT_TYPES list above;
-    # for scotch-doubles tournaments, we'll add 2 players
-    player = models.ManyToManyField('Player', blank=True)
+    # for scotch-doubles tournaments,
+    doubles_players = models.ManyToManyField('Player', related_name='doubles_players', blank=True)
+    player = models.ForeignKey('Player', on_delete=models.DO_NOTHING, null=True, blank=True)
     team = models.ForeignKey('Team', on_delete=models.DO_NOTHING, null=True, blank=True)
     seed = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
-        if self.type == 'player':
-            return ', '.join([p.__str__() for p in self.player.all()])
+        if self.type == 'doubles_players':
+            return ', '.join([p.__str__() for p in self.doubles_players.all()])
         return getattr(self, '{}'.format(self.type)).__str__()
 
     def get_player_win_pct(self):
 
+        player_summary_filter_args = {
+            'season': self.tournament.season,
+        }
+
+        if self.type == 'player':
+            player_summary_filter_args['player'] = self.player
+        elif self.type == 'doubles_players':
+            player_summary_filter_args['player__in'] = [x for x in self.doubles_players.all()]
+
         player_season_summaries = PlayerSeasonSummary.objects.filter(
-            player__in=self.player.all(),
-            season=self.tournament.season,
+            **player_summary_filter_args
         )
 
         # for seeded tournaments, we rely on a filter in the form to only allow the
@@ -204,21 +214,25 @@ class Participant(models.Model):
     def to_dict(self):
         players = []
         team = None
-        if self.type == 'player':
-            players = [{
-                'id': p.id,
-                'name': p.__str__(),
-                'url': reverse('player', kwargs={'player_id': p.id})
-
-            } for p in self.player.all()]
-        else:
+        if self.type == 'team':
             team = {
                 'id': self.team.id,
                 'name': self.team.name,
                 'url': reverse('team', kwargs={'team_id': self.team.id}),
             }
-        return {
-            'id': self.id,
+        else:
+            if self.type == 'scotch_doubles':
+                player_list = self.doubles_players.all()
+            else:
+                player_list = [self.player]
+            players = [{
+                'id': p.id,
+                'name': p.__str__(),
+                'url': reverse('player', kwargs={'player_id': p.id})
+
+            } for p in player_list]
+
+        return {'id': self.id,
             'players': players,
             'seed': self.seed,
             'team': team,
