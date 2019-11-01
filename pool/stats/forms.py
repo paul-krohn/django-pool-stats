@@ -90,7 +90,7 @@ class ScoreSheetStatusForm(django.forms.ModelForm):
 class TournamentForm(django.forms.ModelForm):
     class Meta:
         model = Tournament
-        exclude = ['season']
+        exclude = ['creator_session', 'season']
         widgets = {
             'name': django.forms.TextInput(),
         }

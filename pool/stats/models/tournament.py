@@ -6,6 +6,7 @@ from copy import deepcopy
 from random import choice
 
 from ..models import PlayerSeasonSummary
+from ..utils import is_stats_master, session_uid
 
 
 TOURNAMENT_TYPES = [
@@ -45,6 +46,7 @@ PARTICIPANT_LETTERS = ['a', 'b']
 
 class Tournament(models.Model):
     name = models.TextField()
+    creator_session = models.CharField(max_length=16, null=True, blank=True)
     type = models.TextField(choices=TOURNAMENT_TYPES)
     elimination = models.TextField(choices=ELIMINATION_TYPES)
     season = models.ForeignKey('Season', on_delete=models.CASCADE, null=True)
@@ -53,9 +55,10 @@ class Tournament(models.Model):
     def __str__(self):
         return self.name
 
-    def as_dict(self):
+    def as_dict(self, request):
         response_dict = dict(
             id=self.id,
+            editable=self.editable(request),
             name=self.name,
             type=self.type,
             elimination=self.elimination,
@@ -87,6 +90,10 @@ class Tournament(models.Model):
                 'type': bracket.type, 'rounds': this_bracket_round_list
             })
         return response_dict
+
+    def editable(self, request):
+        return self.creator_session == session_uid(request) or \
+                request.user.is_superuser or is_stats_master(request.user)
 
     def create_brackets(self):
         winners_bracket, created = Bracket.objects.get_or_create(tournament=self, type='w')
