@@ -14,6 +14,10 @@ def session_uid(request):
     return request.session['uid']
 
 
+def is_stats_master(user):
+    return user.groups.filter(name='statsmaster').exists()
+
+
 def expire_page(request, path=None, query_string=None, method='GET'):
     """
     :param request: "real" request, or at least one providing the same scheme, host, and port as what you want to expire
