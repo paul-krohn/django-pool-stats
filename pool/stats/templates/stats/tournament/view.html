@@ -35,12 +35,17 @@
                                         v-html="participantLinks(participant)">
                                 </span>
                                 <span v-else-if="matchup.participant_a && matchup.participant_b || (participant && ( matchup.bye_winner == participant.id))">
+                                    <span v-if="the_tournament.editable">
                                         <input
-                                            type="submit"
-                                            :id="matchupButtonId (matchup, participant)"
-                                            class="btn btn-primary btn-sm confirm"
-                                            :value="participantText(participant)"
+                                                type="submit"
+                                                :id="matchupButtonId (matchup, participant)"
+                                                class="btn btn-primary btn-sm confirm"
+                                                :value="participantText(participant)"
                                         >
+                                    </span>
+                                    <span v-else="" v-html="participantLinks(participant)">
+
+                                    </span>
                                 </span>
                                 <span v-else="">
                                     <span v-html="participantLinks(participant)"></span>
@@ -105,6 +110,10 @@
             setConfirmDialogs: function() {
                 let self = this;
                 console.log(self.the_tournament);
+                if (self.the_tournament.editable === false) {
+                    return true;
+                }
+                console.log("editable: " + self.the_tournament.editable);
                 self.the_tournament.brackets.forEach(function(bracket, index){
                     console.log("looking at bracket " + bracket.type);
                     bracket.rounds.forEach(function(round, index){

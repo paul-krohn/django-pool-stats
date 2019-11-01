@@ -5,7 +5,6 @@ from django.db.models import Q
 
 from ..forms import TournamentForm, TournamentParticipantFormSet, create_tournament_participant_form
 from ..models import Participant, Player, Season, Tournament, TournamentMatchup
-
 from ..views import check_season
 
 
@@ -25,7 +24,7 @@ def tournament(request, tournament_id):
     a_tournament = Tournament.objects.get(id=tournament_id)
     accept = request.META.get('HTTP_ACCEPT')
     if accept == 'application/json':
-        return JsonResponse(a_tournament.as_dict(), safe=False)
+        return JsonResponse(a_tournament.as_dict(request), safe=False)
     context = {
         'tournament': a_tournament,
     }
@@ -75,8 +74,10 @@ def tournament_mark_winner(request):
         matchup_id = request.POST.get('matchup')
         winner_id = request.POST.get('winner')
         if matchup_id and winner_id:
-            print("marking winner of matchup {} as {}".format(matchup_id, winner_id))
             matchup = TournamentMatchup.objects.get(id=matchup_id)
+            if not matchup.round.bracket.tournament.editable(request):
+                return HttpResponse(status=403)
+            print("marking winner of matchup {} as {}".format(matchup_id, winner_id))
             winner = Participant.objects.get(id=winner_id)
             matchup.winner = winner
             matchup.save()
