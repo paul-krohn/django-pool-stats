@@ -10,7 +10,7 @@ from ..forms import DisabledScoreSheetGameForm, ScoreSheetGameForm, ScoreSheetCo
     ScoreSheetStatusForm, LineupFormSet, SubstitutionFormSet
 from ..models import ScoreSheet, Game, Match, AwayLineupEntry, HomeLineupEntry, PlayPosition, AwaySubstitution, \
     HomeSubstitution
-from ..utils import session_uid
+from ..utils import session_uid, is_stats_master
 
 
 def score_sheet(request, score_sheet_id):
@@ -238,10 +238,6 @@ def score_sheet_substitutions(request, score_sheet_id, away_home):
 
     else:
         return redirect('score_sheet_edit', score_sheet_id=s.id)
-
-
-def is_stats_master(user):
-    return user.groups.filter(name='statsmaster').exists()
 
 
 def user_can_edit_scoresheet(request, score_sheet_id):
