@@ -1,3 +1,4 @@
+import re
 from unittest.mock import MagicMock
 
 from django.test import Client, LiveServerTestCase, TestCase
@@ -38,6 +39,16 @@ class TestsWithSampleData(BasePoolStatsTestCase):
         test_redirect_response = c.get(response.url)
         self.assertRedirects(test_redirect_response, expected_url=reverse('tournament', kwargs={'tournament_id': 1}))
 
+    def test_is_editable(self):
+        response = self.client.post(reverse('tournament_edit'), data={
+            'name': 'test singles double-elimination tournament',
+            'type': 'singles',
+            'elimination': 'double',
+        })
+
+        tournament_id = int(re.findall(r'\d+', response.url)[-1])
+        t = Tournament.objects.get(id=tournament_id)
+        self.assertTrue(t.editable(self.client))
 
 class TournamentTestCases(TestCase):
 
