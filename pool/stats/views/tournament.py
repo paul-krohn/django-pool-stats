@@ -37,10 +37,10 @@ def tournament_edit(request, tournament_id=None):
     t = None
     if tournament_id is not None:
         t = Tournament.objects.get(id=tournament_id)
+        if not t.editable(request):
+            return redirect('tournament', t.id)
 
     if request.method == 'POST':
-        if t is not None and t.editable(request):
-            return redirect('tournament', t.id)
 
         tournament_form = TournamentForm(
             request.POST,
