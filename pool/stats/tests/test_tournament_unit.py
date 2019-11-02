@@ -1,12 +1,14 @@
 from unittest.mock import MagicMock
 
-from django.test import LiveServerTestCase, TestCase
+from django.test import Client, LiveServerTestCase, TestCase
+from django.urls import reverse
+
+from .base_cases import BasePoolStatsTestCase
 
 from ..models import Bracket, Participant, Round, Tournament, TournamentMatchup
 
 
 class TournamentLiveTestCases(LiveServerTestCase):
-
 
     def test_get_match_loser(self):
         """
@@ -21,6 +23,20 @@ class TournamentLiveTestCases(LiveServerTestCase):
         )
         print('the not-winner: {}'.format(matchup.not_winner().id))
         self.assertEqual(matchup.not_winner(), matchup.participant_a)
+
+
+class TestsWithSampleData(BasePoolStatsTestCase):
+
+    def test_non_owned_tournament_redirect(self):
+        response = self.client.post(reverse('tournament_edit'), data={
+            'name': 'test team double tournament',
+            'type': 'teams',
+            'elimination': 'double',
+        })
+
+        c = Client()
+        test_redirect_response = c.get(response.url)
+        self.assertRedirects(test_redirect_response, expected_url=reverse('tournament', kwargs={'tournament_id': 1}))
 
 
 class TournamentTestCases(TestCase):
