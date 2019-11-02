@@ -5,6 +5,7 @@ from django.db.models import Q
 
 from ..forms import TournamentForm, TournamentParticipantFormSet, create_tournament_participant_form
 from ..models import Participant, Player, Season, Tournament, TournamentMatchup
+from ..utils import session_uid
 from ..views import check_season
 
 
@@ -38,6 +39,9 @@ def tournament_edit(request, tournament_id=None):
         t = Tournament.objects.get(id=tournament_id)
 
     if request.method == 'POST':
+        if t is not None and t.editable(request):
+            return redirect('tournament', t.id)
+
         tournament_form = TournamentForm(
             request.POST,
             instance=t
@@ -45,6 +49,8 @@ def tournament_edit(request, tournament_id=None):
         saved_tournament = tournament_form.save()
         # also set the season, which isn't in the form
         saved_tournament.season_id = request.session.get('season_id', Season.objects.get(is_default=True).id)
+        # also set the creator session
+        saved_tournament.creator_session = session_uid(request)
         saved_tournament.save()
         return redirect('tournament_edit', saved_tournament.id)
     else:
@@ -90,6 +96,8 @@ def tournament_mark_winner(request):
 def tournament_participants(request, tournament_id):
 
     a_tournament = Tournament.objects.get(id=tournament_id)
+    if not a_tournament.editable(request):
+        return redirect('tournament', a_tournament.id)
 
     participant_form = create_tournament_participant_form(a_tournament)
 
@@ -152,6 +160,8 @@ def tournament_brackets(request, tournament_id):
 
     finals_rounds = ['first', 'second']
     t = Tournament.objects.get(id=tournament_id)
+    if not t.editable(request):
+        return redirect('tournament', t.id)
     t.create_brackets()
     t.create_rounds()
 
