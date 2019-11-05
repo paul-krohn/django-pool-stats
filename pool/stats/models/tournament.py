@@ -76,15 +76,20 @@ class Tournament(models.Model):
                     'matchups': []
                 }
                 for matchup in round.tournamentmatchup_set.all():
-                    this_round['matchups'].append({
-                            'bye_winner': matchup.bye_winner(),
-                            'name': matchup.__str__(),
-                            'number': matchup.number,
-                            'id': matchup.id,
-                            'participant_a': None if not matchup.participant_a else matchup.participant_a.to_dict(),
-                            'participant_b': None if not matchup.participant_b else matchup.participant_b.to_dict(),
-                            'winner': None if not matchup.winner else matchup.winner.to_dict(),
-                    })
+                    matchup_field_names = [
+                        'id', 'number', 'a_want_winner', 'b_want_winner'
+                    ]
+                    this_matchup = {f:getattr(matchup, str(f)) for f in matchup_field_names}
+                    this_matchup['bye_winner'] = matchup.bye_winner()
+                    this_matchup['parent'] = matchup.parent_id()
+                    this_matchup['name'] = matchup.code_name()
+                    this_matchup['source_match_a'] = None if not matchup.source_match_a else matchup.source_match_a.id
+                    this_matchup['source_match_b'] = None if not matchup.source_match_b else matchup.source_match_b.id
+                    this_matchup['participant_a']= None if not matchup.participant_a else matchup.participant_a.to_dict()
+                    this_matchup['participant_b'] = None if not matchup.participant_b else matchup.participant_b.to_dict()
+                    this_matchup['winner'] = None if not matchup.winner else matchup.winner.to_dict()
+
+                    this_round['matchups'].append(this_matchup)
                 this_bracket_round_list.append(this_round)
             response_dict['brackets'].append({
                 'type': bracket.type, 'rounds': this_bracket_round_list
@@ -418,6 +423,12 @@ class TournamentMatchup(models.Model):
         Participant, on_delete=models.DO_NOTHING, null=True,
     )
 
+    def parent_id(self):
+        parents = TournamentMatchup.objects.filter(
+            models.Q(source_match_a__id=self.id) | models.Q(source_match_b__id=self.id)
+        )
+        return parents[0].id if len(parents) else None
+
     def not_winner(self):
         for p in [self.participant_a, self.participant_b]:
             if p != self.winner:
@@ -469,3 +480,6 @@ class TournamentMatchup(models.Model):
 
     def __str__(self):
         return "{}-{}".format(self.round, self.number)
+
+    def code_name(self):
+        return "{}-{}-{}".format(self.round.bracket.type, self.round.number, self.number)
