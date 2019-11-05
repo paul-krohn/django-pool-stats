@@ -409,7 +409,6 @@ class TournamentMatchup(models.Model):
         'TournamentMatchup', on_delete=models.DO_NOTHING, null=True,
         related_name='match_b',
     )
-
     participant_a = models.ForeignKey(
         Participant, on_delete=models.DO_NOTHING, null=True,
         related_name='participant_a'
@@ -418,10 +417,13 @@ class TournamentMatchup(models.Model):
         Participant, on_delete=models.DO_NOTHING, null=True,
         related_name='participant_b'
     )
-
     winner = models.ForeignKey(
         Participant, on_delete=models.DO_NOTHING, null=True,
     )
+    number = models.IntegerField()
+    a_want_winner = models.NullBooleanField(null=True)
+    b_want_winner = models.NullBooleanField(null=True)
+    play_order = models.IntegerField(null=True)
 
     def parent_id(self):
         parents = TournamentMatchup.objects.filter(
@@ -433,11 +435,6 @@ class TournamentMatchup(models.Model):
         for p in [self.participant_a, self.participant_b]:
             if p != self.winner:
                 return p
-
-    number = models.IntegerField()
-    a_want_winner = models.NullBooleanField(null=True)
-    b_want_winner = models.NullBooleanField(null=True)
-    play_order = models.IntegerField(null=True)
 
     def update(self):
         if self.source_match_a.winner:
