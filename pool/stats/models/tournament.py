@@ -77,7 +77,7 @@ class Tournament(models.Model):
                 }
                 for matchup in round.tournamentmatchup_set.all():
                     matchup_field_names = [
-                        'id', 'number', 'a_want_winner', 'b_want_winner'
+                        'id', 'number', 'a_want_winner', 'b_want_winner', 'is_necessary'
                     ]
                     this_matchup = {f:getattr(matchup, str(f)) for f in matchup_field_names}
                     this_matchup['bye_winner'] = matchup.bye_winner()
@@ -85,7 +85,7 @@ class Tournament(models.Model):
                     this_matchup['name'] = matchup.code_name()
                     this_matchup['source_match_a'] = None if not matchup.source_match_a else matchup.source_match_a.id
                     this_matchup['source_match_b'] = None if not matchup.source_match_b else matchup.source_match_b.id
-                    this_matchup['participant_a']= None if not matchup.participant_a else matchup.participant_a.to_dict()
+                    this_matchup['participant_a'] = None if not matchup.participant_a else matchup.participant_a.to_dict()
                     this_matchup['participant_b'] = None if not matchup.participant_b else matchup.participant_b.to_dict()
                     this_matchup['winner'] = None if not matchup.winner else matchup.winner.to_dict()
 
@@ -381,11 +381,15 @@ class Round(models.Model):
         losers_side_round_count = 2 * (self.bracket.tournament.round_count() - 1)
 
         losers_side_source_round = self.bracket.tournament.bracket_set.get(type='l').round_set.get(number=losers_side_round_count)
-        if step == 'second':
-            winners_side_source_round_number = self.number - 2
         source_matchup_a = self.bracket.tournament.bracket_set.get(type='w').round_set.get(
             number=winners_side_source_round_number).tournamentmatchup_set.all()[0] # there should be exactly one right
         source_matchup_b = losers_side_source_round.tournamentmatchup_set.all()[0]
+        if step == 'second':
+            # this is the maybe-necessary last round/matchup
+            matchup_args['is_necessary'] = False
+            matchup_args['a_want_winner'] = False
+            source_matchup_b = self.bracket.tournament.bracket_set.get(type='w').round_set.get(
+                number=winners_side_source_round_number).tournamentmatchup_set.all()[0]
 
         matchup_args['source_match_a'] = source_matchup_a
         matchup_args['source_match_b'] = source_matchup_b
@@ -424,6 +428,7 @@ class TournamentMatchup(models.Model):
     a_want_winner = models.NullBooleanField(null=True)
     b_want_winner = models.NullBooleanField(null=True)
     play_order = models.IntegerField(null=True)
+    is_necessary = models.BooleanField(default=True)
 
     def parent_id(self):
         parents = TournamentMatchup.objects.filter(
@@ -449,6 +454,16 @@ class TournamentMatchup(models.Model):
                 self.participant_b = self.source_match_b.winner
             else:
                 self.participant_b = self.source_match_b.not_winner()
+        if not self.is_necessary:
+            # pass
+            # if the winner of the 2ndlast winners bracket match is the winner of the loser's bracket,
+            # then this match is now necessary
+            hot_seat_matchup = self.source_match_a
+            losers_bracket_final = self.source_match_a.source_match_b
+            print("hot seat matchup id = {}".format(hot_seat_matchup.id))
+            print("lb final matchup id = {}".format(losers_bracket_final.id))
+            if hot_seat_matchup.winner_id == losers_bracket_final.winner_id:
+                self.is_necessary = True
         self.save()
 
     def no_match(self):

@@ -41,6 +41,7 @@
                                                 :id="matchupButtonId (matchup, participant)"
                                                 class="btn btn-primary btn-sm confirm"
                                                 :value="participantText(participant)"
+                                                :disabled="! matchup.is_necessary"
                                         >
                                     </span>
                                     <span v-else="" v-html="participantLinks(participant)">
