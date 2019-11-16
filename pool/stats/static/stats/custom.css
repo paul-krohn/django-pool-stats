@@ -101,3 +101,73 @@ a:hover	{
     margin: 10px;
     min-height: 18em; /* height works for 4 games; */
 }
+
+/* svg stuff for bracket display */
+
+.node g {
+  padding: 2px;
+}
+
+.node rect {
+  fill: #5b83c2;
+  stroke-width: 2px;
+}
+
+.edgePath path.path {
+  stroke: #fdd813;
+  fill: none;
+  stroke-width: 2px;
+}
+
+.bracket-w rect {
+  stroke: #fdd813;
+}
+.bracket-w path.path {
+  stroke: #fdd813;
+  fill: #fdd813;
+}
+
+.bracket-l rect {
+  stroke: #bfbebf
+}
+.bracket-l path.path {
+  stroke: #bfbebf;
+  fill: #bfbebf;
+}
+
+.matchup {
+  margin: 2px;
+  color: #5b83c2;
+  border-radius: 3px;
+  text-align: center;
+  font-weight: normal;
+}
+
+.matchup-l {
+  background-color: #bfbebf;
+}
+
+.matchup-w {
+  background-color: #fdd813;
+}
+
+.matchup-participant p {
+  color: #1d305f;
+  padding: 1px;
+  margin: 0px;
+}
+.matchup-participant {
+  font-size: 12px;
+  padding: 2px;
+  min-width: 160px;
+}
+
+.arrowhead-l {
+  fill: #bfbebf;
+  stroke-width: 2.5px;
+}
+
+.arrowhead-w {
+  fill: #fdd813;
+  stroke-width: 2px;
+}
