@@ -20,11 +20,11 @@ def tournaments(request, season_id=None):
     return render(request, 'stats/tournament/list.html', context)
 
 
-def tournament(request, tournament_id):
+def tournament(request, tournament_id, json=False):
 
     a_tournament = Tournament.objects.get(id=tournament_id)
     accept = request.META.get('HTTP_ACCEPT')
-    if accept == 'application/json':
+    if json or accept == 'application/json':
         return JsonResponse(a_tournament.as_dict(request), safe=False)
     context = {
         'tournament': a_tournament,

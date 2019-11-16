@@ -73,6 +73,7 @@ urlpatterns = [
 
     url(r'^tournaments/(?P<season_id>[0-9]+)', cache_page(view_cache_time)(tournament.tournaments), name='tournaments'),
     url(r'^tournaments/', tournament.tournaments, name='tournaments'),
+    url(r'^tournament/(?P<tournament_id>[0-9]+)/json', tournament.tournament,  {'json': True}, name='tournament_json'),
     url(r'^tournament/(?P<tournament_id>[0-9]+)', tournament.tournament, name='tournament'),
     url(r'^tournament_edit/(?P<tournament_id>[0-9]+)', tournament.tournament_edit, name='tournament_edit'),
     url(r'^tournament_edit/', tournament.tournament_edit, name='tournament_edit'),
