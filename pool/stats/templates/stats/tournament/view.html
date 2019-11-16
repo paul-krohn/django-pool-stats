@@ -72,7 +72,125 @@
     </div>
 {% endverbatim %}
 </div>
+<div>
+    <svg id="svg" width="2400"></svg>
+</div>
 <script>
+function matchupHtml(m, r, b) {
+  var matchupDiv = document.createElement("div");
+  matchupDiv.style.width = "100%";
+  matchupDiv.setAttribute('class', "matchup matchup-" + b.type);
+
+  ['a', 'b'].forEach(function(letter){
+    participantDiv = document.createElement("div");
+    participantDiv.style.width = "120px";
+    participantDiv.appendChild(getParticipantText(m, letter));
+    participantDiv.setAttribute('class', 'matchup-participant');
+    matchupDiv.append(participantDiv);
+  });
+  return matchupDiv
+}
+
+function getParticipantText(matchup, ab) {
+  participant = matchup['participant_' + ab];
+  var participantGraf = document.createElement("p");
+  participantGraf.setAttribute('class', 'matchup-participant');
+
+  var participantText = '';
+  if (participant == null) {
+    participantText = 'TBD';
+  } else {
+    if (participant.type === 'team') {
+      participantText = participant.seed + ' - ' + participant['team']['name'];
+    }
+    if (participant.type === 'player') {
+        let player_names = Array();
+        participant.players.forEach(function(p){
+          player_names.push(p.name);
+        });
+        participantText = player_names.join(', ');
+    }
+  }
+  var textNode = document.createTextNode(participantText);
+  participantGraf.appendChild(textNode);
+  return participantGraf;
+}
+
+
+var nodeWidth = 95;
+
+// Create the input graph
+var g = new dagreD3.graphlib.Graph({
+  compound: true,
+  multigraph: false,
+}).setGraph({
+  rankdir: "LR",
+  edgesep: 5,
+  nodesep: 8,
+});
+
+
+
+
+matchups = [];
+var tournamentJson = "{% url 'tournament_json' tournament.id %}";
+d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(data) {
+
+  data["brackets"].forEach(function(br){
+    br["rounds"].forEach(function(ro){
+      ro['matchups'].forEach(function(mu){
+        var node_id = mu.name;
+        matchups.push(mu);
+        var this_matchup_label = mu.name;
+        g.setNode(node_id, {
+          // if you are tempted to set the width here, maybe don't
+          labelType: "html",
+          label: matchupHtml(mu, ro, br),
+          class: 'bracket-' + br.type,
+        });
+      })
+    });
+  });
+
+
+// then join the matchups with edges -- you have to do this second so you don't try
+// to join to a matchup that doesn't exist yet.
+  matchups.forEach(function(matchup) {
+    ['a', 'b'].forEach(function(letter){
+      this_source_match = matchup['source_match_' + letter];
+      if ( Number.isInteger(this_source_match) ) {
+        var source_match = matchups.filter(m => m.id === this_source_match)[0];
+        // console.log("for match " + matchup.name + "_parent, we want to join it to a parent from the source match: " + source_match.name + '_parent');
+        g.setEdge(source_match.name, matchup.name, {
+          curve: d3.curveBasis,
+          class: "bracket-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
+          arrowheadClass: "arrowhead-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
+        });
+      }
+      // console.log("the non-integer source_match is: " + this_source_match)
+    });
+  });
+
+  // Create the renderer
+  var render = new dagreD3.render();
+
+  // Set up an SVG group so that we can translate the final graph.
+  var svg = d3.select("svg");
+  var inner = svg.append("g");
+
+  // Run the renderer. This is what draws the final graph.
+  render(inner, g);
+
+  // Center the graph
+  var xCenterOffset = (svg.attr("width") - g.graph().width) / 2;
+  inner.attr("transform", "translate(" + xCenterOffset + ", 200)");
+  // console.log("the height is: " +  svg.attr("height"));
+  svg.attr("height", g.graph().height + 400);
+});
+
+
+    </script>
+    <script>
 
     function csrfSafeMethod(method) {
         // these HTTP methods do not require CSRF protection
@@ -110,19 +228,19 @@
             },
             setConfirmDialogs: function() {
                 let self = this;
-                console.log(self.the_tournament);
+                {#console.log(self.the_tournament);#}
                 if (self.the_tournament.editable === false) {
                     return true;
                 }
-                console.log("editable: " + self.the_tournament.editable);
+                {#console.log("editable: " + self.the_tournament.editable);#}
                 self.the_tournament.brackets.forEach(function(bracket, index){
-                    console.log("looking at bracket " + bracket.type);
+                    {#console.log("looking at bracket " + bracket.type);#}
                     bracket.rounds.forEach(function(round, index){
-                        console.log("looking at round " + round.number  );
+                        {#console.log("looking at round " + round.number  );#}
                         round.matchups.forEach(function(matchup, index){
                             if (matchup.participant_a && matchup.participant_b) {
                                 [matchup.participant_a, matchup.participant_b].forEach(function(participant, index) {
-                                    console.log("we need a confirm dialog for matchup " + matchup.id + " with dom id " + self.matchupButtonId(matchup, participant));
+                                    {#console.log("we need a confirm dialog for matchup " + matchup.id + " with dom id " + self.matchupButtonId(matchup, participant));#}
                                     $('#' + self.matchupButtonId(matchup, participant)).confirm({
                                         title: self.participantText(matchup.participant_a) + " vs " + self.participantText(matchup.participant_b),
                                         text: '<b>' + self.participantText(participant) + "</b> is the winner",
@@ -136,8 +254,8 @@
                                 if (matchup.participant_b) {
                                     participant = matchup.participant_b;
                                 }
-                                console.log('bye participant:' + participant);
-                                console.log("we need a bye close dialog for matchup " + matchup.id + " with dom id " + self.matchupButtonId(matchup, participant));
+                                {#console.log('bye participant:' + participant);#}
+                                {#console.log("we need a bye close dialog for matchup " + matchup.id + " with dom id " + self.matchupButtonId(matchup, participant));#}
                                 $('#' + self.matchupButtonId(matchup, participant)).confirm({
                                     title: 'Close Bye',
                                     text: '<b>' + self.participantText(participant) + "</b> gets a bye",
