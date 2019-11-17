@@ -6,7 +6,7 @@
 */
 
 h1, h2, h3, h4, h5, h6, th, .dropdown {
-    font-family: 'Rubik';
+  font-family: 'Rubik', sans-serif;
     color: #5C7EBB;
 }
 
@@ -39,7 +39,7 @@ a:hover	{
     text-decoration: underline;
 }
 
-.mark-nobreak-player, mark-break-player {
+.mark-nobreak-player, .mark-break-player {
     height: 30px;
 }
 
