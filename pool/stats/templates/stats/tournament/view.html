@@ -8,10 +8,10 @@
     See: https://docs.djangoproject.com/en/2.1/ref/csrf/
 -->
 {% csrf_token %}
+<h1>{{ the_tournament.name }}</h1>
 
-    <div id="app">
+<div id="app">
 {% verbatim %}
-    <h1>{{ the_tournament.name }}</h1>
     <button type="button" onclick="app.updateData();">update</button>
     <h3>Participants</h3>
     <ul>
@@ -72,9 +72,11 @@
     </div>
 {% endverbatim %}
 </div>
-<div>
-    <svg id="svg" width="2400"></svg>
+
+<div id="bracket"  role="tabpanel" class="tab-pane" >
+    <svg id="svg" width="2400" height="1200"></svg>
 </div>
+
 <script>
 function matchupHtml(m, r, b) {
   var matchupDiv = document.createElement("div");
@@ -181,11 +183,13 @@ d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(da
   // Run the renderer. This is what draws the final graph.
   render(inner, g);
 
-  // Center the graph
+/*
+  // "centering" the graph seems to not be an improvent, so commented for now.
   var xCenterOffset = (svg.attr("width") - g.graph().width) / 2;
   inner.attr("transform", "translate(" + xCenterOffset + ", 200)");
-  // console.log("the height is: " +  svg.attr("height"));
   svg.attr("height", g.graph().height + 400);
+*/
+
 });
 
 
