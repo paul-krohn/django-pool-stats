@@ -12,33 +12,33 @@
 
 <div id="app">
 {% verbatim %}
-    <button type="button" onclick="app.updateData();">update</button>
-    <h3>Participants</h3>
-    <input type="button" class="btn btn-small" value="Participants"
+    <div>
+        <button type="button" onclick="app.updateData();">update</button>
+    </div>
+    <input type="button" class="btn btn-lg button-section-header" value="Participants"
            onclick="toggler('participants');" />
     <div id="participants">
         <ul>
-        <li v-for="participant in the_tournament.participants">
-            <span v-html="participantLinks(participant)"></span> ({{ participant.seed }})
+        <li v-for="participant in the_tournament.participants" class="list-group-item col-xs-3">
+            <div class="matchup-participant">
+                <div class="matchup-participant-common matchup-participant-seed" v-html="participant.seed"></div>
+                <div class="matchup-participant-common matchup-participant-names" v-html="participantLinks(participant)"></div>
+            </div>
         </li>
         </ul>
     </div>
     <div v-for="bracket in the_tournament.brackets" class="brackets">
-        <template v-if="the_tournament.elimination != 'single'">
-            <h2>{{ bracket.type }} Bracket</h2>
-        </template>
-
         <div>
-            <input type="button" class="btn btn-small" :value="'match list ' + bracket.type"
+            <input type="button" class="btn btn-lg" :value="'match list ' + bracket.type"
                    :onclick="'toggler(\'match-list-' + bracket.type + '\');'"
             />
         </div>
         <div :id="'match-list-' + bracket.type" >
         <div v-for="round in bracket.rounds">
-            <h3>Round {{ round.number }}</h3>
+            <h4>Round {{ round.number }}</h4>
             <ul>
                 <li v-for="matchup in round.matchups">
-                    <div>{{ matchup.name }}: {{ matchup.id }}
+                    <div>
                         <span v-for="(participant, index) in getMatchupParticipants (matchup)">
                             <span v-if="participant">
                                 <span v-if="matchup.winner"
@@ -86,7 +86,7 @@
 </div>
 
 <div>
-    <input type="button" class="btn btn-small" value="bracket"
+    <input type="button" class="btn btn-lg" value="bracket"
        onclick="toggler('bracket');" />
 </div>
 

@@ -7,7 +7,7 @@
 
 h1, h2, h3, h4, h5, h6, th, .dropdown {
   font-family: 'Rubik', sans-serif;
-    color: #5C7EBB;
+  color: #5C7EBB;
 }
 
 h5, h6 {
@@ -102,6 +102,13 @@ a:hover	{
     min-height: 18em; /* height works for 4 games; */
 }
 
+/* non-svg stuff for bracket display */
+
+.button-section-header {
+    font-family: 'Rubik', sans-serif;
+    color: #5C7EBB !important;
+}
+
 /* svg stuff for bracket display */
 
 .node g {
@@ -151,20 +158,47 @@ a:hover	{
   background-color: #fdd813;
 }
 
+.matchup-participant ul {
+  list-style-type: none;
+}
+
 .matchup-participant p {
   color: #1d305f;
   padding: 1px;
-  margin: 0px;
+  margin: 0;
 }
+
 .matchup-participant {
+  background-color: #5b83c2;
   font-size: 12px;
   padding: 2px;
-  min-width: 160px;
+  display: flex;
+  width: fit-content;
+  border-radius: 2px;
+}
+
+.matchup-participant-common {
+  color: #1d305f;
+  background-color: #bfbebf;
+  padding: 2px;
+  border-radius: 2px;
+}
+
+.matchup-participant-seed {
+  float: left;
+  min-width: 3ch;
+  text-align: center;
+  margin-right: 2px;
+}
+
+.matchup-participant-names {
+  float: left;
+  padding: 2px 4px 2px 4px;
 }
 
 .arrowhead-l {
   fill: #bfbebf;
-  stroke-width: 2.5px;
+  stroke-width: 2px;
 }
 
 .arrowhead-w {
