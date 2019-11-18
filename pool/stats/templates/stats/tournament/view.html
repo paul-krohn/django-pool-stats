@@ -14,15 +14,26 @@
 {% verbatim %}
     <button type="button" onclick="app.updateData();">update</button>
     <h3>Participants</h3>
-    <ul>
-    <li v-for="participant in the_tournament.participants">
-        <span v-html="participantLinks(participant)"></span> ({{ participant.seed }})
-    </li>
-    </ul>
+    <input type="button" class="btn btn-small" value="Participants"
+           onclick="toggler('participants');" />
+    <div id="participants">
+        <ul>
+        <li v-for="participant in the_tournament.participants">
+            <span v-html="participantLinks(participant)"></span> ({{ participant.seed }})
+        </li>
+        </ul>
+    </div>
     <div v-for="bracket in the_tournament.brackets" class="brackets">
         <template v-if="the_tournament.elimination != 'single'">
             <h2>{{ bracket.type }} Bracket</h2>
         </template>
+
+        <div>
+            <input type="button" class="btn btn-small" :value="'match list ' + bracket.type"
+                   :onclick="'toggler(\'match-list-' + bracket.type + '\');'"
+            />
+        </div>
+        <div :id="'match-list-' + bracket.type" >
         <div v-for="round in bracket.rounds">
             <h3>Round {{ round.number }}</h3>
             <ul>
@@ -70,7 +81,13 @@
             </ul>
         </div><!-- end v-for rounds -->
     </div>
+    </div>
 {% endverbatim %}
+</div>
+
+<div>
+    <input type="button" class="btn btn-small" value="bracket"
+       onclick="toggler('bracket');" />
 </div>
 
 <div id="bracket"  role="tabpanel" class="tab-pane" >
@@ -194,6 +211,7 @@ d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(da
 
 
     </script>
+
     <script>
 
     function csrfSafeMethod(method) {
@@ -229,6 +247,9 @@ d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(da
         methods: {
             matchupButtonId: function(matchup, participant) {
                 return("matchup_button_" + matchup.id + '_' + participant.id);
+            },
+            bracketMatchupListId: function(bracket_type) {
+                return("bracket-match-list-" + bracket_type);
             },
             setConfirmDialogs: function() {
                 let self = this;
@@ -374,6 +395,13 @@ d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(da
             this.setConfirmDialogs();
         },
 
-    })
+    });
+
+    function toggler(some_div_id) {
+        let this_div = $('#' + some_div_id);
+        let current_display = this_div.css("display");
+        this_div.css("display", current_display === "block" ? "none" : "block");
+    }
+
 </script>
 {% endblock %}
