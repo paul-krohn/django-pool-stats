@@ -123,7 +123,7 @@ a:hover	{
 .edgePath path.path {
   stroke: #fdd813;
   fill: none;
-  stroke-width: 2px;
+  stroke-width: 3px;
 }
 
 .bracket-w rect {
@@ -191,9 +191,14 @@ a:hover	{
   margin-right: 2px;
 }
 
-.matchup-participant-names {
-  float: left;
+.matchup-participant-names div {
   padding: 2px 4px 2px 4px;
+  font-weight: bold;
+}
+
+.label {
+  /* overrides a 700 that gets set somewhere */
+  font-weight: normal;
 }
 
 .arrowhead-l {

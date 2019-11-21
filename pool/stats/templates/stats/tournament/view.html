@@ -96,23 +96,32 @@
 
 <script>
 function matchupHtml(m, r, b) {
-  var matchupDiv = document.createElement("div");
-  matchupDiv.style.width = "100%";
-  matchupDiv.setAttribute('class', "matchup matchup-" + b.type);
+
+  let matchupDiv = document.createElement("div");
 
   ['a', 'b'].forEach(function(letter){
-    participantDiv = document.createElement("div");
-    participantDiv.style.width = "120px";
-    participantDiv.appendChild(getParticipantText(m, letter));
+    let participantDiv = document.createElement('div');
+    participantDiv.style.float = 'none';
     participantDiv.setAttribute('class', 'matchup-participant');
+
+    let seedDiv = document.createElement('div');
+    seedDiv.setAttribute('class', 'matchup-participant-common matchup-participant-seed');
+    seedDiv.innerText = m['participant_' + letter].seed;
+    participantDiv.appendChild(seedDiv);
+
+    let namesDiv = document.createElement('div');
+    namesDiv.setAttribute('class', 'matchup-participant-common matchup-participant-names');
+
+    namesDiv.innerText = getParticipantText(m, letter);
+    participantDiv.appendChild(namesDiv);
     matchupDiv.append(participantDiv);
   });
   return matchupDiv
 }
 
 function getParticipantText(matchup, ab) {
-  participant = matchup['participant_' + ab];
-  var participantGraf = document.createElement("p");
+  let participant = matchup['participant_' + ab];
+  let participantGraf = document.createElement("p");
   participantGraf.setAttribute('class', 'matchup-participant');
 
   var participantText = '';
@@ -120,7 +129,7 @@ function getParticipantText(matchup, ab) {
     participantText = 'TBD';
   } else {
     if (participant.type === 'team') {
-      participantText = participant.seed + ' - ' + participant['team']['name'];
+      participantText = participant['team']['name'];
     }
     if (participant.type === 'player') {
         let player_names = Array();
@@ -132,7 +141,7 @@ function getParticipantText(matchup, ab) {
   }
   var textNode = document.createTextNode(participantText);
   participantGraf.appendChild(textNode);
-  return participantGraf;
+  return participantText;
 }
 
 
