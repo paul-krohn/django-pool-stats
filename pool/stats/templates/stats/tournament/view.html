@@ -170,7 +170,13 @@ d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(da
       ro['matchups'].forEach(function(mu){
         var node_id = mu.name;
         matchups.push(mu);
-        var this_matchup_label = mu.name;
+      })
+    });
+  });
+  data["brackets"].forEach(function(br){
+    br["rounds"].forEach(function(ro){
+      ro['matchups'].forEach(function(mu){
+        var node_id = mu.name;
         g.setNode(node_id, {
           // if you are tempted to set the width here, maybe don't
           labelType: "html",
