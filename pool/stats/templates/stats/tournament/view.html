@@ -99,6 +99,13 @@ function matchupHtml(m, r, b) {
 
   let matchupDiv = document.createElement("div");
 
+/*
+  let matchNumberDiv = document.createElement("div");
+  matchNumberDiv.setAttribute('class', 'matchup-participant-common');
+  matchNumberDiv.innerHTML = '<b>' + m.name + '</b>';
+  matchupDiv.append(matchNumberDiv);
+*/
+
   ['a', 'b'].forEach(function(letter){
     let participantDiv = document.createElement('div');
     participantDiv.style.float = 'none';
@@ -164,7 +171,8 @@ var g = new dagreD3.graphlib.Graph({
 matchups = [];
 var tournamentJson = "{% url 'tournament_json' tournament.id %}";
 d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(data) {
-
+  // the list of matchups has to be complete before drawing anymatches, since the source
+  // match name is used to display each match.
   data["brackets"].forEach(function(br){
     br["rounds"].forEach(function(ro){
       ro['matchups'].forEach(function(mu){
