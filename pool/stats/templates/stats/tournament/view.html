@@ -106,7 +106,8 @@ function matchupHtml(m, r, b) {
 
     let seedDiv = document.createElement('div');
     seedDiv.setAttribute('class', 'matchup-participant-common matchup-participant-seed');
-    seedDiv.innerText = m['participant_' + letter].seed;
+    var source_match = matchups.filter(j => j.id === m['source_match_' + letter])[0];
+    seedDiv.innerText = m['participant_' + letter] ? m['participant_' + letter].seed : 'from ' + source_match.name;
     participantDiv.appendChild(seedDiv);
 
     let namesDiv = document.createElement('div');
