@@ -295,6 +295,9 @@ class Round(models.Model):
             return int(self.bracket.tournament.bracket_size() / 2 ** ((self.number + (self.number % 2)) / 2 + 1))
 
     def get_first_round_winners_participant(self, ab, increment):
+
+        re_order =  self.first_round_orders[str(self.matchup_count())]
+
         participant_set = self.bracket.tournament.participant_set.all().order_by('seed')
         if ab == 'a':
             return participant_set[re_order[increment]]
