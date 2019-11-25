@@ -165,9 +165,6 @@ var g = new dagreD3.graphlib.Graph({
   nodesep: 8,
 });
 
-
-
-
 matchups = [];
 var tournamentJson = "{% url 'tournament_json' tournament.id %}";
 d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(data) {
