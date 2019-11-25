@@ -289,40 +289,53 @@ class Round(models.Model):
     def get_first_round_winners_participant(self, ab, increment):
         participant_set = self.bracket.tournament.participant_set.all().order_by('seed')
         if ab == 'a':
-            return participant_set[increment]
-        if len(participant_set) > (2 * self.matchup_count() - 1) - increment:
-            return participant_set[(2 * self.matchup_count()  - 1) - increment]
+            return participant_set[re_order[increment]]
+        if len(participant_set) > (2 * self.matchup_count() - 1) - re_order[increment]:
+            return participant_set[(2 * self.matchup_count()  - 1) - re_order[increment]]
         return None
 
     def get_first_round_losers_source_matchup(self, ab, increment):
-        source_round_matchups = self.bracket.tournament.bracket_set.get(type='w').round_set.get(number=1).tournamentmatchup_set.all()
-        if ab == 'a':
-            return source_round_matchups[increment]
-        else:
-            return source_round_matchups[self.matchup_count() * 2 - increment -1]
+        source_matchup_number = 2 * increment + 1
+        if ab == 'b':
+            source_matchup_number = 2 * increment + 2
+        return self.bracket.tournament.bracket_set.get(type='w').round_set.get(number=1).tournamentmatchup_set.get(
+            number=source_matchup_number,
+        )
 
     def get_winners_bracket_source_matchup(self, ab, increment):
-        source_matchups = self.bracket.tournament.bracket_set.get(type='w').round_set.get(number=self.number - 1).tournamentmatchup_set.all()
         if ab == 'a':
-            return source_matchups[increment]
+            source_match_number = 2 * increment + 1
         else:
-            return source_matchups[2 * self.matchup_count() - increment - 1]
+            source_match_number = 2 * increment + 2
+        return  self.bracket.tournament.bracket_set.get(type='w').round_set.get(number=self.number - 1).tournamentmatchup_set.get(
+            number = source_match_number
+        )
 
     def get_losers_bracket_elimination_source_matchups(self, ab, increment):
-        source_round_matchups = self.bracket.tournament.bracket_set.get(type='l').round_set.get(number=self.number - 1).tournamentmatchup_set.all()
-        if ab == 'a':
-            return source_round_matchups[increment]
-        else:
-            return source_round_matchups[2 * self.matchup_count() - increment - 1]
+        source_matchup_number = 2 * increment + 1
+        if ab == 'b':
+            source_matchup_number = 2 * increment + 2
+        return self.bracket.tournament.bracket_set.get(
+            type='l').round_set.get(number=self.number - 1).tournamentmatchup_set.get(number=source_matchup_number)
 
     def get_losers_bracket_drop_in_source_matchup(self, ab, increment):
-        winners_source_round_number = int(self.number / 2) + 1
-        winners_source_matches = self.bracket.tournament.bracket_set.get(type='w').round_set.get(number=winners_source_round_number).tournamentmatchup_set.all()
-        losers_source_matches = self.bracket.tournament.bracket_set.get(type='l').round_set.get(number=self.number - 1).tournamentmatchup_set.all()
+
+        # flop on alternating/even drop-in rounds
+        # flop means the source from the winners side should be reverse order on even drop-in rounds`x
+
+        source_match_number = increment + 1
         if ab == 'a':
-            return winners_source_matches[increment]
+            source_round_number = int(self.number / 2) + 1
+            bracket = 'w'
         else:
-            return losers_source_matches[increment]
+            source_round_number = self.number - 1
+            if self.number == 2:
+                source_match_number = self.matchup_count() - increment
+            bracket = 'l'
+        return self.bracket.tournament.bracket_set.get(type=bracket).round_set.get(
+                number=source_round_number).tournamentmatchup_set.get(
+                number=source_match_number
+            )
 
     def create_matchups(self):
 
@@ -351,8 +364,8 @@ class Round(models.Model):
                 elif self.number % 2 == 0:
                     # this is a "drop-in" losers bracket round; we mix the losers bracket winners and winners bracket losers
                     matchup_args['a_want_winner'] = False
-                    matchup_args['source_match_a'] = self.get_losers_bracket_drop_in_source_matchup('a', i)
-                    matchup_args['source_match_b'] = self.get_losers_bracket_drop_in_source_matchup('b', i)
+                    matchup_args['source_match_a'] = self.get_losers_bracket_drop_in_source_matchup('a', matchup_count - 1 - i)
+                    matchup_args['source_match_b'] = self.get_losers_bracket_drop_in_source_matchup('b', matchup_count - 1 - i)
                 else:
                     # this is an "elimination" losers bracket round; source matches are the previous round
                     for p in PARTICIPANT_LETTERS:
