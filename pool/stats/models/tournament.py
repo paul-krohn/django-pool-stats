@@ -261,6 +261,14 @@ class Bracket(models.Model):
 
 
 class Round(models.Model):
+
+    # these hard-coded orders could conceivably be replaced with and algorithm, but I don't know what it is
+    # in any case, the idea is to make it soe the top seeds meet as late as possible.
+    first_round_orders = {
+        '4': [0, 2, 1, 3],
+        '8': [0, 7, 3, 4, 1, 6, 2, 5],
+        '16': [0, 15, 7, 8, 3, 12, 4, 11, 1, 14, 6, 9, 2, 13, 5, 10],
+    }
     bracket = models.ForeignKey(Bracket, on_delete=models.CASCADE)
     number = models.IntegerField(null=True)
 
