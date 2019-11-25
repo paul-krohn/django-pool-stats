@@ -114,7 +114,12 @@ function matchupHtml(m, r, b) {
     let seedDiv = document.createElement('div');
     seedDiv.setAttribute('class', 'matchup-participant-common matchup-participant-seed');
     var source_match = matchups.filter(j => j.id === m['source_match_' + letter])[0];
-    seedDiv.innerText = m['participant_' + letter] ? m['participant_' + letter].seed : 'from ' + source_match.name;
+    console.log("trying to set seed text for " + m.name + " participant " + letter); // + " seed: " + m['participant_' + letter].seed);
+    var innerText = '-';
+    if (m['participant_' + letter] !== null) {
+        innerText = m['participant_' + letter].seed ? m['participant_' + letter].seed : '-' ;
+    }
+    seedDiv.innerText = innerText;
     participantDiv.appendChild(seedDiv);
 
     let namesDiv = document.createElement('div');
