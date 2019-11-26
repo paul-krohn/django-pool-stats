@@ -202,15 +202,18 @@ d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(da
 // to join to a matchup that doesn't exist yet.
   matchups.forEach(function(matchup) {
     ['a', 'b'].forEach(function(letter){
-      this_source_match = matchup['source_match_' + letter];
+      var this_source_match = matchup['source_match_' + letter];
       if ( Number.isInteger(this_source_match) ) {
-        var source_match = matchups.filter(m => m.id === this_source_match)[0];
-        // console.log("for match " + matchup.name + "_parent, we want to join it to a parent from the source match: " + source_match.name + '_parent');
-        g.setEdge(source_match.name, matchup.name, {
-          curve: d3.curveBasis,
-          class: "bracket-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
-          arrowheadClass: "arrowhead-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
-        });
+          var source_match = matchups.filter(m => m.id === this_source_match)[0];
+        if (!matchup.bye_winner) {
+            g.setEdge(source_match.name, matchup.name, {
+            curve: d3.curveBasis,
+            class: "bracket-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
+            arrowheadClass: "arrowhead-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
+          });
+        } else {
+            console.log("we never found nodes called " + source_match.name + ' and ' + matchup.name);
+        }
       }
       // console.log("the non-integer source_match is: " + this_source_match)
     });
