@@ -51,6 +51,7 @@ class Tournament(models.Model):
     elimination = models.TextField(choices=ELIMINATION_TYPES)
     season = models.ForeignKey('Season', on_delete=models.CASCADE, null=True)
     seeded = models.BooleanField(default=False)
+    flopped = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -340,7 +341,7 @@ class Round(models.Model):
             bracket = 'w'
         else:
             source_round_number = self.number - 1
-            if self.number == 2:
+            if self.number == 2 and self.bracket.tournament.flopped:
                 source_match_number = self.matchup_count() - increment
             bracket = 'l'
         return self.bracket.tournament.bracket_set.get(type=bracket).round_set.get(
