@@ -19,7 +19,7 @@
            onclick="toggler('participants');" />
     <div id="participants">
         <ul>
-        <li v-for="participant in the_tournament.participants" class="list-group-item col-xs-3">
+        <li v-for="participant in the_tournament.participants" class="col-xs-3" style="padding: 2px;">
             <div class="matchup-participant">
                 <div class="matchup-participant-common matchup-participant-seed" v-html="participant.seed"></div>
                 <div class="matchup-participant-common matchup-participant-names" v-html="participantLinks(participant)"></div>
@@ -178,7 +178,6 @@ d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(da
   data["brackets"].forEach(function(br){
     br["rounds"].forEach(function(ro){
       ro['matchups'].forEach(function(mu){
-        var node_id = mu.name;
         matchups.push(mu);
       })
     });
@@ -191,7 +190,8 @@ d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(da
           // if you are tempted to set the width here, maybe don't
           labelType: "html",
           label: matchupHtml(mu, ro, br),
-          class: 'bracket-' + br.type,
+          class: 'bracket-' + br.type + ' ' + mu.name,
+          padding: 5,
         });
       })
     });
