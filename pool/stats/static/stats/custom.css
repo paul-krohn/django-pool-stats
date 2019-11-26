@@ -117,7 +117,7 @@ a:hover	{
 
 .node rect {
   fill: #5b83c2;
-  stroke-width: 2px;
+  stroke-width: 4px;
 }
 
 .edgePath path.path {
