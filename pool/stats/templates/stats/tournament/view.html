@@ -20,14 +20,16 @@
     <div id="participants">
         <ul>
         <li v-for="participant in the_tournament.participants" class="col-xs-3" style="padding: 2px;">
-            <div class="matchup-participant">
-                <div class="matchup-participant-common matchup-participant-seed" v-html="participant.seed"></div>
-                <div class="matchup-participant-common matchup-participant-names" v-html="participantLinks(participant)"></div>
+            <div class="matchup-wrapper">
+                <div class="matchup-participant">
+                    <div class="matchup-participant-common matchup-participant-seed" v-html="participant.seed"></div>
+                    <div class="matchup-participant-common matchup-participant-names" v-html="participantLinks(participant)"></div>
+                </div>
             </div>
         </li>
         </ul>
     </div>
-    <div v-for="bracket in the_tournament.brackets" class="brackets">
+    <div v-for="bracket in the_tournament.brackets" class="brackets" style="display: none;">
         <div>
             <input type="button" class="btn btn-lg" :value="'match list ' + bracket.type"
                    :onclick="'toggler(\'match-list-' + bracket.type + '\');'"
@@ -90,7 +92,7 @@
        onclick="toggler('bracket');" />
 </div>
 
-<div  >
+<div>
     <svg id="bracketSvg" width="2400" height="1200"></svg>
 </div>
 
@@ -98,6 +100,7 @@
 function matchupHtml(matchup) {
 
   let matchupDiv = document.createElement("div");
+  matchupDiv.setAttribute('class', 'matchup-wrapper');
 
 /*
   let matchNumberDiv = document.createElement("div");
@@ -108,7 +111,7 @@ function matchupHtml(matchup) {
 
   ['a', 'b'].forEach(function(letter){
     let participantDiv = document.createElement('div');
-    participantDiv.style.float = 'none';
+    // participantDiv.style.float = 'none';
     participantDiv.setAttribute('class', 'matchup-participant');
 
     let seedDiv = document.createElement('div');
@@ -162,9 +165,10 @@ let g = new dagreD3.graphlib.Graph({
   multigraph: false,
 }).setGraph({
   rankdir: "LR",
+    ranker: 'tight-tree',
   edgesep: 20,
-  nodesep: 30,
-  ranksep: 40,
+  nodesep: 20,
+  ranksep: 20,
 });
 
 
@@ -178,7 +182,7 @@ function drawNodes(data) {
                     labelType: "html",
                     label: matchupHtml(mu),
                     class: 'bracket-' + br.type + ' ' + mu.name,
-                    padding: 5,
+                    padding: 2,
                 });
             })
         });
@@ -222,12 +226,12 @@ function drawEdges(matchups){
                         edgeMinLength = 2;
                     }
                     g.setEdge(source_match.name, matchup.name, {
-                    curve: d3.curveBasis,
-                    lineInterpolate: 'basis',
-                    minlen: edgeMinLength,
-                    class: "bracket-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
-                    arrowheadClass: "arrowhead-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
-                  });
+                        curve: d3.curveBasis,
+                        lineInterpolate: 'basis',
+                        minlen: edgeMinLength,
+                        class: "bracket-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
+                        arrowheadClass: "arrowhead-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
+                    });
                 } else {
                     console.log("we never found nodes called " + source_match.name + ' and ' + matchup.name);
                 }
