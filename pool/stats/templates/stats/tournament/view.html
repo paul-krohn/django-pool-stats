@@ -157,17 +157,15 @@ function getParticipantText(matchup, ab) {
   return participantText;
 }
 
-
-var nodeWidth = 95;
-
 // Create the input graph
 var g = new dagreD3.graphlib.Graph({
   compound: true,
   multigraph: false,
 }).setGraph({
   rankdir: "LR",
-  edgesep: 5,
-  nodesep: 8,
+  edgesep: 20,
+  nodesep: 30,
+  ranksep: 40,
 });
 
 matchups = [];
