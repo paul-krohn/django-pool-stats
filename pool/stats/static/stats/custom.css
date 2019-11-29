@@ -116,7 +116,7 @@ a:hover	{
 }
 
 .node rect {
-  fill: #5b83c2;
+  fill: #bfbebf;
   stroke-width: 4px;
 }
 
@@ -144,7 +144,7 @@ a:hover	{
 
 .matchup {
   margin: 2px;
-  color: #5b83c2;
+  /*color: #5b83c2;*/
   border-radius: 3px;
   text-align: center;
   font-weight: normal;
@@ -162,38 +162,49 @@ a:hover	{
   list-style-type: none;
 }
 
+/*
 .matchup-participant p {
   color: #1d305f;
   padding: 1px;
   margin: 0;
 }
+*/
+.matchup-wrapper {
+  padding: 2px;
+}
 
 .matchup-participant {
-  background-color: #5b83c2;
-  font-size: 12px;
-  padding: 2px;
+  float: none;
+  background-color: #bfbebf;
   display: flex;
   width: fit-content;
-  border-radius: 2px;
+  border-style: solid;
+  border-radius: 3px;
+  border-color: #5C7EBB;
+  border-width: 2px;
+  margin: 3px;
+  vertical-align: middle;
 }
 
 .matchup-participant-common {
   color: #1d305f;
-  background-color: #bfbebf;
-  padding: 2px;
-  border-radius: 2px;
+  font-size: 14px;
+  padding: 4px;
+  vertical-align: middle;
 }
 
 .matchup-participant-seed {
   float: left;
   min-width: 3ch;
   text-align: center;
-  margin-right: 2px;
+  background-color:  #5C7EBB;
+  color: #bfbebf;
 }
 
-.matchup-participant-names div {
-  padding: 2px 4px 2px 4px;
-  font-weight: bold;
+.matchup-participant-names {
+  padding: 3px 4px 3px 4px;
+  font-weight: normal;
+  /*vertical-align: center;*/
 }
 
 .label {
