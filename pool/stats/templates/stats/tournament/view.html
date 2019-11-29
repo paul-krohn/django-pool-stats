@@ -97,10 +97,10 @@
 </div>
 
 <script>
-function matchupHtml(matchup) {
+function matchupHtml(matchup, bracket='w') {
 
   let matchupDiv = document.createElement("div");
-  matchupDiv.setAttribute('class', 'matchup-wrapper');
+  matchupDiv.setAttribute('class', ['matchup-wrapper', 'matchup-wrapper-' + bracket].join(' '));
 
 /*
   let matchNumberDiv = document.createElement("div");
@@ -165,7 +165,7 @@ let g = new dagreD3.graphlib.Graph({
   multigraph: false,
 }).setGraph({
   rankdir: "LR",
-    ranker: 'tight-tree',
+  //  ranker: 'tight-tree',
   edgesep: 20,
   nodesep: 20,
   ranksep: 20,
@@ -180,7 +180,7 @@ function drawNodes(data) {
                 g.setNode(mu.name, {
                     // if you are tempted to set the width here, maybe don't
                     labelType: "html",
-                    label: matchupHtml(mu),
+                    label: matchupHtml(mu, br.type),
                     class: 'bracket-' + br.type + ' ' + mu.name,
                     padding: 2,
                 });
