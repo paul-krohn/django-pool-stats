@@ -13,7 +13,7 @@
 <div id="app">
 {% verbatim %}
     <div>
-        <button type="button" onclick="app.updateData();">update</button>
+        <button class="btn" type="button" onclick="app.updateData(); getData();">update</button>
     </div>
     <input type="button" class="btn btn-lg button-section-header" value="Participants"
            onclick="toggler('participants');" />
@@ -90,8 +90,8 @@
        onclick="toggler('bracket');" />
 </div>
 
-<div id="bracket"  role="tabpanel" class="tab-pane" >
-    <svg id="svg" width="2400" height="1200"></svg>
+<div  >
+    <svg id="bracketSvg" width="2400" height="1200"></svg>
 </div>
 
 <script>
@@ -113,9 +113,8 @@ function matchupHtml(m, r, b) {
 
     let seedDiv = document.createElement('div');
     seedDiv.setAttribute('class', 'matchup-participant-common matchup-participant-seed');
-    var source_match = matchups.filter(j => j.id === m['source_match_' + letter])[0];
-    console.log("trying to set seed text for " + m.name + " participant " + letter); // + " seed: " + m['participant_' + letter].seed);
-    var innerText = '-';
+    // console.log("trying to set seed text for " + m.name + " participant " + letter); // + " seed: " + m['participant_' + letter].seed);
+    let innerText = '-';
     if (m['participant_' + letter] !== null) {
         innerText = m['participant_' + letter].seed ? m['participant_' + letter].seed : '-' ;
     }
@@ -137,7 +136,7 @@ function getParticipantText(matchup, ab) {
   let participantGraf = document.createElement("p");
   participantGraf.setAttribute('class', 'matchup-participant');
 
-  var participantText = '';
+  let participantText = '';
   if (participant == null) {
     participantText = 'TBD';
   } else {
@@ -152,13 +151,13 @@ function getParticipantText(matchup, ab) {
         participantText = player_names.join(', ');
     }
   }
-  var textNode = document.createTextNode(participantText);
+  let textNode = document.createTextNode(participantText);
   participantGraf.appendChild(textNode);
   return participantText;
 }
 
 // Create the input graph
-var g = new dagreD3.graphlib.Graph({
+let g = new dagreD3.graphlib.Graph({
   compound: true,
   multigraph: false,
 }).setGraph({
@@ -168,80 +167,94 @@ var g = new dagreD3.graphlib.Graph({
   ranksep: 40,
 });
 
-matchups = [];
-var tournamentJson = "{% url 'tournament_json' tournament.id %}";
-d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(data) {
-  // the list of matchups has to be complete before drawing anymatches, since the source
-  // match name is used to display each match.
-  data["brackets"].forEach(function(br){
-    br["rounds"].forEach(function(ro){
-      ro['matchups'].forEach(function(mu){
-        matchups.push(mu);
-      })
-    });
-  });
-  data["brackets"].forEach(function(br){
-    br["rounds"].forEach(function(ro){
-      ro['matchups'].forEach(function(mu){
-        var node_id = mu.name;
-        g.setNode(node_id, {
-          // if you are tempted to set the width here, maybe don't
-          labelType: "html",
-          label: matchupHtml(mu, ro, br),
-          class: 'bracket-' + br.type + ' ' + mu.name,
-          padding: 5,
+
+function drawNodes(data) {
+    // console.log("drawNodes called");
+    data["brackets"].forEach(function (br) {
+        br["rounds"].forEach(function (ro) {
+            ro['matchups'].forEach(function (mu) {
+                g.setNode(mu.name, {
+                    // if you are tempted to set the width here, maybe don't
+                    labelType: "html",
+                    label: matchupHtml(mu, ro, br),
+                    class: 'bracket-' + br.type + ' ' + mu.name,
+                    padding: 5,
+                });
+            })
         });
-      })
     });
-  });
+}
 
 
-// then join the matchups with edges -- you have to do this second so you don't try
-// to join to a matchup that doesn't exist yet.
-  matchups.forEach(function(matchup) {
-    ['a', 'b'].forEach(function(letter){
-      var this_source_match = matchup['source_match_' + letter];
-      if ( Number.isInteger(this_source_match) ) {
-        var source_match = matchups.filter(m => m.id === this_source_match)[0];
-        if (!matchup.bye_winner) {
-            let edgeMinLength = 1;
-            if (source_match.name.match(/^w/) && matchup.name.match(/^w/)) {
-                edgeMinLength = 2;
+function getData() {
+    // console.log("getData called");
+    let tournamentJson = "{% url 'tournament_json' tournament.id %}?svg";
+    let matchups = [];
+    d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(data) {
+        drawNodes(data);
+        // the list of matchups has to be complete before drawing any matches, since the source
+        // match name is used to display each match.
+        data["brackets"].forEach(function (br) {
+            br["rounds"].forEach(function (ro) {
+                ro['matchups'].forEach(function (mu) {
+                    matchups.push(mu);
+                })
+            });
+        });
+        drawEdges(matchups);
+        renderDiag();
+    });
+}
+
+
+function drawEdges(matchups){
+    // console.log("drawEdges called");
+    // then join the matchups with edges -- you have to do this second so you don't try
+    // to join to a matchup that doesn't exist yet.
+    matchups.forEach(function(matchup) {
+        ['a', 'b'].forEach(function(letter){
+            let this_source_match = matchup['source_match_' + letter];
+            if ( Number.isInteger(this_source_match) ) {
+                let source_match = matchups.filter(m => m.id === this_source_match)[0];
+                if (!matchup.bye_winner) {
+                    let edgeMinLength = 1;
+                    if (source_match.name.match(/^w/) && matchup.name.match(/^w/)) {
+                        edgeMinLength = 2;
+                    }
+                    g.setEdge(source_match.name, matchup.name, {
+                    curve: d3.curveBasis,
+                    lineInterpolate: 'basis',
+                    minlen: edgeMinLength,
+                    class: "bracket-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
+                    arrowheadClass: "arrowhead-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
+                  });
+                } else {
+                    console.log("we never found nodes called " + source_match.name + ' and ' + matchup.name);
+                }
             }
-            g.setEdge(source_match.name, matchup.name, {
-            curve: d3.curveBasis,
-            lineInterpolate: 'basis',
-            minlen: edgeMinLength,
-            class: "bracket-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
-            arrowheadClass: "arrowhead-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
-          });
-        } else {
-            console.log("we never found nodes called " + source_match.name + ' and ' + matchup.name);
-        }
-      }
-      // console.log("the non-integer source_match is: " + this_source_match)
+            // console.log("the non-integer source_match is: " + this_source_match)
+        });
     });
-  });
+}
 
-  // Create the renderer
-  var render = new dagreD3.render();
 
-  // Set up an SVG group so that we can translate the final graph.
-  var svg = d3.select("svg");
-  var inner = svg.append("g");
+function renderDiag() {
+    console.log("renderDiag called");
+    // Create the renderer
+    let render = new dagreD3.render();
 
-  // Run the renderer. This is what draws the final graph.
-  render(inner, g);
+    // Set up an SVG group so that we can translate the final graph.
+    let svg = d3.select("#bracketSvg");
 
-/*
-  // "centering" the graph seems to not be an improvement, so commented for now.
-  var xCenterOffset = (svg.attr("width") - g.graph().width) / 2;
-  inner.attr("transform", "translate(" + xCenterOffset + ", 200)");
-  svg.attr("height", g.graph().height + 400);
-*/
+    // Run the renderer. This is what draws the final graph.
+    render(svg, g);
 
+}
+
+$(document).ready(function () {
+    // console.log("the document is ready");
+    getData();
 });
-
 
     </script>
 
