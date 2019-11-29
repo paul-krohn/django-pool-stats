@@ -204,10 +204,16 @@ d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(da
     ['a', 'b'].forEach(function(letter){
       var this_source_match = matchup['source_match_' + letter];
       if ( Number.isInteger(this_source_match) ) {
-          var source_match = matchups.filter(m => m.id === this_source_match)[0];
+        var source_match = matchups.filter(m => m.id === this_source_match)[0];
         if (!matchup.bye_winner) {
+            let edgeMinLength = 1;
+            if (source_match.name.match(/^w/) && matchup.name.match(/^w/)) {
+                edgeMinLength = 2;
+            }
             g.setEdge(source_match.name, matchup.name, {
             curve: d3.curveBasis,
+            lineInterpolate: 'basis',
+            minlen: edgeMinLength,
             class: "bracket-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
             arrowheadClass: "arrowhead-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
           });
