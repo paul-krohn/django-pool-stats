@@ -95,7 +95,7 @@
 </div>
 
 <script>
-function matchupHtml(m, r, b) {
+function matchupHtml(matchup) {
 
   let matchupDiv = document.createElement("div");
 
@@ -115,8 +115,8 @@ function matchupHtml(m, r, b) {
     seedDiv.setAttribute('class', 'matchup-participant-common matchup-participant-seed');
     // console.log("trying to set seed text for " + m.name + " participant " + letter); // + " seed: " + m['participant_' + letter].seed);
     let innerText = '-';
-    if (m['participant_' + letter] !== null) {
-        innerText = m['participant_' + letter].seed ? m['participant_' + letter].seed : '-' ;
+    if (matchup['participant_' + letter] !== null) {
+        innerText = matchup['participant_' + letter].seed ? matchup['participant_' + letter].seed : '-' ;
     }
     seedDiv.innerText = innerText;
     participantDiv.appendChild(seedDiv);
@@ -124,7 +124,7 @@ function matchupHtml(m, r, b) {
     let namesDiv = document.createElement('div');
     namesDiv.setAttribute('class', 'matchup-participant-common matchup-participant-names');
 
-    namesDiv.innerText = getParticipantText(m, letter);
+    namesDiv.innerText = getParticipantText(matchup, letter);
     participantDiv.appendChild(namesDiv);
     matchupDiv.append(participantDiv);
   });
@@ -176,7 +176,7 @@ function drawNodes(data) {
                 g.setNode(mu.name, {
                     // if you are tempted to set the width here, maybe don't
                     labelType: "html",
-                    label: matchupHtml(mu, ro, br),
+                    label: matchupHtml(mu),
                     class: 'bracket-' + br.type + ' ' + mu.name,
                     padding: 5,
                 });
