@@ -1,13 +1,13 @@
 @import url('https://fonts.googleapis.com/css?family=Rubik');
 
 /*
-   "sfpa" blue: #5C7EBB
+   "sfpa" blue: #293a80
    "sfpa" orange: #E39230
 */
 
 h1, h2, h3, h4, h5, h6, th, .dropdown {
   font-family: 'Rubik', sans-serif;
-  color: #5C7EBB;
+  color: #293a80;
 }
 
 h5, h6 {
@@ -104,9 +104,14 @@ a:hover	{
 
 /* non-svg stuff for bracket display */
 
+/* dark #010038 */
+/* medium #293a80 */
+/* light #537ec5*/
+/* contrast #f39422 aka losers, was fdd813 */
+
 .button-section-header {
     font-family: 'Rubik', sans-serif;
-    color: #5C7EBB !important;
+    color: #293a80 !important;
 }
 
 /* svg stuff for bracket display */
@@ -116,46 +121,46 @@ a:hover	{
 }
 
 .node rect {
-  fill: #bfbebf;
+  fill: #537ec5;
   stroke-width: 4px;
 }
 
 .edgePath path.path {
-  stroke: #fdd813;
+  stroke: #f39422;
   fill: none;
   stroke-width: 3px;
 }
 
-.bracket-w rect {
-  stroke: #fdd813;
-}
-.bracket-w path.path {
-  stroke: #fdd813;
-  fill: #fdd813;
-}
-
 .bracket-l rect {
-  stroke: #bfbebf
+  stroke: #f39422;
 }
 .bracket-l path.path {
-  stroke: #bfbebf;
-  fill: #bfbebf;
+  stroke: #f39422;
+  fill: #f39422;
+}
+
+.bracket-w rect {
+  stroke: #293a80
+}
+.bracket-w path.path {
+  stroke: #293a80;
+  fill: #293a80;
+  border-radius: 4px;
 }
 
 .matchup {
   margin: 2px;
-  /*color: #5b83c2;*/
   border-radius: 3px;
   text-align: center;
   font-weight: normal;
 }
 
 .matchup-l {
-  background-color: #bfbebf;
+  background-color: #293a80;
 }
 
 .matchup-w {
-  background-color: #fdd813;
+  background-color: #f39422;
 }
 
 .matchup-participant ul {
@@ -173,21 +178,28 @@ a:hover	{
   padding: 2px;
 }
 
+.matchup-wrapper-l {
+  background-color: #f39422;
+}
+.matchup-wrapper-w {
+
+}
+
 .matchup-participant {
   float: none;
-  background-color: #bfbebf;
+  background-color: #537ec5;
   display: flex;
   width: fit-content;
   border-style: solid;
   border-radius: 3px;
-  border-color: #5C7EBB;
+  border-color: #010038;
   border-width: 2px;
   margin: 3px;
   vertical-align: middle;
 }
 
 .matchup-participant-common {
-  color: #1d305f;
+  color: #537ec5;
   font-size: 14px;
   padding: 4px;
   vertical-align: middle;
@@ -195,15 +207,17 @@ a:hover	{
 
 .matchup-participant-seed {
   float: left;
-  min-width: 3ch;
+  min-width: 4ch;
   text-align: center;
-  background-color:  #5C7EBB;
-  color: #bfbebf;
+  background-color:  #010038;
+  color: white;
 }
 
 .matchup-participant-names {
   padding: 3px 4px 3px 4px;
   font-weight: normal;
+  color: #010038;
+  background-color: white;
   /*vertical-align: center;*/
 }
 
@@ -212,12 +226,12 @@ a:hover	{
   font-weight: normal;
 }
 
-.arrowhead-l {
-  fill: #bfbebf;
+.arrowhead-w {
+  fill: #293a80;
   stroke-width: 2px;
 }
 
-.arrowhead-w {
-  fill: #fdd813;
+.arrowhead-l {
+  fill: #f39422;
   stroke-width: 2px;
 }
