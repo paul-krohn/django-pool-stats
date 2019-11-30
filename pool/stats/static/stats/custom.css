@@ -185,6 +185,10 @@ a:hover	{
 
 }
 
+.hover {
+  background-color: aquamarine !important;
+}
+
 .matchup-participant {
   float: none;
   background-color: #537ec5;
