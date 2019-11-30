@@ -255,21 +255,17 @@ function drawEdges(matchups){
             let this_source_match = matchup['source_match_' + letter];
             if ( Number.isInteger(this_source_match) ) {
                 let source_match = matchups.filter(m => m.id === this_source_match)[0];
-                if (!matchup.bye_winner) {
-                    let edgeMinLength = 1;
-                    if (source_match.name.match(/^w/) && matchup.name.match(/^w/)) {
-                        edgeMinLength = 2;
-                    }
-                    g.setEdge(source_match.name, matchup.name, {
-                        curve: d3.curveBasis,
-                        lineInterpolate: 'basis',
-                        minlen: edgeMinLength,
-                        class: "bracket-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
-                        arrowheadClass: "arrowhead-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
-                    });
-                } else {
-                    // console.log("we never found nodes called " + source_match.name + ' and ' + matchup.name);
+                let edgeMinLength = 1;
+                if (source_match.name.match(/^w/) && matchup.name.match(/^w/)) {
+                    edgeMinLength = 2;
                 }
+                g.setEdge(source_match.name, matchup.name, {
+                    curve: d3.curveBasis,
+                    lineInterpolate: 'basis',
+                    minlen: edgeMinLength,
+                    class: "bracket-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
+                    arrowheadClass: "arrowhead-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
+                });
             }
             // console.log("the non-integer source_match is: " + this_source_match)
         });
