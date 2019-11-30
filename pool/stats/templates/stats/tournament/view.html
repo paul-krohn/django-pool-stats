@@ -97,7 +97,7 @@
 </div>
 
 <script>
-function matchupHtml(matchup, bracket='w') {
+function matchupHtml(matchup, bracket='w', winner=null) {
 
   let matchupDiv = document.createElement("div");
   matchupDiv.setAttribute('class', ['matchup-wrapper', 'matchup-wrapper-' + bracket].join(' '));
@@ -127,6 +127,9 @@ function matchupHtml(matchup, bracket='w') {
     let names_div_classes = ['matchup-participant-common', 'matchup-participant-names'];
     if (matchup['participant_' + letter]) {
         names_div_classes.push('matchup-participant-id-' + matchup['participant_' + letter].id);
+        if (matchup.winner && matchup['participant_' + letter].id === matchup.winner.id) {
+            names_div_classes.push('matchup-participant-winner');
+        }
     }
     // console.log('classes are: ' + names_div_classes);
     namesDiv.setAttribute('class', names_div_classes.join(' '));
