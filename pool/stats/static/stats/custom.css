@@ -113,6 +113,8 @@ a:hover	{
     font-family: 'Rubik', sans-serif;
     color: #010038;
     margin: 4px;
+.bracket-border {
+  padding: 8px;
 }
 
 /* svg stuff for bracket display */
