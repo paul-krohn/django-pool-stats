@@ -110,9 +110,14 @@ a:hover	{
 /* contrast #f39422 aka losers, was fdd813 */
 
 .button-section-header {
-    font-family: 'Rubik', sans-serif;
-    color: #010038;
-    margin: 4px;
+  font-family: 'Rubik', sans-serif;
+  color: #010038;
+  margin: 4px;
+  /* css black magic courtesy https://stackoverflow.com/questions/6205191/how-can-i-stop-float-left*/
+  clear: both;
+  display: block;
+}
+
 .bracket-border {
   padding: 8px;
 }
