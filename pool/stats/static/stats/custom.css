@@ -111,7 +111,8 @@ a:hover	{
 
 .button-section-header {
     font-family: 'Rubik', sans-serif;
-    color: #293a80 !important;
+    color: #010038;
+    margin: 4px;
 }
 
 /* svg stuff for bracket display */
