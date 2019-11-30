@@ -8,12 +8,12 @@
     See: https://docs.djangoproject.com/en/2.1/ref/csrf/
 -->
 {% csrf_token %}
-<h1>{{ the_tournament.name }}</h1>
+<h1>{{ tournament.name }}</h1>
 
 <div id="app">
 {% verbatim %}
     <div>
-        <button class="btn" type="button" onclick="app.updateData(); getData();">update</button>
+        <button class="btn btn-primary btn-sm" type="button" onclick="app.updateData(); getData();">update</button>
     </div>
     <input type="button" class="btn btn-lg button-section-header" value="Participants"
            onclick="toggler('participants');" />
@@ -31,7 +31,7 @@
     </div>
     <div v-for="bracket in the_tournament.brackets" class="brackets">
         <div>
-            <input type="button" class="btn btn-lg" :value="bracketLabels[bracket.type] + ' match list '"
+            <input type="button" class="btn btn-lg button-section-header" :value="bracketLabels[bracket.type] + ' Match List '"
                    :onclick="'toggler(\'match-list-' + bracket.type + '\');'"
             />
         </div>
@@ -88,8 +88,8 @@
 </div>
 
 <div>
-    <input type="button" class="btn btn-lg" value="bracket"
-       onclick="toggler('bracket');" />
+    <input type="button" class="btn btn-lg button-section-header" value="Bracket"
+           onclick="toggler('bracketSvg');" />
 </div>
 
 <div>
@@ -320,8 +320,8 @@ $(document).ready(function () {
         data: {
             the_tournament: [],
             bracketLabels: {
-                l: 'one-loss',
-                w: 'no-loss',
+                l: 'One-loss',
+                w: 'No-loss',
             },
 
         },
