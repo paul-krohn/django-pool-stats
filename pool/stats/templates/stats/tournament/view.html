@@ -18,20 +18,20 @@
     <input type="button" class="btn btn-lg button-section-header" value="Participants"
            onclick="toggler('participants');" />
     <div id="participants">
-        <ul>
+        <ul class="list-unstyled">
         <li v-for="participant in the_tournament.participants" class="col-xs-3" style="padding: 2px;">
             <div class="matchup-wrapper">
                 <div class="matchup-participant">
                     <div class="matchup-participant-common matchup-participant-seed" v-html="participant.seed"></div>
-                    <div class="matchup-participant-common matchup-participant-names" v-html="participantLinks(participant)"></div>
+                    <div :class="participantNameClasses(participant)" v-html="participantLinks(participant)"></div>
                 </div>
             </div>
         </li>
         </ul>
     </div>
-    <div v-for="bracket in the_tournament.brackets" class="brackets" style="display: none;">
+    <div v-for="bracket in the_tournament.brackets" class="brackets">
         <div>
-            <input type="button" class="btn btn-lg" :value="'match list ' + bracket.type"
+            <input type="button" class="btn btn-lg" :value="bracketLabels[bracket.type] + ' match list '"
                    :onclick="'toggler(\'match-list-' + bracket.type + '\');'"
             />
         </div>
@@ -315,7 +315,12 @@ $(document).ready(function () {
     let app = new Vue({
         el: '#app',
         data: {
-            the_tournament: []
+            the_tournament: [],
+            bracketLabels: {
+                l: 'one-loss',
+                w: 'no-loss',
+            },
+
         },
         methods: {
             matchupButtonId: function(matchup, participant) {
