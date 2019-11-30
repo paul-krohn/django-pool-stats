@@ -219,11 +219,11 @@ function setMouseOvers(data) {
 
     data['participants'].forEach(function(p){
         let participantClass = '.matchup-participant-id-' + p.id;
-        console.log("setting mouseovers for " + participantClass);
+        // console.log("setting mouseovers for " + participantClass);
         let theseDivs = $(participantClass);
         // console.log('these divs:' + theseDivs);
         theseDivs.each(function(index){
-            console.log("this is " + $(this));
+            // console.log("this is " + $(this));
             $(this).mouseover(function(){
                 $(participantClass).addClass('hover');
             });
