@@ -35,7 +35,7 @@
                    :onclick="'toggler(\'match-list-' + bracket.type + '\');'"
             />
         </div>
-        <div :id="'match-list-' + bracket.type" >
+        <div :id="'match-list-' + bracket.type" style="display: none;">
         <div v-for="round in bracket.rounds">
             <h4>Round {{ round.number }}</h4>
             <ul>
