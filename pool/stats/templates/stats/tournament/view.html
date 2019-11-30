@@ -92,11 +92,20 @@
            onclick="toggler('bracketSvg');" />
 </div>
 
-<div>
-    <svg id="bracketSvg" width="2400" height="1200"></svg>
+<div id="bracket-border">
+    <svg id="bracketSvg" ></svg>
 </div>
 
 <script>
+let svg = $("#bracketSvg");
+let bracketSize = {{ tournament.bracket_size }};
+
+svg.width(bracketSize * 150 + 100);
+svg.height(bracketSize * 55 + 100);
+
+let bracketBorder = $("#bracket-border");
+bracketBorder.width(bracketSize * 150 + 100);
+
 function matchupHtml(matchup, bracket='w', winner=null) {
 
   let matchupDiv = document.createElement("div");
