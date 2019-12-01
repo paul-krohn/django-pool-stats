@@ -99,9 +99,10 @@
 <script>
 let svg = $("#bracketSvg");
 let bracketSize = {{ tournament.bracket_size }};
+let heightMultiple = {{ tournament.flopped|yesno:"1.25,1.0,1.0"  }}
 
 svg.width(bracketSize * 150 + 100);
-svg.height(bracketSize * 55 + 100);
+svg.height(heightMultiple * bracketSize * 55 + 100);
 
 let bracketBorder = $("#bracket-border");
 bracketBorder.width(bracketSize * 150 + 100);
