@@ -193,13 +193,16 @@ function drawNodes(data) {
     data["brackets"].forEach(function (br) {
         br["rounds"].forEach(function (ro) {
             ro['matchups'].forEach(function (mu) {
-                g.setNode(mu.name, {
-                    // if you are tempted to set the width here, maybe don't
-                    labelType: "html",
-                    label: matchupHtml(mu, br.type),
-                    class: 'bracket-' + br.type + ' ' + mu.name,
-                    padding: 2,
-                });
+                //console.log("bye winner: " + mu.bye_winner);
+                if (mu.bye_winner === 0 || ro.number > 1 || br.type === "l") {
+                    g.setNode(mu.name, {
+                        // if you are tempted to set the width here, maybe don't
+                        labelType: "html",
+                        label: matchupHtml(mu, br.type),
+                        class: 'bracket-' + br.type + ' ' + mu.name,
+                        padding: 2,
+                    });
+                }
             })
         });
     });
@@ -253,19 +256,23 @@ function drawEdges(matchups){
     matchups.forEach(function(matchup) {
         ['a', 'b'].forEach(function(letter){
             let this_source_match = matchup['source_match_' + letter];
-            if ( Number.isInteger(this_source_match) ) {
+            if (Number.isInteger(this_source_match)) {
                 let source_match = matchups.filter(m => m.id === this_source_match)[0];
-                let edgeMinLength = 1;
-                if (source_match.name.match(/^w/) && matchup.name.match(/^w/)) {
-                    edgeMinLength = 2;
+                // console.log("source match: " + source_match.name + " and this match: " + matchup.name);
+                if (!source_match.bye_winner || source_match.name.match(/^l/)) {
+                    let edgeMinLength = 1;
+                    if (source_match.name.match(/^w/) && matchup.name.match(/^w/)) {
+                        edgeMinLength = 2;
+                    }
+                    g.setEdge(source_match.name, matchup.name, {
+                        curve: d3.curveBasis,
+                        lineInterpolate: 'basis',
+                        minlen: edgeMinLength,
+                        class: "bracket-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
+                        arrowheadClass: "arrowhead-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
+                    });
+                    // console.log("we set an edge from source match: " + source_match.name + " to this match: " + matchup.name);
                 }
-                g.setEdge(source_match.name, matchup.name, {
-                    curve: d3.curveBasis,
-                    lineInterpolate: 'basis',
-                    minlen: edgeMinLength,
-                    class: "bracket-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
-                    arrowheadClass: "arrowhead-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
-                });
             }
             // console.log("the non-integer source_match is: " + this_source_match)
         });
