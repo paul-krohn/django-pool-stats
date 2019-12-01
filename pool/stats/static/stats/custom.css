@@ -122,19 +122,17 @@ a:hover	{
   padding: 8px;
 }
 
-/* svg stuff for bracket display */
-
-.node g {
-  padding: 2px;
-}
+/*
+  svg stuff for bracket display
+  rect.node and g.node get no fill; all fill/color from the enclosed div
+*/
 
 .node rect {
-  fill: #537ec5;
-  stroke-width: 4px;
+  fill: none;
+  stroke-width: 0;
 }
 
 .edgePath path.path {
-  stroke: #f39422;
   fill: none;
   stroke-width: 3px;
 }
@@ -183,14 +181,14 @@ a:hover	{
 }
 */
 .matchup-wrapper {
-  padding: 2px;
+  padding: 4px;
 }
 
 .matchup-wrapper-l {
   background-color: #f39422;
 }
 .matchup-wrapper-w {
-
+  background-color: #537ec5;
 }
 
 .hover {
