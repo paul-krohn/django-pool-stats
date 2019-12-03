@@ -92,20 +92,72 @@
            onclick="toggler('bracketSvg');" />
 </div>
 
+<div id="bracket-controls">
+{% if tournament.elimination == 'double' %}
+    <input type="button" class="btn btn-sm" value="combined"
+           onclick="scaleElem('bracket-border', 'full');getData();"/>
+    <input type="button" class="btn btn-sm" value="1-loss"
+           onclick="scaleElem('bracket-border', 'full');getData(bracket='l', true);"/>
+    <input type="button" class="btn btn-sm" value="0-loss"
+           onclick="scaleElem('bracket-border', 'full');getData(bracket='w', true);"/>
+    <input type="button" class="btn btn-sm" value="scale to width"
+           onclick="scaleElem('bracket-border', 'window');"/>
+    <input type="button" class="btn btn-sm" value="scale 100%"
+           onclick="scaleElem('bracket-border', 'full');"/>
+{% endif %}
+</div>
 <div id="bracket-border">
     <svg id="bracketSvg" ></svg>
 </div>
 
 <script>
 let svg = $("#bracketSvg");
-let bracketSize = {{ tournament.bracket_size }};
-let heightMultiple = {{ tournament.flopped|yesno:"1.25,1.0,1.0"  }}
 
-svg.width(bracketSize * 150 + 100);
-svg.height(heightMultiple * bracketSize * 55 + 100);
+function getDefaultBracketDivSize() {
+    let sizes = {};
+    let heightMultiple = {{ tournament.flopped|yesno:"1.25,1.0,1.0" }};
+    let bracketSize = {{ tournament.bracket_size }};
+    sizes.height = heightMultiple * bracketSize * 60 + 100;
+    sizes.width = bracketSize * 180 + 100;
+    return sizes;
+}
+
+console.log('height: ' + getDefaultBracketDivSize().height);
+console.log('width: ' + getDefaultBracketDivSize().width);
+
+svg.width(getDefaultBracketDivSize().width);
+svg.height(getDefaultBracketDivSize().height);
 
 let bracketBorder = $("#bracket-border");
-bracketBorder.width(bracketSize * 150 + 100);
+bracketBorder.width(getDefaultBracketDivSize().width);
+
+function scaleElem(divId, to='full') {
+    console.log('scaling ' + divId + " to " + to);
+    let theDiv = $('#'+ divId);
+    let windowWidth = $(window).width();
+
+    let ratio = 1.0;
+    switch(to) {
+      case 'full':
+        ratio = 1;
+        break;
+      case 'window':
+        ratio = (windowWidth / getDefaultBracketDivSize().width);
+        break;
+      default:
+        // code block
+    }
+
+    console.log('scaling ratio: ' + ratio);
+    console.log(`default size is ${getDefaultBracketDivSize().width} by ${getDefaultBracketDivSize().height}`);
+    console.log(`the window width is: ${windowWidth}`);
+    let xTranslateArg = ((1 - ratio) * getDefaultBracketDivSize().width);
+    let yTranslateArg = ((1 - ratio) * getDefaultBracketDivSize().height);
+    let transformString = `scale(${ratio}) translate(-${xTranslateArg}px, -${yTranslateArg}px)`;
+    console.log('transform css: ' + transformString);
+    theDiv.css('transform', transformString);
+}
+
 
 function matchupHtml(matchup, bracket='w', winner=null) {
 
@@ -189,9 +241,21 @@ let g = new dagreD3.graphlib.Graph({
 });
 
 
-function drawNodes(data) {
-    // console.log("drawNodes called");
-    data["brackets"].forEach(function (br) {
+function drawNodes(data, bracketName='all', clear=false) {
+    console.log("drawNodes called with clear: " + clear);
+
+    if (clear === true) {
+        g.nodes().forEach(function(n){
+            if (n.startsWith(bracketName)) {
+                console.log("removing " + n);
+                g.removeNode(n);
+            }
+        })
+    }
+    // let source_match = matchups.filter(m => m.id === this_source_match)[0];
+    let bracketNames = bracketName === 'all' ? ['w', 'l'] : [bracketName];
+    console.log("the bracket names are: " + bracketNames);
+    data["brackets"].filter(b => bracketNames.includes(b.type)).forEach(function (br) {
         br["rounds"].forEach(function (ro) {
             ro['matchups'].forEach(function (mu) {
                 //console.log("bye winner: " + mu.bye_winner);
@@ -209,23 +273,37 @@ function drawNodes(data) {
 }
 
 
-function getData() {
+function getData(bracket='all', clear=false) {
+
     // console.log("getData called");
     let tournamentJson = "{% url 'tournament_json' tournament.id %}?svg";
     let matchups = [];
     d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(data) {
-        drawNodes(data);
+        if (clear) {
+            $("#bracketSvg").find('svg').find('g').remove();
+        }
+        console.time('drawNodes');
+        drawNodes(data, bracket, clear);
+        console.timeEnd('drawNodes');
+
         // the list of matchups has to be complete before drawing any matches, since the source
         // match name is used to display each match.
-        data["brackets"].forEach(function (br) {
+        let bracketNames = bracket === 'all' ? ['w', 'l'] : [bracket];
+        data["brackets"].filter(b => bracketNames.includes(b.type)).forEach(function (br) {
             br["rounds"].forEach(function (ro) {
                 ro['matchups'].forEach(function (mu) {
+                    mu.bracket = br;
+                    mu.round = ro;
                     matchups.push(mu);
                 })
             });
         });
-        drawEdges(matchups);
+        drawEdges(matchups, bracket);
+        console.time('renderDiag');
         renderDiag();
+        let boundingBox = $('#bracketSvg').find('g.output').getBoundingClientRect();
+        console.log(`the bounding box is ${boundingBox.width} by ${boundingBox.height}`);
+        console.timeEnd('renderDiag');
         setMouseOvers(data);
     });
 }
@@ -258,21 +336,29 @@ function drawEdges(matchups){
             let this_source_match = matchup['source_match_' + letter];
             if (Number.isInteger(this_source_match)) {
                 let source_match = matchups.filter(m => m.id === this_source_match)[0];
-                // console.log("source match: " + source_match.name + " and this match: " + matchup.name);
-                if (!source_match.bye_winner || source_match.name.match(/^l/)) {
+                //console.log("source match: " + source_match.name + " and this match: " + matchup.name);
+                if (source_match && (!source_match.bye_winner || (source_match.name && source_match.name.match(/^l/)))) {
                     let edgeMinLength = 1;
+                    let edgeWeight = 5;
                     if (source_match.name.match(/^w/) && matchup.name.match(/^w/)) {
                         edgeMinLength = 2;
+                        edgeWeight = 4;
                     }
+                    if (source_match.name.match(/^w/) && matchup.name.match(/^l/)) {
+                        edgeWeight = 2;
+                    }
+
                     g.setEdge(source_match.name, matchup.name, {
                         curve: d3.curveBasis,
                         lineInterpolate: 'basis',
                         minlen: edgeMinLength,
+                        weight: edgeWeight,
+                        // label: "my weight is: " + edgeWeight,
                         class: "bracket-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
                         arrowheadClass: "arrowhead-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
                     });
-                    // console.log("we set an edge from source match: " + source_match.name + " to this match: " + matchup.name);
                 }
+                    // console.log("we set an edge from source match: " + source_match.name + " to this match: " + matchup.name);
             }
             // console.log("the non-integer source_match is: " + this_source_match)
         });
@@ -295,7 +381,7 @@ function renderDiag() {
 
 $(document).ready(function () {
     // console.log("the document is ready");
-    getData();
+    getData('all');
 });
 
     </script>
