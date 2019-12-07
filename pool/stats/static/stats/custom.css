@@ -118,9 +118,10 @@ a:hover	{
   display: block;
 }
 
-.bracket-border {
+#bracket-border {
   padding: 8px;
 }
+
 
 /*
   svg stuff for bracket display
