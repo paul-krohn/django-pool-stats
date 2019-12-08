@@ -215,7 +215,11 @@ function scaleElem(divId, to='full') {
 function matchupHtml(matchup, bracket='w', winner=null) {
 
   let matchupDiv = document.createElement("div");
-  matchupDiv.setAttribute('class', ['matchup-wrapper', 'matchup-wrapper-' + bracket].join(' '));
+  let matchupClasses = ['matchup-wrapper', 'matchup-wrapper-' + bracket]
+  if (!matchup.is_necessary) {
+      matchupClasses.push('not_necessary');
+  }
+  matchupDiv.setAttribute('class', matchupClasses.join(' '));
 
 /*
   let matchNumberDiv = document.createElement("div");
