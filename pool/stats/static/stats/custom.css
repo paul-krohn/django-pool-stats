@@ -192,8 +192,14 @@ a:hover	{
   background-color: #537ec5;
 }
 
-.not_necessary {
-  opacity: 0.4;
+.if_necessary {
+  background-color: rgba(83, 126, 197, 0.45) !important;
+}
+
+.legend {
+  float:left;
+  width: fit-content;
+  margin-right: 4px;
 }
 
 .hover {
