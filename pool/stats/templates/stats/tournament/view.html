@@ -92,11 +92,11 @@
                onclick="scaleElem('bracket-border', 'full');getData(bracket='l', true);"/>
         <input type="button" class="btn btn-sm" value="0-loss"
                onclick="scaleElem('bracket-border', 'full');getData(bracket='w', true);"/>
+    {% endif %}
         <input type="button" class="btn btn-sm" value="scale to width"
                onclick="scaleElem('bracket-border', 'window');"/>
         <input type="button" class="btn btn-sm" value="scale 100%"
                onclick="scaleElem('bracket-border', 'full');"/>
-    {% endif %}
     </div>
     <div id="bracket-border">
         <svg id="bracketSvg" ></svg>
