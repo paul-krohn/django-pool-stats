@@ -192,6 +192,10 @@ a:hover	{
   background-color: #537ec5;
 }
 
+.not_necessary {
+  opacity: 0.4;
+}
+
 .hover {
   background-color: aquamarine !important;
 }
