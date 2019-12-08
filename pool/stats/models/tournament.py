@@ -52,6 +52,7 @@ class Tournament(models.Model):
     season = models.ForeignKey('Season', on_delete=models.CASCADE, null=True)
     seeded = models.BooleanField(default=False)
     flopped = models.BooleanField(default=False)
+    third_place = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -171,6 +172,20 @@ class Tournament(models.Model):
                 participant.save()
                 available_seeds.remove(this_seed)
 
+    def create_third_place_matchup(self):
+
+        source_round = self.bracket_set.get(type='w').round_set.get(number=self.round_count() - 1)
+        source_matchups = source_round.tournamentmatchup_set.all()
+
+        m, created = TournamentMatchup.objects.get_or_create(
+            round=self.bracket_set.get(type='w').round_set.get(number=self.round_count()),
+            number=2,
+            source_match_a=source_matchups[0],
+            source_match_b=source_matchups[1],
+            a_want_winner=False,
+            b_want_winner=False,
+        )
+
 
 class Participant(models.Model):
     type = models.TextField(choices=PARTICIPANT_TYPES)
@@ -263,8 +278,8 @@ class Bracket(models.Model):
 
 class Round(models.Model):
 
-    # these hard-coded orders could conceivably be replaced with and algorithm, but I don't know what it is
-    # in any case, the idea is to make it soe the top seeds meet as late as possible.
+    # These hard-coded orders could conceivably be replaced with an algorithm, but I don't know what it is;
+    # in any case, the idea is to make it so the top seeds meet as late as possible.
     first_round_orders = {
         '4': [0, 2, 1, 3],
         '8': [0, 7, 3, 4, 1, 6, 2, 5],
