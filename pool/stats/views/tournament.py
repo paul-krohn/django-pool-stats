@@ -174,5 +174,7 @@ def tournament_brackets(request, tournament_id):
         for _round in winners_bracket.round_set.filter(number__gt=t.round_count()).order_by('number'):
             _round.create_finals_matchup(finals_rounds[i])
             i += 1
-            pass
+    else:
+        if t.third_place:
+            t.create_third_place_matchup()
     return redirect('tournament', tournament_id)
