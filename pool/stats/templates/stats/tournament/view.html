@@ -15,9 +15,8 @@
     <div>
         <button class="btn btn-primary btn-sm" type="button" onclick="app.updateData(); getData();">update</button>
     </div>
-    <input type="button" class="btn btn-lg button-section-header" value="Participants"
-           onclick="toggler('participants');" />
-    <div id="participants">
+    <h4><a href="#participants" data-toggle="collapse">Participants</a></h4>
+    <div id="participants" class="collapse">
         <ul class="list-unstyled">
         <li v-for="participant in the_tournament.participants" class="col-xs-3" style="padding: 2px;">
             <div class="matchup-wrapper">
@@ -30,12 +29,8 @@
         </ul>
     </div>
     <div v-for="bracket in the_tournament.brackets" class="brackets">
-        <div>
-            <input type="button" class="btn btn-lg button-section-header" :value="bracketLabels[bracket.type] + ' Match List '"
-                   :onclick="'toggler(\'match-list-' + bracket.type + '\');'"
-            />
-        </div>
-        <div :id="'match-list-' + bracket.type" style="display: none;">
+        <h4 style="clear: left;"><a :href="'#match-list-' + bracket.type" data-toggle="collapse"><span v-if="the_tournament.brackets.length > 1">{{ bracketLabels[bracket.type] }}</span> Match List</a></h4>
+        <div :id="'match-list-' + bracket.type" class="collapse">
         <div v-for="round in bracket.rounds">
             <h4>Round {{ round.number }}</h4>
             <ul>
@@ -85,29 +80,51 @@
     </div>
     </div>
 {% endverbatim %}
-</div>
 
-<div>
-    <input type="button" class="btn btn-lg button-section-header" value="Bracket"
-           onclick="toggler('bracketSvg');" />
-</div>
+    <h4><a href="#bracket-wrapper" data-toggle="collapse">Bracket</a></h4>
 
-<div id="bracket-controls">
-{% if tournament.elimination == 'double' %}
-    <input type="button" class="btn btn-sm" value="combined"
-           onclick="scaleElem('bracket-border', 'full');getData();"/>
-    <input type="button" class="btn btn-sm" value="1-loss"
-           onclick="scaleElem('bracket-border', 'full');getData(bracket='l', true);"/>
-    <input type="button" class="btn btn-sm" value="0-loss"
-           onclick="scaleElem('bracket-border', 'full');getData(bracket='w', true);"/>
-    <input type="button" class="btn btn-sm" value="scale to width"
-           onclick="scaleElem('bracket-border', 'window');"/>
-    <input type="button" class="btn btn-sm" value="scale 100%"
-           onclick="scaleElem('bracket-border', 'full');"/>
-{% endif %}
-</div>
-<div id="bracket-border">
-    <svg id="bracketSvg" ></svg>
+    <div id="bracket-wrapper">
+    <div id="bracket-controls">
+    {% if tournament.elimination == 'double' %}
+        <input type="button" class="btn btn-sm" value="combined"
+               onclick="scaleElem('bracket-border', 'full');getData();"/>
+        <input type="button" class="btn btn-sm" value="1-loss"
+               onclick="scaleElem('bracket-border', 'full');getData(bracket='l', true);"/>
+        <input type="button" class="btn btn-sm" value="0-loss"
+               onclick="scaleElem('bracket-border', 'full');getData(bracket='w', true);"/>
+        <input type="button" class="btn btn-sm" value="scale to width"
+               onclick="scaleElem('bracket-border', 'window');"/>
+        <input type="button" class="btn btn-sm" value="scale 100%"
+               onclick="scaleElem('bracket-border', 'full');"/>
+    {% endif %}
+    </div>
+    <div id="bracket-border">
+        <svg id="bracketSvg" ></svg>
+    </div>
+    <div>
+    <h5>Bracket Legend</h5>
+        <div class="matchup-wrapper matchup-wrapper-w" style="float: left; width: fit-content; margin-right: 4px;">
+            <div class="matchup-participant">
+                <div class="matchup-participant-common matchup-participant-seed">Seed</div>
+                <div class="matchup-participant-common matchup-participant-names">Losing Team</div>
+            </div>
+            <div class="matchup-participant">
+                <div class="matchup-participant-common matchup-participant-seed">Seed</div>
+                <div class="matchup-participant-common matchup-participant-names matchup-participant-winner">Winning Team</div>
+            </div>
+        </div>
+            <div  v-if="the_tournament.brackets.length > 1" class="matchup-wrapper matchup-wrapper-w" style="float:left; width: fit-content; margin-right: 4px;;">
+                <div class="matchup-participant">
+                    <div class="matchup-participant-common matchup-participant-names">0-loss bracket</div>
+                </div>
+            </div>
+            <div  v-if="the_tournament.brackets.length > 1" class="matchup-wrapper matchup-wrapper-l" style="float: left; width: fit-content; margin-right: 4px;">
+                <div class="matchup-participant">
+                    <div class="matchup-participant-common matchup-participant-names">1-loss bracket</div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script>
