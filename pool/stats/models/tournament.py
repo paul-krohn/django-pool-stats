@@ -172,6 +172,51 @@ class Tournament(models.Model):
                 participant.save()
                 available_seeds.remove(this_seed)
 
+    def update_places(self):
+        bracket_size = self.bracket_size()
+        for p in self.participant_set.all():
+            p.place = None
+            p.save()
+        offset = 0
+        count = 0
+        bracket = 'w'
+        if self.elimination == 'double':
+            # determine most of the placings with the losers' bracket results
+            offset = 3  # the winner of the 2 brackets will get 1, 2
+            count = 0
+            bracket = 'l'
+        for _round in self.bracket_set.get(type=bracket).round_set.all().order_by('-number'):
+            # if you lost in the first losers bracket round, you tied for the bottom 1/4 of the bracket
+            # your place is bracket_size / 2 + bracket_size / 4
+            matchups = _round.tournamentmatchup_set.all()
+            number_of_participants_with_this_place = len(matchups)
+            for matchup in matchups:
+                loser = matchup.not_winner()
+                if loser:
+                    loser.place = offset + count
+                    loser.save()
+            count += number_of_participants_with_this_place
+        if self.elimination == 'double':
+            # now get the 1-2 from the winners bracket
+            rounds = self.bracket_set.get(type='w').round_set.filter(number__gt=self.round_count()).order_by('number')
+            print('the rounds are: {}'.format(rounds))
+            # if the last-round matchup "is_necessary" then we need the winner of that, else the winner of the previous round
+            top_two_participants = [None, None]
+            last_round_matchup = rounds[1].tournamentmatchup_set.all()[0]
+            if last_round_matchup.is_necessary and last_round_matchup.winner:
+                top_two_participants[0] = last_round_matchup.winner
+                top_two_participants[1] = last_round_matchup.not_winner()
+            else:
+                matchup = rounds[0].tournamentmatchup_set.all()[0]
+                top_two_participants[0] = matchup.winner
+                top_two_participants[1] = matchup.not_winner()
+
+            i = 1
+            for participant in top_two_participants:
+                participant.place = i
+                participant.save()
+                i += 1
+
     def create_third_place_matchup(self):
 
         source_round = self.bracket_set.get(type='w').round_set.get(number=self.round_count() - 1)
