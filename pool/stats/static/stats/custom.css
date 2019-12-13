@@ -208,7 +208,7 @@ a:hover	{
 
 .matchup-participant {
   float: none;
-  background-color: #537ec5;
+  background-color: white;
   display: flex;
   width: fit-content;
   border-style: solid;
@@ -238,12 +238,21 @@ div.matchup-participant-winner {
   color: white;
 }
 
+.matchup-participant-place {
+  float: right;
+  min-width: 3ch;
+  text-align: center;
+  background-color: #9090a0;
+  color: white;
+}
+
 .matchup-participant-names {
   padding: 3px 4px 3px 4px;
   font-weight: normal;
   color: #010038;
   background-color: white;
-  /*vertical-align: center;*/
+  margin-right: 4px;
+  width: 100%;
 }
 
 .label {

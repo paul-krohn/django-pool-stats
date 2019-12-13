@@ -53,6 +53,7 @@ class Tournament(models.Model):
     seeded = models.BooleanField(default=False)
     flopped = models.BooleanField(default=False)
     third_place = models.BooleanField(default=False)
+    show_places = models.IntegerField(default=1)
 
     def __str__(self):
         return self.name
@@ -65,6 +66,7 @@ class Tournament(models.Model):
             type=self.type,
             elimination=self.elimination,
             season=self.season_id,
+            show_places=self.show_places,
             participants=[participant.to_dict() for participant in self.participant_set.all().order_by('seed')],
         )
 
@@ -173,30 +175,28 @@ class Tournament(models.Model):
                 available_seeds.remove(this_seed)
 
     def update_places(self):
-        bracket_size = self.bracket_size()
+
         for p in self.participant_set.all():
             p.place = None
             p.save()
-        offset = 0
-        count = 0
-        bracket = 'w'
         if self.elimination == 'double':
             # determine most of the placings with the losers' bracket results
             offset = 3  # the winner of the 2 brackets will get 1, 2
             count = 0
             bracket = 'l'
-        for _round in self.bracket_set.get(type=bracket).round_set.all().order_by('-number'):
-            # if you lost in the first losers bracket round, you tied for the bottom 1/4 of the bracket
-            # your place is bracket_size / 2 + bracket_size / 4
-            matchups = _round.tournamentmatchup_set.all()
-            number_of_participants_with_this_place = len(matchups)
-            for matchup in matchups:
-                loser = matchup.not_winner()
-                if loser:
-                    loser.place = offset + count
-                    loser.save()
-            count += number_of_participants_with_this_place
-        if self.elimination == 'double':
+            for _round in self.bracket_set.get(type=bracket).round_set.all().order_by('-number'):
+                # print('doing places for round {}'.format(_round))
+                # if you lost in the first losers bracket round, you tied for the bottom 1/4 of the bracket
+                # your place is bracket_size / 2 + bracket_size / 4
+                matchups = _round.tournamentmatchup_set.all()
+                number_of_participants_with_this_place = len(matchups)
+                for matchup in matchups:
+                    loser = matchup.not_winner()
+                    if loser:
+                        loser.place = offset + count
+                        loser.save()
+                count += number_of_participants_with_this_place
+
             # now get the 1-2 from the winners bracket
             rounds = self.bracket_set.get(type='w').round_set.filter(number__gt=self.round_count()).order_by('number')
             print('the rounds are: {}'.format(rounds))
@@ -216,6 +216,33 @@ class Tournament(models.Model):
                 participant.place = i
                 participant.save()
                 i += 1
+        else:
+            offset = 1
+            inc = 0
+            # positions 1-4 from last round, in the case where there is a third-place match, or 1-2, if there is not
+            for matchup in self.bracket_set.get(type='w').round_set.get(number=self.round_count()).tournamentmatchup_set.all().order_by('number'):
+                print('working on matchup: {}'.format(matchup))
+                if matchup.winner:
+                    matchup.winner.place = inc + offset
+                    matchup.winner.save()
+                    matchup.not_winner().place = inc + offset + 1
+                    matchup.not_winner().save()
+                    print('marked {} as {} and {} as {}'.format(matchup.winner, inc + offset, matchup.not_winner(), inc + offset + 1))
+                inc += 2
+            if self.third_place:
+                # skip the 2nd-last round, as all the participants have places already
+                last_round = self.round_count() - 2
+            else:
+                last_round = self.round_count() - 1
+            for _round in self.bracket_set.get(type='w').round_set.filter(number__lte=last_round).order_by('-number'):
+                print('working on round {}'.format(_round))
+                # all the participants here get the same rank
+                for matchup in _round.tournamentmatchup_set.all():
+                    this_place = inc + 1
+                    if matchup.winner and not matchup.bye_winner():
+                        matchup.not_winner().place = this_place
+                        matchup.not_winner().save()
+                inc += len(_round.tournamentmatchup_set.all())
 
     def create_third_place_matchup(self):
 
@@ -241,6 +268,7 @@ class Participant(models.Model):
     player = models.ForeignKey('Player', on_delete=models.DO_NOTHING, null=True, blank=True)
     team = models.ForeignKey('Team', on_delete=models.DO_NOTHING, null=True, blank=True)
     seed = models.IntegerField(null=True, blank=True)
+    place = models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         if self.type == 'doubles_players':
@@ -309,6 +337,7 @@ class Participant(models.Model):
             'players': players,
             'seed': self.seed,
             'team': team,
+            'place': self.place,
             'type': self.type,
         }
 
@@ -540,7 +569,6 @@ class TournamentMatchup(models.Model):
             else:
                 self.participant_b = self.source_match_b.not_winner()
         if not self.is_necessary:
-            # pass
             # if the winner of the 2ndlast winners bracket match is the winner of the loser's bracket,
             # then this match is now necessary
             hot_seat_matchup = self.source_match_a
@@ -555,6 +583,7 @@ class TournamentMatchup(models.Model):
         if self.a_want_winner is False and self.b_want_winner is False and self.source_match_a.bye_winner() and self.source_match_b.bye_winner():
             return True
         return False
+
     def bye_winner(self):
         if bool(self.participant_a is None) ^ bool(self.participant_b is None):
             # winners first round byes

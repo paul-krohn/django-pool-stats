@@ -16,13 +16,15 @@
         <button class="btn btn-primary btn-sm" type="button" onclick="app.updateData(); getData();">update</button>
     </div>
     <h3><a href="#participants" data-toggle="collapse">Participants</a></h3>
-    <div id="participants" class="collapse">
+    <div id="participants" class="">
         <ul class="list-unstyled">
         <li v-for="participant in the_tournament.participants" class="col-xs-3" style="padding: 2px;">
             <div class="matchup-wrapper">
                 <div class="matchup-participant">
                     <div class="matchup-participant-common matchup-participant-seed" v-html="participant.seed"></div>
                     <div :class="participantNameClasses(participant)" v-html="participantLinks(participant)"></div>
+                    <div class="matchup-participant-common matchup-participant-place"
+                         v-if="participant.place && participant.place <= the_tournament.show_places" v-html="participant.place"></div>
                 </div>
             </div>
         </li>
@@ -107,6 +109,7 @@
             <div class="matchup-participant">
                 <div class="matchup-participant-common matchup-participant-seed">Seed</div>
                 <div class="matchup-participant-common matchup-participant-names">Losing Team</div>
+                <div class="matchup-participant-common matchup-participant-place">Place</div>
             </div>
             <div class="matchup-participant">
                 <div class="matchup-participant-common matchup-participant-seed">Seed</div>
