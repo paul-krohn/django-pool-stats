@@ -1,7 +1,6 @@
 from django.http import JsonResponse, HttpResponse
 from django.shortcuts import redirect, render
 from django.forms import modelformset_factory
-from django.db.models import Q
 
 from ..forms import TournamentForm, TournamentParticipantFormSet, create_tournament_participant_form
 from ..models import Participant, Player, Season, Tournament, TournamentMatchup
@@ -66,13 +65,6 @@ def tournament_edit(request, tournament_id=None):
     return render(request, 'stats/tournament/edit.html', context)
 
 
-def update_affected_matchups(a_matchup):
-    affected_matchups = TournamentMatchup.objects.filter(
-        Q(source_match_a=a_matchup) | Q(source_match_b=a_matchup)
-    )
-    for m in affected_matchups:
-        m.update()
-
 
 def tournament_mark_winner(request):
 
@@ -88,7 +80,7 @@ def tournament_mark_winner(request):
             matchup.winner = winner
             matchup.save()
 
-            update_affected_matchups(matchup)
+            matchup.update_affected_matchups()
 
     return HttpResponse(status=204)
 
@@ -178,3 +170,22 @@ def tournament_brackets(request, tournament_id):
         if t.third_place:
             t.create_third_place_matchup()
     return redirect('tournament', tournament_id)
+
+
+def tournament_controls(request, tournament_id):
+
+    if request.method == 'POST':
+        t = None
+        if tournament_id is not None:
+            t = Tournament.objects.get(id=tournament_id)
+            if not t.editable(request):
+                return redirect('tournament', t.id)
+
+        action = request.POST.get('action')
+
+        if action == 'close_byes':
+            t.close_byes()
+            return HttpResponse(status=204)
+
+
+    return HttpResponse(status=204)

@@ -14,6 +14,7 @@
 {% verbatim %}
     <div>
         <button class="btn btn-primary btn-sm" type="button" onclick="app.updateData(); getData();">update</button>
+        <button id="close-byes" class="btn btn-primary btn-sm confirm" type="button">Close byes</button>
     </div>
     <h3><a href="#participants" data-toggle="collapse">Participants</a></h3>
     <div id="participants" class="">
@@ -542,6 +543,14 @@ $(document).ready(function () {
                         });
                     });
                 });
+                // now a confirm button for the "close dialogs" button
+                $('#close-byes').confirm({
+                    title: "confirm closing byes",
+                    text: 'Mark <b>all byes</b> with winners?',
+                    confirm: function() {
+                        self.closeByes();
+                    },
+                });
             },
             getMatchupParticipants: function(matchup) {
                 return([matchup['participant_a'], matchup['participant_b']]);
@@ -614,6 +623,18 @@ $(document).ready(function () {
                     });
                     return player_names.join(', ');
                 }
+            },
+            closeByes: function() {
+                $.ajaxSetup({
+                    beforeSend: function (xhr, settings) {
+                        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        }
+                    },
+                    dataType: 'application/json',
+                });
+                $.post("{% url 'tournament_controls' tournament.id %}", {"action": 'close_byes'});
+                this.updateData();
             },
             submitMatchupWinner: function(matchup, winner) {
             //    console.log("we are about to set the winner of matchup " + matchup.id + " to " + winner.id);

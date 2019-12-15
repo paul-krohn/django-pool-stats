@@ -4,6 +4,7 @@ from math import ceil, log
 from statistics import mean
 from copy import deepcopy
 from random import choice
+from django.db.models import Q
 
 from ..models import PlayerSeasonSummary
 from ..utils import is_stats_master, session_uid
@@ -257,6 +258,18 @@ class Tournament(models.Model):
             a_want_winner=False,
             b_want_winner=False,
         )
+
+    def close_byes(self):
+        for b in self.bracket_set.all():
+            bye_rounds = 1
+            if b.type == 'l':
+                bye_rounds = 2
+            for r in b.round_set.filter(number__lte=bye_rounds):
+                for m in r.tournamentmatchup_set.all():
+                    if m.bye_winner():
+                        m.winner_id = m.bye_winner()
+                        m.save()
+                        m.update_affected_matchups()
 
 
 class Participant(models.Model):
@@ -578,6 +591,13 @@ class TournamentMatchup(models.Model):
             if hot_seat_matchup.winner_id == losers_bracket_final.winner_id:
                 self.is_necessary = True
         self.save()
+
+    def update_affected_matchups(self):
+        affected_matchups = TournamentMatchup.objects.filter(
+            Q(source_match_a=self) | Q(source_match_b=self)
+        )
+        for m in affected_matchups:
+            m.update()
 
     def no_match(self):
         if self.a_want_winner is False and self.b_want_winner is False and self.source_match_a.bye_winner() and self.source_match_b.bye_winner():
