@@ -80,6 +80,7 @@ urlpatterns = [
     url(r'^tournament_brackets/(?P<tournament_id>[0-9]+)', tournament.tournament_brackets, name='tournament_brackets'),
     url(r'^tournament_mark_winner/', tournament.tournament_mark_winner, name='tournament_mark_winner'),
     url(r'^tournament_participants/(?P<tournament_id>[0-9]+)', tournament.tournament_participants, name='tournament_participants'),
+    url(r'^tournament_controls/(?P<tournament_id>[0-9]+)', tournament.tournament_controls, name='tournament_controls'),
 
 
     url(r'^__status', status.index),
