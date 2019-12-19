@@ -14,7 +14,6 @@
 {% verbatim %}
     <div>
         <button class="btn btn-primary btn-sm" type="button" onclick="app.updateData(); getData();">update</button>
-        <button id="close-byes" class="btn btn-primary btn-sm confirm" type="button">Close byes</button>
     </div>
     <h3><a href="#participants" data-toggle="collapse">Participants</a></h3>
     <div id="participants" class="">
@@ -34,6 +33,7 @@
     <div v-for="bracket in the_tournament.brackets" class="brackets">
         <h3 style="clear: left;"><a :href="'#match-list-' + bracket.type" data-toggle="collapse"><span v-if="the_tournament.brackets.length > 1">{{ bracketLabels[bracket.type] }}</span> Match List</a></h3>
         <div :id="'match-list-' + bracket.type" class="collapse">
+        <button :data-bracket-type="bracket.type"  class="btn btn-primary btn-sm confirm close-byes" type="button">Close byes</button>
         <div v-for="round in bracket.rounds">
             <h4>Round {{ round.number }}</h4>
             <ul>
@@ -84,7 +84,7 @@
     </div>
 {% endverbatim %}
 
-    <h3><a href="#bracket-wrapper" data-toggle="collapse">Bracket</a></h3>
+    <h3><a href="#bracket-wrapper" style="clear: left;" data-toggle="collapse">Bracket</a></h3>
 
     <div id="bracket-wrapper">
     <div id="bracket-controls">
@@ -543,13 +543,17 @@ $(document).ready(function () {
                         });
                     });
                 });
-                // now a confirm button for the "close dialogs" button
-                $('#close-byes').confirm({
-                    title: "confirm closing byes",
-                    text: 'Mark <b>all byes</b> with winners?',
-                    confirm: function() {
-                        self.closeByes();
-                    },
+                // now a confirm button for the "close dialogs" buttons
+                $('.close-byes').each(function(){
+                    let bracket = $(this).data('bracket-type');
+                    console.log('setting a confirm for closing ' + bracket + ' byes.');
+                    $(this).confirm({
+                        title: "confirm closing byes",
+                        text: 'Mark <b>all byes</b> with winners?',
+                        confirm: function () {
+                            self.closeByes(bracket);
+                        },
+                    });
                 });
             },
             getMatchupParticipants: function(matchup) {
@@ -624,7 +628,7 @@ $(document).ready(function () {
                     return player_names.join(', ');
                 }
             },
-            closeByes: function() {
+            closeByes: function(bracketType) {
                 $.ajaxSetup({
                     beforeSend: function (xhr, settings) {
                         if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -633,7 +637,11 @@ $(document).ready(function () {
                     },
                     dataType: 'application/json',
                 });
-                $.post("{% url 'tournament_controls' tournament.id %}", {"action": 'close_byes'});
+                console.log('closing byes in bracket ' + bracketType);
+                $.post("{% url 'tournament_controls' tournament.id %}", {
+                    'bracket_type': bracketType,
+                    'action': 'close_byes',
+                });
                 this.updateData();
             },
             submitMatchupWinner: function(matchup, winner) {
