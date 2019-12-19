@@ -259,17 +259,18 @@ class Tournament(models.Model):
             b_want_winner=False,
         )
 
-    def close_byes(self):
-        for b in self.bracket_set.all():
-            bye_rounds = 1
-            if b.type == 'l':
-                bye_rounds = 2
-            for r in b.round_set.filter(number__lte=bye_rounds):
-                for m in r.tournamentmatchup_set.all():
-                    if m.bye_winner():
-                        m.winner_id = m.bye_winner()
-                        m.save()
-                        m.update_affected_matchups()
+    def close_byes(self, bracket_type):
+        print("closing byes in {}".format(bracket_type))
+        b = self.bracket_set.get(type=bracket_type)
+        bye_rounds = 1
+        if b.type == 'l':
+            bye_rounds = 2
+        for r in b.round_set.filter(number__lte=bye_rounds):
+            for m in r.tournamentmatchup_set.all():
+                if m.bye_winner():
+                    m.winner_id = m.bye_winner()
+                    m.save()
+                    m.update_affected_matchups()
 
 
 class Participant(models.Model):

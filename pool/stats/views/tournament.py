@@ -184,7 +184,7 @@ def tournament_controls(request, tournament_id):
         action = request.POST.get('action')
 
         if action == 'close_byes':
-            t.close_byes()
+            t.close_byes(request.POST.get('bracket_type'))
             return HttpResponse(status=204)
 
 
