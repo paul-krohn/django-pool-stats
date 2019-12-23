@@ -1,0 +1,43 @@
+{% extends "stats/base.html" %}
+{% block title %}SFPA :: Team :: Register {% endblock %}
+
+{% block content %}
+
+<h2>Register a team</h2>
+    :{{ form }}:
+<form action="{% url 'register'  %}" method="post">
+    {% if player_formset.non_form_errors %}
+        {{ player_formset.non_form_errors }}
+    {% endif %}
+    <table class="table" style="width: auto;">
+    {% csrf_token %}
+    {{ player_formset.management_form }}
+    {% for player_form in player_formset %}
+        {{ player_form.as_p }}
+    {% endfor %}
+    <tr>
+        <td><input class="btn btn-primary" type="submit" value="Save players" id="lineup_save"/></td></tr>
+</table>
+</form>
+<div>
+</div>
+
+
+<script type="text/javascript">
+
+    $(document).ready(function() {
+        $('select').multiselect({enableCaseInsensitiveFiltering: true});
+    });
+
+    $("#lineup_save").confirm({
+        submitForm: true,
+        post: true,
+        text: "<b>Are you sure?</b><br/>",
+        confirm: function(button) {
+            $("#lineup_save").submit();
+        }
+    });
+
+</script>
+{% endblock %}
+

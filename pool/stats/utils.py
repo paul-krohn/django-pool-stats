@@ -44,3 +44,7 @@ def update_season_stats(season_id):
 
 def expire_caches():
     page_cache.clear()
+
+
+def get_dupes_from_dict(dictionary):
+    return ['{}'.format(p) for p in {k: v for k, v in dictionary.items() if v > 1}]

@@ -2,6 +2,7 @@ import django.forms
 from django.core.exceptions import ValidationError
 
 from .models import Player, Team, Game, ScoreSheet, Match
+from .utils import get_dupes_from_dict
 from .views.season import get_default_season
 
 WINNER_CHOICES = (
@@ -104,6 +105,45 @@ class ScoreSheetCreationForm(django.forms.ModelForm):
     class Meta:
         model = Match
         exclude = []
+
+
+class TeamForm(django.forms.ModelForm):
+    class Meta:
+        model = Team
+        fields = ['name', 'players', 'table']
+        widgets = {
+            'name': django.forms.TextInput(),
+        }
+
+
+class TeamPlayerFormSet(django.forms.BaseModelFormSet):
+
+    class Meta:
+        model = Player
+        exclude = []  # TODO fix
+
+    def clean(self):
+        super().clean()
+
+        players = {}
+        player_count = 0
+        for form in self.forms:
+            if form.cleaned_data == {}:
+                pass  # there is an empty form in every formset; assume that is valid
+            elif 'DELETE' in form.cleaned_data and form.cleaned_data['DELETE'] is True:
+                pass  # assume deletions are valid
+            form_player = form.cleaned_data.get('player')
+            if form_player:
+                player_count += 1
+                if form_player in players:
+                    players[form_player] += 1
+                else:
+                    players[form_player] = 1
+        if len(players) < player_count:
+            raise ValidationError('there are duplicate players: {}'.format(', '.join(
+                get_dupes_from_dict(players)
+            )))
+
 
 
 class SubstitutionFormSet(django.forms.BaseModelFormSet):

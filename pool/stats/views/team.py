@@ -1,10 +1,12 @@
 import datetime
 
 from django.db.models import Q
+from django.forms import modelformset_factory
 from django.shortcuts import redirect, render, get_object_or_404
 from django.template import loader
 
-from ..models import Team, Tie, TieBreakerResult, Season, PlayerSeasonSummary, ScoreSheet, Match
+from ..forms import TeamPlayerFormSet, TeamForm
+from ..models import Player, Team, Tie, TieBreakerResult, Season, PlayerSeasonSummary, ScoreSheet, Match
 from ..utils import page_cache as cache
 from ..views import check_season
 
@@ -79,3 +81,18 @@ def team(request, team_id, after=None):
         'matches': _matches,
     }
     return render(request, 'stats/team.html', context)
+
+
+def register(request, team_id=None):
+
+    season = Season.objects.get(id=7)  # TODO: don't hard-code this
+    form = TeamForm()
+    if request.method == 'POST':
+        team_form = TeamForm(request.POST)
+        if team_form.is_valid():
+            t, c = Team.objects.update_or_create(team_form)
+            print(t, c)
+
+    return render(request, 'stats/team_register.html', context={
+        'form': form,
+    })
