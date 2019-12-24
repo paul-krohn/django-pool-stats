@@ -1,7 +1,7 @@
 import django.forms
 from django.core.exceptions import ValidationError
 
-from .models import Player, Team, Game, ScoreSheet, Match
+from .models import Game, Match, Player, ScoreSheet, Table, Team
 from .utils import get_dupes_from_dict
 from .views.season import get_default_season
 
@@ -108,6 +108,9 @@ class ScoreSheetCreationForm(django.forms.ModelForm):
 
 
 class TeamRegistrationForm(django.forms.ModelForm):
+
+    table = django.forms.ModelChoiceField(queryset=Table.objects.filter(active=True))
+
     class Meta:
         model = Team
         fields = ['name', 'captain', 'players', 'table']
