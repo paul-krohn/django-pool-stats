@@ -40,6 +40,7 @@
 <script type="text/javascript">
 
     $(document).ready(function() {
+        $('#id_captain').prop('required', true);
         $('select').multiselect({
             enableCaseInsensitiveFiltering: true,
             numberDisplayed: 1,
@@ -55,7 +56,6 @@
                   player_names.map(player => $("<li>").text(player)
                 ));
             },
-
         });
     });
 
