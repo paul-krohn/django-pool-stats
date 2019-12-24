@@ -25,7 +25,19 @@
 <script type="text/javascript">
 
     $(document).ready(function() {
-        $('select').multiselect({enableCaseInsensitiveFiltering: true});
+        $('select').multiselect({
+            enableCaseInsensitiveFiltering: true,
+            numberDisplayed: 1,
+            onChange: function(){
+                let player_names = [];
+                let el = $('#id_players');
+                el.find('option:selected').each(function(){
+                    player_names.push($(this).text());
+                });
+                $('#player_names').text(player_names.join(', '));
+            },
+
+        });
     });
 
     $("#lineup_save").confirm({
