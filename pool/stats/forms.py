@@ -107,7 +107,7 @@ class ScoreSheetCreationForm(django.forms.ModelForm):
         exclude = []
 
 
-class TeamForm(django.forms.ModelForm):
+class TeamRegistrationForm(django.forms.ModelForm):
     class Meta:
         model = Team
         fields = ['name', 'captain', 'players', 'table']

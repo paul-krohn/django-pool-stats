@@ -5,7 +5,7 @@ from django.forms import modelformset_factory
 from django.shortcuts import redirect, render, get_object_or_404
 from django.template import loader
 
-from ..forms import TeamPlayerFormSet, TeamForm
+from ..forms import TeamPlayerFormSet, TeamRegistrationForm
 from ..models import Player, Team, Tie, TieBreakerResult, Season, PlayerSeasonSummary, ScoreSheet, Match
 from ..utils import page_cache as cache
 from ..views import check_season
@@ -86,16 +86,16 @@ def team(request, team_id, after=None):
 def register(request, team_id=None):
 
     season = Season.objects.get(id=7)  # TODO: don't hard-code this
-    form = TeamForm()
+    form = TeamRegistrationForm()
     if request.method == 'POST':
-        team_form = TeamForm(request.POST)
+        team_form = TeamRegistrationForm(request.POST)
         if team_form.is_valid():
             team_form.instance.season = season
             team_form.save()
             return redirect('register', team_id=team_form.instance.id)
     elif team_id is not None:
         _team = Team.objects.get(id=team_id)
-        form = TeamForm(instance=_team)
+        form = TeamRegistrationForm(instance=_team)
 
     return render(request, 'stats/team_register.html', context={
         'form': form,
