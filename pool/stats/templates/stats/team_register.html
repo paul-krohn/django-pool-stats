@@ -11,14 +11,15 @@
     <table class="table" style="width: auto;">
     {% csrf_token %}
      <tr>
-         <th>{{ form.name.label }}</th><td>{{ form.name }}</td>
+         <th>{{ form.name.label }}</th><td>{{ form.name }}</td><td>Try to include the sponsor venue's name. Feel free to be punny!</td>
      </tr>
      <tr>
-         <th>{{ form.captain.label }}</th><td>{{ form.captain }}</td>
+         <th>{{ form.captain.label }}</th><td>{{ form.captain }}</td><td>Required field.</td>
      </tr>
      <tr>
          <th>{{ form.players.label }}</th>
-         <td>{{ form.players }}
+         <td>{{ form.players }}</td>
+         <td>
              <ol id="player_names">
                  {% if form.instance.id %}
                      {% for player_name in form.instance.players.all %}
@@ -29,10 +30,16 @@
          </td>
      </tr>
      <tr>
-         <th>{{ form.table.label }}</th><td>{{ form.table }}</td>
+         <th>{{ form.table.label }}</th>
+         <td>{{ form.table }}</td>
+         <td>Don't worry if you aren't 100% sure of the venue and/or table, just leave it blank.</td>
      </tr>
     <tr>
-        <td></td><td><input class="btn btn-primary" type="submit" value="Save team" /></td>
+        <td></td>
+        <td>
+            <input class="btn btn-primary" type="submit" value="Save team" />
+        </td>
+        <td>Done? Don't forget to save ...</td>
     </tr>
     </table>
 </form>
