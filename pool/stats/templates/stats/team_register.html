@@ -48,15 +48,16 @@
 
     $(document).ready(function() {
         $('#id_captain').prop('required', true);
-        $('select').multiselect({
+        $('#id_players').multiselect({
             enableCaseInsensitiveFiltering: true,
             numberDisplayed: 1,
             onChange: function(){
                 let player_names = [];
-                let el = $('#id_players');
-                el.find('option:selected').each(function(){
+                let player_select = $('#id_players');  // this id chosen by Django internals
+                player_select.find('option:selected').each(function(){
                     player_names.push($(this).text());
                 });
+                console.log('player names: ' + player_names);
                 let namesOL = $('#player_names');
                 namesOL.empty();
                 namesOL.append(
