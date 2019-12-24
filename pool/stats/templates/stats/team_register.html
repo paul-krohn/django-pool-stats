@@ -16,7 +16,13 @@
      <tr>
          <th>{{ form.players.label }}</th>
          <td>{{ form.players }}
-             <p id="player_names">{{ form.instance.players.all|join:", " }}</p>
+             <ol id="player_names">
+                 {% if form.instance.id %}
+                     {% for player_name in form.instance.players.all %}
+                         <li>{{ player_name }}</li>
+                     {% endfor %}
+                 {% endif %}
+             </ol>
          </td>
      </tr>
      <tr>
@@ -40,7 +46,11 @@
                 el.find('option:selected').each(function(){
                     player_names.push($(this).text());
                 });
-                $('#player_names').text(player_names.join(', '));
+                let namesOL = $('#player_names');
+                namesOL.empty();
+                namesOL.append(
+                  player_names.map(player => $("<li>").text(player)
+                ));
             },
 
         });
