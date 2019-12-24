@@ -10,17 +10,23 @@
     {% endif %}
     <table class="table" style="width: auto;">
     {% csrf_token %}
-    {{ form.as_table }}
+     <tr>
+         <th>{{ form.name.label }}</th><td>{{ form.name }}</td>
+     </tr>
+     <tr>
+         <th>{{ form.players.label }}</th>
+         <td>{{ form.players }}
+             <p id="player_names">{{ form.instance.players.all|join:", " }}</p>
+         </td>
+     </tr>
+     <tr>
+         <th>{{ form.table.label }}</th><td>{{ form.table }}</td>
+     </tr>
     <tr>
-        <td><input class="btn btn-primary" type="submit" value="Save team" /></td>
+        <td></td><td><input class="btn btn-primary" type="submit" value="Save team" /></td>
     </tr>
     </table>
 </form>
-<div>
-    <h3>Current Players</h3>
-    <p id="player_names">{{ form.instance.players.all|join:", " }}</p>
-</div>
-
 
 <script type="text/javascript">
 
@@ -40,14 +46,15 @@
         });
     });
 
-    $("#lineup_save").confirm({
+/*    $("#team_save").confirm({
         submitForm: true,
         post: true,
         text: "<b>Are you sure?</b><br/>",
         confirm: function(button) {
+            console.log('saving');
             $("#lineup_save").submit();
         }
-    });
+    }); */
 
 </script>
 {% endblock %}
