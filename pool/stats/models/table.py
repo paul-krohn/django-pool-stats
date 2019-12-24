@@ -13,3 +13,6 @@ class Table(models.Model):
             return ", ".join([self.venue.name, self.name])
         else:
             return self.venue.name
+
+    class Meta:
+        ordering = ['venue', '-name']
