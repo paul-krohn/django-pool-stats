@@ -110,7 +110,7 @@ class ScoreSheetCreationForm(django.forms.ModelForm):
 class TeamForm(django.forms.ModelForm):
     class Meta:
         model = Team
-        fields = ['name', 'players', 'table']
+        fields = ['name', 'captain', 'players', 'table']
         widgets = {
             'name': django.forms.TextInput(),
         }
