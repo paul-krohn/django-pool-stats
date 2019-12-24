@@ -90,8 +90,12 @@ def register(request, team_id=None):
     if request.method == 'POST':
         team_form = TeamForm(request.POST)
         if team_form.is_valid():
-            t, c = Team.objects.update_or_create(team_form)
-            print(t, c)
+            team_form.instance.season = season
+            team_form.save()
+            return redirect('register', team_id=team_form.instance.id)
+    elif team_id is not None:
+        _team = Team.objects.get(id=team_id)
+        form = TeamForm(instance=_team)
 
     return render(request, 'stats/team_register.html', context={
         'form': form,

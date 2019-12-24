@@ -4,22 +4,21 @@
 {% block content %}
 
 <h2>Register a team</h2>
-    :{{ form }}:
-<form action="{% url 'register'  %}" method="post">
-    {% if player_formset.non_form_errors %}
-        {{ player_formset.non_form_errors }}
+<form id="team_save" action="{% url 'register'  %}" method="post">
+    {% if form.non_form_errors %}
+        {{ form.non_form_errors }}
     {% endif %}
     <table class="table" style="width: auto;">
     {% csrf_token %}
-    {{ player_formset.management_form }}
-    {% for player_form in player_formset %}
-        {{ player_form.as_p }}
-    {% endfor %}
+    {{ form.as_table }}
     <tr>
-        <td><input class="btn btn-primary" type="submit" value="Save players" id="lineup_save"/></td></tr>
-</table>
+        <td><input class="btn btn-primary" type="submit" value="Save team" /></td>
+    </tr>
+    </table>
 </form>
 <div>
+    <h3>Current Players</h3>
+    <p id="player_names">{{ form.instance.players.all|join:", " }}</p>
 </div>
 
 
