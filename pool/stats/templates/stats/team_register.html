@@ -47,7 +47,9 @@
 <script type="text/javascript">
 
     $(document).ready(function() {
-        $('#id_captain').prop('required', true);
+        $('#id_captain').prop('required', true).multiselect({
+            enableCaseInsensitiveFiltering: true,
+        });
         $('#id_players').multiselect({
             enableCaseInsensitiveFiltering: true,
             numberDisplayed: 1,
@@ -64,6 +66,9 @@
                   player_names.map(player => $("<li>").text(player)
                 ));
             },
+        });
+        $('#id_table').multiselect({
+            enableCaseInsensitiveFiltering: true,
         });
     });
 
