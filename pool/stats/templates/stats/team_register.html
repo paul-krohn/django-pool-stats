@@ -87,7 +87,7 @@
                 updatePlayerNamesOL();
             },
         });
-        $(table_select).multiselect({
+        $(table_select).prop('required', false).multiselect({
             enableCaseInsensitiveFiltering: true,
         });
     });

@@ -7,8 +7,16 @@ from django.template import loader
 
 from ..forms import TeamPlayerFormSet, TeamRegistrationForm
 from ..models import Player, Team, Tie, TieBreakerResult, Season, PlayerSeasonSummary, ScoreSheet, Match
-from ..utils import page_cache as cache
+from ..utils import page_cache as cache, session_uid
 from ..views import check_season
+
+
+def user_can_edit_team(request, a_team):
+
+    # you can edit a team if registration is open and you created it
+    now = datetime.datetime.now()
+    return a_team.season.registration_end >= now >= a_team.season.registration_start and \
+           a_team.creator_session == session_uid(request)
 
 
 def teams(request, season_id=None):
@@ -91,11 +99,15 @@ def register(request, team_id=None):
         team_form = TeamRegistrationForm(request.POST)
         if team_form.is_valid():
             team_form.instance.season = season
+            team_form.creator_session = session_uid(request)
             team_form.save()
             return redirect('register', team_id=team_form.instance.id)
     elif team_id is not None:
-        _team = Team.objects.get(id=team_id)
-        form = TeamRegistrationForm(instance=_team)
+        if user_can_edit_team(request, team_id):
+            _team = Team.objects.get(id=team_id)
+            form = TeamRegistrationForm(instance=_team)
+        else:
+            return redirect('team', team_id)
 
     return render(request, 'stats/team_register.html', context={
         'form': form,
