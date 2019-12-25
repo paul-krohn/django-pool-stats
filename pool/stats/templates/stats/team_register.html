@@ -47,27 +47,47 @@
 <script type="text/javascript">
 
     $(document).ready(function() {
-        $('#id_captain').prop('required', true).multiselect({
+        let captain_select = $('#id_captain');  // id style is from Django internals
+        let player_select = $('#id_players');
+        let table_select = $('#id_table');
+        let player_names = [];
+        function updatePlayerNamesOL() {
+            let namesOL = $('#player_names');
+            namesOL.empty();
+            namesOL.append(
+              player_names.map(player => $("<li>").text(player)
+            ));
+        }
+
+        captain_select.prop('required', true).multiselect({
             enableCaseInsensitiveFiltering: true,
+            onChange: function() {
+                captain_select.find('option:selected').each(function(){
+                    let captain_id = $(this).val();
+                    if (! player_names.includes($(this).text())) {
+                        player_names.push($(this).text());
+                    }
+                    $('#id_players option[value="' + captain_id + '"]').attr('selected','selected');
+                    player_select.multiselect('rebuild');
+                    updatePlayerNamesOL();
+                });
+            },
         });
-        $('#id_players').multiselect({
+        player_select.multiselect({
             enableCaseInsensitiveFiltering: true,
             numberDisplayed: 1,
             onChange: function(){
-                let player_names = [];
-                let player_select = $('#id_players');  // this id chosen by Django internals
+                player_names = [];
                 player_select.find('option:selected').each(function(){
-                    player_names.push($(this).text());
+                    if (! player_names.includes($(this).text())) {
+                        player_names.push($(this).text());
+                    }
                 });
                 console.log('player names: ' + player_names);
-                let namesOL = $('#player_names');
-                namesOL.empty();
-                namesOL.append(
-                  player_names.map(player => $("<li>").text(player)
-                ));
+                updatePlayerNamesOL();
             },
         });
-        $('#id_table').multiselect({
+        $(table_select).multiselect({
             enableCaseInsensitiveFiltering: true,
         });
     });
