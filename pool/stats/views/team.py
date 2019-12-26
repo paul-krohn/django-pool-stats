@@ -14,9 +14,11 @@ from ..views import check_season
 def user_can_edit_team(request, a_team):
 
     # you can edit a team if registration is open and you created it
-    now = datetime.datetime.now()
-    return a_team.season.registration_end >= now >= a_team.season.registration_start and \
+    now = datetime.datetime.now().date()
+    print('session id is: {}'.format(session_uid(request)))
+    return_value = a_team.season.registration_end >= now >= a_team.season.registration_start and \
            a_team.creator_session == session_uid(request)
+    return return_value
 
 
 def teams(request, season_id=None):
@@ -96,15 +98,17 @@ def register(request, team_id=None):
     season = Season.objects.get(id=7)  # TODO: don't hard-code this
     form = TeamRegistrationForm()
     if request.method == 'POST':
-        team_form = TeamRegistrationForm(request.POST)
-        if team_form.is_valid():
-            team_form.instance.season = season
-            team_form.creator_session = session_uid(request)
-            team_form.save()
-            return redirect('register', team_id=team_form.instance.id)
+        form = TeamRegistrationForm(request.POST)
+        print('form validness: {}'.format(form.is_valid()))
+        if form.is_valid():
+            form.instance.season = season
+            form.instance.creator_session = session_uid(request)
+            form.save()
+            return redirect('register', team_id=form.instance.id)
+
     elif team_id is not None:
-        if user_can_edit_team(request, team_id):
-            _team = Team.objects.get(id=team_id)
+        _team = Team.objects.get(id=team_id)
+        if user_can_edit_team(request, _team):
             form = TeamRegistrationForm(instance=_team)
         else:
             return redirect('team', team_id)

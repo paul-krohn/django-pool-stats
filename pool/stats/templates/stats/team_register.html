@@ -8,6 +8,9 @@
     {% if form.non_form_errors %}
         {{ form.non_form_errors }}
     {% endif %}
+    {% if form.errors %}
+        {{ form.errors }}
+    {% endif %}
     <table class="table" style="width: auto;">
     {% csrf_token %}
      <tr>
