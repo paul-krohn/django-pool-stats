@@ -6,7 +6,8 @@
 <h2>Register a team</h2>
     <h4>For returning teams/players</h4>
     <p>If you have new players, please contact the <a href="mailto:webmaster.sfpapool@gmail.com">Webmaster</a>. Please provide full legal name, email address, and phone number for each new player.</p>
-<form id="team_save" action="{% url 'register'  %}" method="post">
+
+<form id="team_save" action="{% url 'register'  %}{% if team_id %}/{{ team_id }}{% endif %}" method="post">
     {% if form.non_form_errors %}
         {{ form.non_form_errors }}
     {% endif %}

@@ -95,24 +95,30 @@ def team(request, team_id, after=None):
 
 def register(request, team_id=None):
 
-    season = Season.objects.get(id=7)  # TODO: don't hard-code this
     form = TeamRegistrationForm()
-    if request.method == 'POST':
-        form = TeamRegistrationForm(request.POST)
-        print('form validness: {}'.format(form.is_valid()))
-        if form.is_valid():
-            form.instance.season = season
-            form.instance.creator_session = session_uid(request)
-            form.save()
-            return redirect('register', team_id=form.instance.id)
+    season = Season.objects.get(id=7)  # TODO: don't hard-code this
 
-    elif team_id is not None:
+    if team_id is not None:
         _team = Team.objects.get(id=team_id)
         if user_can_edit_team(request, _team):
             form = TeamRegistrationForm(instance=_team)
         else:
             return redirect('team', team_id)
 
-    return render(request, 'stats/team_register.html', context={
+    if request.method == 'POST':
+        form = TeamRegistrationForm(request.POST)
+        print('form validness: {}'.format(form.is_valid()))
+        if form.is_valid():
+            if team_id is not None:
+                form.instance.id = team_id
+            form.instance.season = season
+            form.instance.creator_session = session_uid(request)
+            form.save()
+            return redirect('register', team_id=form.instance.id)
+
+    context = {
         'form': form,
-    })
+    }
+    if team_id is not None:
+        context['team_id'] = team_id
+    return render(request, 'stats/team_register.html', context=context)
