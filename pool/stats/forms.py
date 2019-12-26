@@ -111,6 +111,10 @@ class TeamRegistrationForm(django.forms.ModelForm):
 
     table = django.forms.ModelChoiceField(queryset=Table.objects.filter(active=True))
 
+    def __init__(self, *args, **kwargs):
+        super(TeamRegistrationForm, self).__init__(*args, **kwargs)
+        self.fields['table'].required = False
+
     class Meta:
         model = Team
         fields = ['name', 'captain', 'players', 'table']
