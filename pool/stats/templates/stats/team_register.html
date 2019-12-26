@@ -2,7 +2,7 @@
 {% block title %}SFPA :: Team :: Register {% endblock %}
 
 {% block content %}
-
+{% if registration_open %}
 <h2>Register a team</h2>
     <h4>For returning teams/players</h4>
     <p>If you have new players, please contact the <a href="mailto:webmaster.sfpapool@gmail.com">Webmaster</a>. Please provide full legal name, email address, and phone number for each new player.</p>
@@ -49,7 +49,9 @@
     </tr>
     </table>
 </form>
-
+{% else %}
+    <h2>Registration is currently closed.</h2>
+{% endif %}
 <script type="text/javascript">
 
     $(document).ready(function() {

@@ -96,7 +96,16 @@ def team(request, team_id, after=None):
 def register(request, team_id=None):
 
     form = TeamRegistrationForm()
-    season = Season.objects.get(id=7)  # TODO: don't hard-code this
+    now = datetime.datetime.now().date()
+    seasons = Season.objects.filter(
+        registration_start__lte=now
+    ).filter(
+        registration_end__gte=now
+    )
+    registration_open = False
+    if len(seasons) == 1:
+        registration_open = True
+        season = seasons[0]
 
     if team_id is not None:
         _team = Team.objects.get(id=team_id)
@@ -117,6 +126,7 @@ def register(request, team_id=None):
             return redirect('register', team_id=form.instance.id)
 
     context = {
+        'registration_open': registration_open,
         'form': form,
     }
     if team_id is not None:
