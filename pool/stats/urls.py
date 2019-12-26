@@ -29,6 +29,9 @@ urlpatterns = [
     # the 'after' parameter is really just to make it testable
     url(r'^team/(?P<team_id>[0-9]+)/(?P<after>[0-9-]+)?$', team.team, name='team'),
     url(r'^team/(?P<team_id>[0-9]+)/', team.team, name='team'),
+    url(r'^team/register/(?P<team_id>[0-9]+)', team.register, name='register'),
+    url(r'^team/register', team.register, name='register'),
+
 
     url(r'^teams/(?P<season_id>[0-9]+)', team.teams, name='teams'),
     url(r'^teams/', views.index, name='teams'),

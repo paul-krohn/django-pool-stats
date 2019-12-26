@@ -1,12 +1,24 @@
 import datetime
 
 from django.db.models import Q
+from django.forms import modelformset_factory
 from django.shortcuts import redirect, render, get_object_or_404
 from django.template import loader
 
-from ..models import Team, Tie, TieBreakerResult, Season, PlayerSeasonSummary, ScoreSheet, Match
-from ..utils import page_cache as cache
+from ..forms import TeamPlayerFormSet, TeamRegistrationForm
+from ..models import Player, Team, Tie, TieBreakerResult, Season, PlayerSeasonSummary, ScoreSheet, Match
+from ..utils import page_cache as cache, session_uid
 from ..views import check_season
+
+
+def user_can_edit_team(request, a_team):
+
+    # you can edit a team if registration is open and you created it
+    now = datetime.datetime.now().date()
+    print('session id is: {}'.format(session_uid(request)))
+    return_value = a_team.season.registration_end >= now >= a_team.season.registration_start and \
+           a_team.creator_session == session_uid(request)
+    return return_value
 
 
 def teams(request, season_id=None):
@@ -79,3 +91,44 @@ def team(request, team_id, after=None):
         'matches': _matches,
     }
     return render(request, 'stats/team.html', context)
+
+
+def register(request, team_id=None):
+
+    form = TeamRegistrationForm()
+    now = datetime.datetime.now().date()
+    seasons = Season.objects.filter(
+        registration_start__lte=now
+    ).filter(
+        registration_end__gte=now
+    )
+    registration_open = False
+    if len(seasons) == 1:
+        registration_open = True
+        season = seasons[0]
+
+    if team_id is not None:
+        _team = Team.objects.get(id=team_id)
+        if user_can_edit_team(request, _team):
+            form = TeamRegistrationForm(instance=_team)
+        else:
+            return redirect('team', team_id)
+
+    if request.method == 'POST':
+        form = TeamRegistrationForm(request.POST)
+        print('form validness: {}'.format(form.is_valid()))
+        if form.is_valid():
+            if team_id is not None:
+                form.instance.id = team_id
+            form.instance.season = season
+            form.instance.creator_session = session_uid(request)
+            form.save()
+            return redirect('register', team_id=form.instance.id)
+
+    context = {
+        'registration_open': registration_open,
+        'form': form,
+    }
+    if team_id is not None:
+        context['team_id'] = team_id
+    return render(request, 'stats/team_register.html', context=context)

@@ -1,0 +1,112 @@
+{% extends "stats/base.html" %}
+{% block title %}SFPA :: Team :: Register {% endblock %}
+
+{% block content %}
+{% if registration_open %}
+<h2>Register a team</h2>
+    <h4>For returning teams/players</h4>
+    <p>If you have new players, please contact the <a href="mailto:webmaster.sfpapool@gmail.com">Webmaster</a>. Please provide full legal name, email address, and phone number for each new player.</p>
+
+<form id="team_save" action="{% url 'register'  %}{% if team_id %}/{{ team_id }}{% endif %}" method="post">
+    {% if form.non_form_errors %}
+        {{ form.non_form_errors }}
+    {% endif %}
+    {% if form.errors %}
+        {{ form.errors }}
+    {% endif %}
+    <table class="table" style="width: auto;">
+    {% csrf_token %}
+     <tr>
+         <th>{{ form.name.label }}</th><td>{{ form.name }}</td><td>Try to include the sponsor venue's name. Feel free to be punny!</td>
+     </tr>
+     <tr>
+         <th>{{ form.captain.label }}</th><td>{{ form.captain }}</td><td>Required field.</td>
+     </tr>
+     <tr>
+         <th>{{ form.players.label }}</th>
+         <td>{{ form.players }}</td>
+         <td>
+             <ol id="player_names">
+                 {% if form.instance.id %}
+                     {% for player_name in form.instance.players.all %}
+                         <li>{{ player_name }}</li>
+                     {% endfor %}
+                 {% endif %}
+             </ol>
+         </td>
+     </tr>
+     <tr>
+         <th>{{ form.table.label }}</th>
+         <td>{{ form.table }}</td>
+         <td>Don't worry if you aren't 100% sure of the venue and/or table, just leave it blank.</td>
+     </tr>
+    <tr>
+        <td></td>
+        <td>
+            <input class="btn btn-primary" type="submit" value="Save team" />
+        </td>
+        <td>Done? Don't forget to save ...</td>
+    </tr>
+    </table>
+</form>
+{% else %}
+    <h2>Registration is currently closed.</h2>
+{% endif %}
+<script type="text/javascript">
+
+    $(document).ready(function() {
+
+        let captain_select = $('#id_captain');  // id style is from Django internals
+        let player_select = $('#id_players');
+        let table_select = $('#id_table');
+
+        function selectCaptainInPlayers() {
+            captain_select.find('option:selected').each(function() {
+                let captain_id = $(this).val();
+                $('#id_players option[value="' + captain_id + '"]').attr('selected', 'selected');
+            });
+            // since the multi-select plugin creates a UL in front of the HTML select Django
+            // builds. you need to update/rebuild it when you change things under the covers.
+            player_select.multiselect('rebuild');
+        }
+
+        function updatePlayerNamesOL() {
+            console.log("updating player names OL");
+
+            let namesOL = $('#player_names');
+            let player_names = [];
+
+            player_select.find('option:selected').each(function(){
+                console.log("evaluating " + $(this).text());
+                if (! player_names.includes($(this).text())) {
+                    player_names.push($(this).text());
+                }
+            });
+
+            namesOL.empty();
+            namesOL.append(
+              player_names.map(player => $("<li>").text(player)
+            ));
+
+        }
+
+        captain_select.prop('required', true).multiselect({
+            enableCaseInsensitiveFiltering: true,
+            onChange: function() {
+                selectCaptainInPlayers();
+                updatePlayerNamesOL();
+            },
+        });
+        player_select.multiselect({
+            enableCaseInsensitiveFiltering: true,
+            numberDisplayed: 1,
+            onChange: updatePlayerNamesOL,
+        });
+        $(table_select).prop('required', false).multiselect({
+            enableCaseInsensitiveFiltering: true,
+        });
+    });
+
+</script>
+{% endblock %}
+

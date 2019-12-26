@@ -10,6 +10,15 @@
     <h4><a href="{% url 'sponsor' team.sponsor.id %}">{{ team.sponsor }}</a></h4>
 {%  endif %}
 {% if team.captain %}<p>Captain: <a href="{% url 'player' team.captain.id %}">{{ team.captain }}</a></p>{% endif %}
+    {% if not team.wins|add:team.losses %}
+        {# this is here to display _something_ after registration and before play starts #}
+        <ul>
+        {% for player in team.players.all %}
+            <li><a href="{% url 'player' player.id team.season.id %}">{{ player }}</a></li>
+        {% endfor %}
+        </ul>
+        {%  else %}
+    {% endif %}
 {{ players_table }}
 {% endif %}
 {% if official_score_sheets %}

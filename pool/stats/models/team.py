@@ -33,6 +33,7 @@ class Team(models.Model):
     division_ranking = models.IntegerField(null=True, blank=True)
     rank_tie_breaker = models.IntegerField(default=0, null=True, blank=True)
     table = models.ForeignKey(Table, blank=True, null=True, on_delete=models.CASCADE)
+    creator_session = models.CharField(max_length=16, null=True, blank=True)
 
     class Meta:
         ordering = ['name']

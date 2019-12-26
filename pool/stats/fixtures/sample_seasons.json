@@ -4,7 +4,7 @@
     "pk": 4,
     "fields": {
       "name": "Fall 2010",
-      "pub_date": "2010-08-03T12:00:00Z",
+      "pub_date": "2010-08-03",
       "is_default": true,
       "minimum_games": 1
     }
@@ -14,7 +14,7 @@
     "pk": 5,
     "fields": {
       "name": "Spring 2011",
-      "pub_date": "2011-01-08T12:00:00Z",
+      "pub_date": "2011-01-08",
       "is_default": false,
       "minimum_games": 1
     }
