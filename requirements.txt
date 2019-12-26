@@ -1,4 +1,4 @@
-Django==2.1.15
+Django==3.0.1
 django-redis==4.11.0
 # mysql client on OS X needs an install from source with:
 # CFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform
