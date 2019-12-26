@@ -53,45 +53,52 @@
 <script type="text/javascript">
 
     $(document).ready(function() {
+
         let captain_select = $('#id_captain');  // id style is from Django internals
         let player_select = $('#id_players');
         let table_select = $('#id_table');
-        let player_names = [];
+
+        function selectCaptainInPlayers() {
+            captain_select.find('option:selected').each(function() {
+                let captain_id = $(this).val();
+                $('#id_players option[value="' + captain_id + '"]').attr('selected', 'selected');
+            });
+            // since the multi-select plugin creates a UL in front of the HTML select Django
+            // builds. you need to update/rebuild it when you change things under the covers.
+            player_select.multiselect('rebuild');
+        }
+
         function updatePlayerNamesOL() {
+            console.log("updating player names OL");
+
             let namesOL = $('#player_names');
+            let player_names = [];
+
+            player_select.find('option:selected').each(function(){
+                console.log("evaluating " + $(this).text());
+                if (! player_names.includes($(this).text())) {
+                    player_names.push($(this).text());
+                }
+            });
+
             namesOL.empty();
             namesOL.append(
               player_names.map(player => $("<li>").text(player)
             ));
+
         }
 
         captain_select.prop('required', true).multiselect({
             enableCaseInsensitiveFiltering: true,
             onChange: function() {
-                captain_select.find('option:selected').each(function(){
-                    let captain_id = $(this).val();
-                    if (! player_names.includes($(this).text())) {
-                        player_names.push($(this).text());
-                    }
-                    $('#id_players option[value="' + captain_id + '"]').attr('selected','selected');
-                    player_select.multiselect('rebuild');
-                    updatePlayerNamesOL();
-                });
+                selectCaptainInPlayers();
+                updatePlayerNamesOL();
             },
         });
         player_select.multiselect({
             enableCaseInsensitiveFiltering: true,
             numberDisplayed: 1,
-            onChange: function(){
-                player_names = [];
-                player_select.find('option:selected').each(function(){
-                    if (! player_names.includes($(this).text())) {
-                        player_names.push($(this).text());
-                    }
-                });
-                console.log('player names: ' + player_names);
-                updatePlayerNamesOL();
-            },
+            onChange: updatePlayerNamesOL,
         });
         $(table_select).prop('required', false).multiselect({
             enableCaseInsensitiveFiltering: true,
