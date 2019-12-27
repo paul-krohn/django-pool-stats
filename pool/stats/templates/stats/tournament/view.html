@@ -117,17 +117,17 @@
                 <div class="matchup-participant-common matchup-participant-names matchup-participant-winner">Winning Team</div>
             </div>
         </div>
-            <div  v-if="the_tournament.brackets.length > 1" class="matchup-wrapper matchup-wrapper-w .legend" style="float: left; width: fit-content; margin-right: 4px;">
+            <div  v-if="the_tournament.brackets && the_tournament.brackets.length > 1" class="matchup-wrapper matchup-wrapper-w .legend" style="float: left; width: fit-content; margin-right: 4px;">
                 <div class="matchup-participant">
                     <div class="matchup-participant-common matchup-participant-names">0-loss bracket</div>
                 </div>
             </div>
-            <div  v-if="the_tournament.brackets.length > 1" class="matchup-wrapper matchup-wrapper-l" style="float: left; width: fit-content; margin-right: 4px;">
+            <div  v-if="the_tournament.brackets && the_tournament.brackets.length > 1" class="matchup-wrapper matchup-wrapper-l" style="float: left; width: fit-content; margin-right: 4px;">
                 <div class="matchup-participant">
                     <div class="matchup-participant-common matchup-participant-names">1-loss bracket</div>
                 </div>
             </div>
-            <div  v-if="the_tournament.brackets.length > 1" class="matchup-wrapper matchup-wrapper-l if_necessary" style="float: left; width: fit-content; margin-right: 4px;">
+            <div  v-if="the_tournament.brackets && the_tournament.brackets.length > 1" class="matchup-wrapper matchup-wrapper-l if_necessary" style="float: left; width: fit-content; margin-right: 4px;">
                 <div class="matchup-participant">
                     <div class="matchup-participant-common matchup-participant-names">If necessary</div>
                 </div>
