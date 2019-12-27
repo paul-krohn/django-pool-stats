@@ -148,8 +148,8 @@ function getDefaultBracketDivSize() {
     return sizes;
 }
 
-console.log('height: ' + getDefaultBracketDivSize().height);
-console.log('width: ' + getDefaultBracketDivSize().width);
+// console.log('height: ' + getDefaultBracketDivSize().height);
+// console.log('width: ' + getDefaultBracketDivSize().width);
 
 svg.width(getDefaultBracketDivSize().width);
 svg.height(getDefaultBracketDivSize().height);
@@ -176,7 +176,7 @@ function setInitialSvgSizes() {
 }
 
 function scaleElem(divId, to='full') {
-    console.log('scaling ' + divId + " to " + to);
+    // console.log('scaling ' + divId + " to " + to);
     let theDiv = $('#'+ divId);
     let contentDiv = $('#content');
 
@@ -309,22 +309,22 @@ let g = new dagreD3.graphlib.Graph({
 
 
 function drawNodes(data, bracketName='all', clear=false) {
-    console.log(`drawNodes called with clear: ${clear} and bracket name: ${bracketName}` );
+    // console.log(`drawNodes called with clear: ${clear} and bracket name: ${bracketName}` );
 
     if (clear === true) {
         g.nodes().forEach(function(n){
-            console.log(`checking out node: ${n}`);
+            // console.log(`checking out node: ${n}`);
             if (!n.startsWith(bracketName)) {
-                console.log("removing " + n);
+                // console.log("removing " + n);
                 g.removeNode(n);
             }
         })
     }
     // let source_match = matchups.filter(m => m.id === this_source_match)[0];
     let bracketNames = bracketName === 'all' ? ['w', 'l'] : [bracketName];
-    console.log("the bracket names are: " + bracketNames);
+    // console.log("the bracket names are: " + bracketNames);
     data["brackets"].filter(b => bracketNames.includes(b.type)).forEach(function (br) {
-        console.log(`${br.type}`);
+        // console.log(`${br.type}`);
         br["rounds"].forEach(function (ro) {
             ro['matchups'].forEach(function (mu) {
                 //console.log("bye winner: " + mu.bye_winner);
@@ -504,19 +504,19 @@ $(document).ready(function () {
             },
             setConfirmDialogs: function() {
                 let self = this;
-                {#console.log(self.the_tournament);#}
+                // console.log(self.the_tournament);
                 if (self.the_tournament.editable === false) {
                     return true;
                 }
-                {#console.log("editable: " + self.the_tournament.editable);#}
+                // console.log("editable: " + self.the_tournament.editable);
                 self.the_tournament.brackets.forEach(function(bracket, index){
-                    {#console.log("looking at bracket " + bracket.type);#}
+                    // console.log("looking at bracket " + bracket.type);
                     bracket.rounds.forEach(function(round, index){
-                        {#console.log("looking at round " + round.number  );#}
+                        // console.log("looking at round " + round.number  );
                         round.matchups.forEach(function(matchup, index){
                             if (matchup.participant_a && matchup.participant_b) {
                                 [matchup.participant_a, matchup.participant_b].forEach(function(participant, index) {
-                                    {#console.log("we need a confirm dialog for matchup " + matchup.id + " with dom id " + self.matchupButtonId(matchup, participant));#}
+                                    // console.log("we need a confirm dialog for matchup " + matchup.id + " with dom id " + self.matchupButtonId(matchup, participant));
                                     $('#' + self.matchupButtonId(matchup, participant)).confirm({
                                         title: self.participantText(matchup.participant_a) + " vs " + self.participantText(matchup.participant_b),
                                         text: '<b>' + self.participantText(participant) + "</b> is the winner",
@@ -530,8 +530,8 @@ $(document).ready(function () {
                                 if (matchup.participant_b) {
                                     participant = matchup.participant_b;
                                 }
-                                {#console.log('bye participant:' + participant);#}
-                                {#console.log("we need a bye close dialog for matchup " + matchup.id + " with dom id " + self.matchupButtonId(matchup, participant));#}
+                                // console.log('bye participant:' + participant);
+                                // console.log("we need a bye close dialog for matchup " + matchup.id + " with dom id " + self.matchupButtonId(matchup, participant));
                                 $('#' + self.matchupButtonId(matchup, participant)).confirm({
                                     title: 'Close Bye',
                                     text: '<b>' + self.participantText(participant) + "</b> gets a bye",
@@ -546,7 +546,7 @@ $(document).ready(function () {
                 // now a confirm button for the "close dialogs" buttons
                 $('.close-byes').each(function(){
                     let bracket = $(this).data('bracket-type');
-                    console.log('setting a confirm for closing ' + bracket + ' byes.');
+                    // console.log('setting a confirm for closing ' + bracket + ' byes.');
                     $(this).confirm({
                         title: "confirm closing byes",
                         text: 'Mark <b>all byes</b> with winners?',
@@ -637,7 +637,7 @@ $(document).ready(function () {
                     },
                     dataType: 'application/json',
                 });
-                console.log('closing byes in bracket ' + bracketType);
+                // console.log('closing byes in bracket ' + bracketType);
                 $.post("{% url 'tournament_controls' tournament.id %}", {
                     'bracket_type': bracketType,
                     'action': 'close_byes',
