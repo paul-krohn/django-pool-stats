@@ -30,7 +30,6 @@ class PlayerElo(models.Model):
 
         main_filter_args = {
             'scoresheet__official': True,
-            'scoresheet__match__playoff': False,
             'scoresheet__match__season_id': season_id,
             'playerelo__isnull': True,
             'forfeit': False,
