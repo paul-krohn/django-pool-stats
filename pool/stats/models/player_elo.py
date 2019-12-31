@@ -113,19 +113,6 @@ def get_summaries(game, season_id):
     return summaries
 
 
-def get_games_filter(options):
-    main_filter_args = {
-        'scoresheet__official': True,
-        'scoresheet__match__playoff': False,
-        'forfeit': False,
-    }
-    if options['type'] == 'scoresheet':
-        main_filter_args['scoresheet__id'] = options['the_id']
-    elif options['type'] == 'season':
-        main_filter_args['scoresheet__match__season_id'] = options['the_id']
-    return main_filter_args
-
-
 def get_previous_season(season_id):
     this_season = Season.objects.get(id=season_id)
     # now get the seasons before this one (ie excluding this one), ordered by date
