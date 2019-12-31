@@ -189,6 +189,7 @@ function scaleElem(divId, to='full') {
     console.log(`before: W: ${beforeScalingBoundingBox.width} H: ${beforeScalingBoundingBox.height}`);
     console.log(`before: x: ${beforeScalingBoundingBox.x} y: ${beforeScalingBoundingBox.y}`);
     */
+    let transformString = 'none';
 
     let ratio = 1.0;
     switch(to) {
@@ -199,6 +200,9 @@ function scaleElem(divId, to='full') {
         // ratio = 0.4;
         ratio = (contentDiv.width() / theDiv.width());
         // console.log(`content div width: ${contentDiv.width()} svg width: ${theDiv.width()} ratio: ${ratio}`);
+        let xTranslateArg = -0.5 * (1 - ratio) * (beforeScalingBoundingBox.width);
+        let yTranslateArg = -0.5 * (1 - ratio) * (beforeScalingBoundingBox.height);
+        transformString = `translateX(${xTranslateArg}px) translateY(${yTranslateArg}px) scale(${ratio})`;
         break;
       default:
         ratio = 1;
@@ -212,9 +216,6 @@ function scaleElem(divId, to='full') {
       https://stackoverflow.com/questions/27635272/css3-transform-order-matters-rightmost-operation-first
     */
 
-    let xTranslateArg = -0.5 * (1 - ratio) * (beforeScalingBoundingBox.width);
-    let yTranslateArg = -0.5 * (1 - ratio) * (beforeScalingBoundingBox.height);
-    let transformString = `translateX(${xTranslateArg}px) translateY(${yTranslateArg}px) scale(${ratio})`;
 
     // console.log('transform css: ' + transformString);
     theDiv.css('transform', transformString);
