@@ -103,6 +103,7 @@ def register(request, team_id=None):
         registration_end__gte=now
     )
     registration_open = False
+    season = None
     if len(seasons) == 1:
         registration_open = True
         season = seasons[0]
@@ -128,6 +129,7 @@ def register(request, team_id=None):
     context = {
         'registration_open': registration_open,
         'form': form,
+        'season': season,
     }
     if team_id is not None:
         context['team_id'] = team_id

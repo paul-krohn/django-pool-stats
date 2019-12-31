@@ -30,7 +30,6 @@ class PlayerElo(models.Model):
 
         main_filter_args = {
             'scoresheet__official': True,
-            'scoresheet__match__playoff': False,
             'scoresheet__match__season_id': season_id,
             'playerelo__isnull': True,
             'forfeit': False,
@@ -111,19 +110,6 @@ def get_summaries(game, season_id):
             print(
                 "no season summary for {}({}) based on game id {}. error: {}".format(player, player.id, game.id, e))
     return summaries
-
-
-def get_games_filter(options):
-    main_filter_args = {
-        'scoresheet__official': True,
-        'scoresheet__match__playoff': False,
-        'forfeit': False,
-    }
-    if options['type'] == 'scoresheet':
-        main_filter_args['scoresheet__id'] = options['the_id']
-    elif options['type'] == 'season':
-        main_filter_args['scoresheet__match__season_id'] = options['the_id']
-    return main_filter_args
 
 
 def get_previous_season(season_id):
