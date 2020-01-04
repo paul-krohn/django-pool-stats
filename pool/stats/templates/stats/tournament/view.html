@@ -168,25 +168,6 @@
 </div>
 
 <script>
-let svg = $("#bracketSvg");
-
-function getDefaultBracketDivSize() {
-    let sizes = {};
-    let heightMultiple = {{ tournament.flopped|yesno:"1.25,1.0,1.0" }};
-    let bracketSize = {{ tournament.bracket_size }};
-    sizes.height = heightMultiple * bracketSize * 60 + 100;
-    sizes.width = bracketSize * 180 + 100;
-    return sizes;
-}
-
-// console.log('height: ' + getDefaultBracketDivSize().height);
-// console.log('width: ' + getDefaultBracketDivSize().width);
-
-svg.width(getDefaultBracketDivSize().width);
-svg.height(getDefaultBracketDivSize().height);
-
-let bracketBorder = $("#bracket-border");
-// bracketBorder.width(getDefaultBracketDivSize().width);
 
 function getSvgSize(svgId) {
     // first, jquery-select the SVG element by ID
@@ -509,6 +490,32 @@ function renderDiag() {
 
 }
 
+
+class BracketController {
+    constructor(args) {
+        console.log(`constructor called with ${args.contentDiv}, ${args.svgDiv}, ${args.wrapperDiv}`);
+        this.contentDiv = $(`#${args.contentDiv || 'content'}`);
+        this.svgDiv = $(`#${args.svgDiv || 'bracketSvg'}`);
+        this.wrapperDiv = $(`#${args.wrapperDiv || 'bracket-border'}`);
+        this.bracketScale = 1.0;
+        this.bracketSize = args.bracketSize;
+
+        this.setDefaultBracketElementSize();
+        console.log('svg is now: ' + this.svgDiv.height() + ' by ' + this.svgDiv.width());
+
+    }
+
+    setDefaultBracketElementSize() {
+        // set a big-enough, but not ridiculous, size for the svg element, so it can be draw,
+        // then it can be re-sized later when we can read the actual size of the svg.
+
+        let defaultHeight = this.bracketSize * 90 + 100;
+        let defaultWidth = this.bracketSize * 180 + 100;
+        this.svgDiv.height(defaultHeight).width(defaultWidth);
+        this.wrapperDiv.height(defaultHeight).width(defaultWidth);
+    }
+
+}
 $(document).ready(function () {
     // console.log("the document is ready");
     getData('all');
