@@ -458,8 +458,7 @@ class BracketController {
         let matchups = [];
         d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(data) {
             if (clear) {
-                // $("#bracketSvg").find('svg').find('g').remove();
-                this.svgDiv.find('svg').find('g').remove();
+                $('#bracketSvg').find('svg').find('g').remove();
             }
             if (lastRound === null) {
                 // lastRound = data['brackets'].filter(b => (b.type === 'w'))[0].length;
