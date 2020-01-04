@@ -88,21 +88,52 @@
 
     <div id="bracket-wrapper">
     <div id="bracket-controls">
-    {% if tournament.elimination == 'double' %}
-        <input type="button" class="btn btn-sm" value="combined"
-               onclick="scaleElem('bracket-border', 'full'); getData();"/>
-        <input type="button" class="btn btn-sm" value="1-loss"
-               onclick="scaleElem('bracket-border', 'full'); getData(bracket='l', true);"/>
-        <input type="button" class="btn btn-sm" value="0-loss"
-               onclick="scaleElem('bracket-border', 'full'); getData(bracket='w', true);"/>
-    {% endif %}
+    <div>
+        <form class="form-inline" id="bracket-controller">
+            <div class="form-group">
+            <label>display: </label>
+            <select style="width: auto;" class="form-control" id="bracket-display-style">
+                <option selected value="all">combined</option>
+                <option value="w">0-loss</option>
+                <option value="l">1-loss</option>
+            </select>
+
+            <label for="first-round-number">From round</label>
+            <select style="width: auto;" class="form-control" id="first-round-number">
+                <option selected>1</option>
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+            </select>
+
+            <label for="first-round-number">to round</label>
+            <select style="width: auto;" class="form-control" id="last-round-number">
+                <option>2</option>
+                <option>3</option>
+                <option>4</option>
+                <option>5</option>
+                <option selected>6</option>
+            </select>
+            </div>
+            <input type="button" class="btn btn-sm" value="update bracket"
+                onclick="getData(bracket=$('#bracket-display-style').val(),
+                        firstRound=$('#first-round-number').val(),
+                        lastRound=$('#last-round-number').val(),
+                        clear=true
+                    );"
+            />
+
+        </form>
+
+    <div id="bracket-border">
+        <svg id="bracketSvg" ></svg>
+    </div>
+    </div>
         <input type="button" class="btn btn-sm" value="scale to width"
                onclick="scaleElem('bracket-border', 'window');"/>
         <input type="button" class="btn btn-sm" value="scale 100%"
                onclick="scaleElem('bracket-border', 'full');"/>
-    </div>
-    <div id="bracket-border">
-        <svg id="bracketSvg" ></svg>
     </div>
     <div>
     <h4>Legend</h4>
@@ -225,7 +256,7 @@ function scaleElem(divId, to='full') {
 function matchupHtml(matchup, bracket='w', winner=null) {
 
   let matchupDiv = document.createElement("div");
-  let matchupClasses = ['matchup-wrapper', 'matchup-wrapper-' + bracket]
+  let matchupClasses = ['matchup-wrapper', 'matchup-wrapper-' + bracket];
   if (!matchup.is_necessary) {
       matchupClasses.push('if_necessary');
   }
@@ -309,7 +340,8 @@ let g = new dagreD3.graphlib.Graph({
 });
 
 
-function drawNodes(data, bracketName='all', clear=false) {
+//function drawNodes(data, bracketName='all', firstRound=1, lastRound=null, clear=false) {
+function drawNodes(data, bracketName, firstRound, lastRound, clear=false) {
     // console.log(`drawNodes called with clear: ${clear} and bracket name: ${bracketName}` );
 
     if (clear === true) {
@@ -327,23 +359,28 @@ function drawNodes(data, bracketName='all', clear=false) {
     data["brackets"].filter(b => bracketNames.includes(b.type)).forEach(function (br) {
         // console.log(`${br.type}`);
         br["rounds"].forEach(function (ro) {
-            ro['matchups'].forEach(function (mu) {
-                //console.log("bye winner: " + mu.bye_winner);
-                if (mu.bye_winner === 0 || ro.number > 1 || br.type === "l") {
-                    g.setNode(mu.name, {
-                        // if you are tempted to set the width here, maybe don't
-                        labelType: "html",
-                        label: matchupHtml(mu, br.type),
-                        padding: 2,
-                    });
-                }
-            })
+            if (ro.number >= firstRound && (lastRound && ro.number <= lastRound)) {
+                ro['matchups'].forEach(function (mu) {
+                    //console.log("bye winner: " + mu.bye_winner);
+                    if (mu.bye_winner === 0 || ro.number > 1 || br.type === "l") {
+
+                        g.setNode(mu.name, {
+                            // if you are tempted to set the width here, maybe don't
+                            labelType: "html",
+                            label: matchupHtml(mu, br.type),
+                            padding: 2,
+                        });
+                    }
+                })
+            }
         });
     });
 }
 
 
-function getData(bracket='all', clear=false) {
+function getData(bracket='all', firstRound=1, lastRound=null, clear=false) {
+
+    console.log(`getData called with bracket: ${bracket} firstRound: ${firstRound} lastRound: ${lastRound} clear: ${clear}`);
 
     // console.log("getData called");
     let tournamentJson = "{% url 'tournament_json' tournament.id %}?svg";
@@ -352,23 +389,38 @@ function getData(bracket='all', clear=false) {
         if (clear) {
             $("#bracketSvg").find('svg').find('g').remove();
         }
+        if (lastRound === null) {
+            // lastRound = data['brackets'].filter(b => (b.type === 'w'))[0].length;
+            lastRound = {{ tournament.round_count }};
+            if (data["elimination"] === "double") {
+                lastRound += 2;
+            }
+        }
+        console.log(`now the last round is: ${lastRound}`);
         console.time('drawNodes');
-        drawNodes(data, bracket, clear);
+        drawNodes(data, bracket, firstRound, lastRound, clear);
         console.timeEnd('drawNodes');
 
         // the list of matchups has to be complete before drawing any matches, since the source
         // match name is used to display each match.
         let bracketNames = bracket === 'all' ? ['w', 'l'] : [bracket];
         data["brackets"].filter(b => bracketNames.includes(b.type)).forEach(function (br) {
+            let lastBracketRound = br["rounds"].length;
+            if (lastRound !== null) {
+                lastBracketRound = lastRound;
+            }
+
             br["rounds"].forEach(function (ro) {
-                ro['matchups'].forEach(function (mu) {
-                    mu.bracket = br;
-                    mu.round = ro;
-                    matchups.push(mu);
-                })
+                if (ro.number >= firstRound && (ro.number <= lastBracketRound)) {
+                    ro['matchups'].forEach(function (mu) {
+                        mu.bracket = br;
+                        mu.round = ro;
+                        matchups.push(mu);
+                    })
+                }
             });
         });
-        drawEdges(matchups, bracket);
+        drawEdges(matchups, bracket, firstRound, lastRound);
         console.time('renderDiag');
         renderDiag();
         //let boundingBox = $('#bracketSvg').find('g.output').getBoundingClientRect();
@@ -404,6 +456,7 @@ function drawEdges(matchups){
     // console.log("drawEdges called");
     // then join the matchups with edges -- you have to do this second so you don't try
     // to join to a matchup that doesn't exist yet.
+    console.log("the nodes are: " + g.nodes());
     matchups.forEach(function(matchup) {
         ['a', 'b'].forEach(function(letter){
             let this_source_match = matchup['source_match_' + letter];
@@ -421,15 +474,19 @@ function drawEdges(matchups){
                         edgeWeight = 2;
                     }
 
-                    g.setEdge(source_match.name, matchup.name, {
-                        curve: d3.curveBasis,
-                        lineInterpolate: 'basis',
-                        minlen: edgeMinLength,
-                        weight: edgeWeight,
-                        // label: "my weight is: " + edgeWeight,
-                        class: "bracket-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
-                        arrowheadClass: "arrowhead-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
-                    });
+                    //if (g.node(source_match.name) && g.node(matchup.name)) {
+                    if (g.nodes().includes(source_match.name) && g.nodes().includes(matchup.name)) {
+                        console.log(`setting edge from ${source_match.name} to ${matchup.name}`);
+                        g.setEdge(source_match.name, matchup.name, {
+                            curve: d3.curveBasis,
+                            lineInterpolate: 'basis',
+                            minlen: edgeMinLength,
+                            weight: edgeWeight,
+                            // label: "my weight is: " + edgeWeight,
+                            class: "bracket-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
+                            arrowheadClass: "arrowhead-" + (matchup[letter + "_want_winner"] ? "w" : "l"),
+                        });
+                    }
                 }
                     // console.log("we set an edge from source match: " + source_match.name + " to this match: " + matchup.name);
             }
@@ -455,6 +512,7 @@ function renderDiag() {
 $(document).ready(function () {
     // console.log("the document is ready");
     getData('all');
+
 });
 
     </script>
