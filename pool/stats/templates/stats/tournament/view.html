@@ -358,62 +358,6 @@ function drawNodes(data, bracketName, firstRound, lastRound, clear=false) {
     });
 }
 
-
-function getData(bracket='all', firstRound=1, lastRound=null, clear=false) {
-
-    console.log(`getData called with bracket: ${bracket} firstRound: ${firstRound} lastRound: ${lastRound} clear: ${clear}`);
-
-    // console.log("getData called");
-    let tournamentJson = "{% url 'tournament_json' tournament.id %}?svg";
-    let matchups = [];
-    d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(data) {
-        if (clear) {
-            $("#bracketSvg").find('svg').find('g').remove();
-        }
-        if (lastRound === null) {
-            // lastRound = data['brackets'].filter(b => (b.type === 'w'))[0].length;
-            lastRound = {{ tournament.round_count }};
-            if (data["elimination"] === "double") {
-                lastRound += 2;
-            }
-        }
-        console.log(`now the last round is: ${lastRound}`);
-        console.time('drawNodes');
-        drawNodes(data, bracket, firstRound, lastRound, clear);
-        console.timeEnd('drawNodes');
-
-        // the list of matchups has to be complete before drawing any matches, since the source
-        // match name is used to display each match.
-        let bracketNames = bracket === 'all' ? ['w', 'l'] : [bracket];
-        data["brackets"].filter(b => bracketNames.includes(b.type)).forEach(function (br) {
-            let lastBracketRound = br["rounds"].length;
-            if (lastRound !== null) {
-                lastBracketRound = lastRound;
-            }
-
-            br["rounds"].forEach(function (ro) {
-                if (ro.number >= firstRound && (ro.number <= lastBracketRound)) {
-                    ro['matchups'].forEach(function (mu) {
-                        mu.bracket = br;
-                        mu.round = ro;
-                        matchups.push(mu);
-                    })
-                }
-            });
-        });
-        drawEdges(matchups, bracket, firstRound, lastRound);
-        console.time('renderDiag');
-        renderDiag();
-        //let boundingBox = $('#bracketSvg').find('g.output').getBoundingClientRect();
-        //console.log(`the bounding box is ${boundingBox.width} by ${boundingBox.height}`);
-        console.timeEnd('renderDiag');
-        setMouseOvers(data);
-        let svgBoundingBox = getSvgSize('bracketSvg');
-        $('#bracketSvg').height(svgBoundingBox.height).width(svgBoundingBox.width);
-        $('#bracket-border').height(svgBoundingBox.height).width(svgBoundingBox.width);
-    });
-}
-
 function setMouseOvers(data) {
 
     data['participants'].forEach(function(p){
@@ -505,6 +449,62 @@ class BracketController {
 
     }
 
+    getData(bracket='all', firstRound=1, lastRound=null, clear=false) {
+
+        console.log(`getData called with bracket: ${bracket} firstRound: ${firstRound} lastRound: ${lastRound} clear: ${clear}`);
+
+        // console.log("getData called");
+        let tournamentJson = "{% url 'tournament_json' tournament.id %}?svg";
+        let matchups = [];
+        d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(data) {
+            if (clear) {
+                // $("#bracketSvg").find('svg').find('g').remove();
+                this.svgDiv.find('svg').find('g').remove();
+            }
+            if (lastRound === null) {
+                // lastRound = data['brackets'].filter(b => (b.type === 'w'))[0].length;
+                lastRound = {{ tournament.round_count }};
+                if (data["elimination"] === "double") {
+                    lastRound += 2;
+                }
+            }
+            console.log(`now the last round is: ${lastRound}`);
+            console.time('drawNodes');
+            drawNodes(data, bracket, firstRound, lastRound, clear);
+            console.timeEnd('drawNodes');
+
+            // the list of matchups has to be complete before drawing any matches, since the source
+            // match name is used to display each match.
+            let bracketNames = bracket === 'all' ? ['w', 'l'] : [bracket];
+            data["brackets"].filter(b => bracketNames.includes(b.type)).forEach(function (br) {
+                let lastBracketRound = br["rounds"].length;
+                if (lastRound !== null) {
+                    lastBracketRound = lastRound;
+                }
+
+                br["rounds"].forEach(function (ro) {
+                    if (ro.number >= firstRound && (ro.number <= lastBracketRound)) {
+                        ro['matchups'].forEach(function (mu) {
+                            mu.bracket = br;
+                            mu.round = ro;
+                            matchups.push(mu);
+                        })
+                    }
+                });
+            });
+            drawEdges(matchups, bracket, firstRound, lastRound);
+            console.time('renderDiag');
+            renderDiag();
+            //let boundingBox = $('#bracketSvg').find('g.output').getBoundingClientRect();
+            //console.log(`the bounding box is ${boundingBox.width} by ${boundingBox.height}`);
+            console.timeEnd('renderDiag');
+            setMouseOvers(data);
+            let svgBoundingBox = getSvgSize('bracketSvg');
+            $('#bracketSvg').height(svgBoundingBox.height).width(svgBoundingBox.width);
+            $('#bracket-border').height(svgBoundingBox.height).width(svgBoundingBox.width);
+        });
+    }
+
     setDefaultBracketElementSize() {
         // set a big-enough, but not ridiculous, size for the svg element, so it can be draw,
         // then it can be re-sized later when we can read the actual size of the svg.
@@ -516,10 +516,17 @@ class BracketController {
     }
 
 }
+
+const bracket_controller = new BracketController({
+    contentDiv: 'content',
+    svgDiv: 'bracketSvg',
+    wrapperDiv: 'bracket-border',
+    bracketSize: {{ tournament.bracket_size }},
+});
+
 $(document).ready(function () {
     // console.log("the document is ready");
-    getData('all');
-
+    bracket_controller.getData('all');
 });
 
     </script>
