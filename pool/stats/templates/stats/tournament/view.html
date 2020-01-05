@@ -428,7 +428,12 @@ class BracketController {
 
     getData(bracket='all', firstRound=1, lastRound=null, clear=false) {
 
-        console.log(`getData called with bracket: ${bracket} firstRound: ${firstRound} lastRound: ${lastRound} clear: ${clear}`);
+        let scaled = true;
+        if (this.bracketScale === 1.0) {
+            scaled = false;
+        } else {
+            this.scale();
+        }
 
         // console.log("getData called");
         let tournamentJson = "{% url 'tournament_json' tournament.id %}?svg";
@@ -480,6 +485,9 @@ class BracketController {
 
             outerThis.svgDiv.height(svgBoundingBox.height).width(svgBoundingBox.width);
             outerThis.wrapperDiv.height(svgBoundingBox.height).width(svgBoundingBox.width);
+            if (scaled) {
+                outerThis.scale();
+            }
         });
     }
 
