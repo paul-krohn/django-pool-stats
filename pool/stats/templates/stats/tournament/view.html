@@ -370,19 +370,6 @@ function drawEdges(matchups){
 }
 
 
-function renderDiag() {
-    // console.log("renderDiag called");
-    // Create the renderer
-    let render = new dagreD3.render();
-
-    // Set up an SVG group so that we can translate the final graph.
-    let svg = d3.select("#bracketSvg");
-
-    // Run the renderer. This is what draws the final graph.
-    render(svg, g);
-
-}
-
 
 class BracketController {
     constructor(args) {
@@ -396,6 +383,19 @@ class BracketController {
         this.setDefaultBracketElementSize();
         console.log('svg is now: ' + this.svgDiv.height() + ' by ' + this.svgDiv.width());
 
+    }
+
+    render() {
+
+        // console.log("renderDiag called");
+        // Create the renderer
+        let render = new dagreD3.render();
+
+        // Set up an SVG group so that we can translate the final graph.
+        let svg = d3.select("#bracketSvg");
+
+        // Run the renderer. This is what draws the final graph.
+        render(svg, g);
     }
 
     scale(to='full') {
@@ -486,7 +486,7 @@ class BracketController {
             });
             drawEdges(matchups, bracket, firstRound, lastRound);
             console.time('renderDiag');
-            renderDiag();
+            outerThis.render();
             //let boundingBox = $('#bracketSvg').find('g.output').getBoundingClientRect();
             //console.log(`the bounding box is ${boundingBox.width} by ${boundingBox.height}`);
             console.timeEnd('renderDiag');
