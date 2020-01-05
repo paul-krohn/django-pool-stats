@@ -169,20 +169,6 @@
 
 <script>
 
-function getSvgSize(svgId) {
-    // first, jquery-select the SVG element by ID
-    let theDiv = $('#'+ svgId);
-    let svgGID = svgId + '-g';
-    // then jquery-select the g.output child element
-    let theG = theDiv.find('g.output');
-    // now assign an ID to it ...
-    theG.attr('id', svgGID);
-    // so you can re-find it with getElementById
-    let svgRealG = document.getElementById(svgGID);
-    // that is the thing you want the bounding rect of
-    return svgRealG.getBoundingClientRect();
-}
-
 function matchupHtml(matchup, bracket='w', winner=null) {
 
   let matchupDiv = document.createElement("div");
@@ -441,6 +427,11 @@ class BracketController {
         $('#bracket-border').css('transform', transformString);
     }
 
+    svgSize() {
+        // for Reasons, this.svgDiv.find('g.output')[0] doesn't work. I call shenanigans.
+        return $('#' + this.svgDiv.attr('id')).find('g.output')[0].getBoundingClientRect();
+    }
+
     getData(bracket='all', firstRound=1, lastRound=null, clear=false) {
 
         console.log(`getData called with bracket: ${bracket} firstRound: ${firstRound} lastRound: ${lastRound} clear: ${clear}`);
@@ -491,7 +482,7 @@ class BracketController {
             //console.log(`the bounding box is ${boundingBox.width} by ${boundingBox.height}`);
             console.timeEnd('renderDiag');
             setMouseOvers(data);
-            let svgBoundingBox = getSvgSize('bracketSvg');
+            let svgBoundingBox = outerThis.svgSize();
 
             outerThis.svgDiv.height(svgBoundingBox.height).width(svgBoundingBox.width);
             outerThis.wrapperDiv.height(svgBoundingBox.height).width(svgBoundingBox.width);
