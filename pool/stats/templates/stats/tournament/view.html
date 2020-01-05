@@ -313,7 +313,7 @@ function drawEdges(matchups){
     // console.log("drawEdges called");
     // then join the matchups with edges -- you have to do this second so you don't try
     // to join to a matchup that doesn't exist yet.
-    console.log("the nodes are: " + g.nodes());
+    // console.log("the nodes are: " + g.nodes());
     matchups.forEach(function(matchup) {
         ['a', 'b'].forEach(function(letter){
             let this_source_match = matchup['source_match_' + letter];
@@ -333,7 +333,7 @@ function drawEdges(matchups){
 
                     //if (g.node(source_match.name) && g.node(matchup.name)) {
                     if (g.nodes().includes(source_match.name) && g.nodes().includes(matchup.name)) {
-                        console.log(`setting edge from ${source_match.name} to ${matchup.name}`);
+                        // console.log(`setting edge from ${source_match.name} to ${matchup.name}`);
                         g.setEdge(source_match.name, matchup.name, {
                             curve: d3.curveBasis,
                             lineInterpolate: 'basis',
@@ -444,13 +444,12 @@ class BracketController {
                 $('#bracketSvg').find('svg').find('g').remove();
             }
             if (lastRound === null) {
-                // lastRound = data['brackets'].filter(b => (b.type === 'w'))[0].length;
                 lastRound = {{ tournament.round_count }};
                 if (data["elimination"] === "double") {
                     lastRound += 2;
                 }
             }
-            console.log(`now the last round is: ${lastRound}`);
+            // console.log(`now the last round is: ${lastRound}`);
             console.time('drawNodes');
             drawNodes(data, bracket, firstRound, lastRound, clear);
             console.timeEnd('drawNodes');
