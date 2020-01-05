@@ -13,7 +13,7 @@
 <div id="app">
 {% verbatim %}
     <div>
-        <button class="btn btn-primary btn-sm" type="button" onclick="app.updateData(); getData();">update</button>
+        <button class="btn btn-primary btn-sm" type="button" onclick="app.updateData(); bracket_controller.getData();">update</button>
     </div>
     <h3><a href="#participants" data-toggle="collapse">Participants</a></h3>
     <div id="participants" class="">
@@ -385,20 +385,18 @@ class BracketController {
     scale() {
 
         let transformString = 'none';
+        // We can't directly use the jquery selector, jquery objects don't have getBoundingClientRect().
+        let theDivById = document.getElementById(this.wrapperDiv.attr('id'));
+        let beforeScalingBoundingBox = theDivById.getBoundingClientRect();
+        /*
+        console.log(`before: T: ${beforeScalingBoundingBox.top} B: ${beforeScalingBoundingBox.bottom}`);
+        console.log(`before: L: ${beforeScalingBoundingBox.left} R: ${beforeScalingBoundingBox.right}`);
+        console.log(`before: W: ${beforeScalingBoundingBox.width} H: ${beforeScalingBoundingBox.height}`);
+        console.log(`before: x: ${beforeScalingBoundingBox.x} y: ${beforeScalingBoundingBox.y}`);
+        */
+
         // are we currently scaled?
         if (this.bracketScale === 1.0) {
-
-            // We can't directly use the jquery selector, jquery objects don't have getBoundingClientRect().
-            let theDivById = document.getElementById(this.wrapperDiv.attr('id'));
-            let beforeScalingBoundingBox = theDivById.getBoundingClientRect();
-
-            /*
-            console.log(`before: T: ${beforeScalingBoundingBox.top} B: ${beforeScalingBoundingBox.bottom}`);
-            console.log(`before: L: ${beforeScalingBoundingBox.left} R: ${beforeScalingBoundingBox.right}`);
-            console.log(`before: W: ${beforeScalingBoundingBox.width} H: ${beforeScalingBoundingBox.height}`);
-            console.log(`before: x: ${beforeScalingBoundingBox.x} y: ${beforeScalingBoundingBox.y}`);
-            */
-
             console.log('scaling to window, the wrapper div width is: ' + this.wrapperDiv.width());
             let ratio = (this.contentDiv.width() / this.wrapperDiv.width());
             console.log(`content div width: ${this.contentDiv.width()} svg width: ${this.svgDiv.width()} ratio: ${ratio}`);
