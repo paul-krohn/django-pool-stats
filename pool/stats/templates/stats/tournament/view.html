@@ -91,14 +91,14 @@
     <div>
         <form class="form-inline" id="bracket-controller">
             <div class="form-group">
-            <label>display: </label>
+            <label>display </label>
             <select style="width: auto;" class="form-control" id="bracket-display-style">
                 <option selected value="all">combined</option>
                 <option value="w">0-loss</option>
                 <option value="l">1-loss</option>
             </select>
 
-            <label for="first-round-number">From round</label>
+            <label for="first-round-number"> bracket from round</label>
             <select style="width: auto;" class="form-control" id="first-round-number">
                 <option selected>1</option>
                 <option>2</option>
@@ -123,6 +123,9 @@
                         clear=true
                     );"
             />
+            <label for="bracket-scale-button">scale to </label>
+            <input type="button" id="bracket-scale-button" class="btn btn-sm" value="window"
+               onclick="bracket_controller.scale();" />
 
         </form>
 
@@ -130,10 +133,6 @@
         <svg id="bracketSvg" ></svg>
     </div>
     </div>
-        <input type="button" class="btn btn-sm" value="scale to width"
-               onclick="bracket_controller.scale('window');"/>
-        <input type="button" class="btn btn-sm" value="scale 100%"
-               onclick="bracket_controller.scale('full');"/>
     </div>
     <div>
     <h4>Legend</h4>
@@ -365,6 +364,7 @@ class BracketController {
         this.wrapperDiv = $(`#${args.wrapperDiv || 'bracket-border'}`);
         this.bracketScale = 1.0;
         this.bracketSize = args.bracketSize;
+        this.bracketScaleButton = $(`#${args.bracketScaleButton}`);
 
         this.setDefaultBracketElementSize();
         console.log('svg is now: ' + this.svgDiv.height() + ' by ' + this.svgDiv.width());
@@ -384,36 +384,35 @@ class BracketController {
         render(svg, g);
     }
 
-    scale(to='full') {
-        console.log('scale called to ' + to);
-        // We can't directly use the jquery selector, jquery objects don't have getBoundingClientRect().
-        let theDivById = document.getElementById(this.wrapperDiv.attr('id'));
-        let beforeScalingBoundingBox = theDivById.getBoundingClientRect();
-        /*
-        console.log(`before: T: ${beforeScalingBoundingBox.top} B: ${beforeScalingBoundingBox.bottom}`);
-        console.log(`before: L: ${beforeScalingBoundingBox.left} R: ${beforeScalingBoundingBox.right}`);
-        console.log(`before: W: ${beforeScalingBoundingBox.width} H: ${beforeScalingBoundingBox.height}`);
-        console.log(`before: x: ${beforeScalingBoundingBox.x} y: ${beforeScalingBoundingBox.y}`);
-        */
+    scale() {
+
         let transformString = 'none';
+        // are we currently scaled?
+        if (this.bracketScale === 1.0) {
 
-        let ratio = 1.0;
-        switch(to) {
-            case 'window':
-                console.log('scaling to window, the wrapper div width is: ' + this.wrapperDiv.width());
-                ratio = (this.contentDiv.width() / this.wrapperDiv.width());
-                console.log(`content div width: ${this.contentDiv.width()} svg width: ${this.svgDiv.width()} ratio: ${ratio}`);
-                let xTranslateArg = -0.5 * (1 - ratio) * (beforeScalingBoundingBox.width);
-                let yTranslateArg = -0.5 * (1 - ratio) * (beforeScalingBoundingBox.height);
-                transformString = `translateX(${xTranslateArg}px) translateY(${yTranslateArg}px) scale(${ratio})`;
-                break;
-            default:
-                // the 'full' case is handled by this default
-                ratio = 1.0;
+            // We can't directly use the jquery selector, jquery objects don't have getBoundingClientRect().
+            let theDivById = document.getElementById(this.wrapperDiv.attr('id'));
+            let beforeScalingBoundingBox = theDivById.getBoundingClientRect();
+
+            /*
+            console.log(`before: T: ${beforeScalingBoundingBox.top} B: ${beforeScalingBoundingBox.bottom}`);
+            console.log(`before: L: ${beforeScalingBoundingBox.left} R: ${beforeScalingBoundingBox.right}`);
+            console.log(`before: W: ${beforeScalingBoundingBox.width} H: ${beforeScalingBoundingBox.height}`);
+            console.log(`before: x: ${beforeScalingBoundingBox.x} y: ${beforeScalingBoundingBox.y}`);
+            */
+
+            console.log('scaling to window, the wrapper div width is: ' + this.wrapperDiv.width());
+            let ratio = (this.contentDiv.width() / this.wrapperDiv.width());
+            console.log(`content div width: ${this.contentDiv.width()} svg width: ${this.svgDiv.width()} ratio: ${ratio}`);
+            let xTranslateArg = -0.5 * (1 - ratio) * (beforeScalingBoundingBox.width);
+            let yTranslateArg = -0.5 * (1 - ratio) * (beforeScalingBoundingBox.height);
+            transformString = `translateX(${xTranslateArg}px) translateY(${yTranslateArg}px) scale(${ratio})`;
+            $('#' + this.bracketScaleButton.prop('id')).val('100%');
+            this.bracketScale = ratio;
+        } else {
+            $('#' + this.bracketScaleButton.prop('id')).val('window');
+            this.bracketScale = 1.0;
         }
-
-
-        // console.log('scaling ratio: ' + ratio);
 
         /*
           Scaling is relative to the _center_ of the scaled element, so we need to move the element half the amount it is scaled.
@@ -422,7 +421,6 @@ class BracketController {
         */
 
         console.log('transform css: ' + transformString);
-        this.bracketScale = ratio;
         //this.wrapperDiv.css('transform', transformString);
         $('#bracket-border').css('transform', transformString);
     }
@@ -506,6 +504,7 @@ const bracket_controller = new BracketController({
     svgDiv: 'bracketSvg',
     wrapperDiv: 'bracket-border',
     bracketSize: {{ tournament.bracket_size }},
+    bracketScaleButton: 'bracket-scale-button',
 });
 
 $(document).ready(function () {
