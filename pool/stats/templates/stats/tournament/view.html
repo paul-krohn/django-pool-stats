@@ -448,6 +448,7 @@ class BracketController {
         // console.log("getData called");
         let tournamentJson = "{% url 'tournament_json' tournament.id %}?svg";
         let matchups = [];
+        let outerThis = this;
         d3.json(tournamentJson, [['Content-Type', 'application/json']]).then(function(data) {
             if (clear) {
                 $('#bracketSvg').find('svg').find('g').remove();
@@ -491,8 +492,9 @@ class BracketController {
             console.timeEnd('renderDiag');
             setMouseOvers(data);
             let svgBoundingBox = getSvgSize('bracketSvg');
-            $('#bracketSvg').height(svgBoundingBox.height).width(svgBoundingBox.width);
-            $('#bracket-border').height(svgBoundingBox.height).width(svgBoundingBox.width);
+
+            outerThis.svgDiv.height(svgBoundingBox.height).width(svgBoundingBox.width);
+            outerThis.wrapperDiv.height(svgBoundingBox.height).width(svgBoundingBox.width);
         });
     }
 
