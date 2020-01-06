@@ -33,6 +33,7 @@ class TestsWithSampleData(BasePoolStatsTestCase):
             'name': 'test team double tournament',
             'type': 'teams',
             'elimination': 'double',
+            'show_places': 3,
         })
 
         c = Client()
@@ -44,6 +45,7 @@ class TestsWithSampleData(BasePoolStatsTestCase):
             'name': 'test singles double-elimination tournament',
             'type': 'singles',
             'elimination': 'double',
+            'show_places': 3,
         })
 
         tournament_id = int(re.findall(r'\d+', response.url)[-1])
