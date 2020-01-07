@@ -22,7 +22,6 @@ class TournamentLiveTestCases(LiveServerTestCase):
             participant_b=p_b,
             winner=p_b,
         )
-        print('the not-winner: {}'.format(matchup.not_winner().id))
         self.assertEqual(matchup.not_winner(), matchup.participant_a)
 
 
