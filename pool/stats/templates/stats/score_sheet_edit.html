@@ -92,7 +92,7 @@ $(document).ready(function(){
     </ol>
 </div>
 {% endif %}
-<p/>
+<p></p>
 <form name="score_sheet_games_form" action="{% url 'score_sheet_edit' score_sheet.id %}" method="post">
     {% csrf_token %}
     {{ games_formset.management_form }}
@@ -124,17 +124,16 @@ $(document).ready(function(){
             <td colspan="4"></td>
         </tr>
     </table>
-    </div>
 </form>
     {%  with score_sheet.self_check as issues %}
         {% if issues|length %}
+        <div>
             <ul>
             {%  for issue in issues %}
-            <div>
                 <li>{{ issue }}</li>
-            </div>
             {% endfor %}
             </ul>
+        </div>
         {% endif %}
     {%  endwith %}
     <div id="away-player-summaries"><h4>{{ score_sheet.match.away_team }} Player Summaries</h4>
