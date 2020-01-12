@@ -8,16 +8,49 @@
     See: https://docs.djangoproject.com/en/2.1/ref/csrf/
 -->
 {% csrf_token %}
+
+    <style>
+    .game_wrapper {
+        display: inline-flex;
+        border-width: 2px;
+        border-color: #B444B4;
+        border-style: solid;
+        padding: 2px;
+        margin: 2px;
+        font-weight: normal;
+    }
+    .game_player {
+        float: left;
+    }
+    .game_winner {
+
+    }
+    </style>
 <h1>{{ tournament.name }}</h1>
 
     <div id="games">
-    <div v-for="game in games" class="col-xs-3" style="padding: 2px;">
-        <a :href="game.away_player.url">
-            <span v-html="game.away_player.name"></span>
-        </a> vs
-        <a :href="game.home_player.url">
-            <span v-html="game.home_player.name"></span>
-        </a>
+    <div v-for="game in games" class="game_wrapper">
+        <form method="POST" :id="game.id" :target="gameFormUrl" :disabled="! editable">
+
+            <input type="radio" :id="'game-winner-home-' + game.id" value="home" v-model="game.winner">
+            <label :for="'game-winner-home-' + game.id">
+                <a :href="game.home_player.url">
+                    <span v-html="game.home_player.name"></span>
+                </a>
+            </label>
+
+            <input type="radio" :id="'game-winner-away-' + game.id" value="away" v-model="game.winner">
+            <label :for="'game-winner-away-' + game.id">
+                <a :href="game.away_player.url">
+                    <span v-html="game.away_player.name"></span>
+                </a>
+            </label>
+
+            <label :for="'game-tr' + game.id">tr </label>
+            <input type="checkbox" :id="'game-tr' + game.id" v-model="game.table_run" />
+            <label :for="'game-forfeit' + game.id">forfeit </label>
+            <input type="checkbox" :id="'game-forfeit' + game.id" v-model="game.forfeit" />
+        </form>
     </div>
     {% verbatim %}
     {%  endverbatim %}
@@ -32,11 +65,28 @@ let app = new Vue({
     data: {
         games: [],
         editable: false,
+        gameFormUrl: '{% url 'game_update' %}',
     },
     methods: {
         matchupButtonId: function (matchup, participant) {
             return ("matchup_button_" + matchup.id + '_' + participant.id);
         },
+        submitGame: function(game, winner, forfeit, table_run) {
+            //    console.log("we are about to set the winner of matchup " + matchup.id + " to " + winner.id);
+            //    let the_id = this.matchupButtonId(matchup, winner);
+            //    console.log("the id is: " + the_id);
+            $.ajaxSetup({
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                dataType: 'application/json',
+            });
+            $.post("{% url 'game_update' %}", {"game": game.id, "winner": winner});
+            // this.updateData();
+        },
+
     },
     mounted: function() {
         let self = this;
@@ -51,9 +101,6 @@ let app = new Vue({
                 Accept: "application/json",
             }
         });
-    },
-    updated: function () {
-        this.setConfirmDialogs();
     },
 });
 
