@@ -40,3 +40,17 @@ class Game(models.Model):
 
         super(Game, self).save(force_insert=force_insert, force_update=force_update)
         self.__original_winner = self.winner
+
+    def as_dict(self):
+
+        game_data = {
+            'id': self.id,
+            'away_player': self.away_player.as_dict(),
+            'home_player': self.home_player.as_dict(),
+            'winner': self.winner,
+            'table_run': self.table_run,
+            'forfeit': self.forfeit,
+            'timestamp': self.timestamp,
+        }
+
+        return game_data

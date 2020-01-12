@@ -1,4 +1,5 @@
 from django.db import models
+from django.urls import reverse
 
 
 class Player(models.Model):
@@ -9,6 +10,12 @@ class Player(models.Model):
 
     def __str__(self):
         return self.display_name or "%s %s" % (self.first_name, self.last_name)
+
+    def as_dict(self):
+        return {
+            'name': str(self),
+            'url': reverse('player', kwargs={'player_id': self.id}),
+        }
 
     class Meta:
         # Players with a display_name that sorts differently from their
