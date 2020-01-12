@@ -4,7 +4,8 @@ from str2bool import str2bool
 
 
 feature_names = [
-    'elo'
+    'elo',
+    'auto_save',
 ]
 
 def index(request):

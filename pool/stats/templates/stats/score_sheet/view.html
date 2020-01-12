@@ -1,0 +1,62 @@
+{% extends "stats/base.html" %}
+{% block title %}SFPA :: Tournament :: {{ tournament }}{% endblock %}
+
+{% block content %}
+
+<!--
+    the csrftoken is read below in javascript to satisfy django's anti-csrf implementation,
+    See: https://docs.djangoproject.com/en/2.1/ref/csrf/
+-->
+{% csrf_token %}
+<h1>{{ tournament.name }}</h1>
+
+    <div id="games">
+    <div v-for="game in games" class="col-xs-3" style="padding: 2px;">
+        <a :href="game.away_player.url">
+            <span v-html="game.away_player.name"></span>
+        </a> vs
+        <a :href="game.home_player.url">
+            <span v-html="game.home_player.name"></span>
+        </a>
+    </div>
+    {% verbatim %}
+    {%  endverbatim %}
+</div>
+
+<script>
+
+let dataUrl = '{% url 'score_sheet_games' score_sheet.id %}';
+
+let app = new Vue({
+    el: '#games',
+    data: {
+        games: [],
+        editable: false,
+    },
+    methods: {
+        matchupButtonId: function (matchup, participant) {
+            return ("matchup_button_" + matchup.id + '_' + participant.id);
+        },
+    },
+    mounted: function() {
+        let self = this;
+        $.ajax({
+            url: dataUrl,
+            dataType: 'json',
+            success: function(data) {
+                self.games = data.games;
+                self.editable = data.editable;
+            },
+            headers: {
+                Accept: "application/json",
+            }
+        });
+    },
+    updated: function () {
+        this.setConfirmDialogs();
+    },
+});
+
+</script>
+
+{% endblock %}
