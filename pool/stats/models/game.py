@@ -51,6 +51,7 @@ class Game(models.Model):
             'table_run': self.table_run,
             'forfeit': self.forfeit,
             'timestamp': self.timestamp,
+            'home_breaks': self.order.home_breaks,
         }
 
         return game_data
