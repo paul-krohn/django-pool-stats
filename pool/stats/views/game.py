@@ -1,3 +1,5 @@
+from str2bool import str2bool
+
 from django.shortcuts import redirect, render, reverse, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 
@@ -9,14 +11,14 @@ def update(request):
 
     if request.POST:
 
-        game = get_object_or_404(Game, {
-            'id': request.POST.get('game_id')
-        })
+        game = get_object_or_404(Game,
+            id=str(request.POST.get('game_id'))
+        )
         score_sheet = game.scoresheet_set.first()
-        if user_can_edit_scoresheet(score_sheet):
+        if user_can_edit_scoresheet(request, score_sheet.id):
             game.winner = request.POST.get('winner')
-            game.forfeit = request.POST.get('forfeit')
-            game.table_run = request.POST.get('table_run')
+            game.forfeit = str2bool(request.POST.get('forfeit'))
+            game.table_run = str2bool(request.POST.get('table_run'))
             game.save()
             return JsonResponse({'message': "game {} saved"})
         else:

@@ -31,15 +31,20 @@
     <div id="games">
     <div v-for="game in games" class="game_wrapper">
         <form method="POST" :id="game.id" :target="gameFormUrl" :disabled="! editable">
-
-            <input type="radio" :id="'game-winner-home-' + game.id" value="home" v-model="game.winner">
+            <input type="radio" :id="'game-winner-home-' + game.id"
+               value="home" v-model="game.winner" :disabled="! editable"
+               @change="submitGame(game)"
+            />
             <label :for="'game-winner-home-' + game.id">
                 <a :href="game.home_player.url">
                     <span v-html="game.home_player.name"></span>
                 </a>
             </label>
 
-            <input type="radio" :id="'game-winner-away-' + game.id" value="away" v-model="game.winner">
+            <input type="radio" :id="'game-winner-away-' + game.id"
+                   value="away" v-model="game.winner" :disabled="! editable"
+                   @change="submitGame(game)"
+            >
             <label :for="'game-winner-away-' + game.id">
                 <a :href="game.away_player.url">
                     <span v-html="game.away_player.name"></span>
@@ -47,9 +52,15 @@
             </label>
 
             <label :for="'game-tr' + game.id">tr </label>
-            <input type="checkbox" :id="'game-tr' + game.id" v-model="game.table_run" />
+            <input type="checkbox" :id="'game-tr' + game.id" v-model="game.table_run"
+                    :disabled="! editable"
+                    @change="submitGame(game)"
+            />
             <label :for="'game-forfeit' + game.id">forfeit </label>
-            <input type="checkbox" :id="'game-forfeit' + game.id" v-model="game.forfeit" />
+            <input type="checkbox" :id="'game-forfeit' + game.id" v-model="game.forfeit"
+                :disabled="! editable"
+                @change="submitGame(game)"
+            />
         </form>
     </div>
     {% verbatim %}
@@ -57,8 +68,13 @@
 </div>
 
 <script>
+function csrfSafeMethod(method) {
+    // these HTTP methods do not require CSRF protection
+    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+}
 
 let dataUrl = '{% url 'score_sheet_games' score_sheet.id %}';
+let csrftoken = $("input[name='csrfmiddlewaretoken']").val();
 
 let app = new Vue({
     el: '#games',
@@ -71,19 +87,24 @@ let app = new Vue({
         matchupButtonId: function (matchup, participant) {
             return ("matchup_button_" + matchup.id + '_' + participant.id);
         },
-        submitGame: function(game, winner, forfeit, table_run) {
+        submitGame: function(game) {
             //    console.log("we are about to set the winner of matchup " + matchup.id + " to " + winner.id);
             //    let the_id = this.matchupButtonId(matchup, winner);
             //    console.log("the id is: " + the_id);
             $.ajaxSetup({
                 beforeSend: function (xhr, settings) {
-                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
                         xhr.setRequestHeader("X-CSRFToken", csrftoken);
                     }
                 },
                 dataType: 'application/json',
             });
-            $.post("{% url 'game_update' %}", {"game": game.id, "winner": winner});
+            $.post("{% url 'game_update' %}", {
+                "game_id": game.id,
+                "winner": game.winner,
+                "table_run": game.table_run,
+                "forfeit": game.forfeit,
+            });
             // this.updateData();
         },
 
