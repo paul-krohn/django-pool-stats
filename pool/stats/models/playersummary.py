@@ -1,5 +1,3 @@
-from datetime import date
-
 from django.db import models
 
 from .game import Game
@@ -7,7 +5,6 @@ from .player import Player
 from .season import Season
 from .scoresheet import ScoreSheet
 from .team import Team
-from .week import Week
 
 from .globals import away_home, logger
 
@@ -61,8 +58,7 @@ class PlayerSeasonSummary(models.Model):
         # remove the players with < the minimum number of games in the current season
         summaries = []
         if minimum_games is None:
-            minimum_games = len(Week.objects.filter(season_id=season_id, date__lt=date.today())) * \
-                Season.objects.get(id=season_id).minimum_games
+            minimum_games = Season.objects.get(id=season_id).standings_minimum_games()
         for summary in all_summaries:
             if summary.wins + summary.losses >= minimum_games:
                 summaries.append(summary)
