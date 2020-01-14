@@ -1,3 +1,5 @@
+from datetime import date
+
 from django.db import models
 
 
@@ -11,3 +13,14 @@ class Season(models.Model):
 
     def __str__(self):
         return self.name
+
+    def standings_minimum_games(self, before_date=None):
+
+        if before_date is None:
+            before_date = date.today()
+
+        min_games = 0
+        for week in self.week_set.filter(date__lt=before_date):
+            if len(week.match_set.filter(playoff=False)):
+                min_games += self.minimum_games
+        return min_games
