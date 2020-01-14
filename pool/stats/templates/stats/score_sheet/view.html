@@ -7,30 +7,65 @@
 -->
 {% csrf_token %}
 
-    <style>
+<style>
     .game_wrapper {
-        display: inline-flex;
-        border-width: 2px;
+        {#display: inline-flex;#}
+        /*border-width: 2px;
         border-color: #B444B4;
-        border-style: solid;
+        border-style: solid; */
         padding: 2px;
         margin: 2px;
-        font-weight: normal;
+        font-weight: normal !important;
     }
     .game_player {
-        float: left;
+        padding: 2px;
+        font-weight: normal;
+        display: inline-flex;
+    }
+    .game_players {
+        {#display: inline-flex;#}
+        padding: 2px;
     }
     .game_winner {
 
     }
-    </style>
+
+    .game_attributes {
+        display: inline-flex;
+    }
+    .game_attribute {
+        padding: 2px;
+    }
+
+    .play-position {
+        font-weight: bold;
+        width: 28px;
+        height: 28px;
+        border: #444444 solid;
+        text-align: center;
+        vertical-align: middle !important;
+    }
+
+    .mark-nobreak-position, .mark-break-position {
+        font-weight: bold;
+        width: 28px;
+        height: 28px;
+    }
+
+    .break-position {
+        background-color: #444444;
+        color: #FFFFFF;
+    }
+
+</style>
 <h1>{{ tournament.name }}</h1>
 
     <div id="games">
-    <div v-for="game in games" class="game_wrapper">
+    <div v-for="game in games" class="game_wrapper" >
         <form method="POST" :id="game.id" :target="gameFormUrl" :disabled="! editable">
-            <div class="game_players">
+            <div class="game_players" :class="{ 'scoresheet-odd' : game.order.order / 2}">
                 <div class="game_player">
+                    <div class="play-position" :class="{ 'break-position' : game.order.home_breaks}" v-html="game.order.home_position"></div>
                     <input type="radio" :id="'game-winner-home-' + game.id"
                        value="home" v-model="game.winner" :disabled="! editable"
                        @change="submitGame(game)"
@@ -41,7 +76,8 @@
                         </a>
                     </label>
                 </div>
-                <div class="game_player ">
+                <div class="game_player">
+                    <div class="play-position" :class="{ 'break-position' : !game.order.home_breaks}" v-html="game.order.away_position"></div>
                     <input type="radio" :id="'game-winner-away-' + game.id"
                            value="away" v-model="game.winner" :disabled="! editable"
                            @change="submitGame(game)"
@@ -53,20 +89,20 @@
                     </label>
                 </div>
             </div>
-            <div class="game_attributes">
+            <div class="game_attributes hidden-xs">
                 <div class="game_attribute">
-                    <label :for="'game-tr-' + game.id">tr </label>
                     <input type="checkbox" :id="'game-tr-' + game.id" v-model="game.table_run"
                             :disabled="! editable"
                             @change="submitGame(game)"
                     />
+                    <label :for="'game-tr-' + game.id">tr </label>
                 </div>
                 <div class="game_attribute">
-                    <label :for="'game-forfeit-' + game.id">forfeit </label>
                     <input type="checkbox" :id="'game-forfeit-' + game.id" v-model="game.forfeit"
                         :disabled="! editable"
                         @change="submitGame(game)"
                     />
+                    <label :for="'game-forfeit-' + game.id">forfeit </label>
                 </div>
             </div>
         </form>

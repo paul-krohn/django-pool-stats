@@ -45,6 +45,7 @@ class Game(models.Model):
 
         game_data = {
             'id': self.id,
+            'order': self.order.as_dict(),
             'away_player': self.away_player.as_dict(),
             'home_player': self.home_player.as_dict(),
             'winner': self.winner,

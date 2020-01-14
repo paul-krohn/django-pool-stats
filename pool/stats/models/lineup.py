@@ -22,6 +22,15 @@ class GameOrder(models.Model):
     def __str__(self):
         return "{} ({} vs {})".format(self.order, self.away_position, self.home_position)
 
+    def as_dict(self):
+        return {
+            'away_position': self.away_position.away_name,
+            'home_position': self.home_position.home_name,
+            'home_breaks': self.home_breaks,
+            'order': self.order,
+            'tiebreaker': self.tiebreaker,
+        }
+
     class Meta:
         # the default/primary key sort is sometimes wrong
         ordering = ['order']
