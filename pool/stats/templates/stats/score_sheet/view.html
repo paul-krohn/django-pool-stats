@@ -9,7 +9,7 @@
 
 <style>
     .game_wrapper {
-        {#display: inline-flex;#}
+        /* display: inline-flex; */
         /*border-width: 2px;
         border-color: #B444B4;
         border-style: solid; */
@@ -20,10 +20,8 @@
     .game_player {
         padding: 2px;
         font-weight: normal;
-        display: inline-flex;
     }
     .game_players {
-        {#display: inline-flex;#}
         padding: 2px;
     }
     .game_winner {
@@ -31,8 +29,9 @@
     }
 
     .game_attributes {
-        display: inline-flex;
+
     }
+
     .game_attribute {
         padding: 2px;
     }
@@ -61,36 +60,44 @@
 <h1>{{ tournament.name }}</h1>
 
     <div id="games">
-    <div v-for="game in games" class="game_wrapper" >
+    <div v-for="game in games" class="game_wrapper" :class="{ 'scoresheet-odd' : isOdd(game.order.order + 1)}">
         <form method="POST" :id="game.id" :target="gameFormUrl" :disabled="! editable">
-            <div class="game_players" :class="{ 'scoresheet-odd' : game.order.order / 2}">
+            <div class="game_players" >
                 <div class="game_player">
-                    <div class="play-position" :class="{ 'break-position' : game.order.home_breaks}" v-html="game.order.home_position"></div>
-                    <input type="radio" :id="'game-winner-home-' + game.id"
-                       value="home" v-model="game.winner" :disabled="! editable"
-                       @change="submitGame(game)"
-                    />
-                    <label :for="'game-winner-home-' + game.id">
-                        <a :href="game.home_player.url">
-                            <span v-html="game.home_player.name"></span>
-                        </a>
-                    </label>
+                    <div class="scoresheet-square float-left">
+                        <input type="radio" :id="'game-winner-home-' + game.id"
+                           value="home" v-model="game.winner" :disabled="! editable"
+                           @change="submitGame(game)"
+                        />
+                    </div>
+                    <div class="cell play-position" :class="{ 'break-position' : game.order.home_breaks}" v-html="game.order.home_position"></div>
+                    <div class="scoresheet-cell">
+                        <label :for="'game-winner-home-' + game.id">
+                            <a v-if="game.home_player" :href="game.home_player.url">
+                                <span v-html="game.home_player.name"></span>
+                            </a>
+                        </label>
+                    </div>
                 </div>
                 <div class="game_player">
-                    <div class="play-position" :class="{ 'break-position' : !game.order.home_breaks}" v-html="game.order.away_position"></div>
-                    <input type="radio" :id="'game-winner-away-' + game.id"
-                           value="away" v-model="game.winner" :disabled="! editable"
-                           @change="submitGame(game)"
-                    >
-                    <label :for="'game-winner-away-' + game.id">
-                        <a :href="game.away_player.url">
-                            <span v-html="game.away_player.name"></span>
-                        </a>
-                    </label>
+                    <div class="scoresheet-square ">
+                        <input type="radio" :id="'game-winner-away-' + game.id"
+                               value="away" v-model="game.winner" :disabled="! editable"
+                               @change="submitGame(game)"
+                        >
+                    </div>
+                    <div class="cell play-position" :class="{ 'break-position' : !game.order.home_breaks}" v-html="game.order.away_position"></div>
+                    <div class="scoresheet-cell">
+                        <label :for="'game-winner-away-' + game.id">
+                            <a v-if="game.away_player" :href="game.away_player.url">
+                                <span v-html="game.away_player.name"></span>
+                            </a>
+                        </label>
+                    </div>
                 </div>
             </div>
-            <div class="game_attributes hidden-xs">
-                <div class="game_attribute">
+            <div class="game_attributes scoresheet-cell">
+                <div class="game_attribute ">
                     <input type="checkbox" :id="'game-tr-' + game.id" v-model="game.table_run"
                             :disabled="! editable"
                             @change="submitGame(game)"
@@ -103,6 +110,11 @@
                         @change="submitGame(game)"
                     />
                     <label :for="'game-forfeit-' + game.id">forfeit </label>
+                </div>
+                <div class="game_attribute">
+                    {% verbatim %}
+                    <span v-html="displayDate(game.timestamp)"></span>
+                    {% endverbatim %}
                 </div>
             </div>
         </form>
@@ -128,6 +140,13 @@ let app = new Vue({
         gameFormUrl: '{% url 'game_update' %}',
     },
     methods: {
+        displayDate: function (dateString) {
+            let timestamp = new Date(dateString);
+            return timestamp.toLocaleTimeString('en-US', {timeStyle: 'short'});
+        },
+        isOdd: function(number) {
+            return number % 2;
+        },
         matchupButtonId: function (matchup, participant) {
             return ("matchup_button_" + matchup.id + '_' + participant.id);
         },
