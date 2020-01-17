@@ -19,7 +19,7 @@
     }
     .game_player {
         padding: 2px;
-        font-weight: normal;
+        float: left;
     }
     .game_players {
         padding: 2px;
@@ -29,14 +29,32 @@
     }
 
     .game_attributes {
+        float: right;
+    }
 
+    .game_input {
+        vertical-align: middle !important;
     }
 
     .game_attribute {
+        float: left;
+        vertical-align: middle !important;
         padding: 2px;
     }
 
+    .game_winner_button {
+        vertical-align: middle;
+        width: 26px;
+    }
+
+    .scoresheet-cell {
+        vertical-align: middle !important;
+        padding: 4px !important;
+        float:  left;
+    }
+
     .play-position {
+        float: left;
         font-weight: bold;
         width: 28px;
         height: 28px;
@@ -61,16 +79,16 @@
 
     <div id="games">
     <div v-for="game in games" class="game_wrapper" :class="{ 'scoresheet-odd' : isOdd(game.order.order + 1)}">
-        <form method="POST" :id="game.id" :target="gameFormUrl" :disabled="! editable">
-            <div class="game_players" >
+        <form method="POST" :id="game.id" :target="gameFormUrl" :disabled="! editable" class="container-fluid">
+            <div class="game_players controls row-fluid" >
                 <div class="game_player">
-                    <div class="scoresheet-square float-left">
-                        <input type="radio" :id="'game-winner-home-' + game.id"
+
+                        <input type="radio"  class="game_winner_button" :id="'game-winner-home-' + game.id"
                            value="home" v-model="game.winner" :disabled="! editable"
                            @change="submitGame(game)"
                         />
-                    </div>
-                    <div class="cell play-position" :class="{ 'break-position' : game.order.home_breaks}" v-html="game.order.home_position"></div>
+
+                    <div class="play-position" :class="{ 'break-position' : game.order.home_breaks}" v-html="game.order.home_position"></div>
                     <div class="scoresheet-cell">
                         <label :for="'game-winner-home-' + game.id">
                             <a v-if="game.home_player" :href="game.home_player.url">
@@ -80,13 +98,13 @@
                     </div>
                 </div>
                 <div class="game_player">
-                    <div class="scoresheet-square ">
-                        <input type="radio" :id="'game-winner-away-' + game.id"
+
+                        <input class="game_winner_button" type="radio" :id="'game-winner-away-' + game.id"
                                value="away" v-model="game.winner" :disabled="! editable"
                                @change="submitGame(game)"
                         >
-                    </div>
-                    <div class="cell play-position" :class="{ 'break-position' : !game.order.home_breaks}" v-html="game.order.away_position"></div>
+
+                    <div class=" play-position" :class="{ 'break-position' : !game.order.home_breaks}" v-html="game.order.away_position"></div>
                     <div class="scoresheet-cell">
                         <label :for="'game-winner-away-' + game.id">
                             <a v-if="game.away_player" :href="game.away_player.url">
@@ -96,7 +114,7 @@
                     </div>
                 </div>
             </div>
-            <div class="game_attributes scoresheet-cell">
+            <div style="float: right" class="game_attributes scoresheet-cell hidden-xs">
                 <div class="game_attribute ">
                     <input type="checkbox" :id="'game-tr-' + game.id" v-model="game.table_run"
                             :disabled="! editable"
