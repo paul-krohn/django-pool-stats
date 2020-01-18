@@ -36,6 +36,12 @@
         vertical-align: middle !important;
     }
 
+    .game_order {
+        width: 28px;
+        height: 28px;
+        text-align: center;
+        vertical-align: middle !important;
+    }
     .game_attribute {
         float: left;
         vertical-align: middle !important;
@@ -57,6 +63,11 @@
         vertical-align: middle !important;
         padding: 4px !important;
         float:  left;
+    }
+    div.scoresheet-cell-right {
+        vertical-align: middle !important;
+        padding: 4px !important;
+        float:  right;
     }
 
     .play-position {
@@ -87,8 +98,8 @@
     <div v-for="game in games" :class="gameWrapperClasses(game.order.order + 1)"
          :id="'game-wrapper-' + game.id">
         <form method="POST" :target="gameFormUrl" :disabled="! editable">
-            <div class="game_player col-md-3">
-                <div class="scoresheet-cell">
+            <div class="game_player col-xs-3">
+                <div class="scoresheet-cell-right">
                     <a v-if="game.home_player" :href="game.home_player.url">
                         <span v-html="game.home_player.name"></span>
                     </a>
@@ -105,7 +116,7 @@
                        @change="submitGame(game)"
                     />
                 </div>
-                <div class="scoresheet-cell" v-html="game.order.order"></div>
+                <div class="scoresheet-cell game_order" v-html="game.order.order"></div>
 
                 <div class="scoresheet-cell">
                     <input class="game_winner_button" type="radio" :id="'game-winner-away-' + game.id"
@@ -118,7 +129,7 @@
                          v-html="game.order.away_position"></div>
                 </div>
             </div>
-            <div class="game_player col-md-3">
+            <div class="game_player col-xs-3">
                 <div class="scoresheet-cell">
                     <a v-if="game.away_player" :href="game.away_player.url">
                         <span v-html="game.away_player.name"></span>
