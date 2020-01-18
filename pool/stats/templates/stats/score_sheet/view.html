@@ -94,7 +94,7 @@
 </style>
 <h1>{{ tournament.name }}</h1>
 
-<div id="games">
+<div id="games" class="container-fluid">
     <div v-for="game in games" :class="gameWrapperClasses(game.order.order + 1)"
          :id="'game-wrapper-' + game.id">
         <form method="POST" :target="gameFormUrl" :disabled="! editable">
@@ -136,7 +136,7 @@
                     </a>
                 </div>
             </div>
-            <div style="float: right" class="game_attributes scoresheet-cell hidden-xs col-md-3">
+            <div style="float: right" class="game_attributes scoresheet-cell col-md-3 col-xs-12">
                 <div class="game_attribute ">
                     <input type="checkbox" :id="'game-tr-' + game.id" v-model="game.table_run"
                             :disabled="! editable"
