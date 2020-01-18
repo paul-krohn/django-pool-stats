@@ -207,15 +207,22 @@ let app = new Vue({
                 },
                 dataType: 'application/json',
             });
-            $.post("{% url 'game_update' %}", {
-                "game_id": game.id,
-                "winner": game.winner,
-                "table_run": game.table_run,
-                "forfeit": game.forfeit,
+            $.ajax({
+                type: "POST",
+                url: "{% url 'game_update' %}",
+                dataType: "json",
+                data: {
+                    "game_id": game.id,
+                    "winner": game.winner,
+                    "table_run": game.table_run,
+                    "forfeit": game.forfeit,
+                },
+                success: function(response) {
+                    game.timestamp = response.data.timestamp;
+                },
             });
             // this.updateData();
         },
-
     },
     mounted: function() {
         let self = this;

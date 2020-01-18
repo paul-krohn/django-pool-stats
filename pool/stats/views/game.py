@@ -20,6 +20,11 @@ def update(request):
             game.forfeit = str2bool(request.POST.get('forfeit'))
             game.table_run = str2bool(request.POST.get('table_run'))
             game.save()
-            return JsonResponse({'message': "game {} saved"})
+            return JsonResponse({
+                'message': "game {} saved".format(game.id),
+                "data": {
+                    "timestamp": game.timestamp,
+                 },
+            })
         else:
             return HttpResponse(status=403)
