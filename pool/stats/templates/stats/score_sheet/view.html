@@ -42,6 +42,12 @@
         padding: 2px;
     }
 
+    div.game_number {
+        vertical-align: middle;
+        width: 26px;
+        font-size: small;
+    }
+
     .game_winner_button {
         vertical-align: middle;
         width: 26px;
@@ -97,6 +103,7 @@
                         </label>
                     </div>
                 </div>
+                <div class="scoresheet-cell" v-html="game.order.order"></div>
                 <div class="game_player">
                     <input class="game_winner_button" type="radio" :id="'game-winner-away-' + game.id"
                            value="away" v-model="game.winner" :disabled="! editable"
