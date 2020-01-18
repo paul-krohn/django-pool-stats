@@ -77,16 +77,16 @@
 </style>
 <h1>{{ tournament.name }}</h1>
 
-    <div id="games">
-    <div v-for="game in games" class="game_wrapper" :class="{ 'scoresheet-odd' : isOdd(game.order.order + 1)}">
-        <form method="POST" :id="game.id" :target="gameFormUrl" :disabled="! editable" class="container-fluid">
-            <div class="game_players controls row-fluid" >
+<div id="games">
+    <div v-for="game in games" :class="gameWrapperClasses(game.order.order + 1)"
+         :id="'game-wrapper-' + game.id">
+        <form method="POST" :target="gameFormUrl" :disabled="! editable">
+            <div class="game_players" >
                 <div class="game_player">
-
-                        <input type="radio"  class="game_winner_button" :id="'game-winner-home-' + game.id"
-                           value="home" v-model="game.winner" :disabled="! editable"
-                           @change="submitGame(game)"
-                        />
+                    <input type="radio"  class="game_winner_button" :id="'game-winner-home-' + game.id"
+                       value="home" v-model="game.winner" :disabled="! editable"
+                       @change="submitGame(game)"
+                    />
 
                     <div class="play-position" :class="{ 'break-position' : game.order.home_breaks}" v-html="game.order.home_position"></div>
                     <div class="scoresheet-cell">
@@ -98,12 +98,10 @@
                     </div>
                 </div>
                 <div class="game_player">
-
-                        <input class="game_winner_button" type="radio" :id="'game-winner-away-' + game.id"
-                               value="away" v-model="game.winner" :disabled="! editable"
-                               @change="submitGame(game)"
-                        >
-
+                    <input class="game_winner_button" type="radio" :id="'game-winner-away-' + game.id"
+                           value="away" v-model="game.winner" :disabled="! editable"
+                           @change="submitGame(game)"
+                    >
                     <div class=" play-position" :class="{ 'break-position' : !game.order.home_breaks}" v-html="game.order.away_position"></div>
                     <div class="scoresheet-cell">
                         <label :for="'game-winner-away-' + game.id">
@@ -137,8 +135,6 @@
             </div>
         </form>
     </div>
-    {% verbatim %}
-    {%  endverbatim %}
 </div>
 
 <script>
@@ -164,6 +160,13 @@ let app = new Vue({
         },
         isOdd: function(number) {
             return number % 2;
+        },
+        gameWrapperClasses: function(number){
+            let base_classes = ['game_wrapper', 'container-fluid'];
+            if (this.isOdd(number)) {
+                base_classes.push('scoresheet-odd');
+            }
+            return base_classes.join(' ');
         },
         matchupButtonId: function (matchup, participant) {
             return ("matchup_button_" + matchup.id + '_' + participant.id);
