@@ -70,7 +70,7 @@ urlpatterns = [
     url(r'^score_sheet_edit/(?P<score_sheet_id>[0-9]+)/$', score_sheet.score_sheet_edit, name='score_sheet_edit'),
 
     url(r'^score_sheet/(?P<score_sheet_id>[0-9]+)/$', score_sheet.score_sheet, name='score_sheet'),
-    url(r'^score_sheet/games/(?P<score_sheet_id>[0-9]+)/$', score_sheet.score_sheet_games, name='score_sheet_games'),
+    url(r'^score_sheet/summary/(?P<score_sheet_id>[0-9]+)/$', score_sheet.score_sheet_summary, name='score_sheet_summary'),
 
     url(r'^seasons/', season.seasons, name='seasons'),
     url(r'^set_season/(?P<season_id>[0-9]+)/$', season.set_season, name='set_season'),
