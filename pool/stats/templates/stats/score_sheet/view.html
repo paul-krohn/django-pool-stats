@@ -112,7 +112,6 @@
     </h3>
     <div v-for="game in games" :class="gameWrapperClasses(game.order.order + 1)"
          :id="'game-wrapper-' + game.id">
-        <form method="POST" :target="gameFormUrl" :disabled="! editable">
             <div class="game_player col-xs-2">
                 <div class="scoresheet-cell-right">
                     <a v-if="game.home_player" :href="game.home_player.url">
@@ -125,6 +124,7 @@
                     <div class="play-position" :class="{ 'break-position' : game.order.home_breaks}"
                          v-html="game.order.home_position"></div>
                 </div>
+                <form method="POST" :target="gameFormUrl" :disabled="! editable">
                 <div class="scoresheet-cell">
                     <input type="radio"  class="game_winner_button" :id="'game-winner-home-' + game.id"
                        value="home" v-model="game.winner" :disabled="! editable"
@@ -141,6 +141,7 @@
                            @change="submitGame(game)"
                     >
                 </div>
+                </form>
                 <div class="scoresheet-cell">
                     <div class=" play-position" :class="{ 'break-position' : !game.order.home_breaks}"
                          v-html="game.order.away_position"></div>
@@ -174,7 +175,6 @@
                     {% endverbatim %}
                 </div>
             </div>
-        </form>
     </div>
     <div class="row">
         <div class="col-md-4" v-for="team in teams">
