@@ -155,7 +155,7 @@
                 </div>
                 <div class="game_attribute">
                     {% verbatim %}
-                    <span v-html="displayDate(game.timestamp)"></span>
+                    <span v-if="game.timestamp" v-html="displayDate(game.timestamp)"></span>
                     {% endverbatim %}
                 </div>
             </div>
