@@ -93,6 +93,10 @@ $(document).ready(function(){
 </div>
 {% endif %}
 <p></p>
+{% if auto_save %}
+    {% include 'stats/score_sheet/view.html' %}
+{% else %}
+
 <form name="score_sheet_games_form" action="{% url 'score_sheet_edit' score_sheet.id %}" method="post">
     {% csrf_token %}
     {{ games_formset.management_form }}
@@ -125,6 +129,7 @@ $(document).ready(function(){
         </tr>
     </table>
 </form>
+{% endif %}
     {%  with score_sheet.self_check as issues %}
         {% if issues|length %}
         <div>

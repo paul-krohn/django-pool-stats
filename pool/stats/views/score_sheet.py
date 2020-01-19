@@ -104,6 +104,7 @@ def score_sheet_edit(request, score_sheet_id):
 
     context = {
         'score_sheet': s,
+        'auto_save': request.session.get('auto_save', False),
         'games_formset': score_sheet_game_formset,
         'away_lineup_formset': away_lineup_formset,
         'home_lineup_formset': home_lineup_formset,
