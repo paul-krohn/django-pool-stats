@@ -116,7 +116,9 @@
                        @change="submitGame(game)"
                     />
                 </div>
-                <div class="scoresheet-cell game_order" v-html="game.order.order"></div>
+                <div class="scoresheet-cell">
+                    <div class="game_order" v-html="game.order.order"></div>
+                </div>
 
                 <div class="scoresheet-cell">
                     <input class="game_winner_button" type="radio" :id="'game-winner-away-' + game.id"
