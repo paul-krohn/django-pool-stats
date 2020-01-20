@@ -3,25 +3,36 @@
 {% block title %}SFPA :: Score Sheet :: {{ score_sheet.match }} {% endblock %}
 
 {% block content %}
-<script language="JavaScript">
+<script>
 
-var lineup_ids = ['away_lineup', 'away_substitutions', 'home_lineup', 'home_substitutions'];
+let lineup_ids = ['away_lineup', 'away_substitutions', 'home_lineup', 'home_substitutions'];
 
 function toggler(some_div_id) {
-    for (i = 0; i < lineup_ids.length; i++) {
-        if (some_div_id != lineup_ids[i]) {
-            $("#" + lineup_ids[i] ).css("display", "none");
+
+    lineup_ids.forEach(function(anId){
+        let toggle_div = $("#" + anId);
+        if (anId === some_div_id) {
+            toggle_div.css("display", toggle_div.css("display") === "block" ? "none" : "block");
+        } else {
+            toggle_div.css("display", "none");
         }
-    }
-    var current_display = $("#" + some_div_id).css("display");
-    $("#" + some_div_id).css("display", current_display == "block" ? "none" : "block");
-};
+    });
+
+}
 
 $(document).ready(function(){
-    $( "#toggle-away_lineup" ).click(function(){toggler('away_lineup')});
-    $( "#toggle-home_lineup" ).click(function(){toggler('home_lineup')});
-    $( "#toggle-away_substitutions" ).click(function(){toggler('away_substitutions')});
-    $( "#toggle-home_substitutions" ).click(function(){toggler('home_substitutions')});
+
+    lineup_ids.forEach(function(toggleDiv){
+        $('#toggle-' + toggleDiv).click(function(){
+            toggler(toggleDiv)
+        });
+    });
+
+    $( "#last-game-reset-button" ).confirm({
+        text: 'remove winner of last game?',
+        confirm: reset_last_game
+    });
+
 });
 
 </script>
@@ -60,7 +71,7 @@ $(document).ready(function(){
 </div>
 {% endwith %}
 
-{% if score_sheet.away_substitutions|length > 0 %}
+{% if score_sheet.away_substitutions.all|length > 0 %}
 <div>
     <h5>Away Substitutions</h5>
     <ol>
@@ -71,7 +82,7 @@ $(document).ready(function(){
 </div>
 {% endif %}
 
-{% if score_sheet.home_substitutions|length > 0 %}
+{% if score_sheet.home_substitutions.all|length > 0 %}
 <div>
     <h5>Home Substitutions</h5>
     <ol>
@@ -81,7 +92,11 @@ $(document).ready(function(){
     </ol>
 </div>
 {% endif %}
-<p/>
+<p></p>
+{% if auto_save %}
+    {% include 'stats/score_sheet/view.html' %}
+{% else %}
+
 <form name="score_sheet_games_form" action="{% url 'score_sheet_edit' score_sheet.id %}" method="post">
     {% csrf_token %}
     {{ games_formset.management_form }}
@@ -113,19 +128,23 @@ $(document).ready(function(){
             <td colspan="4"></td>
         </tr>
     </table>
-    </div>
 </form>
+{% endif %}
     {%  with score_sheet.self_check as issues %}
         {% if issues|length %}
+        <div>
             <ul>
             {%  for issue in issues %}
-            <div>
                 <li>{{ issue }}</li>
-            </div>
             {% endfor %}
             </ul>
+        </div>
         {% endif %}
     {%  endwith %}
+{% if auto_save %}
+
+{% else %}
+
     <div id="away-player-summaries"><h4>{{ score_sheet.match.away_team }} Player Summaries</h4>
     {% with player_score_sheet_summaries=away_player_score_sheet_summaries %}
     {% include "stats/player_match_summary.html" %}
@@ -137,6 +156,8 @@ $(document).ready(function(){
     {% endwith %}
     </div>
 
+{% endif %}
+
 <form action="{% url 'score_sheet_edit' score_sheet.id %}" method="post">
     <table class="table">
     {{ score_sheet_completion_form.as_table }}
@@ -146,11 +167,22 @@ $(document).ready(function(){
         <input name="complete" class="btn btn-primary" type="submit" value="Mark complete"/>
     </div>
 </form>
-<script language="JavaScript">
-$('#last-game-reset-button').confirm({
-    text: 'remove winner of last game?',
-    confirm: reset_last_game
-});
-</script>
 
+
+<script>
+
+function updateSummaryData(target) {
+    $.ajax({
+        url: summaryDataUrl,
+        dataType: 'json',
+        headers: {
+            Accept: "application/json",
+        },
+        success: function(data) {
+            target.teams = data;
+            console.log('whee');
+        },
+    });
+}
+</script>
 {% endblock %}

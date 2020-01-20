@@ -6,6 +6,7 @@ from . import views, status
 
 from .views import division
 from .views import feature
+from .views import game
 from .views import score_sheet
 from .views import week
 from .views import matchup
@@ -26,6 +27,8 @@ urlpatterns = [
 
     url(r'^divisions/(?P<season_id>[0-9]+)', division.divisions, name='divisions'),
     url(r'^divisions/', division.divisions, name='divisions'),
+
+    url(r'^game_update/$', game.update, name='game_update'),
 
     # the 'after' parameter is really just to make it testable
     url(r'^team/(?P<team_id>[0-9]+)/(?P<after>[0-9-]+)?$', team.team, name='team'),
@@ -67,6 +70,7 @@ urlpatterns = [
     url(r'^score_sheet_edit/(?P<score_sheet_id>[0-9]+)/$', score_sheet.score_sheet_edit, name='score_sheet_edit'),
 
     url(r'^score_sheet/(?P<score_sheet_id>[0-9]+)/$', score_sheet.score_sheet, name='score_sheet'),
+    url(r'^score_sheet/summary/(?P<score_sheet_id>[0-9]+)/$', score_sheet.score_sheet_summary, name='score_sheet_summary'),
 
     url(r'^seasons/', season.seasons, name='seasons'),
     url(r'^set_season/(?P<season_id>[0-9]+)/$', season.set_season, name='set_season'),

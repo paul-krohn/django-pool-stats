@@ -3,7 +3,7 @@ import logging
 import django.forms
 from django.conf import settings
 from django.forms import modelformset_factory
-from django.http import HttpResponseBadRequest
+from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
 from ..forms import DisabledScoreSheetGameForm, ScoreSheetGameForm, ScoreSheetCompletionForm, \
@@ -25,6 +25,7 @@ def score_sheet(request, score_sheet_id):
     )
 
     context = {
+        'auto_save': request.session.get('auto_save', False),
         'score_sheet': s,
         'edit_link': user_can_edit_scoresheet(request, score_sheet_id),
         'games_formset': score_sheet_game_formset,
@@ -33,6 +34,25 @@ def score_sheet(request, score_sheet_id):
     }
     return render(request, 'stats/score_sheet.html', context)
 
+
+def score_sheet_games(score_sheet_id):
+    game_list = []
+
+    s = ScoreSheet.objects.get(id=score_sheet_id)
+    for game in s.games.all():
+        game_list.append(game.as_dict())
+    return game_list
+
+def score_sheet_summary(request, score_sheet_id):
+    s = get_object_or_404(ScoreSheet, id=score_sheet_id)
+    summary = s.summary()
+    game_list = []
+    for game in s.games.all():
+        game_list.append(game.as_dict())
+
+    summary.update({'games': game_list})
+    summary.update({'editable': user_can_edit_scoresheet(request, score_sheet_id)})
+    return JsonResponse(summary)
 
 def score_sheet_edit(request, score_sheet_id):
     s = get_object_or_404(ScoreSheet, id=score_sheet_id)
@@ -85,6 +105,7 @@ def score_sheet_edit(request, score_sheet_id):
 
     context = {
         'score_sheet': s,
+        'auto_save': request.session.get('auto_save', False),
         'games_formset': score_sheet_game_formset,
         'away_lineup_formset': away_lineup_formset,
         'home_lineup_formset': home_lineup_formset,

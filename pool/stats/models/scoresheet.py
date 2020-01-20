@@ -191,7 +191,7 @@ class ScoreSheet(models.Model):
             'table_runs': len(away_wins.filter(table_run=True)) + len(home_wins.filter(table_run=True)),
         }
 
-    def player_summaries(self, away_home):
+    def player_summaries(self, away_home, as_dict=False):
 
         player_score_sheet_summaries = []
 
@@ -207,13 +207,22 @@ class ScoreSheet(models.Model):
         [players.append(y.player) for y in substitutions]
         for player in players:
             summary = {
-                'player': player,
+                'player': player.as_dict() if as_dict else player,
             }
             summary.update(self.player_summary(
                 a_player=player
             ))
             player_score_sheet_summaries.append(summary)
         return player_score_sheet_summaries
+
+    def summary(self):
+        _summary = {}
+        for ah in away_home:
+            _summary.update({ah: getattr(self.match, '{}_team'.format(ah)).as_dict()})
+            _summary[ah].update({'players': self.player_summaries(ah, True)})
+            _summary[ah].update({'wins': getattr(self, '{}_wins'.format(ah))()})
+
+        return {'teams': _summary}
 
     def check_wins_regular_season(self):
 

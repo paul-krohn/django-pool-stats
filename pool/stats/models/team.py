@@ -1,6 +1,7 @@
 import json
 
 from django.db import models
+from django.urls import reverse
 
 from .division import Division
 from .player import Player
@@ -40,6 +41,12 @@ class Team(models.Model):
 
     def __str__(self):
         return "{}".format(self.name)
+
+    def as_dict(self):
+        return {
+            'name': str(self),
+            'url': reverse('team', kwargs={'team_id': self.id}),
+        }
 
     def sponsor(self):
         return self.table.venue
