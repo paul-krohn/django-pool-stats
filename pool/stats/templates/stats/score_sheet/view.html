@@ -98,6 +98,11 @@
         color: #FFFFFF;
     }
 
+    .team-name {
+        font-size: x-large;
+        white-space: nowrap;
+    }
+
 </style>
 
 
@@ -181,16 +186,16 @@
             <table style="width: auto;" class="table table-striped table-responsive">
                 <thead>
                     <tr>
-                        <th v-html="team.name"></th>
-                        <th>Wins</th>
-                        <th>Losses</th>
-                        <th>Table Runs</th>
+                        <th style="white-space: nowrap;" v-html="team.name"></th>
+                        <th>W</th>
+                        <th>L</th>
+                        <th>TRs</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr v-for="player in team.players">
                         {% verbatim %}
-                        <td><a :href="player.player.url">{{ player.player.name }}</a></td>
+                        <td style="white-space: nowrap;"><a :href="player.player.url">{{ player.player.name }}</a></td>
                         <td>{{ player.wins }}</td>
                         <td>{{ player.losses }}</td>
                         <td>{{ player.table_runs }}</td>
