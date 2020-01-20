@@ -102,55 +102,55 @@
 
 
 <div id="scoresheet" class="container-fluid">
-    <h3>
-        {% verbatim %}
-        {{ teams.away.name }} {{ teams.away.wins }} @
-    </h3>
-    <h3>
-        {{ teams.home.name }} {{ teams.home.wins }}
-        {% endverbatim %}
-    </h3>
+    {% verbatim %}
+    <div class=" team-name">
+        <a :href="teams.away.url">{{ teams.away.name }}</a> {{ teams.away.wins }}
+    </div>
+    <div class=" team-name">
+        <a :href="teams.home.url">{{ teams.home.name }}</a> {{ teams.home.wins }}
+    </div>
+    {% endverbatim %}
     <div v-for="game in games" :class="gameWrapperClasses(game.order.order + 1)"
          :id="'game-wrapper-' + game.id">
             <div class="game_player col-xs-2">
                 <div class="scoresheet-cell-right">
-                    <a v-if="game.home_player" :href="game.home_player.url">
-                        <span v-html="game.home_player.name"></span>
+                    <a v-if="game.away_player" :href="game.away_player.url">
+                        <span v-html="game.away_player.name"></span>
                     </a>
                 </div>
             </div>
             <div style="min-width: 210px" class="col-md-2">
                 <div class="scoresheet-cell">
-                    <div class="play-position" :class="{ 'break-position' : game.order.home_breaks}"
-                         v-html="game.order.home_position"></div>
+                    <div class=" play-position" :class="{ 'break-position' : !game.order.home_breaks}"
+                         v-html="game.order.away_position"></div>
                 </div>
                 <form method="POST" :target="gameFormUrl" :disabled="! editable">
                 <div class="scoresheet-cell">
-                    <input type="radio"  class="game_winner_button" :id="'game-winner-home-' + game.id"
-                       value="home" v-model="game.winner" :disabled="! editable"
-                       @change="submitGame(game)"
-                    />
+                    <input class="game_winner_button" type="radio" :id="'game-winner-away-' + game.id"
+                        value="away" v-model="game.winner" :disabled="! editable"
+                        @change="submitGame(game)"
+                    >
                 </div>
                 <div class="scoresheet-cell">
                     <div class="game_order" v-html="game.order.order"></div>
                 </div>
 
                 <div class="scoresheet-cell">
-                    <input class="game_winner_button" type="radio" :id="'game-winner-away-' + game.id"
-                           value="away" v-model="game.winner" :disabled="! editable"
-                           @change="submitGame(game)"
-                    >
+                    <input type="radio"  class="game_winner_button" :id="'game-winner-home-' + game.id"
+                        value="home" v-model="game.winner" :disabled="! editable"
+                        @change="submitGame(game)"
+                    />
                 </div>
                 </form>
                 <div class="scoresheet-cell">
-                    <div class=" play-position" :class="{ 'break-position' : !game.order.home_breaks}"
-                         v-html="game.order.away_position"></div>
+                    <div class="play-position" :class="{ 'break-position' : game.order.home_breaks}"
+                         v-html="game.order.home_position"></div>
                 </div>
             </div>
             <div class="game_player col-md-2">
                 <div class="scoresheet-cell">
-                    <a v-if="game.away_player" :href="game.away_player.url">
-                        <span v-html="game.away_player.name"></span>
+                    <a v-if="game.home_player" :href="game.home_player.url">
+                        <span v-html="game.home_player.name"></span>
                     </a>
                 </div>
             </div>
