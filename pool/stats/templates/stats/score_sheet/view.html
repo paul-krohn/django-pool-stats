@@ -115,6 +115,9 @@
         <a :href="teams.home.url">{{ teams.home.name }}</a> {{ teams.home.wins }}
     </div>
     {% endverbatim %}
+    <div>
+        <input @click="toggleGameDetails();" id="toggle-game-details" type="button" class="btn btn-default" value="game details" />
+    </div>
     <div v-for="game in games" :class="gameWrapperClasses(game.order.order + 1)"
          :id="'game-wrapper-' + game.id">
             <div class="game_player col-xs-2">
@@ -280,6 +283,15 @@ let app = new Vue({
                 success: function(response) {
                     self.updateData();
                 },
+            });
+        },
+        toggleGameDetails: function() {
+            $(".game_attributes").each(function(i, aDiv){
+                if ($(aDiv).css('display') === 'none') {
+                    $(aDiv).css('display', 'block');
+                } else {
+                    $(aDiv).css('display', 'none');
+                }
             });
         },
     },
