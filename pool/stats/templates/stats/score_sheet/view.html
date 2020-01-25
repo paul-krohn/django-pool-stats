@@ -87,17 +87,6 @@
         vertical-align: middle !important;
     }
 
-    .mark-nobreak-position, .mark-break-position {
-        font-weight: bold;
-        width: 28px;
-        height: 28px;
-    }
-
-    .break-position {
-        background-color: #444444;
-        color: #FFFFFF;
-    }
-
     .team-name {
         font-size: x-large;
         white-space: nowrap;
@@ -136,7 +125,7 @@
             </div>
         </td>
         <td class="scoresheet-square">
-            <div :class="{ 'break-position' : game.order.home_breaks}"  v-html="game.order.home_position"></div>
+            <div :class="{ 'mark-break-position' : game.order.home_breaks}"  v-html="game.order.home_position"></div>
         </td>
         <td class="scoresheet-square">
             <div class="scoresheet-cell">
@@ -158,7 +147,7 @@
             </div>
         </td>
         <td class="scoresheet-square">
-            <div :class="{ 'break-position' : !game.order.home_breaks}"  v-html="game.order.away_position"></div>
+            <div :class="{ 'mark-break-position' : !game.order.home_breaks}"  v-html="game.order.away_position"></div>
         </td>
         <td :id="game.away_player +'_' + game.order.away_position + '_game_' +  game.order.order" class="scoresheet-cell" align="right" >
             <div class="scoresheet-cell">
