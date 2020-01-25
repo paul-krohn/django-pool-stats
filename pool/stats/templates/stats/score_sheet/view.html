@@ -105,109 +105,87 @@
 
 </style>
 
+<div id="scoresheet">
+<table class="table">
+<thead>
+<tr>
+    <th colspan="1" class="scoresheet-small-header" style="text-align:right;"><h5>Home</h5></th>
+    <th colspan="5" class="scoresheet-small-header"></th>
+    <th colspan="4" class="scoresheet-small-header"><h5>Away</h5></th>
+</tr>
+<tr>
+    <th style="text-align: right;"><h4><a :href="teams.home.url" v-html="teams.home.name"></a></h4></th>
+    <th class="scoresheet-cell"><h4 v-html="teams.home.wins"></h4></th>
+    <th></th>
+    <th class="scoresheet-cell"><h4></h4></th>
+    <th></th>
+    <th class="scoresheet-cell"><h4 v-html="teams.home.wins"></h4></th>
+    <th><h4><a :href="teams.away.url" v-html="teams.away.name"></a></h4></th>
+    <th class="scoresheet-square">Time Marked</th>
+    <th class="scoresheet-square">TR</th>
+    <th class="scoresheet-square">F</th>
+</tr>
+</thead>
+<tbody>
+    <tr v-for="game in games" :class="gameWrapperClasses(game.order.order + 1)" :id="'game-wrapper-' + game.id">
+        <td :id="game.home_player +'_' + game.order.home_position + '_game_' +  game.order.order" class="scoresheet-cell" style="float: right;" >
+            <div class="scoresheet-cell">
+                <a v-if="game.home_player" :href="game.home_player.url">
+                    <span v-html="game.home_player.name"></span>
+                </a>
+            </div>
+        </td>
+        <td class="scoresheet-square">
+            <div :class="{ 'break-position' : game.order.home_breaks}"  v-html="game.order.home_position"></div>
+        </td>
+        <td class="scoresheet-square">
+            <div class="scoresheet-cell">
+                <input type="radio"  class="game_winner_button" :id="'game-winner-home-' + game.id"
+                    value="home" v-model="game.winner" :disabled="! editable"
+                    @change="submitGame(game)"
+                />
+            </div>
+        </td>
+        <td class="scoresheet-square">
+            <div class="cell" v-html="game.order.order"></div>
+        </td>
+        <td class="scoresheet-square">
+            <div class="scoresheet-cell">
+                <input type="radio"  class="game_winner_button" :id="'game-winner-away-' + game.id"
+                    value="away" v-model="game.winner" :disabled="! editable"
+                    @change="submitGame(game)"
+                />
+            </div>
+        </td>
+        <td class="scoresheet-square">
+            <div :class="{ 'break-position' : !game.order.home_breaks}"  v-html="game.order.away_position"></div>
+        </td>
+        <td :id="game.away_player +'_' + game.order.away_position + '_game_' +  game.order.order" class="scoresheet-cell" align="right" >
+            <div class="scoresheet-cell">
+                <a v-if="game.away_player" :href="game.away_player.url">
+                    <span v-html="game.away_player.name"></span>
+                </a>
+            </div>
+        </td>
+        <td>
+            <span v-if="game.timestamp" v-html="displayDate(game.timestamp)"></span>
+        </td>
 
-<div id="scoresheet" class="container-fluid">
-    {% verbatim %}
-    <div class=" team-name">
-        <a :href="teams.away.url">{{ teams.away.name }}</a> {{ teams.away.wins }}
-    </div>
-    <div class=" team-name">
-        <a :href="teams.home.url">{{ teams.home.name }}</a> {{ teams.home.wins }}
-    </div>
-    {% endverbatim %}
-    <div>
-        <input @click="toggleGameDetails();" id="toggle-game-details" type="button" class="btn btn-default" value="game details" />
-    </div>
-    <div v-for="game in games" :class="gameWrapperClasses(game.order.order + 1)"
-         :id="'game-wrapper-' + game.id">
-            <div class="game_player col-xs-2">
-                <div class="scoresheet-cell-right">
-                    <a v-if="game.away_player" :href="game.away_player.url">
-                        <span v-html="game.away_player.name"></span>
-                    </a>
-                </div>
-            </div>
-            <div style="min-width: 210px" class="col-md-2">
-                <div class="scoresheet-cell">
-                    <div class=" play-position" :class="{ 'break-position' : !game.order.home_breaks}"
-                         v-html="game.order.away_position"></div>
-                </div>
-                <form method="POST" :target="gameFormUrl" :disabled="! editable">
-                <div class="scoresheet-cell">
-                    <input class="game_winner_button" type="radio" :id="'game-winner-away-' + game.id"
-                        value="away" v-model="game.winner" :disabled="! editable"
-                        @change="submitGame(game)"
-                    >
-                </div>
-                <div class="scoresheet-cell">
-                    <div class="game_order" v-html="game.order.order"></div>
-                </div>
-
-                <div class="scoresheet-cell">
-                    <input type="radio"  class="game_winner_button" :id="'game-winner-home-' + game.id"
-                        value="home" v-model="game.winner" :disabled="! editable"
-                        @change="submitGame(game)"
-                    />
-                </div>
-                </form>
-                <div class="scoresheet-cell">
-                    <div class="play-position" :class="{ 'break-position' : game.order.home_breaks}"
-                         v-html="game.order.home_position"></div>
-                </div>
-            </div>
-            <div class="game_player col-md-2">
-                <div class="scoresheet-cell">
-                    <a v-if="game.home_player" :href="game.home_player.url">
-                        <span v-html="game.home_player.name"></span>
-                    </a>
-                </div>
-            </div>
-            <div style="float: right" class="game_attributes scoresheet-cell col-md-2 col-xs-12">
-                <div class="game_attribute ">
-                    <input type="checkbox" :id="'game-tr-' + game.id" v-model="game.table_run"
-                            :disabled="! editable"
-                            @change="submitGame(game)"
-                    />
-                    <label :for="'game-tr-' + game.id">tr </label>
-                </div>
-                <div class="game_attribute">
-                    <input type="checkbox" :id="'game-forfeit-' + game.id" v-model="game.forfeit"
-                        :disabled="! editable"
-                        @change="submitGame(game)"
-                    />
-                    <label :for="'game-forfeit-' + game.id">forfeit </label>
-                </div>
-                <div class="game_attribute">
-                    {% verbatim %}
-                    <span v-if="game.timestamp" v-html="displayDate(game.timestamp)"></span>
-                    {% endverbatim %}
-                </div>
-            </div>
-    </div>
-    <div class="row">
-        <div class="col-md-4" v-for="team in teams">
-            <table style="width: auto;" class="table table-striped table-responsive">
-                <thead>
-                    <tr>
-                        <th style="white-space: nowrap;" v-html="team.name"></th>
-                        <th>W</th>
-                        <th>L</th>
-                        <th>TRs</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="player in team.players">
-                        {% verbatim %}
-                        <td style="white-space: nowrap;"><a :href="player.player.url">{{ player.player.name }}</a></td>
-                        <td>{{ player.wins }}</td>
-                        <td>{{ player.losses }}</td>
-                        <td>{{ player.table_runs }}</td>
-                        {% endverbatim %}
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+        <td class="scoresheet-square">
+            <input type="checkbox" :id="'game-tr-' + game.id" v-model="game.table_run"
+                    :disabled="! editable"
+                    @change="submitGame(game)"
+            />
+        </td>
+        <td class="scoresheet-square">
+            <input type="checkbox" :id="'game-forfeit-' + game.id" v-model="game.forfeit"
+                :disabled="! editable"
+                @change="submitGame(game)"
+            />
+        </td>
+    </tr>
+</tbody>
+</table>
 </div>
 
 <script>
@@ -251,7 +229,7 @@ let app = new Vue({
             return number % 2;
         },
         gameWrapperClasses: function(number){
-            let base_classes = ['row', 'game_wrapper', 'container-fluid'];
+            let base_classes = [];
             if (this.isOdd(number)) {
                 base_classes.push('scoresheet-odd');
             }
