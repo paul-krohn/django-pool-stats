@@ -61,11 +61,6 @@
         font-size: small;
     }
 
-    .game_winner_button {
-        vertical-align: middle;
-        width: 26px;
-    }
-
     div.scoresheet-cell-right {
         vertical-align: middle !important;
         padding: 4px !important;
@@ -123,9 +118,9 @@
         <td class="scoresheet-square">
             <div :class="{ 'mark-break-position' : game.order.home_breaks}"  v-html="game.order.home_position"></div>
         </td>
-        <td class="scoresheet-square">
-            <div class="scoresheet-cell">
-                <input type="radio"  class="game_winner_button" :id="'game-winner-home-' + game.id"
+        <td class="scoresheet-square" style="vertical-align: middle;">
+            <div class="scoresheet-square">
+                <input type="radio" :id="'game-winner-home-' + game.id"
                     value="home" v-model="game.winner" :disabled="! editable"
                     @change="submitGame(game)"
                 />
@@ -135,8 +130,8 @@
             <div class="cell" v-html="game.order.order"></div>
         </td>
         <td class="scoresheet-square">
-            <div class="scoresheet-cell">
-                <input type="radio"  class="game_winner_button" :id="'game-winner-away-' + game.id"
+            <div class="scoresheet-square">
+                <input type="radio" :id="'game-winner-away-' + game.id"
                     value="away" v-model="game.winner" :disabled="! editable"
                     @change="submitGame(game)"
                 />
