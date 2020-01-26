@@ -208,7 +208,7 @@ let app = new Vue({
         },
         displayDate: function (dateString) {
             let timestamp = new Date(dateString);
-            return timestamp.toLocaleTimeString('en-US', {timeStyle: 'short'});
+            return timestamp.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
         },
         isOdd: function(number) {
             return number % 2;
