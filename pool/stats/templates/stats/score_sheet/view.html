@@ -170,6 +170,32 @@
     </template>
 </tbody>
 </table>
+
+<div class="row">
+    <div class="col-md-6" v-for="team in teams">
+        <table style="width: 100%;" class="table table-striped">
+            <thead>
+                <tr>
+                    <th style="white-space: nowrap;" v-html="team.name"></th>
+                    <th>W</th>
+                    <th>L</th>
+                    <th>TRs</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr v-for="player in team.players">
+                    {% verbatim %}
+                    <td style="white-space: nowrap;"><a :href="player.player.url">{{ player.player.name }}</a></td>
+                    <td>{{ player.wins }}</td>
+                    <td>{{ player.losses }}</td>
+                    <td>{{ player.table_runs }}</td>
+                    {% endverbatim %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
 </div>
 
 <script>
