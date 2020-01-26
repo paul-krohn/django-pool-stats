@@ -111,7 +111,8 @@
 </tr>
 </thead>
 <tbody>
-    <tr v-for="game in games" :class="gameWrapperClasses(game.order.order)" :id="'game-wrapper-' + game.id">
+    <template v-for="game in games">
+    <tr :class="gameWrapperClasses(game.order.order)" :id="'game-wrapper-' + game.id">
         <td :id="'home_player_' + game.order.home_position + '_game_' +  game.order.order" class="scoresheet-cell"
             align="right"
         >
@@ -170,6 +171,10 @@
             />
         </td>
     </tr>
+    <tr v-if="game.order.order % gameGroupSize === 0">
+        <td class="scoresheet-divider" colspan="10"></td>
+    </tr>
+    </template>
 </tbody>
 </table>
 </div>
@@ -190,6 +195,7 @@ let app = new Vue({
         editable: false,
         gameFormUrl: '{% url 'game_update' %}',
         dataUrl: '{% url 'score_sheet_summary' score_sheet.id %}',
+        gameGroupSize: {{ game_group_size }},
     },
     methods: {
         updateData: function() {
