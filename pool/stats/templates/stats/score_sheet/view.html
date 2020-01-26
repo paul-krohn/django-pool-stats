@@ -66,11 +66,6 @@
         width: 26px;
     }
 
-    div.scoresheet-cell {
-        vertical-align: middle !important;
-        padding: 4px !important;
-        float:  left;
-    }
     div.scoresheet-cell-right {
         vertical-align: middle !important;
         padding: 4px !important;
@@ -116,8 +111,10 @@
 </tr>
 </thead>
 <tbody>
-    <tr v-for="game in games" :class="gameWrapperClasses(game.order.order + 1)" :id="'game-wrapper-' + game.id">
-        <td :id="game.home_player +'_' + game.order.home_position + '_game_' +  game.order.order" class="scoresheet-cell" style="float: right;" >
+    <tr v-for="game in games" :class="gameWrapperClasses(game.order.order)" :id="'game-wrapper-' + game.id">
+        <td :id="'home_player_' + game.order.home_position + '_game_' +  game.order.order" class="scoresheet-cell"
+            align="right"
+        >
             <div class="scoresheet-cell">
                 <a v-if="game.home_player" :href="game.home_player.url">
                     <span v-html="game.home_player.name"></span>
