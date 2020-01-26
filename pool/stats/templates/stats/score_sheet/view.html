@@ -113,9 +113,7 @@
 <tbody>
     <template v-for="game in games">
     <tr :class="gameWrapperClasses(game.order.order)" :id="'game-wrapper-' + game.id">
-        <td :id="'home_player_' + game.order.home_position + '_game_' +  game.order.order" class="scoresheet-cell"
-            align="right"
-        >
+        <td :id="'home_player_' + game.order.home_position + '_game_' +  game.order.order" class="scoresheet-cell" align="right">
             <div class="scoresheet-cell">
                 <a v-if="game.home_player" :href="game.home_player.url">
                     <span v-html="game.home_player.name"></span>
@@ -147,7 +145,7 @@
         <td class="scoresheet-square">
             <div :class="{ 'mark-break-position' : !game.order.home_breaks}"  v-html="game.order.away_position"></div>
         </td>
-        <td :id="game.away_player +'_' + game.order.away_position + '_game_' +  game.order.order" class="scoresheet-cell" align="right" >
+        <td :id="game.away_player +'_' + game.order.away_position + '_game_' +  game.order.order" class="scoresheet-cell">
             <div class="scoresheet-cell">
                 <a v-if="game.away_player" :href="game.away_player.url">
                     <span v-html="game.away_player.name"></span>
