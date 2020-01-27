@@ -19,5 +19,6 @@ function reset_last_game(){
     });
     if (set_radio_buttons.length) {
         set_radio_buttons[set_radio_buttons.length - 1].checked = false;
+        return $(set_radio_buttons[set_radio_buttons.length - 1]).data('game-order');
     }
 }
