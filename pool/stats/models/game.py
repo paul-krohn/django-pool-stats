@@ -35,10 +35,11 @@ class Game(models.Model):
     def save(self, force_insert=False, force_update=False, using=None,
              update_fields=None):
 
-        if self.__original_winner in [None, ''] and self.winner not in [None, '']:
-            self.timestamp = timezone.now()
-        else:
+        if self.winner in [None, '']:
             self.timestamp = None
+        else:
+            if self.__original_winner in [None, '']:
+                self.timestamp = timezone.now()
 
         super(Game, self).save(force_insert=force_insert, force_update=force_update)
         self.__original_winner = self.winner
