@@ -44,6 +44,8 @@ class BasePoolStatsTestCase(LiveServerTestCase):
     def setUp(self):
 
         super(BasePoolStatsTestCase, self).setUp()
+        self.client.session['auto_save'] = True
+        self.client.session.save()
 
     def tearDown(self):
 

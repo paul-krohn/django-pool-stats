@@ -37,6 +37,8 @@ class Game(models.Model):
 
         if self.__original_winner in [None, ''] and self.winner not in [None, '']:
             self.timestamp = timezone.now()
+        else:
+            self.timestamp = None
 
         super(Game, self).save(force_insert=force_insert, force_update=force_update)
         self.__original_winner = self.winner

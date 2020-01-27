@@ -44,6 +44,7 @@
         <td class="scoresheet-square" style="vertical-align: middle;">
             <div class="scoresheet-square">
                 <input type="radio" :id="'game-winner-home-' + game.id"
+                    :data-game-order="game.order.order"
                     value="home" v-model="game.winner" :disabled="! editable"
                     @change="submitGame(game)"
                 />
@@ -55,6 +56,7 @@
         <td class="scoresheet-square">
             <div class="scoresheet-square">
                 <input type="radio" :id="'game-winner-away-' + game.id"
+                    :data-game-order="game.order.order"
                     value="away" v-model="game.winner" :disabled="! editable"
                     @change="submitGame(game)"
                 />
@@ -91,6 +93,17 @@
         <td class="scoresheet-divider" colspan="10"></td>
     </tr>
     </template>
+    <tr>
+        <td></td>
+        <td colspan="5">
+            <div class="text-center">
+                <input id="last-game-reset-button" class="btn btn-default" type="button" value="reset last game"
+                    @click="resetLastGame"
+                />
+            </div>
+        </td>
+        <td colspan="4"></td>
+    </tr>
 </tbody>
 </table>
 
@@ -140,12 +153,12 @@ let app = new Vue({
         gameGroupSize: {{ game_group_size }},
     },
     methods: {
-        updateData: function() {
+        updateData: function () {
             let self = this;
             $.ajax({
                 url: this.dataUrl,
                 dataType: 'json',
-                success: function(data) {
+                success: function (data) {
                     self.teams = data.teams;
                     self.games = data.games;
                     self.editable = data.editable;
@@ -157,12 +170,12 @@ let app = new Vue({
         },
         displayDate: function (dateString) {
             let timestamp = new Date(dateString);
-            return timestamp.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
+            return timestamp.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
         },
-        isOdd: function(number) {
+        isOdd: function (number) {
             return number % 2;
         },
-        gameWrapperClasses: function(number){
+        gameWrapperClasses: function (number) {
             let base_classes = [];
             if (this.isOdd(number)) {
                 base_classes.push('scoresheet-odd');
@@ -171,6 +184,12 @@ let app = new Vue({
         },
         matchupButtonId: function (matchup, participant) {
             return ("matchup_button_" + matchup.id + '_' + participant.id);
+        },
+        resetLastGame: function () {
+            let gameOrder = reset_last_game();
+            let game = this.games.filter(b => b.order.order === parseInt(gameOrder))[0];
+            game.winner = '';
+            this.submitGame(game);
         },
         submitGame: function(game) {
             let self = this;
