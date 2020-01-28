@@ -93,7 +93,7 @@
         <td class="scoresheet-divider" colspan="10"></td>
     </tr>
     </template>
-    <tr>
+    <tr v-if="editable">
         <td></td>
         <td colspan="5">
             <div class="text-center">
@@ -146,7 +146,15 @@ let app = new Vue({
     el: '#scoresheet',
     data: {
         games: [],
-        teams: {},
+        teams: {
+            // this pre-population suppresses a warning that team.(home|away) is undefined
+            "home": {
+                "url": null
+            },
+            "away": {
+                "url": null
+            }
+        },
         editable: false,
         gameFormUrl: '{% url 'game_update' %}',
         dataUrl: '{% url 'score_sheet_summary' score_sheet.id %}',
