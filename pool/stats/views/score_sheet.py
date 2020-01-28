@@ -27,6 +27,7 @@ def score_sheet(request, score_sheet_id):
     context = {
         'auto_save': request.session.get('auto_save', False),
         'score_sheet': s,
+        'game_group_size': settings.LEAGUE['game_group_size'],
         'edit_link': user_can_edit_scoresheet(request, score_sheet_id),
         'games_formset': score_sheet_game_formset,
         'away_player_score_sheet_summaries': s.player_summaries('away'),
