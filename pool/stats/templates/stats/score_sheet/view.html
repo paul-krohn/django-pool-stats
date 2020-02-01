@@ -8,6 +8,15 @@
 {% csrf_token %}
 
 <div id="scoresheet">
+
+<div v-if="!owner && editable">
+    <div id="is-editing-buttons" class="btn-group btn-toggle">
+        <button class="btn btn-xs btn-default" @click="editMode(true)">Edit</button>
+        <button class="btn btn-xs btn-primary active" @click="editMode(false)">View</button>
+    </div>
+</div>
+<hr>
+
 <table class="table">
 <thead>
 <tr>
@@ -45,7 +54,7 @@
             <div class="scoresheet-square">
                 <input type="radio" :id="'game-winner-home-' + game.id"
                     :data-game-order="game.order.order"
-                    value="home" v-model="game.winner" :disabled="! editable"
+                    value="home" v-model="game.winner" :disabled="! editing"
                     @change="submitGame(game)"
                 />
             </div>
@@ -57,7 +66,7 @@
             <div class="scoresheet-square">
                 <input type="radio" :id="'game-winner-away-' + game.id"
                     :data-game-order="game.order.order"
-                    value="away" v-model="game.winner" :disabled="! editable"
+                    value="away" v-model="game.winner" :disabled="! editing"
                     @change="submitGame(game)"
                 />
             </div>
@@ -78,13 +87,13 @@
 
         <td class="scoresheet-square">
             <input type="checkbox" :id="'game-tr-' + game.id" v-model="game.table_run"
-                    :disabled="! editable"
+                    :disabled="! editing"
                     @change="submitGame(game)"
             />
         </td>
         <td class="scoresheet-square">
             <input type="checkbox" :id="'game-forfeit-' + game.id" v-model="game.forfeit"
-                :disabled="! editable"
+                :disabled="! editing"
                 @change="submitGame(game)"
             />
         </td>
@@ -156,9 +165,20 @@ let app = new Vue({
             }
         },
         editable: false,
+        owner: false,
+        editing: false,
         gameFormUrl: '{% url 'game_update' %}',
         dataUrl: '{% url 'score_sheet_summary' score_sheet.id %}',
         gameGroupSize: {{ game_group_size }},
+    },
+    watch: {
+        // IDK if _both_ the `editable` and `owner` callbacks are needed.
+        editable: function () {
+            this.editing = this.editable && this.owner;
+        },
+        owner: function () {
+            this.editing = this.editable && this.owner;
+        },
     },
     methods: {
         updateData: function () {
@@ -170,6 +190,7 @@ let app = new Vue({
                     self.teams = data.teams;
                     self.games = data.games;
                     self.editable = data.editable;
+                    self.owner = data.owner;
                 },
                 headers: {
                     Accept: "application/json",
@@ -179,6 +200,10 @@ let app = new Vue({
         displayDate: function (dateString) {
             let timestamp = new Date(dateString);
             return timestamp.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
+        },
+        editMode: function(amIEditing) {
+            this.editing = amIEditing;
+            $('#is-editing-buttons').find('.btn').toggleClass('active').toggleClass('btn-primary').toggleClass('btn-default');
         },
         isOdd: function (number) {
             return number % 2;

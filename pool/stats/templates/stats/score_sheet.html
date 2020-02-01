@@ -4,7 +4,7 @@
 
 {% block content %}
 <h5>{{ score_sheet.match.week }}, {{ score_sheet.match.week.date }}</h5>
-{% if edit_link %}
+{% if edit_link and not auto_save %}
 <p><a href="{% url 'score_sheet_edit' score_sheet.id%}">Edit</a></p>
 {% endif %}
 {% if auto_save %}
