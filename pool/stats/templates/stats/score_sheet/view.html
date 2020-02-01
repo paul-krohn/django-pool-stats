@@ -202,8 +202,10 @@ let app = new Vue({
             return timestamp.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
         },
         editMode: function(amIEditing) {
-            this.editing = amIEditing;
-            $('#is-editing-buttons').find('.btn').toggleClass('active').toggleClass('btn-primary').toggleClass('btn-default');
+            if (this.editing !== amIEditing) {
+                this.editing = amIEditing;
+                $('#is-editing-buttons').find('.btn').toggleClass('active').toggleClass('btn-primary').toggleClass('btn-default');
+            }
         },
         isOdd: function (number) {
             return number % 2;
