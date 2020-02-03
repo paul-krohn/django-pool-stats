@@ -12,7 +12,7 @@
 <div v-if="!owner && editable">
     <div id="is-editing-buttons" class="btn-group btn-toggle">
         <button class="btn btn-xs btn-default" @click="editMode(true)">Edit</button>
-        <button class="btn btn-xs btn-primary active" @click="editMode(false)">View</button>
+        <button class="btn btn-xs btn-primary" @click="editMode(false)">View</button>
     </div>
 </div>
 <hr>
@@ -209,7 +209,7 @@ let app = new Vue({
         editMode: function(amIEditing) {
             if (this.editing !== amIEditing) {
                 this.editing = amIEditing;
-                $('#is-editing-buttons').find('.btn').toggleClass('active').toggleClass('btn-primary').toggleClass('btn-default');
+                $('#is-editing-buttons').find('.btn').toggleClass('btn-primary').toggleClass('btn-default');
             }
         },
         isOdd: function (number) {
