@@ -225,10 +225,13 @@ let app = new Vue({
             return ("matchup_button_" + matchup.id + '_' + participant.id);
         },
         resetLastGame: function () {
-            let gameOrder = reset_last_game();
-            let game = this.games.filter(b => b.order.order === parseInt(gameOrder))[0];
-            game.winner = '';
-            this.submitGame(game);
+            let validWinners = ['away', 'home'];
+            let scoredGames = this.games.filter(b => validWinners.includes(b.winner));
+            if (scoredGames.length) {
+                let game = scoredGames[scoredGames.length - 1];
+                game.winner = '';
+                this.submitGame(game);
+            }
         },
         getMarkGameText: function (game, ha) {
             if (game.winner  === '') {
@@ -293,7 +296,7 @@ let app = new Vue({
         setResetGameConfirmDialog: function() {
             $("#last-game-reset-button").confirm({
                 text: 'remove winner of last game?',
-                confirm: reset_last_game
+                confirm: this.resetLastGame,
             });
 
         },
