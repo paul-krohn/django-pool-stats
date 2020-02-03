@@ -40,7 +40,7 @@
     <template v-for="game in games">
     <tr :class="gameWrapperClasses(game.order.order)" :id="'game-wrapper-' + game.id">
         <td class="scoresheet-square">
-            <div class="cell" v-html="game.order.order"></div>
+            <div class="cell badge" v-html="game.order.order"></div>
         </td>
         <td :id="'home_player_' + game.order.home_position + '_game_' +  game.order.order" class="scoresheet-cell" align="right">
             <div class="scoresheet-cell">
