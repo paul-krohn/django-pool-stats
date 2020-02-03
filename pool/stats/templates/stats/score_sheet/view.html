@@ -185,7 +185,6 @@ let app = new Vue({
     methods: {
         updateData: function () {
             return new Promise((resolve, reject) => {
-                console.log("updateData called");
                 let self = this;
                 $.ajax({
                     url: this.dataUrl,
