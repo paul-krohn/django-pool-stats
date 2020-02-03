@@ -8,20 +8,28 @@
 {% csrf_token %}
 
 <div id="scoresheet">
+
+<div v-if="!owner && editable">
+    <div id="is-editing-buttons" class="btn-group btn-toggle">
+        <button class="btn btn-xs btn-default" @click="editMode(true)">Edit</button>
+        <button class="btn btn-xs btn-primary" @click="editMode(false)">View</button>
+    </div>
+</div>
+<hr>
+
 <table class="table">
 <thead>
 <tr>
-    <th colspan="1" class="scoresheet-small-header" style="text-align:right;"><h5>Home</h5></th>
-    <th colspan="5" class="scoresheet-small-header"></th>
+    <th colspan="2" class="scoresheet-small-header" style="text-align:right;"><h5>Home</h5></th>
+    <th colspan="3" class="scoresheet-small-header"></th>
     <th colspan="4" class="scoresheet-small-header"><h5>Away</h5></th>
 </tr>
 <tr>
+    <th></th>
     <th style="text-align: right;"><h4><a :href="teams.home.url" v-html="teams.home.name"></a></h4></th>
-    <th class="scoresheet-cell"><h4 v-html="teams.home.wins"></h4></th>
+    <th class="scoresheet-cell"><h4 style="text-align: center;" v-html="teams.home.wins"></h4></th>
     <th></th>
-    <th class="scoresheet-cell"><h4></h4></th>
-    <th></th>
-    <th class="scoresheet-cell"><h4 v-html="teams.away.wins"></h4></th>
+    <th class="scoresheet-cell"><h4 style="text-align: center;" v-html="teams.away.wins"></h4></th>
     <th><h4><a :href="teams.away.url" v-html="teams.away.name"></a></h4></th>
     <th class="scoresheet-square">Time Marked</th>
     <th class="scoresheet-square">TR</th>
@@ -31,6 +39,9 @@
 <tbody>
     <template v-for="game in games">
     <tr :class="gameWrapperClasses(game.order.order)" :id="'game-wrapper-' + game.id">
+        <td class="scoresheet-square">
+            <div class="cell badge" v-html="game.order.order"></div>
+        </td>
         <td :id="'home_player_' + game.order.home_position + '_game_' +  game.order.order" class="scoresheet-cell" align="right">
             <div class="scoresheet-cell">
                 <a v-if="game.home_player" :href="game.home_player.url">
@@ -39,31 +50,30 @@
             </div>
         </td>
         <td class="scoresheet-square">
-            <div :class="{ 'mark-break-position' : game.order.home_breaks}"  v-html="game.order.home_position"></div>
+            <div :class="game.order.home_breaks ? 'mark-break-position' : 'mark-nobreak-position'"  v-html="game.order.home_position"></div>
         </td>
-        <td class="scoresheet-square" style="vertical-align: middle;">
-            <div class="scoresheet-square">
-                <input type="radio" :id="'game-winner-home-' + game.id"
-                    :data-game-order="game.order.order"
-                    value="home" v-model="game.winner" :disabled="! editable"
-                    @change="submitGame(game)"
-                />
+        <td class="scoresheet-cell" style="text-align: center; width: 58px; ">
+            <div class="btn-group" data-toggle="buttons" style="display: flex;">
+                <label :class="getGameMarkClasses(game, 'home')"
+                       :for="'game-winner-home-' + game.id" v-html="getMarkGameText(game, 'home')"
+                        @click="markGame(game, 'home')" :disabled="! editing">
+                    <input type="radio" :id="'game-winner-home-' + game.id"
+                        :data-game-order="game.order.order"
+                        value="home" v-model="game.winner"
+                    />
+                </label>
+                <label :class="getGameMarkClasses(game, 'away')" style="float: left"
+                        :for="'game-winner-away-' + game.id" v-html="getMarkGameText(game, 'away')"
+                        @click="markGame(game, 'away')" :disabled="! editing">
+                    <input type="radio" :id="'game-winner-away-' + game.id"
+                        :data-game-order="game.order.order"
+                        value="away" v-model="game.winner"
+                    />
+                </label>
             </div>
         </td>
         <td class="scoresheet-square">
-            <div class="cell" v-html="game.order.order"></div>
-        </td>
-        <td class="scoresheet-square">
-            <div class="scoresheet-square">
-                <input type="radio" :id="'game-winner-away-' + game.id"
-                    :data-game-order="game.order.order"
-                    value="away" v-model="game.winner" :disabled="! editable"
-                    @change="submitGame(game)"
-                />
-            </div>
-        </td>
-        <td class="scoresheet-square">
-            <div :class="{ 'mark-break-position' : !game.order.home_breaks}"  v-html="game.order.away_position"></div>
+            <div :class="game.order.home_breaks ? 'mark-nobreak-position' : 'mark-break-position'"  v-html="game.order.away_position"></div>
         </td>
         <td :id="game.away_player +'_' + game.order.away_position + '_game_' +  game.order.order" class="scoresheet-cell">
             <div class="scoresheet-cell">
@@ -78,13 +88,13 @@
 
         <td class="scoresheet-square">
             <input type="checkbox" :id="'game-tr-' + game.id" v-model="game.table_run"
-                    :disabled="! editable"
+                    :disabled="! editing"
                     @change="submitGame(game)"
             />
         </td>
         <td class="scoresheet-square">
             <input type="checkbox" :id="'game-forfeit-' + game.id" v-model="game.forfeit"
-                :disabled="! editable"
+                :disabled="! editing"
                 @change="submitGame(game)"
             />
         </td>
@@ -93,12 +103,13 @@
         <td class="scoresheet-divider" colspan="10"></td>
     </tr>
     </template>
-    <tr v-if="editable">
+    <tr v-if="editing">
         <td></td>
         <td colspan="5">
             <div class="text-center">
-                <input id="last-game-reset-button" class="btn btn-default" type="button" value="reset last game"
-                    @click="resetLastGame"
+                <input id="last-game-reset-button" class="btn btn-default"
+                       type="button" value="reset last game"
+                       @click="confirmResetLastGame()"
                 />
             </div>
         </td>
@@ -156,29 +167,50 @@ let app = new Vue({
             }
         },
         editable: false,
+        owner: false,
+        editing: false,
         gameFormUrl: '{% url 'game_update' %}',
         dataUrl: '{% url 'score_sheet_summary' score_sheet.id %}',
         gameGroupSize: {{ game_group_size }},
     },
+    watch: {
+        // IDK if _both_ the `editable` and `owner` callbacks are needed.
+        editable: function () {
+            this.editing = this.editable && this.owner;
+        },
+        owner: function () {
+            this.editing = this.editable && this.owner;
+        },
+    },
     methods: {
         updateData: function () {
-            let self = this;
-            $.ajax({
-                url: this.dataUrl,
-                dataType: 'json',
-                success: function (data) {
-                    self.teams = data.teams;
-                    self.games = data.games;
-                    self.editable = data.editable;
-                },
-                headers: {
-                    Accept: "application/json",
-                }
+            return new Promise((resolve, reject) => {
+                let self = this;
+                $.ajax({
+                    url: this.dataUrl,
+                    dataType: 'json',
+                    success: function (data) {
+                        self.teams = data.teams;
+                        self.games = data.games;
+                        self.editable = data.editable;
+                        self.owner = data.owner;
+                        resolve();
+                    },
+                    headers: {
+                        Accept: "application/json",
+                    }
+                });
             });
         },
         displayDate: function (dateString) {
             let timestamp = new Date(dateString);
             return timestamp.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
+        },
+        editMode: function(amIEditing) {
+            if (this.editing !== amIEditing) {
+                this.editing = amIEditing;
+                $('#is-editing-buttons').find('.btn').toggleClass('btn-primary').toggleClass('btn-default');
+            }
         },
         isOdd: function (number) {
             return number % 2;
@@ -193,11 +225,46 @@ let app = new Vue({
         matchupButtonId: function (matchup, participant) {
             return ("matchup_button_" + matchup.id + '_' + participant.id);
         },
+        confirmResetLastGame: function () {
+            $.confirm({
+                text: 'Reset last game?',
+                confirm: this.resetLastGame,
+            });
+        },
         resetLastGame: function () {
-            let gameOrder = reset_last_game();
-            let game = this.games.filter(b => b.order.order === parseInt(gameOrder))[0];
-            game.winner = '';
-            this.submitGame(game);
+            let validWinners = ['away', 'home'];
+            let scoredGames = this.games.filter(b => validWinners.includes(b.winner));
+            if (scoredGames.length) {
+                let game = scoredGames[scoredGames.length - 1];
+                game.winner = '';
+                this.submitGame(game);
+            }
+        },
+        getMarkGameText: function (game, ha) {
+            if (game.winner  === '') {
+                return ha.charAt(0).toUpperCase();
+            } else if (game.winner === ha) {
+                return '&#10003;';
+            } else {
+                return '&ndash;';
+            }
+        },
+        getGameMarkClasses: function (game, ha) {
+            let commonClasses = ['btn', 'btn-sm', 'mark-winner'];
+            let winnerClass = 'btn-primary';
+            let loserClass = 'btn-default';
+            if (game.winner === ha) {
+                commonClasses.push(winnerClass)
+            } else {
+                commonClasses.push(loserClass)
+            }
+            return commonClasses;
+        },
+        markGame: function (game, ha) {
+            if (this.editing) {
+                game.winner = ha;
+                this.submitGame(game);
+            }
         },
         submitGame: function(game) {
             let self = this;

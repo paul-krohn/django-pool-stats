@@ -67,6 +67,9 @@ a:hover	{
 
 .mark-nobreak-position, .mark-break-position {
     font-weight: bold;
+}
+
+.mark-nobreak-position, .mark-break-position, .mark-winner {
     width: 28px;
     height: 28px;
 }

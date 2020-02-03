@@ -53,6 +53,7 @@ def score_sheet_summary(request, score_sheet_id):
 
     summary.update({'games': game_list})
     summary.update({'editable': user_can_edit_scoresheet(request, score_sheet_id)})
+    summary.update({'owner': session_uid(request) == s.creator_session})
     return JsonResponse(summary)
 
 def score_sheet_edit(request, score_sheet_id):
