@@ -232,7 +232,7 @@ let app = new Vue({
         },
         getMarkGameText: function (game, ha) {
             if (game.winner  === '') {
-                return ha;
+                return ha.charAt(0).toUpperCase();
             } else if (game.winner === ha) {
                 return '&#10003;';
             } else {
