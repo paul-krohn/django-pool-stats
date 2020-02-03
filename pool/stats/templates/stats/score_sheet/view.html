@@ -108,7 +108,9 @@
         <td colspan="5">
             <div class="text-center">
                 <input id="last-game-reset-button" class="btn btn-default"
-                       type="button" value="reset last game" />
+                       type="button" value="reset last game"
+                       @click="confirmResetLastGame()"
+                />
             </div>
         </td>
         <td colspan="4"></td>
@@ -224,6 +226,12 @@ let app = new Vue({
         matchupButtonId: function (matchup, participant) {
             return ("matchup_button_" + matchup.id + '_' + participant.id);
         },
+        confirmResetLastGame: function () {
+            $.confirm({
+                text: 'Reset last game?',
+                confirm: this.resetLastGame,
+            });
+        },
         resetLastGame: function () {
             let validWinners = ['away', 'home'];
             let scoredGames = this.games.filter(b => validWinners.includes(b.winner));
@@ -293,16 +301,9 @@ let app = new Vue({
                 }
             });
         },
-        setResetGameConfirmDialog: function() {
-            $("#last-game-reset-button").confirm({
-                text: 'remove winner of last game?',
-                confirm: this.resetLastGame,
-            });
-
-        },
     },
     mounted: function() {
-        this.updateData().then(this.setResetGameConfirmDialog);
+        this.updateData();
     },
 });
 
