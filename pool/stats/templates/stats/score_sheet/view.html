@@ -50,7 +50,7 @@
             </div>
         </td>
         <td class="scoresheet-square">
-            <div :class="{ 'mark-break-position' : game.order.home_breaks}"  v-html="game.order.home_position"></div>
+            <div :class="game.order.home_breaks ? 'mark-break-position' : 'mark-nobreak-position'"  v-html="game.order.home_position"></div>
         </td>
         <td class="scoresheet-cell" style="text-align: center; width: 58px; ">
             <div class="btn-group" data-toggle="buttons" style="display: flex;">
@@ -73,7 +73,7 @@
             </div>
         </td>
         <td class="scoresheet-square">
-            <div :class="{ 'mark-break-position' : !game.order.home_breaks}"  v-html="game.order.away_position"></div>
+            <div :class="game.order.home_breaks ? 'mark-nobreak-position' : 'mark-break-position'"  v-html="game.order.away_position"></div>
         </td>
         <td :id="game.away_player +'_' + game.order.away_position + '_game_' +  game.order.order" class="scoresheet-cell">
             <div class="scoresheet-cell">
