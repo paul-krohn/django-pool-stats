@@ -27,9 +27,9 @@
 <tr>
     <th></th>
     <th style="text-align: right;"><h4><a :href="teams.home.url" v-html="teams.home.name"></a></h4></th>
-    <th class="scoresheet-cell"><h4 v-html="teams.home.wins"></h4></th>
+    <th class="scoresheet-cell"><h4 style="text-align: center;" v-html="teams.home.wins"></h4></th>
     <th></th>
-    <th class="scoresheet-cell"><h4 v-html="teams.away.wins"></h4></th>
+    <th class="scoresheet-cell"><h4 style="text-align: center;" v-html="teams.away.wins"></h4></th>
     <th><h4><a :href="teams.away.url" v-html="teams.away.name"></a></h4></th>
     <th class="scoresheet-square">Time Marked</th>
     <th class="scoresheet-square">TR</th>
@@ -52,20 +52,24 @@
         <td class="scoresheet-square">
             <div :class="{ 'mark-break-position' : game.order.home_breaks}"  v-html="game.order.home_position"></div>
         </td>
-        <td class="scoresheet-cell" style="vertical-align: middle;">
-            <div class="scoresheet-square">
-                <input type="radio" :id="'game-winner-home-' + game.id"
-                    :data-game-order="game.order.order"
-                    value="home" v-model="game.winner" :disabled="! editing"
-                    @change="submitGame(game)"
-                />
-            </div>
-            <div class="scoresheet-square">
-                <input type="radio" :id="'game-winner-away-' + game.id"
-                    :data-game-order="game.order.order"
-                    value="away" v-model="game.winner" :disabled="! editing"
-                    @change="submitGame(game)"
-                />
+        <td class="scoresheet-cell" style="text-align: center; width: 58px; ">
+            <div class="btn-group" data-toggle="buttons" style="display: flex;">
+                <label :class="getGameMarkClasses(game, 'home')"
+                       :for="'game-winner-home-' + game.id" v-html="getMarkGameText(game, 'home')"
+                        @click="markGame(game, 'home')" :disabled="! editing">
+                    <input type="radio" :id="'game-winner-home-' + game.id"
+                        :data-game-order="game.order.order"
+                        value="home" v-model="game.winner"
+                    />
+                </label>
+                <label :class="getGameMarkClasses(game, 'away')" style="float: left"
+                        :for="'game-winner-away-' + game.id" v-html="getMarkGameText(game, 'away')"
+                        @click="markGame(game, 'away')" :disabled="! editing">
+                    <input type="radio" :id="'game-winner-away-' + game.id"
+                        :data-game-order="game.order.order"
+                        value="away" v-model="game.winner"
+                    />
+                </label>
             </div>
         </td>
         <td class="scoresheet-square">
@@ -225,6 +229,32 @@ let app = new Vue({
             let game = this.games.filter(b => b.order.order === parseInt(gameOrder))[0];
             game.winner = '';
             this.submitGame(game);
+        },
+        getMarkGameText: function (game, ha) {
+            if (game.winner  === '') {
+                return ha;
+            } else if (game.winner === ha) {
+                return '&#10003;';
+            } else {
+                return '&ndash;';
+            }
+        },
+        getGameMarkClasses: function (game, ha) {
+            let commonClasses = ['btn', 'btn-sm', 'mark-winner'];
+            let winnerClass = 'btn-primary';
+            let loserClass = 'btn-default';
+            if (game.winner === ha) {
+                commonClasses.push(winnerClass)
+            } else {
+                commonClasses.push(loserClass)
+            }
+            return commonClasses;
+        },
+        markGame: function (game, ha) {
+            if (this.editing) {
+                game.winner = ha;
+                this.submitGame(game);
+            }
         },
         submitGame: function(game) {
             let self = this;
