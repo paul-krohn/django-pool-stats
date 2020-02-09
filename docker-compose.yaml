@@ -1,0 +1,27 @@
+---
+
+version: '3'
+
+services:
+  db:
+    image: mysql:5.7
+    environment:
+      MYSQL_DATABASE: 'pool_stats'
+      MYSQL_USER: 'pool_stats'
+      MYSQL_PASSWORD: 'pool_stats'
+      MYSQL_ROOT_PASSWORD: 'rabbit'
+    ports:
+      - 3309:3306
+    expose:
+      - 3306
+  web:
+    build: .
+    environment:
+      DJANGO_SETTINGS_MODULE: 'pool.docker_settings'
+    command: python /code/pool/manage.py runserver 0.0.0.0:8000
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
