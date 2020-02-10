@@ -17,6 +17,9 @@ DATABASES['default']['PORT'] = '3306'
 
 DATABASES['default']['OPTIONS'] = {'init_command': "SET FOREIGN_KEY_CHECKS=0", }
 
+CACHES["default"]["LOCATION"] = "redis://redis:6379/0"
+CACHES["page"]["LOCATION"] = "redis://redis:6379/1"
+
 # thank you apple for this non-standard location
 # LOGGING['handlers']['syslog']['address'] = '/var/run/syslog'
 
