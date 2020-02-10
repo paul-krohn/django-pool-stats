@@ -64,7 +64,6 @@ def score_sheet(request, score_sheet_id):
 
     context = {
         'score_sheet': s,
-        'auto_save': True,
         'game_group_size': settings.LEAGUE['game_group_size'],
         'games_formset': score_sheet_game_formset,
         'away_lineup_formset': away_lineup_formset,
