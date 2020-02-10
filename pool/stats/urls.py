@@ -66,9 +66,6 @@ urlpatterns = [
         score_sheet.score_sheet_lineup, name='score_sheet_lineup'),
     url(r'^score_sheet_substitutions/(?P<score_sheet_id>[0-9]+)/(?P<away_home>[a-z]+)$',
         score_sheet.score_sheet_substitutions, name='score_sheet_substitutions'),
-
-    url(r'^score_sheet_edit/(?P<score_sheet_id>[0-9]+)/$', score_sheet.score_sheet_edit, name='score_sheet_edit'),
-
     url(r'^score_sheet/(?P<score_sheet_id>[0-9]+)/$', score_sheet.score_sheet, name='score_sheet'),
     url(r'^score_sheet/summary/(?P<score_sheet_id>[0-9]+)/$', score_sheet.score_sheet_summary, name='score_sheet_summary'),
 
