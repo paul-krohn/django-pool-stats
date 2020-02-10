@@ -38,62 +38,7 @@ $(document).ready(function(){
 </script>
 
 <h5>{{ score_sheet.match.week }}, {{ score_sheet.match.week.date }}</h5>
-<div id="lineup-controls-wrapper" style="display: none">
-<div>
-    <form id="showhide">
-        <input id="toggle-home_lineup" type="button" class="btn btn-default" value="Home Lineup" />
-        <input id="toggle-home_substitutions" type="button" class="btn btn-default" value="Home Subs" /> •
-        <input id="toggle-away_lineup" type="button" class="btn btn-default" value="Away Lineup" />
-        <input id="toggle-away_substitutions" type="button" class="btn btn-default" value="Away Subs" />
-    </form>
-</div>
-{% with "away" as away_home %}
-<div id="away_lineup" class="collapse showhide">
-    {% with away_lineup_formset as lineup_formset %}
-    {% include "stats/score_sheet_lineup_edit.html" %}
-    {% endwith %}
-</div>
-<div id="away_substitutions" class="collapse showhide">
-    {% with away_substitutions_formset as substitutions_formset %}
-    {% include "stats/score_sheet_substitutions.html" %}
-    {% endwith %}
-</div>
-{% endwith %}
-{% with "home" as away_home %}
-<div id="home_lineup" class="collapse showhide">
-    {% with home_lineup_formset as lineup_formset %}
-    {% include "stats/score_sheet_lineup_edit.html" %}
-    {% endwith %}
-</div>
-<div id="home_substitutions" class="collapse showhide">
-    {% with home_substitutions_formset as substitutions_formset %}
-    {% include "stats/score_sheet_substitutions.html" %}
-    {% endwith %}
-</div>
-{% endwith %}
 
-{% if score_sheet.away_substitutions.all|length > 0 %}
-<div>
-    <h5>Away Substitutions</h5>
-    <ol>
-    {% for sub in score_sheet.away_substitutions.all %}
-        <li>{{ sub }}</li>
-    {% endfor %}
-    </ol>
-</div>
-{% endif %}
-
-{% if score_sheet.home_substitutions.all|length > 0 %}
-<div>
-    <h5>Home Substitutions</h5>
-    <ol>
-    {% for sub in score_sheet.home_substitutions.all %}
-        <li>{{ sub }}</li>
-    {% endfor %}
-    </ol>
-</div>
-{% endif %}
-</div> <!-- end lineup-controls-wrapper div -->
 
 <p></p>
 
