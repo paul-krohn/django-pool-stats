@@ -18,7 +18,7 @@ services:
     build: .
     environment:
       DJANGO_SETTINGS_MODULE: 'pool.docker_settings'
-    command: python /code/pool/manage.py runserver 0.0.0.0:8000
+    command: python3 /code/pool/manage.py runserver 0.0.0.0:8000
     volumes:
       - .:/code
     ports:
