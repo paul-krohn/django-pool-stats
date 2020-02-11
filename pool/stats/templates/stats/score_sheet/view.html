@@ -6,41 +6,100 @@
     See: https://docs.djangoproject.com/en/2.1/ref/csrf/
 -->
 {% csrf_token %}
+<!--
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item">
+    <a class="nav-link active" id="home-tab" data-toggle="tab" href="#home" role="tab" aria-controls="home"
+      aria-selected="true">Home</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="profile-tab" data-toggle="tab" href="#profile" role="tab" aria-controls="profile"
+      aria-selected="false">Profile</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link" id="contact-tab" data-toggle="tab" href="#contact" role="tab" aria-controls="contact"
+      aria-selected="false">Contact</a>
+  </li>
+</ul>
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">Raw denim you
+    probably haven't heard of them jean shorts Austin. Nesciunt tofu stumptown aliqua, retro synth master
+    cleanse. Mustache cliche tempor, williamsburg carles vegan helvetica. Reprehenderit butcher retro
+    keffiyeh dreamcatcher synth. Cosby sweater eu banh mi, qui irure terry richardson ex squid. Aliquip
+    placeat salvia cillum iphone. Seitan aliquip quis cardigan american apparel, butcher voluptate nisi
+    qui.</div>
+  <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">Food truck fixie
+    locavore, accusamus mcsweeney's marfa nulla single-origin coffee squid. Exercitation +1 labore velit,
+    blog sartorial PBR leggings next level wes anderson artisan four loko farm-to-table craft beer twee.
+    Qui photo booth letterpress, commodo enim craft beer mlkshk aliquip jean shorts ullamco ad vinyl cillum
+    PBR. Homo nostrud organic, assumenda labore aesthetic magna delectus mollit. Keytar helvetica VHS
+    salvia yr, vero magna velit sapiente labore stumptown. Vegan fanny pack odio cillum wes anderson 8-bit,
+    sustainable jean shorts beard ut DIY ethical culpa terry richardson biodiesel. Art party scenester
+    stumptown, tumblr butcher vero sint qui sapiente accusamus tattooed echo park.</div>
+  <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">Etsy mixtape
+    wayfarers, ethical wes anderson tofu before they sold out mcsweeney's organic lomo retro fanny pack
+    lo-fi farm-to-table readymade. Messenger bag gentrify pitchfork tattooed craft beer, iphone skateboard
+    locavore carles etsy salvia banksy hoodie helvetica. DIY synth PBR banksy irony. Leggings gentrify
+    squid 8-bit cred pitchfork. Williamsburg banh mi whatever gluten-free, carles pitchfork biodiesel fixie
+    etsy retro mlkshk vice blog. Scenester cred you probably haven't heard of them, vinyl craft beer blog
+    stumptown. Pitchfork sustainable tofu synth chambray yr.</div>
+</div>
+-->
+
+
 <div id="scoresheet">
 
     <div id="lineup-controls-wrapper">
     <div>
-        <form id="showhide">
-            <input id="toggle-home_lineup" type="button" class="btn btn-default" value="Home Lineup" />
-            <input id="toggle-home_substitutions" type="button" class="btn btn-default" value="Home Subs" /> •
-            <input id="toggle-away_lineup" type="button" class="btn btn-default" value="Away Lineup" />
-            <input id="toggle-away_substitutions" type="button" class="btn btn-default" value="Away Subs" />
-        </form>
-    </div>
-    {% with "away" as away_home %}
-    <div id="away_lineup" class="collapse showhide">
-        {% with away_lineup_formset as lineup_formset %}
-        {% include "stats/score_sheet_lineup_edit.html" %}
+        <ul class="nav nav-tabs" id="lineup-controls" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link" id="toggle-home_lineup" data-toggle="tab"
+                   href="#home-lineup-content" role="tab" aria-controls="home-lineup-content"
+                   aria-selected="true">Home Lineup</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="toggle-home_substitutions" data-toggle="tab"
+                   href="#home-substitutions-content" role="tab" aria-controls="home-substitution-content"
+                   aria-selected="false">Home Subs</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="toggle-away_lineup" data-toggle="tab"
+                   href="#away-lineup-content" role="tab" aria-controls="away-lineup-content"
+                   aria-selected="true">Away Lineup</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="toggle-away_substitutions" data-toggle="tab"
+                   href="#away-substitutions-content" role="tab" aria-controls="away-substitutions-content"
+                   aria-selected="false">Away Subs</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="lineup-controls-tabs">
+        {% with "home" as away_home %}
+            <div class="tab-pane fade show active" id="home-lineup-content" role="tabpanel" aria-labelledby="toggle-home_lineup">
+                {% with home_lineup_formset as lineup_formset %}
+                {% include "stats/score_sheet_lineup_edit.html" %}
+                {% endwith %}
+            </div>
+            <div class="tab-pane fade " id="home-substitutions-content" role="tabpanel" aria-labelledby="toggle-home_substitutions">
+                {% with home_substitutions_formset as substitutions_formset %}
+                {% include "stats/score_sheet_substitutions.html" %}
+                {% endwith %}
+            </div>
         {% endwith %}
-    </div>
-    <div id="away_substitutions" class="collapse showhide">
-        {% with away_substitutions_formset as substitutions_formset %}
-        {% include "stats/score_sheet_substitutions.html" %}
+        {% with "away" as away_home %}
+            <div class="tab-pane fade show active" id="away-lineup-content" role="tabpanel" aria-labelledby="toggle-away_lineup">
+                {% with away_lineup_formset as lineup_formset %}
+                {% include "stats/score_sheet_lineup_edit.html" %}
+                {% endwith %}
+            </div>
+            <div class="tab-pane fade " id="away-substitutions-content" role="tabpanel" aria-labelledby="toggle-away_substitutions">
+                {% with away_substitutions_formset as substitutions_formset %}
+                {% include "stats/score_sheet_substitutions.html" %}
+                {% endwith %}
+            </div>
         {% endwith %}
+        </div>
     </div>
-    {% endwith %}
-    {% with "home" as away_home %}
-    <div id="home_lineup" class="collapse showhide">
-        {% with home_lineup_formset as lineup_formset %}
-        {% include "stats/score_sheet_lineup_edit.html" %}
-        {% endwith %}
-    </div>
-    <div id="home_substitutions" class="collapse showhide">
-        {% with home_substitutions_formset as substitutions_formset %}
-        {% include "stats/score_sheet_substitutions.html" %}
-        {% endwith %}
-    </div>
-    {% endwith %}
 
     {% if score_sheet.away_substitutions.all|length > 0 %}
     <div>
