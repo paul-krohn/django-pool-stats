@@ -1,10 +1,9 @@
-<h6>{{ away_home|title }} Substitutions</h6>
 <form action="{% url 'score_sheet_substitutions' score_sheet.id away_home %}" method="post">
     {% csrf_token %}
     {% if substitutions_formset.non_form_errors %}
     <strong>{{ substitutions_formset.non_form_errors }}</strong>
     {% endif %}
-    <table class="table" style="width: auto;">
+    <table class="table table-condensed" style="width: auto;">
         <th>Game</th><th>Player</th><th></th>
         {{ substitutions_formset.management_form }}
         {% for substitutions_formset in substitutions_formset %}
