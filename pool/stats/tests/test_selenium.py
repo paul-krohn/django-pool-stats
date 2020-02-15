@@ -115,11 +115,13 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         self.set_substitution('away', 11)
         self.set_substitution('home', 11)
         # check that there are 5 players in the summaries
+        summary = self.client.get(
+            reverse('score_sheet_summary', kwargs={'score_sheet_id': 1})
+        )
+        score_sheet_summary = json.loads(summary.content)
+
         for location_name in location_names:
-            player_summary_div = self.selenium.find_element_by_id('{}-player-summaries'.format(location_name))
-            player_summary_table = player_summary_div.find_element_by_tag_name('table')
-            player_summary_rows = player_summary_table.find_elements_by_tag_name('tr')
-            self.assertEqual(len(player_summary_rows), 6)  # 5 players plus a header row
+            self.assertEqual(len(score_sheet_summary['teams'][location_name]['players']), 5)
 
     def test_scoresheet_duplicate_substitutions(self):
         self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
