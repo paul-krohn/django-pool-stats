@@ -62,15 +62,19 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
 
         self.populate_lineup()
-        # now that we have lineups set, make sure we have games, and that all have players. We should still be on the
-        # edit page for this scoresheet. then loop over the games form table and check that exactly 2 columns are
-        # populated with an <a> element
-        games_form = self.selenium.find_element_by_name('score_sheet_games_form')
-        games_form_table = games_form.find_element_by_class_name('table')
-        table_rows = games_form_table.find_elements_by_class_name('scoresheet-odd') + \
-            games_form_table.find_elements_by_class_name('scoresheet-even')
-        for table_row in table_rows[0:-1]:  # skip the tie-breaker, which will be the last row
-            self.assertEqual(len(table_row.find_elements_by_xpath('td[div[a]]')), 2)
+        # now that we have lineups set, make sure we have games, and that all have players,
+        # except the tie breaker/last game
+        score_sheet_id = self.score_sheet_create()
+        summary = self.client.get(
+            reverse('score_sheet_summary', kwargs={'score_sheet_id': 1})
+        )
+        score_sheet_summary = json.loads(summary.content)
+
+        for game in score_sheet_summary['games'][0:-1]:
+            for loc in location_names:
+                self.assertIsNotNone(
+                    game['{}_player'.format(loc)]['name']
+                )
 
     def test_score_sheet_incomplete_substitution(self):
 
