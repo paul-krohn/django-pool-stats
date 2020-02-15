@@ -162,17 +162,29 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         self.populate_lineup()
         self.set_substitution('away', 10)
         self.set_substitution('home', 10)
+
+        summary = self.client.get(
+            reverse('score_sheet_summary', kwargs={'score_sheet_id': 1})
+        )
+        score_sheet_summary = json.loads(summary.content)
+        for location_name in location_names:
+            # check there are 5 players listed
+            self.assertEqual(len(score_sheet_summary['teams'][location_name]['players']), 5)
+        # remove the subs & re-check
         for location_name in location_names:
             self.selenium.find_element_by_id('toggle-{}_substitutions'.format(location_name)).click()
             # <input type="checkbox" name="form-0-DELETE" id="id_form-0-DELETE">
-            substitution_form = self.selenium.find_element_by_id('{}_substitutions'.format(location_name))
+            substitution_form = self.selenium.find_element_by_id('{}-substitutions-content'.format(location_name))
             substitution_form.find_element_by_id('id_form-0-DELETE').click()
             self.selenium.find_element_by_id('{}_substitutions_save'.format(location_name)).click()
+        summary = self.client.get(
+            reverse('score_sheet_summary', kwargs={'score_sheet_id': 1})
+        )
+        score_sheet_summary = json.loads(summary.content)
         for location_name in location_names:
-            player_summary_div = self.selenium.find_element_by_id('{}-player-summaries'.format(location_name))
-            player_summary_table = player_summary_div.find_element_by_tag_name('table')
-            player_summary_rows = player_summary_table.find_elements_by_tag_name('tr')
-            self.assertEqual(len(player_summary_rows), 5)  # 4 players plus a header row
+            # check there are 5 players listed
+            self.assertEqual(len(score_sheet_summary['teams'][location_name]['players']), 4)
+
 
     def test_team_win_totals(self):
         self.score_sheet_create()
