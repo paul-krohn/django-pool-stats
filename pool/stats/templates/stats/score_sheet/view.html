@@ -9,6 +9,81 @@
 
 <div id="scoresheet">
 
+    <div id="lineup-controls-wrapper">
+    <div>
+        <ul class="nav nav-pills" id="lineup-controls" role="tablist">
+            <li class="nav-item">
+                <a class="nav-link" id="toggle-home_lineup" data-toggle="tab"
+                   href="#home-lineup-content" role="tab" aria-controls="home-lineup-content"
+                   aria-selected="true">Home Lineup</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="toggle-home_substitutions" data-toggle="tab"
+                   href="#home-substitutions-content" role="tab" aria-controls="home-substitution-content"
+                   aria-selected="false">Home Subs</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="toggle-away_lineup" data-toggle="tab"
+                   href="#away-lineup-content" role="tab" aria-controls="away-lineup-content"
+                   aria-selected="true">Away Lineup</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" id="toggle-away_substitutions" data-toggle="tab"
+                   href="#away-substitutions-content" role="tab" aria-controls="away-substitutions-content"
+                   aria-selected="false">Away Subs</a>
+            </li>
+        </ul>
+        <div class="tab-content" id="lineup-controls-tabs">
+        {% with "home" as away_home %}
+            <div class="tab-pane fade" id="home-lineup-content" role="tabpanel" aria-labelledby="toggle-home_lineup">
+                {% with home_lineup_formset as lineup_formset %}
+                {% include "stats/score_sheet_lineup_edit.html" %}
+                {% endwith %}
+            </div>
+            <div class="tab-pane fade " id="home-substitutions-content" role="tabpanel" aria-labelledby="toggle-home_substitutions">
+                {% with home_substitutions_formset as substitutions_formset %}
+                {% include "stats/score_sheet_substitutions.html" %}
+                {% endwith %}
+            </div>
+        {% endwith %}
+        {% with "away" as away_home %}
+            <div class="tab-pane fade" id="away-lineup-content" role="tabpanel" aria-labelledby="toggle-away_lineup">
+                {% with away_lineup_formset as lineup_formset %}
+                {% include "stats/score_sheet_lineup_edit.html" %}
+                {% endwith %}
+            </div>
+            <div class="tab-pane fade " id="away-substitutions-content" role="tabpanel" aria-labelledby="toggle-away_substitutions">
+                {% with away_substitutions_formset as substitutions_formset %}
+                {% include "stats/score_sheet_substitutions.html" %}
+                {% endwith %}
+            </div>
+        {% endwith %}
+        </div>
+    </div>
+
+    {% if score_sheet.away_substitutions.all|length > 0 %}
+    <div>
+        <h5>Away Substitutions</h5>
+        <ol>
+        {% for sub in score_sheet.away_substitutions.all %}
+            <li>{{ sub }}</li>
+        {% endfor %}
+        </ol>
+    </div>
+    {% endif %}
+
+    {% if score_sheet.home_substitutions.all|length > 0 %}
+    <div>
+        <h5>Home Substitutions</h5>
+        <ol>
+        {% for sub in score_sheet.home_substitutions.all %}
+            <li>{{ sub }}</li>
+        {% endfor %}
+        </ol>
+    </div>
+    {% endif %}
+    </div> <!-- end lineup-controls-wrapper div -->
+
 <div v-if="!owner && editable">
     <div id="is-editing-buttons" class="btn-group btn-toggle">
         <button class="btn btn-xs btn-default" @click="editMode(true)">Edit</button>
@@ -17,7 +92,7 @@
 </div>
 <hr>
 
-<table class="table">
+<table class="table" id="games-list">
 <thead>
 <tr>
     <th colspan="2" class="scoresheet-small-header" style="text-align:right;"><h5>Home</h5></th>
@@ -75,7 +150,7 @@
         <td class="scoresheet-square">
             <div :class="game.order.home_breaks ? 'mark-nobreak-position' : 'mark-break-position'"  v-html="game.order.away_position"></div>
         </td>
-        <td :id="game.away_player +'_' + game.order.away_position + '_game_' +  game.order.order" class="scoresheet-cell">
+        <td :id="'away_player_' + game.order.away_position + '_game_' +  game.order.order" class="scoresheet-cell">
             <div class="scoresheet-cell">
                 <a v-if="game.away_player" :href="game.away_player.url">
                     <span v-html="game.away_player.name"></span>
@@ -144,168 +219,16 @@
 </div>
 
 </div>
-
 <script>
-function csrfSafeMethod(method) {
-    // these HTTP methods do not require CSRF protection
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-}
+$(document).ready(function(){
 
-let csrftoken = $("input[name='csrfmiddlewaretoken']").val();
-
-let app = new Vue({
-    el: '#scoresheet',
-    data: {
-        games: [],
-        teams: {
-            // this pre-population suppresses a warning that team.(home|away) is undefined
-            "home": {
-                "url": null
-            },
-            "away": {
-                "url": null
-            }
-        },
-        editable: false,
-        owner: false,
-        editing: false,
-        gameFormUrl: '{% url 'game_update' %}',
+    ScoreSheet({
         dataUrl: '{% url 'score_sheet_summary' score_sheet.id %}',
         gameGroupSize: {{ game_group_size }},
-    },
-    watch: {
-        // IDK if _both_ the `editable` and `owner` callbacks are needed.
-        editable: function () {
-            this.editing = this.editable && this.owner;
-        },
-        owner: function () {
-            this.editing = this.editable && this.owner;
-        },
-    },
-    methods: {
-        updateData: function () {
-            return new Promise((resolve, reject) => {
-                let self = this;
-                $.ajax({
-                    url: this.dataUrl,
-                    dataType: 'json',
-                    success: function (data) {
-                        self.teams = data.teams;
-                        self.games = data.games;
-                        self.editable = data.editable;
-                        self.owner = data.owner;
-                        resolve();
-                    },
-                    headers: {
-                        Accept: "application/json",
-                    }
-                });
-            });
-        },
-        displayDate: function (dateString) {
-            let timestamp = new Date(dateString);
-            return timestamp.toLocaleTimeString('en-GB', {hour: '2-digit', minute: '2-digit'});
-        },
-        editMode: function(amIEditing) {
-            if (this.editing !== amIEditing) {
-                this.editing = amIEditing;
-                $('#is-editing-buttons').find('.btn').toggleClass('btn-primary').toggleClass('btn-default');
-            }
-        },
-        isOdd: function (number) {
-            return number % 2;
-        },
-        gameWrapperClasses: function (number) {
-            let base_classes = [];
-            if (this.isOdd(number)) {
-                base_classes.push('scoresheet-odd');
-            }
-            return base_classes.join(' ');
-        },
-        matchupButtonId: function (matchup, participant) {
-            return ("matchup_button_" + matchup.id + '_' + participant.id);
-        },
-        confirmResetLastGame: function () {
-            $.confirm({
-                text: 'Reset last game?',
-                confirm: this.resetLastGame,
-            });
-        },
-        resetLastGame: function () {
-            let validWinners = ['away', 'home'];
-            let scoredGames = this.games.filter(b => validWinners.includes(b.winner));
-            if (scoredGames.length) {
-                let game = scoredGames[scoredGames.length - 1];
-                game.winner = '';
-                this.submitGame(game);
-            }
-        },
-        getMarkGameText: function (game, ha) {
-            if (game.winner  === '') {
-                return ha.charAt(0).toUpperCase();
-            } else if (game.winner === ha) {
-                return '&#10003;';
-            } else {
-                return '&ndash;';
-            }
-        },
-        getGameMarkClasses: function (game, ha) {
-            let commonClasses = ['btn', 'btn-sm', 'mark-winner'];
-            let winnerClass = 'btn-primary';
-            let loserClass = 'btn-default';
-            if (game.winner === ha) {
-                commonClasses.push(winnerClass)
-            } else {
-                commonClasses.push(loserClass)
-            }
-            return commonClasses;
-        },
-        markGame: function (game, ha) {
-            if (this.editing) {
-                game.winner = ha;
-                this.submitGame(game);
-            }
-        },
-        submitGame: function(game) {
-            let self = this;
-            $.ajaxSetup({
-                beforeSend: function (xhr, settings) {
-                        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                    }
-                },
-                dataType: 'application/json',
-            });
-            $.ajax({
-                type: "POST",
-                url: "{% url 'game_update' %}",
-                dataType: "json",
-                data: {
-                    "game_id": game.id,
-                    "winner": game.winner,
-                    "table_run": game.table_run,
-                    "forfeit": game.forfeit,
-                },
-                success: function(response) {
-                    self.updateData();
-                },
-            });
-        },
-        toggleGameDetails: function() {
-            $(".game_attributes").each(function(i, aDiv){
-                if ($(aDiv).css('display') === 'none') {
-                    $(aDiv).css('display', 'block');
-                } else {
-                    $(aDiv).css('display', 'none');
-                }
-            });
-        },
-    },
-    mounted: function() {
-        this.updateData();
-    },
+        gameUpdateUrl: '{% url 'game_update' %}',
+        csrfToken: $("input[name='csrfmiddlewaretoken']").val(),
+    });
+
 });
-
 </script>
-
 {% endblock %}

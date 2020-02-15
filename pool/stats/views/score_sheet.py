@@ -15,51 +15,8 @@ from ..utils import session_uid, is_stats_master
 
 def score_sheet(request, score_sheet_id):
     s = get_object_or_404(ScoreSheet, id=score_sheet_id)
-    score_sheet_game_formset_f = modelformset_factory(
-        Game,
-        form=DisabledScoreSheetGameForm,
-        max_num=len(s.games.all()),
-    )
-    score_sheet_game_formset = score_sheet_game_formset_f(
-        queryset=s.games.all(),
-    )
-
-    context = {
-        'auto_save': request.session.get('auto_save', False),
-        'score_sheet': s,
-        'game_group_size': settings.LEAGUE['game_group_size'],
-        'edit_link': user_can_edit_scoresheet(request, score_sheet_id),
-        'games_formset': score_sheet_game_formset,
-        'away_player_score_sheet_summaries': s.player_summaries('away'),
-        'home_player_score_sheet_summaries': s.player_summaries('home')
-    }
-    return render(request, 'stats/score_sheet.html', context)
-
-
-def score_sheet_games(score_sheet_id):
-    game_list = []
-
-    s = ScoreSheet.objects.get(id=score_sheet_id)
-    for game in s.games.all():
-        game_list.append(game.as_dict())
-    return game_list
-
-def score_sheet_summary(request, score_sheet_id):
-    s = get_object_or_404(ScoreSheet, id=score_sheet_id)
-    summary = s.summary()
-    game_list = []
-    for game in s.games.all():
-        game_list.append(game.as_dict())
-
-    summary.update({'games': game_list})
-    summary.update({'editable': user_can_edit_scoresheet(request, score_sheet_id)})
-    summary.update({'owner': session_uid(request) == s.creator_session})
-    return JsonResponse(summary)
-
-def score_sheet_edit(request, score_sheet_id):
-    s = get_object_or_404(ScoreSheet, id=score_sheet_id)
-    if not user_can_edit_scoresheet(request, score_sheet_id):
-        return redirect('score_sheet', s.id)
+    # if not user_can_edit_scoresheet(request, score_sheet_id):
+    #     return redirect('score_sheet', s.id)
     score_sheet_game_formset_f = modelformset_factory(
         Game,
         form=ScoreSheetGameForm,
@@ -107,7 +64,6 @@ def score_sheet_edit(request, score_sheet_id):
 
     context = {
         'score_sheet': s,
-        'auto_save': request.session.get('auto_save', False),
         'game_group_size': settings.LEAGUE['game_group_size'],
         'games_formset': score_sheet_game_formset,
         'away_lineup_formset': away_lineup_formset,
@@ -118,7 +74,28 @@ def score_sheet_edit(request, score_sheet_id):
         'home_player_score_sheet_summaries': s.player_summaries('home'),
         'score_sheet_completion_form': score_sheet_completion_form,
     }
-    return render(request, 'stats/score_sheet_edit.html', context)
+    return render(request, 'stats/score_sheet.html', context)
+
+
+def score_sheet_games(score_sheet_id):
+    game_list = []
+
+    s = ScoreSheet.objects.get(id=score_sheet_id)
+    for game in s.games.all():
+        game_list.append(game.as_dict())
+    return game_list
+
+def score_sheet_summary(request, score_sheet_id):
+    s = get_object_or_404(ScoreSheet, id=score_sheet_id)
+    summary = s.summary()
+    game_list = []
+    for game in s.games.all():
+        game_list.append(game.as_dict())
+
+    summary.update({'games': game_list})
+    summary.update({'editable': user_can_edit_scoresheet(request, score_sheet_id)})
+    summary.update({'owner': session_uid(request) == s.creator_session})
+    return JsonResponse(summary)
 
 
 def score_sheet_create(request):
@@ -130,7 +107,7 @@ def score_sheet_create(request):
         s.initialize_lineup()
         s.initialize_games()
 
-        return redirect('score_sheet_edit', score_sheet_id=s.id)
+        return redirect('score_sheet', score_sheet_id=s.id)
     else:
         return HttpResponseBadRequest()
 
@@ -143,7 +120,7 @@ def score_sheet_copy(request):
         if s.official == 1:
             return redirect('score_sheet', request.POST['scoresheet_id'])
         new_scoresheet_id = s.copy(session_id=session_uid(request))
-        return redirect('score_sheet_edit', new_scoresheet_id)
+        return redirect('score_sheet', new_scoresheet_id)
     else:
         return HttpResponseBadRequest
 
@@ -187,11 +164,11 @@ def score_sheet_lineup(request, score_sheet_id, away_home):
         if lineup_formset.is_valid():
             lineup_formset.save()
             s.set_games()
-            return redirect('score_sheet_edit', score_sheet_id=s.id)
+            return redirect('score_sheet', score_sheet_id=s.id)
         else:
             logging.debug("validation errors:{}".format(lineup_formset.form.non_field_errors))
     else:
-        return redirect('score_sheet_edit', score_sheet_id=s.id)
+        return redirect('score_sheet', score_sheet_id=s.id)
 
     context = {
         'score_sheet': s,
@@ -250,7 +227,7 @@ def score_sheet_substitutions(request, score_sheet_id, away_home):
                     substitution.player, substitution.play_position, substitution.game_order))
                 add_substitution_function.add(substitution)
             s.set_games()
-            return redirect('score_sheet_edit', score_sheet_id=s.id)
+            return redirect('score_sheet', score_sheet_id=s.id)
         else:
             logging.debug("validation errors:{}".format(substitution_formset.form.non_field_errors))
             context = {
@@ -261,7 +238,7 @@ def score_sheet_substitutions(request, score_sheet_id, away_home):
             return render(request, 'stats/score_sheet_substitutions_standalone.html', context)
 
     else:
-        return redirect('score_sheet_edit', score_sheet_id=s.id)
+        return redirect('score_sheet', score_sheet_id=s.id)
 
 
 def user_can_edit_scoresheet(request, score_sheet_id):

@@ -1,4 +1,5 @@
 import datetime
+import json
 
 from django.urls import reverse
 from django.test import Client
@@ -96,16 +97,19 @@ class ScoreSheetTests(BasePoolStatsTestCase):
         response = self.client.post(reverse('score_sheet_create'), data={'match_id': self.sample_match_id})
 
         # since we have a fresh DB, assume this will be score sheet number 1 ...
-        self.assertRedirects(response, expected_url=reverse('score_sheet_edit', kwargs={'score_sheet_id': 1}))
+        self.assertRedirects(response, expected_url=reverse('score_sheet', kwargs={'score_sheet_id': 1}))
 
         # the number of games should match the match_ups matrix in create_game_order(), ie len(match_ups)
         score_sheet = ScoreSheet.objects.get(id=1)
         self.assertEqual(len(score_sheet.games.all()), 16)  # 16 is lineup length squared
 
-        # a second client to test the redirect from another session
+        # a second client should get a non-editable response
         c = Client()
-        test_redirect_response = c.get(response.url)
-        self.assertRedirects(test_redirect_response, expected_url=reverse('score_sheet', kwargs={'score_sheet_id': 1}))
+        summary = c.get(
+            reverse('score_sheet_summary', kwargs={'score_sheet_id': 1})
+        )
+        score_sheet_summary = json.loads(summary.content)
+        self.assertFalse(score_sheet_summary['editable'])
 
     def test_score_sheet_set_lineup_with_scored_games(self):
         """
@@ -118,7 +122,7 @@ class ScoreSheetTests(BasePoolStatsTestCase):
         self.assertRedirects(
             response,
             expected_url=reverse(
-                'score_sheet_edit', kwargs={'score_sheet_id': test_score_sheet_id}
+                'score_sheet', kwargs={'score_sheet_id': test_score_sheet_id}
             )
         )
         score_sheet = ScoreSheet.objects.get(id=test_score_sheet_id)
@@ -330,15 +334,18 @@ class ScoreSheetTests(BasePoolStatsTestCase):
         Test that you can copy a score sheet you don't have access to
         """
         response = self.client.post(reverse('score_sheet_create'), data={'match_id': self.sample_match_id}, follow=True)
-        ss = ScoreSheet.objects.get(id=int(response.request['PATH_INFO'].split('/')[-2]))
-        # now spin up another client which should get bounced to the view page when it requests the edit page
+        score_sheet_id =int(response.request['PATH_INFO'].split('/')[-2])
+        # now spin up another client, fetch te summary/json, and check that editable is false
         c = Client()
-        no_access_response = c.get(reverse('score_sheet_edit', kwargs={'score_sheet_id': ss.id}))
-        self.assertRedirects(no_access_response, reverse('score_sheet', kwargs={'score_sheet_id': ss.id}))
+        summary = c.get(
+            reverse('score_sheet_summary', kwargs={'score_sheet_id': score_sheet_id})
+        )
+        score_sheet_summary = json.loads(summary.content)
+        self.assertFalse(score_sheet_summary['editable'])
 
         # now try to copy the score sheet with the 2nd client
-        copy_response = c.post(reverse('score_sheet_copy'), data={'scoresheet_id': ss.id})
-        self.assertRedirects(copy_response, reverse('score_sheet_edit', kwargs={'score_sheet_id': ss.id + 1}))
+        copy_response = c.post(reverse('score_sheet_copy'), data={'scoresheet_id': score_sheet_id})
+        self.assertRedirects(copy_response, reverse('score_sheet', kwargs={'score_sheet_id': score_sheet_id + 1}))
 
     def test_no_copy_official_score_sheet(self):
         """

@@ -1,9 +1,15 @@
+import json
+
 from django.test import LiveServerTestCase
+from django.urls import reverse
+
 from selenium.webdriver.support.ui import Select
 from selenium.webdriver.firefox.webdriver import WebDriver
 
 from random import randrange
 from xvfbwrapper import Xvfb
+
+from ..models import Game
 
 location_names = ['home', 'away']
 
@@ -79,7 +85,7 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
             # first, make sure the form you are about to interact with is visible, to avoid a
             # selenium.common.exceptions.ElementNotInteractableException being thrown.
             self.selenium.find_element_by_id('toggle-{}_lineup'.format(location_name)).click()
-            lineup_form = self.selenium.find_element_by_id('{}_lineup'.format(location_name))
+            lineup_form = self.selenium.find_element_by_id('{}-lineup-content'.format(location_name))
             # referring to away_players and home_players only via eval() makes them look unused ...
             for inc in range(0, eval('{}_players'.format(location_name))):
                 select = Select(lineup_form.find_element_by_id('id_form-{}-player'.format(inc)))
@@ -89,7 +95,7 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
 
     def set_substitution(self, away_home, game_index, player_index=1, substitution_index=0):
         self.selenium.find_element_by_id('toggle-{}_substitutions'.format(away_home)).click()
-        substitution_form = self.selenium.find_element_by_id('{}_substitutions'.format(away_home))
+        substitution_form = self.selenium.find_element_by_id('{}-substitutions-content'.format(away_home))
         game_select = Select(substitution_form.find_element_by_id('id_form-{}-game_order'.format(substitution_index)))
         if game_index is not None:
             game_select.select_by_index(game_index)
@@ -100,10 +106,12 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
         self.selenium.find_element_by_id('{}_substitutions_save'.format(away_home)).click()
         return selected_player
 
-    def set_winners(self, forfeits=0, table_runs=0, random_wins=True):
-        games_form = self.selenium.find_element_by_name('score_sheet_games_form')
-        # hard-coding game count here, is there a way to not do that?
-        # id_form-1-winner_0
+    def set_winners(self, forfeits=0, table_runs=0, scoresheet_id=1, random_wins=True):
+
+        summary = self.client.get(
+            reverse('score_sheet_summary', kwargs={'score_sheet_id': 1})
+        )
+        score_sheet_summary = json.loads(summary.content)
         win_counts = {
             'home': 0,
             'away': 0,
@@ -118,27 +126,29 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
             else:
                 winner = inc % 2
             win_counts[location_names[winner]] += 1
-            button = games_form.find_element_by_id('id_form-{}-winner_{}'.format(inc, winner))
-            button.click()
-            # set some forfeits!
+            score_sheet_summary['games'][inc]['winner'] = location_names[winner]
 
         while len(forfeit_games) < forfeits:
             candidate = randrange(0, 16)
             while candidate in forfeit_games:
                 candidate = randrange(0, 16)
             forfeit_games.append(candidate)
+            score_sheet_summary['games'][candidate]['forfeit'] = True
+
         while len(tr_games) < table_runs:
             candidate = randrange(0, 16)
             while candidate in forfeit_games or candidate in tr_games:
                 candidate = randrange(0, 16)
             tr_games.append(candidate)
+            score_sheet_summary['games'][candidate]['table_run'] = True
 
-        for forfeit_game in forfeit_games:
-            games_form.find_element_by_id('id_form-{}-forfeit'.format(forfeit_game)).click()
-        for tr_game in tr_games:
-            games_form.find_element_by_id('id_form-{}-table_run'.format(tr_game)).click()
+        for game in score_sheet_summary['games']:
+            db_game = Game.objects.get(id=game['id'])
+            db_game.winner = game['winner']
+            db_game.table_run = game['table_run']
+            db_game.forfeit = game['forfeit']
+            db_game.save()
 
-        games_form.find_element_by_id('games-save-button').click()
         return win_counts
 
     @staticmethod
