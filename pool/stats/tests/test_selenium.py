@@ -1,4 +1,7 @@
+import json
+
 from django.test import RequestFactory
+from django.urls import reverse
 
 from selenium.webdriver.support.ui import Select
 
@@ -38,39 +41,22 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
 
     def test_match_create_scoresheet(self):
 
+        # just tests the lineups and substitutions; games and teams are covered in test_scoresheet
+
         # self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, self.test_match['pk']))
         self.score_sheet_create()
 
         # test that we get redirected to the edit URL
-        self.assertEqual(self.selenium.current_url, '{}score_sheet_edit/{}/'.format(self.base_url, 1))
+        self.assertEqual(self.selenium.current_url, '{}score_sheet/{}/'.format(self.base_url, 1))
 
         for location_name in location_names:
             for form_type in form_length_map:
                 # test that we have lineup form for home/away
-                lineup_div = self.selenium.find_element_by_id('{}_{}'.format(location_name, form_type))
+                lineup_div = self.selenium.find_element_by_id('{}-{}-content'.format(location_name, form_type))
                 lineup_form = lineup_div.find_element_by_tag_name('form')
                 lineup_inputs = lineup_form.find_elements_by_tag_name('input')
                 # with the correct number of elements
                 self.assertEqual(form_length_map[form_type], len(lineup_inputs))
-        games_form = self.selenium.find_element_by_name('score_sheet_games_form')
-        games_form_inputs = games_form.find_elements_by_tag_name('input')
-
-        # there should be 16 forms in the playoff div; 5 inputs in each is 80 inputs.
-        # plus 5 at the top of the form ... plus the submit and game reset button. total is 86.
-        self.assertEqual(87, len(games_form_inputs))
-
-    def test_match_create_playoff_scoresheet(self):
-        self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
-        self.assertEqual(self.selenium.current_url, '{}score_sheet_edit/{}/'.format(self.base_url, 1))
-        # <input type="hidden" name="form-TOTAL_FORMS" value="16" id="id_form-TOTAL_FORMS">
-        games_form = self.selenium.find_element_by_name('score_sheet_games_form')
-        games_form_inputs = games_form.find_elements_by_tag_name('input')
-        form_count_input = games_form.find_element_by_id('id_form-TOTAL_FORMS')
-        self.assertEqual(int(form_count_input.get_attribute('value')), 17)
-
-        # there should be 17 forms in the playoff div; 5 inputs in each is 85 inputs.
-        # plus 5 at the top of the form ... plus the submit and game reset button. total is 92.
-        self.assertEqual(92, len(games_form_inputs))
 
     def test_match_scoresheet_set_lineup(self):
         self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
