@@ -92,7 +92,7 @@
 </div>
 <hr>
 
-<table class="table">
+<table class="table" id="games-list">
 <thead>
 <tr>
     <th colspan="2" class="scoresheet-small-header" style="text-align:right;"><h5>Home</h5></th>
@@ -150,7 +150,7 @@
         <td class="scoresheet-square">
             <div :class="game.order.home_breaks ? 'mark-nobreak-position' : 'mark-break-position'"  v-html="game.order.away_position"></div>
         </td>
-        <td :id="game.away_player +'_' + game.order.away_position + '_game_' +  game.order.order" class="scoresheet-cell">
+        <td :id="'away_player_' + game.order.away_position + '_game_' +  game.order.order" class="scoresheet-cell">
             <div class="scoresheet-cell">
                 <a v-if="game.away_player" :href="game.away_player.url">
                     <span v-html="game.away_player.name"></span>
