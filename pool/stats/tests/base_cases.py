@@ -79,7 +79,7 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
             # first, make sure the form you are about to interact with is visible, to avoid a
             # selenium.common.exceptions.ElementNotInteractableException being thrown.
             self.selenium.find_element_by_id('toggle-{}_lineup'.format(location_name)).click()
-            lineup_form = self.selenium.find_element_by_id('{}_lineup'.format(location_name))
+            lineup_form = self.selenium.find_element_by_id('{}-lineup-content'.format(location_name))
             # referring to away_players and home_players only via eval() makes them look unused ...
             for inc in range(0, eval('{}_players'.format(location_name))):
                 select = Select(lineup_form.find_element_by_id('id_form-{}-player'.format(inc)))
@@ -89,7 +89,7 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
 
     def set_substitution(self, away_home, game_index, player_index=1, substitution_index=0):
         self.selenium.find_element_by_id('toggle-{}_substitutions'.format(away_home)).click()
-        substitution_form = self.selenium.find_element_by_id('{}_substitutions'.format(away_home))
+        substitution_form = self.selenium.find_element_by_id('{}-substitutions-content'.format(away_home))
         game_select = Select(substitution_form.find_element_by_id('id_form-{}-game_order'.format(substitution_index)))
         if game_index is not None:
             game_select.select_by_index(game_index)
