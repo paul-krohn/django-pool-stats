@@ -88,7 +88,7 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
             lineup_form = self.selenium.find_element_by_id('{}-lineup-content'.format(location_name))
             # referring to away_players and home_players only via eval() makes them look unused ...
             for inc in range(0, eval('{}_players'.format(location_name))):
-                select = Select(lineup_form.find_element_by_id('id_form-{}-player'.format(inc)))
+                select = Select(lineup_form.find_element_by_id('id_{}_lineup-{}-player'.format(location_name ,inc)))
                 select.select_by_index(inc + 1)  # 'inc + 1' as the first option in the select is '------' or similar
             # submit the form
             self.selenium.find_element_by_id('{}_lineup_save'.format(location_name)).click()
@@ -96,10 +96,10 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
     def set_substitution(self, away_home, game_index, player_index=1, substitution_index=0):
         self.selenium.find_element_by_id('toggle-{}_substitutions'.format(away_home)).click()
         substitution_form = self.selenium.find_element_by_id('{}-substitutions-content'.format(away_home))
-        game_select = Select(substitution_form.find_element_by_id('id_form-{}-game_order'.format(substitution_index)))
+        game_select = Select(substitution_form.find_element_by_id('id_{}_substitutions-{}-game_order'.format(away_home, substitution_index)))
         if game_index is not None:
             game_select.select_by_index(game_index)
-        player_select = Select(substitution_form.find_element_by_id('id_form-{}-player'.format(substitution_index)))
+        player_select = Select(substitution_form.find_element_by_id('id_{}_substitutions-{}-player'.format(away_home, substitution_index)))
         # select the 1th player; zero is '------' or similar
         player_select.select_by_index(player_index)
         selected_player = player_select.first_selected_option

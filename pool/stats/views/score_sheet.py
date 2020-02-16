@@ -7,7 +7,7 @@ from django.http import HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
 from ..forms import DisabledScoreSheetGameForm, ScoreSheetGameForm, ScoreSheetCompletionForm, \
-    ScoreSheetStatusForm, LineupFormSet, SubstitutionFormSet
+    ScoreSheetStatusForm, AwayLineupFormSet, HomeLineupFormSet, AwaySubstitutionFormSet, HomeSubstitutionFormSet
 from ..models import ScoreSheet, Game, Match, AwayLineupEntry, HomeLineupEntry, PlayPosition, AwaySubstitution, \
     HomeSubstitution
 from ..utils import session_uid, is_stats_master
@@ -145,7 +145,7 @@ def score_sheet_lineup_formset(score_sheet_id, away_home):
         model=lineup_model,
         fields=['player'],
         form=LineupForm,
-        formset=LineupFormSet,
+        formset=AwayLineupFormSet if away_home == 'away' else HomeLineupFormSet,
         extra=0,
         max_num=len(PlayPosition.objects.all()),
     )
@@ -195,11 +195,12 @@ def substitutions_formset_factory_builder(score_sheet_id, away_home):
             queryset=substitution_players_queryset,
             required=False,
         )
+        prefix = '{}_substitutions'.format(away_home)
 
     return modelformset_factory(
         model=substitution_model,
         form=SubstitutionForm,
-        formset=SubstitutionFormSet,
+        formset=AwaySubstitutionFormSet if away_home == 'away' else HomeSubstitutionFormSet,
         fields=['game_order', 'player'],
         # this may not work for leagues where the game group size is for some reason not the
         # same as the number of players in a lineup

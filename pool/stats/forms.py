@@ -111,6 +111,18 @@ class LineupFormSet(django.forms.BaseModelFormSet):
                                   code='lineup_duplicate_player')
 
 
+class AwayLineupFormSet(LineupFormSet):
+    def __init__(self, *args, **kwargs):
+        super(AwayLineupFormSet, self).__init__(*args, **kwargs)
+        self.prefix = 'away_lineup'
+
+
+class HomeLineupFormSet(LineupFormSet):
+    def __init__(self, *args, **kwargs):
+        super(HomeLineupFormSet, self).__init__(*args, **kwargs)
+        self.prefix = 'home_lineup'
+
+
 class ScoreSheetCreationForm(django.forms.ModelForm):
 
     class Meta:
@@ -182,6 +194,17 @@ class SubstitutionFormSet(django.forms.BaseModelFormSet):
         if len(player_values) > len(set(player_values)):
             raise ValidationError('You may not substitute in the same player twice',
                                   code='lineup_duplicate_player')
+
+class AwaySubstitutionFormSet(SubstitutionFormSet):
+    def __init__(self, *args, **kwargs):
+        super(AwaySubstitutionFormSet, self).__init__(*args, **kwargs)
+        self.prefix = 'away_substitutions'
+
+
+class HomeSubstitutionFormSet(SubstitutionFormSet):
+    def __init__(self, *args, **kwargs):
+        super(HomeSubstitutionFormSet, self).__init__(*args, **kwargs)
+        self.prefix = 'home_substitutions'
 
 
 class MatchForm(django.forms.ModelForm):
