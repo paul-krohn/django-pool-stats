@@ -99,7 +99,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         self.selenium.find_element_by_id('toggle-{}_lineup'.format(location_name)).click()
         lineup_form = self.selenium.find_element_by_id('{}-lineup-content'.format(location_name))
         for inc in [0, 1]:
-            select = Select(lineup_form.find_element_by_id('id_form-{}-player'.format(inc)))
+            select = Select(lineup_form.find_element_by_id('id_{}_lineup-{}-player'.format(location_name, inc)))
             select.select_by_index(1)  # '1' as the first option in the select is '------' or similar
         # submit the form
         self.selenium.find_element_by_id('{}_lineup_save'.format(location_name)).click()
@@ -168,7 +168,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
             self.selenium.find_element_by_id('toggle-{}_substitutions'.format(location_name)).click()
             # <input type="checkbox" name="form-0-DELETE" id="id_form-0-DELETE">
             substitution_form = self.selenium.find_element_by_id('{}-substitutions-content'.format(location_name))
-            substitution_form.find_element_by_id('id_form-0-DELETE').click()
+            substitution_form.find_element_by_id('id_{}_substitutions-0-DELETE'.format(location_name)).click()
             self.selenium.find_element_by_id('{}_substitutions_save'.format(location_name)).click()
         summary = self.client.get(
             reverse('score_sheet_summary', kwargs={'score_sheet_id': 1})
