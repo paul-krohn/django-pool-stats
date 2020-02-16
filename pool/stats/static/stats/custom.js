@@ -89,8 +89,11 @@ function ScoreSheet(args) {
                 if (this.editing !== amIEditing) {
                     this.editing = amIEditing;
                     $('#is-editing-buttons').find('.btn').toggleClass('btn-primary').toggleClass('btn-default');
-                    let controlsWrapper = $('#lineup-controls-wrapper');
-                    controlsWrapper.css("display", $(controlsWrapper).css("display") === "block" ? "none" : "block");
+                }
+                if (this.editing) {
+                    $('#lineup-controls-wrapper').removeClass('hidden');
+                } else {
+                    $('#lineup-controls-wrapper').addClass('hidden');
                 }
             },
             isOdd: function (number) {

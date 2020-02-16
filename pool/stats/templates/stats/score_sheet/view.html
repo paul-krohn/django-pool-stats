@@ -8,8 +8,15 @@
 {% csrf_token %}
 
 <div id="scoresheet">
+    <div v-if="!owner && editable">
+        <div id="is-editing-buttons" class="btn-group btn-toggle">
+            <button class="btn btn-xs btn-default" @click="editMode(true)">Edit</button>
+            <button class="btn btn-xs btn-primary" @click="editMode(false)">View</button>
+        </div>
+    <hr>
+    </div>
 
-    <div id="lineup-controls-wrapper">
+    <div id="lineup-controls-wrapper" :class="{'hidden' : !editing}">
     <div>
         <ul class="nav nav-pills" id="lineup-controls" role="tablist">
             <li class="nav-item">
@@ -84,13 +91,6 @@
     {% endif %}
     </div> <!-- end lineup-controls-wrapper div -->
 
-<div v-if="!owner && editable">
-    <div id="is-editing-buttons" class="btn-group btn-toggle">
-        <button class="btn btn-xs btn-default" @click="editMode(true)">Edit</button>
-        <button class="btn btn-xs btn-primary" @click="editMode(false)">View</button>
-    </div>
-</div>
-<hr>
 
 <table class="table" id="games-list">
 <thead>
