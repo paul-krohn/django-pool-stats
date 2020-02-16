@@ -192,7 +192,12 @@
     </tr>
 </tbody>
 </table>
-
+<div v-if="issues.length">
+    <h4>Warnings</h4>
+    <ul>
+        <li v-for="issue in issues" v-html="issue"></li>
+    </ul>
+</div>
 <div class="row">
     <div class="col-md-6 col-sm-6" v-for="team in [teams.home, teams.away]">
         <table style="width: 100%;" class="table table-striped">

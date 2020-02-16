@@ -222,7 +222,7 @@ class ScoreSheet(models.Model):
             _summary[ah].update({'players': self.player_summaries(ah, True)})
             _summary[ah].update({'wins': getattr(self, '{}_wins'.format(ah))()})
 
-        return {'teams': _summary}
+        return {'teams': _summary, 'issues': self.self_check()}
 
     def check_wins_regular_season(self):
 

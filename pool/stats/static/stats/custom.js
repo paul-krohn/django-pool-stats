@@ -34,6 +34,7 @@ function ScoreSheet(args) {
         el: '#scoresheet',
         data: {
             games: [],
+            issues: [],
             teams: {
                 // this pre-population suppresses a warning that team.(home|away) is undefined
                 "home": {
@@ -71,6 +72,7 @@ function ScoreSheet(args) {
                         success: function (data) {
                             self.teams = data.teams;
                             self.games = data.games;
+                            self.issues = data.issues;
                             self.editable = data.editable;
                             self.owner = data.owner;
                             resolve();

@@ -43,17 +43,6 @@ $(document).ready(function(){
 <p></p>
 
 {% include 'stats/score_sheet/view.html' %}
-    {%  with score_sheet.self_check as issues %}
-        {% if issues|length %}
-        <div>
-            <ul>
-            {%  for issue in issues %}
-                <li>{{ issue }}</li>
-            {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
-    {%  endwith %}
 
 <form action="{% url 'score_sheet' score_sheet.id %}" method="post">
     <table class="table">
