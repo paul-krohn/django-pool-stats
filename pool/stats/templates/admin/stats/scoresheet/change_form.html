@@ -2,7 +2,7 @@
 {% load i18n admin_urls admin_modify %}
 
     {% block object-tools-items %}
-    <li><a href="{% url 'score_sheet_edit' original.id %}">Edit</a></li>
+    <li><a href="{% url 'score_sheet' original.id %}">Edit</a></li>
     <li>
         {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
         <a href="{% add_preserved_filters history_url %}" class="historylink">{% trans "History" %}</a>
