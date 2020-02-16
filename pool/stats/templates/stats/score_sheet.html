@@ -65,21 +65,4 @@ $(document).ready(function(){
     </div>
 </form>
 
-
-<script>
-
-function updateSummaryData(target) {
-    $.ajax({
-        url: summaryDataUrl,
-        dataType: 'json',
-        headers: {
-            Accept: "application/json",
-        },
-        success: function(data) {
-            target.teams = data;
-            console.log('whee');
-        },
-    });
-}
-</script>
 {% endblock %}
