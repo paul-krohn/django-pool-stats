@@ -299,7 +299,10 @@ class ScoreSheet(models.Model):
         else:
             issues += self.check_wins_regular_season()
 
-        if len(issues) and mark_for_review:
-            self.status = 2  # needs changes
-
+        self.complete = True
+        if len(issues):
+            if mark_for_review:
+                self.status = 2  # needs changes
+            self.complete = False
+        self.save()
         return issues

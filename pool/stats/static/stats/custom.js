@@ -46,12 +46,14 @@ function ScoreSheet(args) {
                 }
             },
             comment: '',
+            complete: false,
             editable: false,
             owner: false,
             editing: false,
             commentUrl: args.commentUrl,
             gameFormUrl: args.gameUpdateUrl,
             dataUrl: args.dataUrl,
+            weekUrl: args.weekUrl,
             gameGroupSize: args.gameGroupSize,
             csrfToken: args.csrfToken,
         },
@@ -74,6 +76,7 @@ function ScoreSheet(args) {
                         dataType: 'json',
                         success: function (data) {
                             self.comment = data.comment;
+                            self.complete = data.complete;
                             self.teams = data.teams;
                             self.games = data.games;
                             self.issues = data.issues;
@@ -156,7 +159,20 @@ function ScoreSheet(args) {
                     this.submitGame(game);
                 }
             },
-            completeMe: function () {
+            confirmCompleteMe: function () {
+                if (this.complete) {
+                    this.completeMe(true);
+                } else {
+                    let self = this;
+                    $.confirm({
+                        text: 'It looks like this score sheet isn not complete. Finish anyway?',
+                        confirm: function () {
+                            self.completeMe(true)
+                        },
+                    });
+                }
+            },
+            completeMe: function (redirect=false) {
                 let self = this;
                 $.ajaxSetup({
                     beforeSend: function (xhr, settings) {
@@ -175,10 +191,13 @@ function ScoreSheet(args) {
                         "comment": $('#scoresheet-comment').val(),
                     },
                     success: function (response) {
-                        self.updateData();
+                        if (redirect) {
+                            window.location = self.weekUrl;
+                        } else {
+                            self.updateData();
+                        }
                     },
                 });
-
             },
             submitGame: function (game) {
                 let self = this;

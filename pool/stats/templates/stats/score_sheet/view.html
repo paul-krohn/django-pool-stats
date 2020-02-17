@@ -230,6 +230,11 @@
                   @blur="completeMe()"
         ></textarea>
         <label for="scoresheet-comment"></label>
+        <div class="text-center">
+            <input v-if="editing" class="btn btn-primary" id="scoresheet-finish"
+                   @click="confirmCompleteMe()" type="button" value="Finish"/>
+            <label for="scoresheet-finish"></label>
+        </div>
     </div>
 </div>
 <script>
@@ -241,6 +246,7 @@ $(document).ready(function(){
         dataUrl: '{% url 'score_sheet_summary' score_sheet.id %}',
         gameGroupSize: {{ game_group_size }},
         gameUpdateUrl: '{% url 'game_update' %}',
+        weekUrl: '{% url 'week' score_sheet.match.week.id %}',
         csrfToken: $("input[name='csrfmiddlewaretoken']").val(),
     });
 
