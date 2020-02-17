@@ -43,43 +43,5 @@ $(document).ready(function(){
 <p></p>
 
 {% include 'stats/score_sheet/view.html' %}
-    {%  with score_sheet.self_check as issues %}
-        {% if issues|length %}
-        <div>
-            <ul>
-            {%  for issue in issues %}
-                <li>{{ issue }}</li>
-            {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
-    {%  endwith %}
 
-<form action="{% url 'score_sheet' score_sheet.id %}" method="post">
-    <table class="table">
-    {{ score_sheet_completion_form.as_table }}
-    </table>
-    {% csrf_token %}
-    <div class="text-center">
-        <input name="complete" class="btn btn-primary" type="submit" value="Mark complete"/>
-    </div>
-</form>
-
-
-<script>
-
-function updateSummaryData(target) {
-    $.ajax({
-        url: summaryDataUrl,
-        dataType: 'json',
-        headers: {
-            Accept: "application/json",
-        },
-        success: function(data) {
-            target.teams = data;
-            console.log('whee');
-        },
-    });
-}
-</script>
 {% endblock %}

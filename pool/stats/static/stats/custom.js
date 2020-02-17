@@ -33,7 +33,9 @@ function ScoreSheet(args) {
     let app = new Vue({
         el: '#scoresheet',
         data: {
+            id: args.id,
             games: [],
+            issues: [],
             teams: {
                 // this pre-population suppresses a warning that team.(home|away) is undefined
                 "home": {
@@ -43,11 +45,15 @@ function ScoreSheet(args) {
                     "url": null
                 }
             },
+            comment: '',
+            complete: false,
             editable: false,
             owner: false,
             editing: false,
+            commentUrl: args.commentUrl,
             gameFormUrl: args.gameUpdateUrl,
             dataUrl: args.dataUrl,
+            weekUrl: args.weekUrl,
             gameGroupSize: args.gameGroupSize,
             csrfToken: args.csrfToken,
         },
@@ -69,8 +75,11 @@ function ScoreSheet(args) {
                         url: this.dataUrl,
                         dataType: 'json',
                         success: function (data) {
+                            self.comment = data.comment;
+                            self.complete = data.complete;
                             self.teams = data.teams;
                             self.games = data.games;
+                            self.issues = data.issues;
                             self.editable = data.editable;
                             self.owner = data.owner;
                             resolve();
@@ -89,8 +98,11 @@ function ScoreSheet(args) {
                 if (this.editing !== amIEditing) {
                     this.editing = amIEditing;
                     $('#is-editing-buttons').find('.btn').toggleClass('btn-primary').toggleClass('btn-default');
-                    let controlsWrapper = $('#lineup-controls-wrapper');
-                    controlsWrapper.css("display", $(controlsWrapper).css("display") === "block" ? "none" : "block");
+                }
+                if (this.editing) {
+                    $('#lineup-controls-wrapper').removeClass('hidden');
+                } else {
+                    $('#lineup-controls-wrapper').addClass('hidden');
                 }
             },
             isOdd: function (number) {
@@ -146,6 +158,46 @@ function ScoreSheet(args) {
                     game.winner = ha;
                     this.submitGame(game);
                 }
+            },
+            confirmCompleteMe: function () {
+                if (this.complete) {
+                    this.completeMe(true);
+                } else {
+                    let self = this;
+                    $.confirm({
+                        text: 'It looks like this score sheet isn not complete. Finish anyway?',
+                        confirm: function () {
+                            self.completeMe(true)
+                        },
+                    });
+                }
+            },
+            completeMe: function (redirect=false) {
+                let self = this;
+                $.ajaxSetup({
+                    beforeSend: function (xhr, settings) {
+                        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", self.csrfToken);
+                        }
+                    },
+                    dataType: 'application/json',
+                });
+                $.ajax({
+                    type: "POST",
+                    url: self.commentUrl,
+                    dataType: "json",
+                    data: {
+                        "scoresheet_id": self.id,
+                        "comment": $('#scoresheet-comment').val(),
+                    },
+                    success: function (response) {
+                        if (redirect) {
+                            window.location = self.weekUrl;
+                        } else {
+                            self.updateData();
+                        }
+                    },
+                });
             },
             submitGame: function (game) {
                 let self = this;

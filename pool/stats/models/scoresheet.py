@@ -222,7 +222,7 @@ class ScoreSheet(models.Model):
             _summary[ah].update({'players': self.player_summaries(ah, True)})
             _summary[ah].update({'wins': getattr(self, '{}_wins'.format(ah))()})
 
-        return {'teams': _summary}
+        return {'teams': _summary, 'issues': self.self_check()}
 
     def check_wins_regular_season(self):
 
@@ -299,7 +299,10 @@ class ScoreSheet(models.Model):
         else:
             issues += self.check_wins_regular_season()
 
-        if len(issues) and mark_for_review:
-            self.status = 2  # needs changes
-
+        self.complete = True
+        if len(issues):
+            if mark_for_review:
+                self.status = 2  # needs changes
+            self.complete = False
+        self.save()
         return issues
