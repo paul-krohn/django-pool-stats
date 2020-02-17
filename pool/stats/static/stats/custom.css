@@ -272,3 +272,7 @@ div.matchup-participant-winner {
   fill: #f39422;
   stroke-width: 2px;
 }
+
+textarea#scoresheet-comment {
+    width: 100%;
+}
