@@ -1,9 +1,10 @@
+from str2bool import str2bool
 import logging
 
 import django.forms
 from django.conf import settings
 from django.forms import modelformset_factory
-from django.http import HttpResponseBadRequest, JsonResponse
+from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
 from ..forms import DisabledScoreSheetGameForm, ScoreSheetGameForm, ScoreSheetCompletionForm, \
@@ -15,13 +16,6 @@ from ..utils import session_uid, is_stats_master
 
 def score_sheet(request, score_sheet_id):
     s = get_object_or_404(ScoreSheet, id=score_sheet_id)
-    # if not user_can_edit_scoresheet(request, score_sheet_id):
-    #     return redirect('score_sheet', s.id)
-    score_sheet_game_formset_f = modelformset_factory(
-        Game,
-        form=ScoreSheetGameForm,
-        max_num=len(s.games.all())
-    )
 
     # normally, you would populate a formset conditionally on whether the request is a POST or not;
     # in this case, the lineups and substitutions are posted to a different view, so that is not necessary.
@@ -34,45 +28,13 @@ def score_sheet(request, score_sheet_id):
     home_substitutions_formset = substitutions_formset_factory_builder(
         score_sheet_id=score_sheet_id, away_home='home')(queryset=s.home_substitutions.all())
 
-    if request.method == 'POST':
-        score_sheet_completion_form = ScoreSheetCompletionForm(request.POST, instance=s)
-        if is_stats_master(request.user):
-            score_sheet_completion_form = ScoreSheetStatusForm(request.POST, instance=s)
-        score_sheet_game_formset = score_sheet_game_formset_f(
-            request.POST, queryset=s.games.all()
-        )
-        # save either the completion form, or the games. It would be preferable to save both, but one
-        # runs in to management form complications.
-        if 'games' in request.POST:
-            if score_sheet_game_formset.is_valid():
-                score_sheet_game_formset.save()
-        else:
-            if score_sheet_completion_form.is_valid():
-                score_sheet_completion_form.save()
-                if score_sheet_completion_form.instance.complete:
-                    return redirect('week', s.match.week.id)
-    else:
-        score_sheet_completion_form = ScoreSheetCompletionForm(
-            instance=s,
-        )
-        if is_stats_master(request.user):
-            score_sheet_completion_form = ScoreSheetStatusForm(instance=s)
-
-        score_sheet_game_formset = score_sheet_game_formset_f(
-            queryset=s.games.all(),
-        )
-
     context = {
         'score_sheet': s,
         'game_group_size': settings.LEAGUE['game_group_size'],
-        'games_formset': score_sheet_game_formset,
         'away_lineup_formset': away_lineup_formset,
         'home_lineup_formset': home_lineup_formset,
         'away_substitutions_formset': away_substitutions_formset,
         'home_substitutions_formset': home_substitutions_formset,
-        'away_player_score_sheet_summaries': s.player_summaries('away'),
-        'home_player_score_sheet_summaries': s.player_summaries('home'),
-        'score_sheet_completion_form': score_sheet_completion_form,
     }
     return render(request, 'stats/score_sheet.html', context)
 
@@ -95,6 +57,7 @@ def score_sheet_summary(request, score_sheet_id):
     summary.update({'games': game_list})
     summary.update({'editable': user_can_edit_scoresheet(request, score_sheet_id)})
     summary.update({'owner': session_uid(request) == s.creator_session})
+    summary.update({'comment': s.comment})
     return JsonResponse(summary)
 
 
@@ -249,3 +212,18 @@ def user_can_edit_scoresheet(request, score_sheet_id):
     # or you are an admin
     return s.official != 1 and ((session_uid(request) == s.creator_session) or
                                 request.user.is_superuser or is_stats_master(request.user))
+
+
+def comment(request):
+
+    if request.POST:
+        ss = get_object_or_404(
+            ScoreSheet,
+            id=str(request.POST.get('scoresheet_id'))
+        )
+        if user_can_edit_scoresheet(request, ss.id):
+            ss.comment = request.POST.get('comment')
+            ss.save()
+            return HttpResponse(status=204)
+    else:
+        return HttpResponse(status=403)

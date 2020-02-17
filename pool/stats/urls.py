@@ -68,6 +68,7 @@ urlpatterns = [
         score_sheet.score_sheet_substitutions, name='score_sheet_substitutions'),
     url(r'^score_sheet/(?P<score_sheet_id>[0-9]+)/$', score_sheet.score_sheet, name='score_sheet'),
     url(r'^score_sheet/summary/(?P<score_sheet_id>[0-9]+)/$', score_sheet.score_sheet_summary, name='score_sheet_summary'),
+    url(r'^score_sheet/comment/', score_sheet.comment, name='score_sheet_comment'),
 
     url(r'^seasons/', season.seasons, name='seasons'),
     url(r'^set_season/(?P<season_id>[0-9]+)/$', season.set_season, name='set_season'),

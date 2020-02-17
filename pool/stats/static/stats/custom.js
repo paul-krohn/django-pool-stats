@@ -33,6 +33,7 @@ function ScoreSheet(args) {
     let app = new Vue({
         el: '#scoresheet',
         data: {
+            id: args.id,
             games: [],
             issues: [],
             teams: {
@@ -44,9 +45,11 @@ function ScoreSheet(args) {
                     "url": null
                 }
             },
+            comment: '',
             editable: false,
             owner: false,
             editing: false,
+            commentUrl: args.commentUrl,
             gameFormUrl: args.gameUpdateUrl,
             dataUrl: args.dataUrl,
             gameGroupSize: args.gameGroupSize,
@@ -70,6 +73,7 @@ function ScoreSheet(args) {
                         url: this.dataUrl,
                         dataType: 'json',
                         success: function (data) {
+                            self.comment = data.comment;
                             self.teams = data.teams;
                             self.games = data.games;
                             self.issues = data.issues;
@@ -151,6 +155,30 @@ function ScoreSheet(args) {
                     game.winner = ha;
                     this.submitGame(game);
                 }
+            },
+            completeMe: function () {
+                let self = this;
+                $.ajaxSetup({
+                    beforeSend: function (xhr, settings) {
+                        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", self.csrfToken);
+                        }
+                    },
+                    dataType: 'application/json',
+                });
+                $.ajax({
+                    type: "POST",
+                    url: self.commentUrl,
+                    dataType: "json",
+                    data: {
+                        "scoresheet_id": self.id,
+                        "comment": $('#scoresheet-comment').val(),
+                    },
+                    success: function (response) {
+                        self.updateData();
+                    },
+                });
+
             },
             submitGame: function (game) {
                 let self = this;

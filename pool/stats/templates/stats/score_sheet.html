@@ -44,14 +44,4 @@ $(document).ready(function(){
 
 {% include 'stats/score_sheet/view.html' %}
 
-<form action="{% url 'score_sheet' score_sheet.id %}" method="post">
-    <table class="table">
-    {{ score_sheet_completion_form.as_table }}
-    </table>
-    {% csrf_token %}
-    <div class="text-center">
-        <input name="complete" class="btn btn-primary" type="submit" value="Mark complete"/>
-    </div>
-</form>
-
 {% endblock %}

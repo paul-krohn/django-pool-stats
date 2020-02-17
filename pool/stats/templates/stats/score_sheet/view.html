@@ -222,12 +222,27 @@
         </table>
     </div>
 </div>
-
+<div class="row"></div>
+<h4>Comment</h4>
+    <div>
+        <p v-if="!editing" v-html="comment"></p>
+        <textarea id="scoresheet-comment" v-if="editing" v-model="comment"
+                  @blur="completeMe()"
+        ></textarea>
+        <label for="scoresheet-comment"></label>
+    </div>
 </div>
+<style>
+scoresheet-comment#textarea {
+    width: 100%;
+}
+</style>
 <script>
 $(document).ready(function(){
 
     ScoreSheet({
+        id: {{ score_sheet.id }},
+        commentUrl: '{% url 'score_sheet_comment' %}',
         dataUrl: '{% url 'score_sheet_summary' score_sheet.id %}',
         gameGroupSize: {{ game_group_size }},
         gameUpdateUrl: '{% url 'game_update' %}',
