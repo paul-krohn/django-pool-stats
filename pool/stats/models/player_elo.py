@@ -118,7 +118,7 @@ def get_player_previous_season_summary(player_summary):
     ).order_by('-pub_date')
     previous_summary = None
     offset = 0
-    while previous_summary is None:
+    while previous_summary is None and offset < len(past_seasons):
         try:
             previous_summary = PlayerSeasonSummary.objects.get(
                 season=past_seasons[offset],
