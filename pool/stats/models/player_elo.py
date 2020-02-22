@@ -112,12 +112,23 @@ def get_summaries(game, season_id):
     return summaries
 
 
-def get_previous_season(season_id):
-    this_season = Season.objects.get(id=season_id)
-    # now get the seasons before this one (ie excluding this one), ordered by date
-    seasons = Season.objects.filter(pub_date__lt=this_season.pub_date).order_by('-pub_date')
-    return seasons[0] or None
+def get_player_previous_season_summary(player_summary):
+    past_seasons = Season.objects.filter(
+        pub_date__lt=player_summary.season.pub_date
+    ).order_by('-pub_date')
+    previous_summary = None
+    offset = 0
+    while previous_summary is None:
+        try:
+            previous_summary = PlayerSeasonSummary.objects.get(
+                season=past_seasons[offset],
+                player=player_summary.player
+            )
+        except models.ObjectDoesNotExist:
+            pass
+        offset += 1
 
+    return previous_summary
 
 def get_old_elo(player_summary):
 
@@ -126,16 +137,12 @@ def get_old_elo(player_summary):
     if player_summary.elo is not None:
         previous_elo = player_summary.elo
     else:
-        previous_season = get_previous_season(player_summary.season_id)
-        if previous_season is not None:
-            previous_season_summary = PlayerSeasonSummary.objects.filter(
-                player=player_summary.player, season=previous_season
-            )
-            if len(previous_season_summary):
-                previous_elo = previous_season_summary[0].elo
-                print("previous elo for {} ({}): {}".format(
-                    previous_season_summary[0], previous_season_summary[0].player.id, previous_elo
-                ))
+        previous_season_summary = get_player_previous_season_summary(player_summary)
+        if previous_season_summary is not None:
+            previous_elo = previous_season_summary.elo
+            print("previous elo for {} ({}): {}".format(
+                previous_season_summary, previous_season_summary.player.id, previous_elo
+            ))
     return Rating(previous_elo)
 
 
