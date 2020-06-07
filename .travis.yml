@@ -2,7 +2,7 @@ language: python
 python:
   - "3.6"
   - "3.7"
-dist: xenial
+dist: bionic
 sudo: required
 cache: pip
 services:

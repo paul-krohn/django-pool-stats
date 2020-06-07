@@ -33,6 +33,12 @@ DATABASES['default']['PASSWORD'] = 'some_password'
 
 There is a .gitignore entry for the file, so you don't accidentally check it in.
 
+### Running Tests
+
+```
+docker-compose run -w /code/pool web python3 manage.py test -v 2
+```
+
 ### Migrations
 
 Standard django-style:
