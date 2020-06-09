@@ -55,7 +55,7 @@ def check_season_dec(func, *do_redirect):
                 request.session['season_id'] = default_season
                 request.session.save()
 
-        season_id = url_season_id or session_season_id
+        season_id = url_season_id or request.session.get('season_id')
         if season_id == 0:
             return redirect(redirect_url)
         else:
