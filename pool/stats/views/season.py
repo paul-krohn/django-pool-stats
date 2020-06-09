@@ -40,6 +40,31 @@ def check_season(request):
         request.session.save()
 
 
+def check_season_dec(func, *do_redirect):
+
+    redirect_url = '/stats/seasons/'
+
+    def _inner(request, *args, **kwargs):
+        # print("decorator called")
+        url_season_id = int(kwargs.get('season_id', 0))
+        session_season_id = request.session.get('season_id', 0)
+
+        if session_season_id == 0:
+            default_season = get_default_season()
+            if default_season != 0:
+                request.session['season_id'] = default_season
+                request.session.save()
+
+        season_id = url_season_id or session_season_id
+        if season_id == 0:
+            return redirect(redirect_url)
+        else:
+            kwargs.update({'season_id': season_id})
+            return func(request, *args, **kwargs)
+
+    return _inner
+
+
 def seasons(request):
     _seasons = Season.objects.all()
     context = {
