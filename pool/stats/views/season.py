@@ -45,50 +45,33 @@ def check_season(request):
 class check_season_d(object):
 
     def __init__(self, do_redirect):
-        print("we are in init, do_redirect is {}".format(do_redirect))
         self.do_redirect = do_redirect
-        pass
 
     def __call__(self, func):
 
-        print("we are in call, function is {}".format(func))
+        redirect_url = '/stats/seasons/'
 
-        def wr(*args, **kwargs):
-            print("inside wr, do_redirect is {}".format(self.do_redirect))
-            return func(*args, **kwargs)
-            # print("after calling func")
-        return wr
+        def wr(request, **kwargs):
 
+            url_season_id = int(kwargs.get('season_id', 0))
+            session_season_id = request.session.get('season_id', 0)
 
-def check_season_dec(func, *do_redirect):
+            if session_season_id == 0:
+                default_season = get_default_season()
+                if default_season != 0:
+                    request.session['season_id'] = default_season
+                    request.session.save()
 
-    redirect_url = '/stats/seasons/'
-
-    @wraps(func)
-    def _inner(request, *args, **kwargs):
-        # print("decorator called")
-        url_season_id = int(kwargs.get('season_id', 0))
-        session_season_id = request.session.get('season_id', 0)
-
-        if session_season_id == 0:
-            default_season = get_default_season()
-            if default_season != 0:
-                request.session['season_id'] = default_season
-                request.session.save()
-
-        season_id = url_season_id or request.session.get('season_id')
-        if season_id == 0:
-            return redirect(redirect_url)
-        else:
-            if do_redirect:
+            season_id = url_season_id or request.session.get('season_id')
+            if season_id == 0:
+                return redirect(redirect_url)
+            else:
+                if self.do_redirect and url_season_id == 0:
+                    return redirect('{}{}'.format(request.path, season_id))
                 kwargs.update({'season_id': season_id})
-            return func(request, *args, **kwargs)
+                return func(request, **kwargs)
 
-    return _inner
-
-
-def check_season_dec_no_redir(func):
-    return check_season_dec(func, do_redirect=False)
+        return wr
 
 
 def seasons(request):
