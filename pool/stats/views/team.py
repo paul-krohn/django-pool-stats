@@ -25,7 +25,7 @@ def user_can_edit_team(request, a_team):
 @check_season_d(True)
 def teams(request, season_id=None):
     team_list = Team.objects.filter(season=season_id).order_by('-win_percentage')
-    season = Season.objects.get(id=request.session['season_id'])
+    season = Season.objects.get(id=season_id)
     ties = Tie.objects.filter(season=season)
     tiebreakers = TieBreakerResult.objects.filter(tie__in=ties)
     context = {
