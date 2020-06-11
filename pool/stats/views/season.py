@@ -1,3 +1,5 @@
+from functools import wraps
+
 from django.shortcuts import redirect, render, reverse
 
 from ..models import Season
@@ -40,10 +42,29 @@ def check_season(request):
         request.session.save()
 
 
+class check_season_d(object):
+
+    def __init__(self, do_redirect):
+        print("we are in init, do_redirect is {}".format(do_redirect))
+        self.do_redirect = do_redirect
+        pass
+
+    def __call__(self, func):
+
+        print("we are in call, function is {}".format(func))
+
+        def wr(*args, **kwargs):
+            print("inside wr, do_redirect is {}".format(self.do_redirect))
+            return func(*args, **kwargs)
+            # print("after calling func")
+        return wr
+
+
 def check_season_dec(func, *do_redirect):
 
     redirect_url = '/stats/seasons/'
 
+    @wraps(func)
     def _inner(request, *args, **kwargs):
         # print("decorator called")
         url_season_id = int(kwargs.get('season_id', 0))
@@ -59,10 +80,15 @@ def check_season_dec(func, *do_redirect):
         if season_id == 0:
             return redirect(redirect_url)
         else:
-            kwargs.update({'season_id': season_id})
+            if do_redirect:
+                kwargs.update({'season_id': season_id})
             return func(request, *args, **kwargs)
 
     return _inner
+
+
+def check_season_dec_no_redir(func):
+    return check_season_dec(func, do_redirect=False)
 
 
 def seasons(request):
