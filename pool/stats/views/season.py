@@ -1,5 +1,3 @@
-from functools import wraps
-
 from django.shortcuts import redirect, render, reverse
 
 from ..models import Season
@@ -44,7 +42,7 @@ def check_season(request):
 
 class check_season_d(object):
 
-    def __init__(self, do_redirect):
+    def __init__(self, do_redirect=True):
         self.do_redirect = do_redirect
 
     def __call__(self, func):
