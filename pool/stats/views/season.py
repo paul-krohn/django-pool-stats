@@ -66,7 +66,7 @@ class check_season_d(object):
             else:
                 if self.do_redirect and url_season_id == 0:
                     return redirect('{}{}'.format(request.path, season_id))
-                kwargs.update({'season_id': season_id})
+                # kwargs.update({'season_id': season_id})
                 return func(request, **kwargs)
 
         return wr

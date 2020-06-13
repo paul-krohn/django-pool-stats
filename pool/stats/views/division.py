@@ -2,18 +2,13 @@ from django.shortcuts import redirect, render
 
 from ..models import Division, Team
 from ..utils import page_cache as cache
-from ..views import check_season
+from ..views.season import check_season_d
 
 
+@check_season_d()
 def divisions(request, season_id=None):
-    check_season(request)
-    if season_id is None:
-        return redirect('divisions', season_id=request.session['season_id'])
 
-    divisions_cache_key = '.'.join([
-        'divisions',
-        season_id
-    ])
+    divisions_cache_key = '.'.join(['divisions', str(season_id)])
 
     page = cache.get(divisions_cache_key)
     if not page:

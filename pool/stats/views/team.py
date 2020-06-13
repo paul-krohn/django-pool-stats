@@ -8,7 +8,6 @@ from django.template import loader
 from ..forms import TeamPlayerFormSet, TeamRegistrationForm
 from ..models import Player, Team, Tie, TieBreakerResult, Season, PlayerSeasonSummary, ScoreSheet, Match
 from ..utils import page_cache as cache, session_uid
-from ..views import check_season
 from ..views.season import check_season_d
 
 
@@ -37,8 +36,6 @@ def teams(request, season_id=None):
 
 
 def team(request, team_id, after=None):
-
-    check_season(request)
 
     _team = get_object_or_404(Team, id=team_id)
 

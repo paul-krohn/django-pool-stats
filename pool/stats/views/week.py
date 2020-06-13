@@ -4,7 +4,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.cache import never_cache
 
 from ..models import Week, ScoreSheet, Season
-from ..views import check_season
+from ..views.season import check_season_d
 from ..forms import ScoreSheetCreationForm
 
 
@@ -40,8 +40,8 @@ def week(request, week_id):
     return render(request, 'stats/week.html', context)
 
 
+@check_season_d(do_redirect=False)
 def weeks(request):
-    check_season(request)
     _season = Season.objects.get(id=request.session['season_id'])
     _weeks = Week.objects.filter(season=request.session['season_id']).order_by('date')
     context = {
@@ -52,9 +52,9 @@ def weeks(request):
 
 
 @never_cache
+@check_season_d(do_redirect=False)
 def get_current_week(request, today_date=''):
 
-    check_season(request)
     # now get the time range that is Sun-Sat this week; start with the DOW now
     today = datetime.date.today()
     if today_date != '':  # this param is really just here for tests.
