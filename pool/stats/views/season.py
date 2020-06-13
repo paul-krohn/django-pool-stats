@@ -1,5 +1,4 @@
 from django.shortcuts import redirect, render, reverse
-
 from ..models import Season
 
 
@@ -34,7 +33,7 @@ def set_season(request, season_id=None):
     return redirect(redirect_to)
 
 
-class check_season_d(object):
+class CheckSeason(object):
 
     def __init__(self, do_redirect=True):
         self.do_redirect = do_redirect

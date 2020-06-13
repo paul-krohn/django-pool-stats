@@ -2,10 +2,10 @@ from django.shortcuts import redirect, render
 
 from ..models import Division, Team
 from ..utils import page_cache as cache
-from ..views.season import check_season_d
+from ..views.season import CheckSeason
 
 
-@check_season_d()
+@CheckSeason()
 def divisions(request, season_id=None):
 
     divisions_cache_key = '.'.join(['divisions', str(season_id)])

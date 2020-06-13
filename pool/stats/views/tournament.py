@@ -5,10 +5,10 @@ from django.forms import modelformset_factory
 from ..forms import TournamentForm, TournamentParticipantFormSet, create_tournament_participant_form
 from ..models import Participant, Player, Season, Tournament, TournamentMatchup
 from ..utils import session_uid
-from ..views.season import check_season_d
+from ..views.season import CheckSeason
 
 
-@check_season_d()
+@CheckSeason()
 def tournaments(request, season_id=None):
     tournament_list = Tournament.objects.filter(season=season_id)
     context = {

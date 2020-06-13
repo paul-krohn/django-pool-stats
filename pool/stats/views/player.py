@@ -6,10 +6,10 @@ from ..forms import PlayerForm
 from ..models import Player, PlayerElo, PlayerSeasonSummary, ScoreSheet, Season
 from ..utils import page_cache as cache
 from ..views import logger
-from ..views.season import check_season_d
+from ..views.season import CheckSeason
 
 
-@check_season_d()
+@CheckSeason()
 def player(request, player_id, season_id=None):
     detail_season = Season.objects.get(id=season_id)
     _player = get_object_or_404(Player, id=player_id)
@@ -59,7 +59,7 @@ def player(request, player_id, season_id=None):
     return rendered_page
 
 
-@check_season_d()
+@CheckSeason()
 def players(request, season_id=None):
 
     elo = request.session.get('elo', False)
@@ -92,7 +92,7 @@ def players(request, season_id=None):
 
 
 def player_elo(request, player_id):
-    check_season(request)
+    CheckSeason(request)
 
     _player = Player.objects.get(id=player_id)
 

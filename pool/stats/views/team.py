@@ -8,7 +8,7 @@ from django.template import loader
 from ..forms import TeamPlayerFormSet, TeamRegistrationForm
 from ..models import Player, Team, Tie, TieBreakerResult, Season, PlayerSeasonSummary, ScoreSheet, Match
 from ..utils import page_cache as cache, session_uid
-from ..views.season import check_season_d
+from ..views.season import CheckSeason
 
 
 def user_can_edit_team(request, a_team):
@@ -21,7 +21,7 @@ def user_can_edit_team(request, a_team):
     return return_value
 
 
-@check_season_d()
+@CheckSeason()
 def teams(request, season_id=None):
     team_list = Team.objects.filter(season=season_id).order_by('-win_percentage')
     season = Season.objects.get(id=season_id)
