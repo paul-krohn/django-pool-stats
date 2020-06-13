@@ -34,12 +34,6 @@ def set_season(request, season_id=None):
     return redirect(redirect_to)
 
 
-def check_season(request):
-    if 'season_id' not in request.session:
-        request.session['season_id'] = get_default_season()
-        request.session.save()
-
-
 class check_season_d(object):
 
     def __init__(self, do_redirect=True):
