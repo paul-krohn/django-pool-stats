@@ -6,12 +6,12 @@ from ..forms import PlayerForm
 from ..models import Player, PlayerElo, PlayerSeasonSummary, ScoreSheet, Season
 from ..utils import page_cache as cache
 from ..views import logger
-from ..views import check_season
+from ..views.season import CheckSeason
 
 
+@CheckSeason()
 def player(request, player_id, season_id=None):
-    check_season(request)
-    detail_season = Season.objects.get(id=season_id or request.session['season_id'])
+    detail_season = Season.objects.get(id=season_id)
     _player = get_object_or_404(Player, id=player_id)
     summaries = PlayerSeasonSummary.objects.filter(player__exact=_player).order_by('-season')
     _score_sheets_with_dupes = ScoreSheet.objects.filter(official=True).filter(
@@ -59,11 +59,8 @@ def player(request, player_id, season_id=None):
     return rendered_page
 
 
+@CheckSeason()
 def players(request, season_id=None):
-    check_season(request)
-
-    if season_id is None:
-        return redirect('players', season_id=request.session['season_id'])
 
     elo = request.session.get('elo', False)
     players_table_cache_key = '.'.join(['players_table', str(season_id), str(elo)])
@@ -95,7 +92,7 @@ def players(request, season_id=None):
 
 
 def player_elo(request, player_id):
-    check_season(request)
+    CheckSeason(request)
 
     _player = Player.objects.get(id=player_id)
 

@@ -38,7 +38,7 @@ urlpatterns = [
 
 
     url(r'^teams/(?P<season_id>[0-9]+)', team.teams, name='teams'),
-    url(r'^teams/', views.index, name='teams'),
+    url(r'^teams/', views.team.teams, name='teams'),
 
     url(r'^week/(?P<week_id>[0-9]+)/$', week.week, name='week'),
     url(r'^weeks/', week.weeks, name='weeks'),
