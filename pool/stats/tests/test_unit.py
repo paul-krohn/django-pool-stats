@@ -456,21 +456,21 @@ class WeekTests(BasePoolStatsTestCase):
         add_session_to_request(request)
 
         # on sunday, I should get the next tuesday
-        current_week_from_sunday = get_current_week(request, '2010-08-08')
+        current_week_from_sunday = get_current_week(request, today_date='2010-08-08')
         self.assertEqual(current_week_from_sunday.url, reverse('week', kwargs={'week_id': 4}))
 
         # on saturday, I should get the previous tuesday
-        current_week_from_sunday = get_current_week(request, '2010-08-14')
+        current_week_from_sunday = get_current_week(request, today_date='2010-08-14')
         self.assertEqual(current_week_from_sunday.url, reverse('week', kwargs={'week_id': 4}))
 
         # on Wednesday, I should get the Tuesday/night before
-        current_week_from_wednesday = get_current_week(request, '2010-08-11')
+        current_week_from_wednesday = get_current_week(request, today_date='2010-08-11')
         self.assertEqual(current_week_from_wednesday.url, reverse('week', kwargs={'week_id': 4}))
 
-        current_week_between_playoff_dates = get_current_week(request, '2010-09-15')
+        current_week_between_playoff_dates = get_current_week(request, today_date='2010-09-15')
         self.assertEqual(current_week_between_playoff_dates.url, reverse('week', kwargs={'week_id': 10}))
 
-        current_week_on_playoff_dates = get_current_week(request, '2010-09-16')
+        current_week_on_playoff_dates = get_current_week(request, today_date='2010-09-16')
         self.assertEqual(current_week_on_playoff_dates.url, reverse('week', kwargs={'week_id': 11}))
 
 

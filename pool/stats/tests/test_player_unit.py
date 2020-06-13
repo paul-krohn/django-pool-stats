@@ -48,7 +48,12 @@ class PlayerViewTests(BasePoolStatsTestCase):
         summary.save()
         page_cache.clear()
 
-        response = self.client.get(reverse('player', kwargs={'player_id': player.id}))
+        response = self.client.get(reverse(
+            'player', kwargs={
+                'player_id': player.id,
+                'season_id': s.id,
+            })
+        )
         self.assertQuerysetEqual(
             response.context['summaries'], ['<PlayerSeasonSummary: George Smith Fall 2010>']
         )
