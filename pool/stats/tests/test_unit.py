@@ -95,18 +95,17 @@ class ScoreSheetTests(BasePoolStatsTestCase):
         """
 
         response = self.client.post(reverse('score_sheet_create'), data={'match_id': self.sample_match_id})
-
-        # since we have a fresh DB, assume this will be score sheet number 1 ...
-        self.assertRedirects(response, expected_url=reverse('score_sheet', kwargs={'score_sheet_id': 1}))
+        score_sheet_id = int(response.url.split('/')[-2])
+        self.assertEqual(response.status_code, 302)
 
         # the number of games should match the match_ups matrix in create_game_order(), ie len(match_ups)
-        score_sheet = ScoreSheet.objects.get(id=1)
+        score_sheet = ScoreSheet.objects.get(id=score_sheet_id)
         self.assertEqual(len(score_sheet.games.all()), 16)  # 16 is lineup length squared
 
         # a second client should get a non-editable response
         c = Client()
         summary = c.get(
-            reverse('score_sheet_summary', kwargs={'score_sheet_id': 1})
+            reverse('score_sheet_summary', kwargs={'score_sheet_id': score_sheet_id})
         )
         score_sheet_summary = json.loads(summary.content)
         self.assertFalse(score_sheet_summary['editable'])
@@ -116,8 +115,8 @@ class ScoreSheetTests(BasePoolStatsTestCase):
         Create a score sheet, create the lineup,
 
         """
-        test_score_sheet_id = 1
         response = self.client.post(reverse('score_sheet_create'), data={'match_id': self.sample_match_id})
+        test_score_sheet_id = response.url.split('/')[-2]
         # since we have a fresh DB, assume this will be score sheet number 1 ...
         self.assertRedirects(
             response,

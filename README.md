@@ -16,7 +16,7 @@ Development has been done on, and instructions are provided for mysql. There is 
 Assuming you stick with the default user/database name:
 
 ```
-create user pool_stats@localhost identified by 'some_password';
+create user pool_stats@localhost;
 create database pool_stats;
 grant all privileges on pool_stats.* to 'pool_stats'@'localhost';
 grant all privileges on test_pool_stats.* to 'pool_stats'@'localhost';

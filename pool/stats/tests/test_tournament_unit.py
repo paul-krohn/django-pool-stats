@@ -37,7 +37,7 @@ class TestsWithSampleData(BasePoolStatsTestCase):
 
         c = Client()
         test_redirect_response = c.get(response.url)
-        self.assertRedirects(test_redirect_response, expected_url=reverse('tournament', kwargs={'tournament_id': 1}))
+        self.assertRedirects(test_redirect_response, expected_url=reverse('tournament', kwargs={'tournament_id': 3}))
 
     def test_is_editable(self):
         response = self.client.post(reverse('tournament_edit'), data={

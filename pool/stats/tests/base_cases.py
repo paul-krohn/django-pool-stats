@@ -78,6 +78,7 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
                            week_id=BasePoolStatsTestCase.DEFAULT_TEST_WEEK_ID):
         self.selenium.get('{}week/{}'.format(self.base_url, week_id))
         self.selenium.find_element_by_id('score_sheet_create_button_match_{}'.format(match_id)).click()
+        return self.selenium.current_url.split('/')[-2]
 
     def populate_lineup(self, away_players=4, home_players=4):
         # get the lineup form, set the first player to 1, second to 2, etc
@@ -109,7 +110,7 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
     def set_winners(self, forfeits=0, table_runs=0, scoresheet_id=1, random_wins=True):
 
         summary = self.client.get(
-            reverse('score_sheet_summary', kwargs={'score_sheet_id': 1})
+            reverse('score_sheet_summary', kwargs={'score_sheet_id': scoresheet_id})
         )
         score_sheet_summary = json.loads(summary.content)
         win_counts = {

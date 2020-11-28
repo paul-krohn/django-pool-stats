@@ -1,11 +1,11 @@
-Django==3.0.7
+Django==3.1.2
 django-redis==4.11.0
 # mysql client on OS X needs an install from source with:
 # CFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform
 elo==0.1.1
 mysqlclient==1.4.6
 redis==3.3.11
-uWSGI==2.0.18
+uWSGI==2.0.19.1
 
 # indirect dependencies
 flake8==3.7.9
