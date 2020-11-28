@@ -44,10 +44,10 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         # just tests the lineups and substitutions; games and teams are covered in test_scoresheet
 
         # self.selenium.get('{}score_sheet_create/{}/'.format(self.base_url, self.test_match['pk']))
-        self.score_sheet_create()
+        score_sheet_id = self.score_sheet_create()
 
         # test that we get redirected to the edit URL
-        self.assertEqual(self.selenium.current_url, '{}score_sheet/{}/'.format(self.base_url, 1))
+        self.assertRegexpMatches(self.selenium.current_url, '{}score_sheet/\d+/'.format(self.base_url))
 
         for location_name in location_names:
             for form_type in form_length_map:
@@ -59,16 +59,15 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
                 self.assertEqual(form_length_map[form_type], len(lineup_inputs))
 
     def test_match_scoresheet_set_lineup(self):
-        self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
+        score_sheet_id = self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
 
         self.populate_lineup()
         # now that we have lineups set, make sure we have games, and that all have players,
         # except the tie breaker/last game
-        score_sheet_id = self.score_sheet_create()
         summary = self.client.get(
-            reverse('score_sheet_summary', kwargs={'score_sheet_id': 1})
+            reverse('score_sheet_summary', kwargs={'score_sheet_id': score_sheet_id})
         )
-        score_sheet_summary = json.loads(summary.content)
+        score_sheet_summary = json.loads(summary.content.decode())
 
         for game in score_sheet_summary['games'][0:-1]:
             for loc in location_names:
@@ -78,9 +77,8 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
 
     def test_score_sheet_incomplete_substitution(self):
 
-        self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
+        score_sheet_id = self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
         self.populate_lineup()
-        score_sheet_id = self.selenium.current_url.split('/')[-2]
         arguments = {
             'away_home': 'away',
             'game_index': None,
@@ -93,8 +91,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
     def test_score_sheet_lineup_duplicate_player(self):
 
         location_name = location_names[0]
-        self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
-        score_sheet_id = self.selenium.current_url.split('/')[-2]
+        score_sheet_id = self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
 
         self.selenium.find_element_by_id('toggle-{}_lineup'.format(location_name)).click()
         lineup_form = self.selenium.find_element_by_id('{}-lineup-content'.format(location_name))
@@ -108,14 +105,14 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
             self.base_url, score_sheet_id, location_name))
 
     def test_match_scoresheet_substitutions(self):
-        self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
+        score_sheet_id = self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
 
         self.populate_lineup()
         self.set_substitution('away', 11)
         self.set_substitution('home', 11)
         # check that there are 5 players in the summaries
         summary = self.client.get(
-            reverse('score_sheet_summary', kwargs={'score_sheet_id': 1})
+            reverse('score_sheet_summary', kwargs={'score_sheet_id': score_sheet_id})
         )
         score_sheet_summary = json.loads(summary.content)
 
@@ -123,8 +120,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
             self.assertEqual(len(score_sheet_summary['teams'][location_name]['players']), 5)
 
     def test_scoresheet_duplicate_substitutions(self):
-        self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
-        score_sheet_id = self.selenium.current_url.split('/')[-2]
+        score_sheet_id = self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
 
         self.set_substitution('away', game_index=11, substitution_index=0)
         self.set_substitution('away', game_index=12, substitution_index=1)  # this creates a duplicate substitution
@@ -133,17 +129,17 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         )
 
     def test_match_scoresheet_mark_winners(self):
-        self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
+        score_sheet_id = self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
 
         self.populate_lineup()
         self.set_substitution('away', 10)
         self.set_substitution('home', 10)
-        win_counts = self.set_winners()
+        win_counts = self.set_winners(scoresheet_id=score_sheet_id)
         # not sure why it helps here to re-get the same page, but when the game counts come up 8-8, the test fails?
         summary = self.client.get(
-            reverse('score_sheet_summary', kwargs={'score_sheet_id': 1})
+            reverse('score_sheet_summary', kwargs={'score_sheet_id': score_sheet_id})
         )
-        score_sheet_summary = json.loads(summary.content)
+        score_sheet_summary = json.loads(summary.content.decode())
         for location_name in location_names:
             self.assertEqual(
                 score_sheet_summary['teams'][location_name]['wins'],
@@ -151,13 +147,13 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
             )
 
     def test_match_scoresheet_remove_substitutions(self):
-        self.score_sheet_create()
+        score_sheet_id = self.score_sheet_create()
         self.populate_lineup()
         self.set_substitution('away', 10)
         self.set_substitution('home', 10)
 
         summary = self.client.get(
-            reverse('score_sheet_summary', kwargs={'score_sheet_id': 1})
+            reverse('score_sheet_summary', kwargs={'score_sheet_id': score_sheet_id})
         )
         score_sheet_summary = json.loads(summary.content)
         for location_name in location_names:
@@ -171,7 +167,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
             substitution_form.find_element_by_id('id_{}_substitutions-0-DELETE'.format(location_name)).click()
             self.selenium.find_element_by_id('{}_substitutions_save'.format(location_name)).click()
         summary = self.client.get(
-            reverse('score_sheet_summary', kwargs={'score_sheet_id': 1})
+            reverse('score_sheet_summary', kwargs={'score_sheet_id': score_sheet_id})
         )
         score_sheet_summary = json.loads(summary.content)
         for location_name in location_names:
@@ -180,14 +176,12 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
 
 
     def test_team_win_totals(self):
-        self.score_sheet_create()
+        score_sheet_id = self.score_sheet_create()
         self.populate_lineup()
         self.set_substitution('away', 10)
         self.set_substitution('home', 10)
-        # we need the scoresheet id from the current URL
-        scoresheet_id = self.selenium.current_url.split('/')[-2]
-        win_counts = self.set_winners(forfeits=1, table_runs=2)
-        ss = ScoreSheet.objects.get(id=scoresheet_id)
+        win_counts = self.set_winners(forfeits=1, table_runs=2, scoresheet_id=score_sheet_id)
+        ss = ScoreSheet.objects.get(id=score_sheet_id)
         ss.official = True
         ss.save()
 

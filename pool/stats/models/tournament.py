@@ -553,8 +553,8 @@ class TournamentMatchup(models.Model):
         Participant, on_delete=models.DO_NOTHING, null=True,
     )
     number = models.IntegerField()
-    a_want_winner = models.NullBooleanField(null=True)
-    b_want_winner = models.NullBooleanField(null=True)
+    a_want_winner = models.BooleanField(null=True)
+    b_want_winner = models.BooleanField(null=True)
     play_order = models.IntegerField(null=True)
     is_necessary = models.BooleanField(default=True)
 
