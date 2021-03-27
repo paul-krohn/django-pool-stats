@@ -25,7 +25,7 @@ pycodestyle==2.7.0
 pycrypto==2.6.1
 pyxdg==0.25 # for some reason, needs to match what is in ubuntu:bionic
 pyflakes==2.3.0
-pygobject==3.26.1 # for some reason, needs to match what is in ubuntu:bionic
+# pygobject==3.26.1 # this is what we get from ubunt:bionic
 pytz==2021.1
 SecretStorage==3.3.1
 setuptools-rust==0.12.1
