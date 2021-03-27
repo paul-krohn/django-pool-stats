@@ -47,7 +47,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         score_sheet_id = self.score_sheet_create()
 
         # test that we get redirected to the edit URL
-        self.assertRegexpMatches(self.selenium.current_url, '{}score_sheet/\d+/'.format(self.base_url))
+        self.assertRegexpMatches(self.selenium.current_url, r'{}score_sheet/\d+/'.format(self.base_url))
 
         for location_name in location_names:
             for form_type in form_length_map:
