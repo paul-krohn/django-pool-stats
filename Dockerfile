@@ -1,7 +1,7 @@
 FROM ubuntu:bionic
 
 RUN apt-get update -qq
-RUN apt-get install -y python3 python3-pip xvfb python3-dev libssl-dev libmysqlclient-dev curl firefox
+RUN apt-get install -y pkg-config libcairo2-dev python3 python3-pip xvfb python3-dev libssl-dev libmysqlclient-dev curl firefox libgirepository1.0-dev
 
 RUN apt-get install -y mysql-client
 RUN curl -L https://github.com/mozilla/geckodriver/releases/download/v0.24.0/geckodriver-v0.24.0-linux64.tar.gz \
@@ -15,6 +15,7 @@ RUN mkdir /code
 WORKDIR /code
 COPY dev-requirements.txt /code/
 COPY requirements.txt /code/
+RUN pip3 install --upgrade pip setuptools pycairo
 RUN pip3 install -r dev-requirements.txt
 COPY . /code/
 
