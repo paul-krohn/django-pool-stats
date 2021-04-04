@@ -6,9 +6,9 @@ def get_default_season():
     default_season_id = 0
     try:
         default_season_id = Season.objects.get(is_default=True).id
-    except Season.DoesNotExist as e:
+    except Season.DoesNotExist:
         # there is no default season, try to get the last/latest one; get them in descending order, as
-        # negative indexing does not work on querysets.
+        # negative indexing does not work on query sets.
         the_seasons = Season.objects.order_by('-pub_date')
         if len(the_seasons):
             default_season_id = the_seasons[0].id
