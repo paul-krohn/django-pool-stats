@@ -26,7 +26,7 @@ def player(request, player_id, season_id=None):
     seen_add = seen.add
     _score_sheets = [x for x in _score_sheets_with_dupes if not (x in seen or seen_add(x))]
     score_sheet_summaries = []
-    # now scrape through the score sheets; collect games from each scoresheet, with win true/falsed and TRs marked
+    # now scrape through the score sheets; collect games from each scoresheet, with win true/false and TRs marked
     for _score_sheet in _score_sheets:
         this_score_sheet = {
             'id': _score_sheet.id,
@@ -35,7 +35,7 @@ def player(request, player_id, season_id=None):
         }
         for game in _score_sheet.games.all():
             if not game.winner or game.forfeit or game.away_player is None or game.home_player is None:
-                continue  # skip not-won games, ie forfeits and unplayed playoff games
+                continue  # skip not-won games, ie forfeits and un-played playoff games
             # if _player.id not in [game.away_player.id, game.home_player.id]:
             if _player not in [game.away_player, game.home_player]:
                 continue  # skip games not involving this player
