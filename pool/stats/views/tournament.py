@@ -63,7 +63,6 @@ def tournament_edit(request, tournament_id=None):
     return render(request, 'stats/tournament/edit.html', context)
 
 
-
 def tournament_mark_winner(request):
 
     if request.method == 'POST':
@@ -110,11 +109,11 @@ def tournament_participants(request, tournament_id):
         )
 
         if participant_formset.is_valid():
-            for pform in participant_formset:
-                if pform.cleaned_data.get('DELETE', False) and pform.cleaned_data.get('pk', False):
-                    p = Participant.objects.get(id=pform.instance.id)
+            for participant_form in participant_formset:
+                if participant_form.cleaned_data.get('DELETE', False) and participant_form.cleaned_data.get('pk', False):  # noqa
+                    p = Participant.objects.get(id=participant_form.instance.id)
                     p.delete()
-                obj = pform.save(commit=False)
+                obj = participant_form.save(commit=False)
                 obj.tournament = a_tournament
                 # also set the participant type, ugly hack alert here
                 obj.type = 'player'
@@ -184,6 +183,5 @@ def tournament_controls(request, tournament_id):
         if action == 'close_byes':
             t.close_byes(request.POST.get('bracket_type'))
             return HttpResponse(status=204)
-
 
     return HttpResponse(status=204)
