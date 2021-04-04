@@ -1,23 +1,21 @@
 import datetime
 
 from django.db.models import Q
-from django.forms import modelformset_factory
 from django.shortcuts import redirect, render, get_object_or_404
 from django.template import loader
 
-from ..forms import TeamPlayerFormSet, TeamRegistrationForm
-from ..models import Player, Team, Tie, TieBreakerResult, Season, PlayerSeasonSummary, ScoreSheet, Match
+from ..forms import TeamRegistrationForm
+from ..models import Team, Tie, TieBreakerResult, Season, PlayerSeasonSummary, ScoreSheet, Match
 from ..utils import page_cache as cache, session_uid
 from ..views.season import CheckSeason
 
 
 def user_can_edit_team(request, a_team):
-
     # you can edit a team if registration is open and you created it
     now = datetime.datetime.now().date()
     print('session id is: {}'.format(session_uid(request)))
     return_value = a_team.season.registration_end >= now >= a_team.season.registration_start and \
-           a_team.creator_session == session_uid(request)
+           a_team.creator_session == session_uid(request)  # noqa
     return return_value
 
 
@@ -36,7 +34,6 @@ def teams(request, season_id=None):
 
 
 def team(request, team_id, after=None):
-
     _team = get_object_or_404(Team, id=team_id)
 
     elo = request.session.get('elo', False)
@@ -57,7 +54,6 @@ def team(request, team_id, after=None):
             'show_teams': False,
         })
         cache.set(players_table_cache_key, players_table)
-
 
     official_score_sheets = ScoreSheet.objects.filter(official=True).filter(
         Q(match__away_team=_team) | Q(match__home_team=_team)
@@ -90,7 +86,6 @@ def team(request, team_id, after=None):
 
 
 def register(request, team_id=None):
-
     form = TeamRegistrationForm()
     now = datetime.datetime.now().date()
     seasons = Season.objects.filter(
