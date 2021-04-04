@@ -7,7 +7,5 @@ from .season import set_season
 logger = logging.getLogger(__name__)
 
 
-def index(request):
+def index(request):  # noqa
     return redirect('teams')
-
-
