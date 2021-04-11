@@ -14,6 +14,7 @@ from .forms import TeamForm, MatchForm
 from .views.season import get_default_season
 
 admin.AdminSite.site_header = "{} stats admin".format(settings.LEAGUE['name'])
+admin.site.site_url = '/stats'
 
 
 def find_duplicate_table_assignments(obj, request, week):
