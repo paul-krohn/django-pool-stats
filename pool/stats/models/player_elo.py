@@ -11,9 +11,7 @@ from .globals import away_home
 
 
 class PlayerElo(models.Model):
-    player = models.ForeignKey(Player,
-       on_delete=models.CASCADE,
-    )
+    player = models.ForeignKey(Player, on_delete=models.CASCADE,)
     rating = models.FloatField(
         null=True,
         blank=True,
@@ -27,11 +25,10 @@ class PlayerElo(models.Model):
 
     @classmethod
     def get_season_rateable_games(cls, season_id):
-
         main_filter_args = {
             'scoresheet__official': True,
             'scoresheet__match__season_id': season_id,
-            'playerelo__isnull': True,
+            'playerelo__isnull': True,  # noqa
             'forfeit': False,
         }
 
@@ -112,10 +109,14 @@ def get_summaries(game, season_id):
     return summaries
 
 
-def get_player_previous_season_summary(player_summary):
+def get_player_previous_season_summary(player_summary) -> PlayerSeasonSummary:
     past_seasons = Season.objects.filter(
         pub_date__lt=player_summary.season.pub_date
     ).order_by('-pub_date')
+    default_previous_summary = PlayerSeasonSummary(
+        season=past_seasons[0],
+        player=player_summary.player
+    )
     previous_summary = None
     offset = 0
     while previous_summary is None and offset < len(past_seasons):
@@ -128,10 +129,10 @@ def get_player_previous_season_summary(player_summary):
             pass
         offset += 1
 
-    return previous_summary
+    return previous_summary if previous_summary is not None else default_previous_summary
+
 
 def get_old_elo(player_summary):
-
     # if the previous season is None, and there is no elo, return a new/default elo
     previous_elo = None
     if player_summary.elo is not None:
@@ -144,5 +145,3 @@ def get_old_elo(player_summary):
                 previous_season_summary, previous_season_summary.player.id, previous_elo
             ))
     return Rating(previous_elo)
-
-
