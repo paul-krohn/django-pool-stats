@@ -1,4 +1,4 @@
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 
 from ..models import Division, Team
 from ..utils import page_cache as cache

@@ -1,4 +1,3 @@
-from str2bool import str2bool
 import logging
 
 import django.forms
@@ -7,9 +6,8 @@ from django.forms import modelformset_factory
 from django.http import HttpResponse, HttpResponseBadRequest, JsonResponse
 from django.shortcuts import get_object_or_404, render, redirect
 
-from ..forms import DisabledScoreSheetGameForm, ScoreSheetGameForm, ScoreSheetCompletionForm, \
-    ScoreSheetStatusForm, AwayLineupFormSet, HomeLineupFormSet, AwaySubstitutionFormSet, HomeSubstitutionFormSet
-from ..models import ScoreSheet, Game, Match, AwayLineupEntry, HomeLineupEntry, PlayPosition, AwaySubstitution, \
+from ..forms import AwayLineupFormSet, HomeLineupFormSet, AwaySubstitutionFormSet, HomeSubstitutionFormSet
+from ..models import ScoreSheet, Match, AwayLineupEntry, HomeLineupEntry, PlayPosition, AwaySubstitution, \
     HomeSubstitution
 from ..utils import session_uid, is_stats_master
 
@@ -46,6 +44,7 @@ def score_sheet_games(score_sheet_id):
     for game in s.games.all():
         game_list.append(game.as_dict())
     return game_list
+
 
 def score_sheet_summary(request, score_sheet_id):
     s = get_object_or_404(ScoreSheet, id=score_sheet_id)

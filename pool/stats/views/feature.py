@@ -8,6 +8,7 @@ feature_names = [
     'auto_save',
 ]
 
+
 def index(request):
 
     features = dict()
