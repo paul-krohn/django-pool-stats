@@ -1,4 +1,4 @@
-Django==3.1.7
+Django==3.1.8
 django-redis==4.12.1
 elo==0.1.1
 # mysql client on OS X needs an install from source with:
@@ -8,14 +8,14 @@ redis==3.5.3
 uWSGI==2.0.19.1
 
 # indirect dependencies
-asgiref==3.3.1
+asgiref==3.3.4
 asn1crypto==1.4.0
-cryptography==3.4.6
+cryptography==3.4.7
 docopt==0.6.2
 flake8==3.9.0
 idna==3.1
-importlib-metadata==3.7.3
-keyring==23.0.0
+importlib-metadata==3.10.0
+keyring==23.0.1
 keyrings.alt==4.0.2
 mccabe==0.6.1
 mock==4.0.3
@@ -23,8 +23,8 @@ pbr==5.5.1
 pip
 pycodestyle==2.7.0
 pycrypto==2.6.1
-pyxdg==0.25 # for some reason, needs to match what is in ubuntu:bionic
-pyflakes==2.3.0
+pyxdg==0.27 # for some reason, needs to match what is in ubuntu:bionic
+pyflakes==2.3.1
 # pygobject==3.26.1 # this is what we get from ubunt:bionic
 pytz==2021.1
 SecretStorage==3.3.1
