@@ -2,6 +2,7 @@ language: python
 python:
   - "3.8"
 dist: focal
+arch: arm64-graviton2
 sudo: required
 cache: pip
 services:
