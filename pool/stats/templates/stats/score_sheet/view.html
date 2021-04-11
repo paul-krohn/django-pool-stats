@@ -117,7 +117,8 @@
         <td class="scoresheet-square">
             <div class="cell badge" v-html="game.order.order"></div>
         </td>
-        <td :id="'home_player_' + game.order.home_position + '_game_' +  game.order.order" class="scoresheet-cell" align="right">
+        <td :id="'home_player_' + game.order.home_position + '_game_' +  game.order.order" class="scoresheet-cell"
+            style="text-align: right;">
             <div class="scoresheet-cell">
                 <a v-if="game.home_player" :href="game.home_player.url">
                     <span v-html="game.home_player.name"></span>
