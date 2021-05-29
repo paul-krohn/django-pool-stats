@@ -62,15 +62,15 @@ class BaseSeleniumPoolStatsTestCase(BasePoolStatsTestCase):
 
     def setUp(self):
 
-        self.vdisplay = Xvfb(width=1280, height=1024)
-        self.vdisplay.start()
+        self.virtual_display = Xvfb(width=1920, height=1080)
+        self.virtual_display.start()
         self.selenium = WebDriver()
         super(BaseSeleniumPoolStatsTestCase, self).setUp()
 
     def tearDown(self):
 
         self.selenium.quit()
-        self.vdisplay.stop()
+        self.virtual_display.stop()
         super(BaseSeleniumPoolStatsTestCase, self).tearDown()
 
     def score_sheet_create(self,

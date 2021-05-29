@@ -31,6 +31,9 @@ SECRET_KEY = 'w6q_fwrro)-_f292+s%kz7#^n7qv!*=czg5bs-38mxjv(fbg0z'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# suppress warning for auto-generated ID fields
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
 ALLOWED_HOSTS = []
 
 
