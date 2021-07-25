@@ -8,6 +8,7 @@ from .models import Season, PlayerSeasonSummary, Team
 
 page_cache = caches['page']
 
+
 def session_uid(request):
     if 'uid' not in request.session.keys():
         request.session['uid'] = str(hash(time.time()))[0:15]
@@ -41,7 +42,7 @@ def expire_page(request, path=None, query_string=None, method='GET'):
 
 def update_season_stats(season_id):
     for team in Season.objects.get(id=season_id).team_set.all():
-            team.count_games()
+        team.count_games()
     PlayerSeasonSummary.update_all(season_id=season_id)
     Team.update_rankings(season_id=season_id)
 
