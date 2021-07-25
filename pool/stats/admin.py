@@ -122,7 +122,16 @@ admin.site.register(Player, PlayerAdmin)
 
 class SeasonAdmin(admin.ModelAdmin):
     list_display = ('name', 'is_default', 'pub_date')
-    actions = ['set_default_season', 'update_stats']
+    actions = ['set_default_season', 'update_stats', 'expire_caches']
+
+    def expire_caches(self, request, _):  # noqa
+        expire_caches()
+        self.message_user(
+            request,
+            level='INFO',
+            message='Caches expired.',
+        )
+        return redirect(request.get_full_path())
 
     def set_default_season(self, request, queryset):
         # queryset should be 1 season
@@ -392,7 +401,7 @@ admin.site.register(Week, WeekAdmin)
 
 
 class TeamAdmin(admin.ModelAdmin):
-    list_display = ('name', 'record', 'season', 'ranking', 'forfeit_wins', 'rank_tie_breaker')
+    list_display = ('name', 'record', 'season', 'ranking', 'forfeit_wins', 'rank_tie_breaker', 'division')
     list_filter = [SeasonFilter, 'rank_tie_breaker']
     filter_horizontal = ['players']
     fields = ['season', 'table', 'division', 'name', 'captain', 'players', 'rank_tie_breaker']
