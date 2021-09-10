@@ -30,7 +30,7 @@ SecretStorage==3.3.1
 setuptools-rust==0.12.1
 six==1.16.0
 str2bool==1.1
-sqlparse==0.4.1
+sqlparse==0.4.2
 typing-extensions==3.10.0.0
 urllib3==1.26.5
 xvfbwrapper==0.2.9
