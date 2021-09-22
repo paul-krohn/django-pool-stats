@@ -1,4 +1,4 @@
-Django==3.2.4
+Django==3.2.5
 django-redis==4.12.1
 elo==0.1.1
 # mysql client on OS X needs an install from source with:
