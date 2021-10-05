@@ -1,6 +1,8 @@
+from django.conf import settings
 from django.db import models
 
 from .game import Game
+from .lineup import GameOrder
 from .player import Player
 from .season import Season
 from .scoresheet import ScoreSheet
@@ -38,7 +40,10 @@ class PlayerSeasonSummary(models.Model):
             |
             models.Q(match__home_team__in=self.player.team_set.filter(season=self.season))
         ).filter(official=1)
+
         sweeps = 0
+        # this should work for leagues with one or zero extra/tie-breaker games in playoffs
+        games_per_player = int(len(GameOrder.objects.all()) / settings.LEAGUE['game_group_size'])
 
         for score_sheet in score_sheets:
             for ah in away_home:
@@ -47,7 +52,9 @@ class PlayerSeasonSummary(models.Model):
                     **score_sheet_filter_args
                 ).filter(
                     winner=ah
-                )) == 4:
+                ).filter(
+                    forfeit=False
+                )) == games_per_player:
                     sweeps += 1
         self.four_ohs = sweeps
         self.save()
