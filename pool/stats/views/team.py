@@ -36,8 +36,7 @@ def teams(request, season_id=None):
 def team(request, team_id, after=None):
     _team = get_object_or_404(Team, id=team_id)
 
-    elo = request.session.get('elo', False)
-    players_table_cache_key = '.'.join(['players_table', 'team', str(team_id), str(elo)])
+    players_table_cache_key = '.'.join(['players_table', 'team', str(team_id)])
     players_table = cache.get(players_table_cache_key)
 
     if not players_table:
@@ -49,7 +48,6 @@ def team(request, team_id, after=None):
         template = loader.get_template('stats/player_table.html')
 
         players_table = template.render(request=request, context={
-            'elo': elo,
             'players': _players,
             'show_teams': False,
         })
@@ -74,7 +72,6 @@ def team(request, team_id, after=None):
         Q(away_team=_team) | Q(home_team=_team)
     ).order_by('week__date')
 
-    _elo = request.session.get('elo', False)
     context = {
         'team': _team,
         'players_table': players_table,

@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.template import loader
 
 from ..forms import PlayerForm
-from ..models import Player, PlayerElo, PlayerSeasonSummary, ScoreSheet, Season
+from ..models import Player, PlayerSeasonSummary, ScoreSheet, Season
 from ..utils import page_cache as cache
 from ..views import logger
 from ..views.season import CheckSeason
@@ -62,14 +62,11 @@ def player(request, player_id, season_id=None):
 @CheckSeason()
 def players(request, season_id=None):
 
-    elo = request.session.get('elo', False)
-    players_table_cache_key = '.'.join(['players_table', str(season_id), str(elo)])
+    players_table_cache_key = '.'.join(['players_table', str(season_id)])
     players_table = cache.get(players_table_cache_key)
 
     if not players_table:
         order_by_args = ('-win_percentage', '-wins')
-        if elo:
-            order_by_args = ('-elo',)
         _players = PlayerSeasonSummary.objects.filter(
             season=season_id,
             ranking__gt=0
@@ -78,7 +75,6 @@ def players(request, season_id=None):
         template = loader.get_template('stats/player_table.html')
 
         players_table = template.render(request=request, context={
-            'elo': elo,
             'players': _players,
             'show_teams': True,
         })
@@ -89,49 +85,6 @@ def players(request, season_id=None):
     }
     view = render(request, 'stats/players.html', context)
     return view
-
-
-def player_elo(request, player_id):
-    CheckSeason(request)
-
-    _player = Player.objects.get(id=player_id)
-
-    player_elo_cache_key = '.'.join([
-        'player_elo_history',
-        str(_player.id),
-        str(request.session['season_id']),
-    ])
-
-    page = cache.get(player_elo_cache_key)
-
-    if not page:
-        elo_history = PlayerElo.objects.filter(
-            player_id=player_id
-        ).order_by('game_id')
-
-        rows = list()
-        for player_history_item in elo_history:
-            wl = 'l'
-            if player_history_item.game.away_player == _player:
-                if player_history_item.game.winner == 'away':
-                    wl = 'w'
-            else:
-                if player_history_item.game.winner == 'home':
-                    wl = 'w'
-            opponent_history_item = PlayerElo.objects.filter(game=player_history_item.game).exclude(player=_player)[0]
-            rows.append({
-                'wl': wl,
-                'opponent': opponent_history_item,
-                'player': player_history_item,
-            })
-
-        context = {
-            'player': _player,
-            'history': rows,
-        }
-        page = render(request, 'stats/player_elo.html', context)
-        cache.set(player_elo_cache_key, page)
-    return page
 
 
 def player_create(request):

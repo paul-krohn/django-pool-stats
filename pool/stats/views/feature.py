@@ -4,7 +4,6 @@ from str2bool import str2bool
 
 
 feature_names = [
-    'elo',
     'auto_save',
 ]
 

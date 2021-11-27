@@ -5,7 +5,7 @@ from .lineup import Substitution, AwaySubstitution, HomeSubstitution
 from .match import Match
 from .matchups import WeekDivisionMatchup
 from .player import Player, AwayPlayer, HomePlayer
-from .player_elo import PlayerElo
+from .player_rating import PlayerRating
 from .playposition import PlayPosition, AwayPlayPosition, HomePlayPosition
 from .playersummary import PlayerSeasonSummary
 from .scoresheet import ScoreSheet
