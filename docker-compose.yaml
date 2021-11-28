@@ -4,18 +4,18 @@ version: '3'
 
 services:
   db:
-    image: mysql:8
+    image: jamielsharief/mysql:latest
     environment:
       MYSQL_DATABASE: 'pool_stats'
       MYSQL_USER: 'pool_stats'
       MYSQL_PASSWORD: 'pool_stats'
       MYSQL_ROOT_PASSWORD: 'rabbit'
     ports:
-      - 3309:3306
+      - "3309:3306"
     expose:
       - 3306
   redis:
-    image: redis
+    image: arm64v8/redis
     expose:
       - 6379
   web:
