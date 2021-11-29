@@ -115,25 +115,3 @@ class PlayerRating(models.Model):
         Game,
         on_delete=models.CASCADE
     )
-
-    # def update(self, game, mu, sigma):
-    #
-    #     self.game_id = game
-    #     self.mu = mu
-    #     self.sigma = sigma
-    #
-    #     self.save()
-    #
-    # def current(self, player_id):
-    #     pass
-    #
-    # @classmethod
-    # def get_player_last_rated_game(cls, player_id):
-    #     return Game.objects.filter(
-    #         models.Q(away_player_id__in=[player_id])
-    #         |
-    #         models.Q(home_player_id__in=[player_id])
-    #     ).filter(
-    #         models.Q(scoresheet__official=True)
-    #     ).order_by('-id').last()
-    #
