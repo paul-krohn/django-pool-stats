@@ -5,6 +5,7 @@ django-redis==4.12.1
 # CFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform
 mysqlclient==2.0.3
 redis==3.5.3
+trueskill==0.4.5
 uWSGI==2.0.19.1
 
 # indirect dependencies

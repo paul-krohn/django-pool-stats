@@ -1,4 +1,3 @@
-from elo import Elo
 from django.shortcuts import render
 
 from ..models import Match, PlayerSeasonSummary, ScoreSheet, Week
