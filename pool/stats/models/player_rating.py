@@ -6,10 +6,7 @@ from .player import Player
 from .singleton import SingletonModel
 
 from trueskill import TrueSkill, Rating, rate_1vs1
-# from .playersummary import PlayerSeasonSummary
-# from .season import Season
-#
-from .globals import away_home
+
 
 DEFAULT_MU = 1000
 DEFAULT_SIGMA = 32
