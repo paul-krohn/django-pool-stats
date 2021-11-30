@@ -45,8 +45,6 @@ urlpatterns = [
     url(r'^nextweek/(?P<today_date>[0-9-]+)', week.get_current_week, name='nextweek'),
     url(r'^nextweek/', week.get_current_week, name='nextweek'),
 
-    url(r'^matchup/', matchup.matchup, name='matchup'),
-
     url(r'^players/(?P<season_id>[0-9]+)', player.players, name='players'),
     url(r'^players/', player.players, name='players'),
 
