@@ -41,11 +41,11 @@ def check_unofficial_games():
 
 
 def get_current_rating(player_id):
-    player_rating = PlayerRating.objects.filter(player_id=player_id).order_by('-game_id').last()
-    if player_rating is not None:
-        return Rating(mu=player_rating.mu, sigma=player_rating.sigma)
+    player_rating = PlayerRating.objects.filter(player_id=player_id).order_by('game_id').last()
+    if player_rating is None:
+        return Rating()
     else:
-        return Rating(mu=DEFAULT_MU, sigma=DEFAULT_SIGMA)
+        return Rating(mu=player_rating.mu, sigma=player_rating.sigma)
 
 
 def get_initial_game():
