@@ -20,7 +20,7 @@ def get_player_matchups(kind, thing):
                 matchups.append({'away': ap_summary, 'home': hp_summary})
     elif kind == 'match':
         matches = Match.objects.filter(id=thing)
-        if len(matches)== 0:
+        if len(matches) == 0:
             return matchups
         else:
             match = matches[0]

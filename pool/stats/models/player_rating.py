@@ -9,13 +9,14 @@ from trueskill import TrueSkill, Rating, rate_1vs1
 
 
 DEFAULT_MU = 1000
-DEFAULT_SIGMA = 32
+DEFAULT_SIGMA = 333
+DEFAULT_BETA = 200
 
 TrueSkill(
-    draw_probability=0.60,
+    draw_probability=0.00,
     mu=DEFAULT_MU,
     sigma=DEFAULT_SIGMA,
-    beta=200,
+    beta=DEFAULT_BETA,
 ).make_as_global()
 
 
