@@ -9,8 +9,8 @@ from .views import feature
 from .views import game
 from .views import score_sheet
 from .views import week
-from .views import matchup
 from .views import player
+from .views import rating
 from .views import season
 from .views import sponsor
 from .views import team
@@ -52,6 +52,8 @@ urlpatterns = [
         player.player, name='player'),
     url(r'^player/(?P<player_id>[0-9]+)/$', player.player, name='player'),
     url(r'^player_create/', player.player_create, name='player_create'),
+
+    url(r'^rating/(?P<player_id>[0-9]+)/$', rating.rating, name='rating'),
 
     url(r'^sponsors/', sponsor.sponsors, name='sponsors'),
     url(r'^sponsor/(?P<sponsor_id>[0-9]+)/$', sponsor.sponsor, name='sponsor'),
