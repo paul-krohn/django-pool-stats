@@ -4,7 +4,7 @@ from str2bool import str2bool
 
 
 feature_names = [
-    'auto_save',
+    'rating',
 ]
 
 

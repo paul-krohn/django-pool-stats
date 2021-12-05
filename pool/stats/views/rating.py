@@ -11,7 +11,7 @@ from ..views.season import CheckSeason
 def rating(request, player_id):
 
     this_player = get_object_or_404(Player, id=player_id)
-    ratings = PlayerRating.objects.filter(player=this_player)
+    ratings = PlayerRating.objects.filter(player=this_player).order_by('-game__scoresheet__match__week__date')
 
     context = {
         'player': this_player,

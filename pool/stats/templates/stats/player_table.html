@@ -7,7 +7,9 @@
       <th data-field="W" data-sortable="true">W</th>
       <th data-field="L" data-sortable="true">L</th>
       <th data-field="Pct" data-sortable="true">Pct</th>
+      {% if rating %}
       <th data-field="rating" data-sortable="true" data-sortable-type="numeric">Rating</th>
+      {% endif %}
       <th data-field="4-0"  data-sortable="true">4-0</th>
       <th data-field="TR" data-sortable="true">TR</th>
     </tr>
@@ -28,10 +30,12 @@
     <td>{{ player_summary.wins }}</td>
     <td>{{ player_summary.losses }}</td>
     <td>{{ player_summary.win_percentage|floatformat:3 }}</td>
-    <td data-value="{{ player_summary.rating }}">
-        <span style="display: none;">{{ player_summary.rating | stringformat:"04d" }}</span>
-        <a href="{% url 'rating' player_summary.player.id %}">{{ player_summary.rating|floatformat:0 }}</a>
+    {% if rating %}
+    <td data-value="{{ player_summary.rating.mu }}">
+        <span style="display: none;">{{ player_summary.rating.mu | stringformat:"04d" }}</span>
+        <a href="{% url 'rating' player_summary.player.id %}">{{ player_summary.rating.mu|floatformat:0 }}</a>
     </td>
+    {% endif %}
     <td>{{ player_summary.four_ohs }}</td>
     <td>{{ player_summary.table_runs }}</td>
     </tr>

@@ -62,7 +62,8 @@ def player(request, player_id, season_id=None):
 @CheckSeason()
 def players(request, season_id=None):
 
-    players_table_cache_key = '.'.join(['players_table', str(season_id)])
+    rating = request.session.get('rating', False)
+    players_table_cache_key = '.'.join(['players_table', str(season_id), str(rating)])
     players_table = cache.get(players_table_cache_key)
 
     if not players_table:
@@ -77,11 +78,13 @@ def players(request, season_id=None):
         players_table = template.render(request=request, context={
             'players': _players,
             'show_teams': True,
+            'rating': rating,
         })
         cache.set(players_table_cache_key, players_table)
 
     context = {
-        'players_table':  players_table
+        'players_table':  players_table,
+        'rating': rating,
     }
     view = render(request, 'stats/players.html', context)
     return view

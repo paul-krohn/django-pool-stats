@@ -7,7 +7,7 @@
 <h2>Feature Flags</h2>
 </div>
 {% for feature, setting in features.items %}
-    <h3>{{ feature }}</h3>
+    <h3>{{ feature }} ({{ setting }})</h3>
     <p>current: {{ setting }}</p>
     <ul>
         <li><a href="{% url 'feature_set' feature 0 %}"> False </a></li>
