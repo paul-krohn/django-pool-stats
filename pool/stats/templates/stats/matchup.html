@@ -72,10 +72,10 @@ $(document).ready(function () {
                 <a href="{% url 'player' match_up.away.player.id %}">{{ match_up.away.player }}</a>
             </div>
         </td>
-        <td>{{ match_up.away.rating|floatformat:0 }}</td>
+        <td>{{ match_up.away.rating.mu|floatformat:0 }}</td>
         <td>{{ match_up.pct|floatformat:0 }}</td>
         <td><a href="{% url 'player' match_up.home.player.id %}">{{ match_up.home.player }}</a>
-        <td>{{ match_up.home.rating|floatformat:0 }}</td>
+        <td>{{ match_up.home.rating.mu|floatformat:0 }}</td>
     </tr>
     {% endfor %}
   </tbody>

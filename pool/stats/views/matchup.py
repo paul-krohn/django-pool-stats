@@ -90,8 +90,8 @@ def matchup(request):
             if not(m['away'].rating and m['home'].rating):
                 continue
             away_pct = win_probability(
-                Rating(m['away'].rating),
-                Rating(m['home'].rating),
+                m['away'].rating,
+                m['home'].rating,
             )
             expected_wins += away_pct
             match_ups.append({

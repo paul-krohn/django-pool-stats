@@ -22,7 +22,6 @@ class PlayerSeasonSummary(models.Model):
     win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0, null=True)
     ranking = models.IntegerField(null=True)
     last_rated_game = models.IntegerField(null=True)
-    rating = models.FloatField(null=True)
 
     def __str__(self):
         return "{} {}".format(self.player, self.season)
@@ -118,19 +117,17 @@ class PlayerSeasonSummary(models.Model):
 
         self.update_sweeps()
 
-        self.rating = self.get_current_rating()
-
         self.save()
 
-    def get_current_rating(self):
+    @property
+    def rating(self):
 
         rating = PlayerRating.objects.filter(
-            game__scoresheet__match__season_id=self.season_id,
             game__forfeit=False,
             player_id=self.player_id
-        ).order_by('game_id').last()
+        ).order_by('game__scoresheet__match__season_id', 'game_id').last()
         if rating is not None:
-            return rating.mu
+            return rating
         else:
             return None
 
