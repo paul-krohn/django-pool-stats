@@ -1,11 +1,6 @@
-from django.db import models
 from django.shortcuts import get_object_or_404, render, redirect
-from django.template import loader
 
-from ..models import Player, PlayerSeasonSummary, PlayerRating, Season
-from ..utils import page_cache as cache
-from ..views import logger
-from ..views.season import CheckSeason
+from ..models import Player, PlayerRating
 
 
 def rating(request, player_id):
