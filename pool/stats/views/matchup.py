@@ -1,8 +1,26 @@
 from django.shortcuts import render
 
 from ..models import Match, PlayerSeasonSummary, ScoreSheet, Week
+from ..models.player_rating import trueskill_env
 
 from ..forms import MatchupForm
+
+from trueskill import Rating
+
+import itertools
+import math
+
+
+def win_probability(p1, p2):
+
+    # cribbed from https://github.com/sublee/trueskill/issues/1
+    team1 = [p1]
+    team2 = [p2]
+    delta_mu = sum(r.mu for r in team1) - sum(r.mu for r in team2)
+    sum_sigma = sum(r.sigma ** 2 for r in itertools.chain(team1, team2))
+    size = len(team1) + len(team2)
+    denominator = math.sqrt(size * (trueskill_env.beta * trueskill_env.beta) + sum_sigma)
+    return trueskill_env.cdf(delta_mu / denominator)
 
 
 def get_player_matchups(kind, thing):
@@ -49,9 +67,9 @@ def get_match(kind, thing):
             match = scoresheets[0].match
     return match
 
+
 def matchup(request):
-    e = Elo(beta=80)
-    # kind = 'scoresheet', thing = None
+
     kind = request.GET.get('kind', 'scoresheet')
     thing = request.GET.get('thing')
     week_id =  request.GET.get('week')
@@ -69,9 +87,12 @@ def matchup(request):
 
     if kind and thing:
         for m in get_player_matchups(kind, int(thing)):
-            if not(m['away'].elo and m['home'].elo):
+            if not(m['away'].rating and m['home'].rating):
                 continue
-            away_pct = e.expect(m['away'].elo, m['home'].elo)
+            away_pct = win_probability(
+                Rating(m['away'].rating),
+                Rating(m['home'].rating),
+            )
             expected_wins += away_pct
             match_ups.append({
                 'away': m['away'], 'home': m['home'], 'pct': away_pct * 100

@@ -12,12 +12,14 @@ DEFAULT_MU = 1000
 DEFAULT_SIGMA = 333
 DEFAULT_BETA = 200
 
-TrueSkill(
+trueskill_env = TrueSkill(
     draw_probability=0.00,
     mu=DEFAULT_MU,
     sigma=DEFAULT_SIGMA,
     beta=DEFAULT_BETA,
-).make_as_global()
+)
+
+trueskill_env.make_as_global()
 
 
 class PlayerRatingException(Exception):

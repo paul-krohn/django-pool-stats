@@ -23,6 +23,6 @@ CACHES["page"]["LOCATION"] = "redis://redis:6379/1"
 # thank you apple for this non-standard location
 # LOGGING['handlers']['syslog']['address'] = '/var/run/syslog'
 
-VIEW_CACHE_TIME = 5
+VIEW_CACHE_TIME = 1
 MAX_SUBSTITUTIONS = 2
 STATIC_ROOT = '/usr/local/pool-stats-static'
