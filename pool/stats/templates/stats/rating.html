@@ -1,0 +1,45 @@
+{% extends "stats/base.html" %}
+{% block title %}SFPA :: Players{% endblock %}
+
+{% block content %}
+<div class="text-center">
+<h2>{{ player }}</h2>
+</div>
+<div class="pull-right search"><input id="filter" class="form-control" type="search" placeholder="Filter"></div>
+<table style="width: auto;" class="table table-condensed table-responsive">
+  <thead>
+    <tr>
+        <th>Opponent</th><th>Result</th><th>New rating</th><th>Variability</th><th>Date</th>
+    </tr>
+  </thead>
+  <tbody class="searchable">
+    {% for rating in ratings %}
+        <tr>
+            <td>{% if rating.game.away_player.id == player.id %}
+                    <a href="{% url 'rating' rating.game.home_player.id %}">{{ rating.game.home_player }}</a>
+                {% else %}
+                    <a href="{% url 'rating' rating.game.away_player.id %}">{{ rating.game.away_player }}</a>
+                {% endif %}
+            </td>
+            <td>
+                {% if rating.game.away_player.id == player.id and rating.game.winner == 'away' %}
+                    W
+                {% elif rating.game.home_player.id == player.id and rating.game.winner == 'home' %}
+                    W
+                {% else %}
+                    L
+                {% endif %}</td>
+            <td>{{ rating.mu | floatformat:0 }}</td>
+            <td>{{ rating.sigma | floatformat:0 }}</td>
+            <td><a href="{% url 'score_sheet' rating.game.scoresheet_set.all.0.id %}">{{ rating.game.scoresheet_set.all.0.match.week.date | date:'Y-m-d' }}</a></td>
+        </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<script>
+$(document).ready(function () {
+    filterer('#filter', '.searchable');
+});
+</script>
+{% endblock %}

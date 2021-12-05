@@ -4,6 +4,7 @@ from django.db import models
 from .game import Game
 from .lineup import GameOrder
 from .player import Player
+from .player_rating import PlayerRating
 from .season import Season
 from .scoresheet import ScoreSheet
 from .team import Team
@@ -20,7 +21,6 @@ class PlayerSeasonSummary(models.Model):
     table_runs = models.IntegerField(verbose_name='Table Runs', default=0)
     win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0, null=True)
     ranking = models.IntegerField(null=True)
-    elo = models.FloatField(null=True)
     last_rated_game = models.IntegerField(null=True)
 
     def __str__(self):
@@ -118,6 +118,18 @@ class PlayerSeasonSummary(models.Model):
         self.update_sweeps()
 
         self.save()
+
+    @property
+    def rating(self):
+
+        rating = PlayerRating.objects.filter(
+            game__forfeit=False,
+            player_id=self.player_id
+        ).order_by('game__scoresheet__match__season_id', 'game_id').last()
+        if rating is not None:
+            return rating
+        else:
+            return None
 
     @classmethod
     def update_all(cls, season_id, minimum_games=None):

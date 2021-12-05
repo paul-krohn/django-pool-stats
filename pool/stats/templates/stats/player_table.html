@@ -1,4 +1,4 @@
-<table class="table" data-sort-name={% if elo %}"ELO" {% else %}"Rank" {% endif %} data-toggle="table" data-sort-order="asc" id="player_rankings_table">
+<table class="table" data-sort-name="rating" data-toggle="table" data-sort-order="desc" id="player_rankings_table">
   <thead>
     <tr>
       <th data-field="Rank" data-sortable="true">Rank</th>
@@ -7,7 +7,9 @@
       <th data-field="W" data-sortable="true">W</th>
       <th data-field="L" data-sortable="true">L</th>
       <th data-field="Pct" data-sortable="true">Pct</th>
-      {% if elo %}<th data-field="elo" data-sortable="true">ELO</th>{% endif %}
+      {% if rating %}
+      <th data-field="rating" data-sortable="true" data-sortable-type="numeric">Rating</th>
+      {% endif %}
       <th data-field="4-0"  data-sortable="true">4-0</th>
       <th data-field="TR" data-sortable="true">TR</th>
     </tr>
@@ -28,7 +30,12 @@
     <td>{{ player_summary.wins }}</td>
     <td>{{ player_summary.losses }}</td>
     <td>{{ player_summary.win_percentage|floatformat:3 }}</td>
-        {% if elo %}<td><!-- {{ player_summary.elo }}--><a href="{% url 'player_elo' player_summary.player_id  %}">{{ player_summary.elo|floatformat:0 }}</a></td>{% endif %}
+    {% if rating %}
+    <td data-value="{{ player_summary.rating.mu }}">
+        <span style="display: none;">{{ player_summary.rating.mu | stringformat:"04d" }}</span>
+        <a href="{% url 'rating' player_summary.player.id %}">{{ player_summary.rating.mu|floatformat:0 }}</a>
+    </td>
+    {% endif %}
     <td>{{ player_summary.four_ohs }}</td>
     <td>{{ player_summary.table_runs }}</td>
     </tr>

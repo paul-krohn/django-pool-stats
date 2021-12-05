@@ -5,6 +5,8 @@ from django.core.cache import caches
 from django.utils.cache import get_cache_key
 
 from .models import Season, PlayerSeasonSummary, Team
+from .models.player_rating import rate_games
+
 
 page_cache = caches['page']
 
@@ -43,6 +45,7 @@ def expire_page(request, path=None, query_string=None, method='GET'):
 def update_season_stats(season_id):
     for team in Season.objects.get(id=season_id).team_set.all():
         team.count_games()
+    rate_games()
     PlayerSeasonSummary.update_all(season_id=season_id)
     Team.update_rankings(season_id=season_id)
 
