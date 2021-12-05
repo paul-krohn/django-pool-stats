@@ -70,6 +70,10 @@ def get_unrated_games():
         away_player__isnull=False
     ).filter(
         home_player__isnull=False
+    ).exclude(
+        winner=None,
+    ).exclude(
+        winner='',
     ).order_by('id')
 
     return games
