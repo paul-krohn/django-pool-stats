@@ -70,6 +70,10 @@ def get_unrated_games():
         away_player__isnull=False
     ).filter(
         home_player__isnull=False
+    ).exclude(
+        winner=None,
+    ).exclude(
+        winner='',
     ).order_by('id')
 
     return games
@@ -86,7 +90,7 @@ def rate_game(game):
 
         PlayerRating(game=game, player=game.away_player, mu=new_away_rating.mu, sigma=new_away_rating.sigma).save()
         PlayerRating(game=game, player=game.home_player, mu=new_home_rating.mu, sigma=new_home_rating.sigma).save()
-    except Exception as e:
+    except Exception:  # noqa
         print("failed rating game between {} and {}".format(game.away_player, game.home_player))
 
 

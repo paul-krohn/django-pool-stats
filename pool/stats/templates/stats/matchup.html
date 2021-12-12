@@ -80,7 +80,27 @@ $(document).ready(function () {
     {% endfor %}
   </tbody>
 </table>
-<p>expected wins for away team: {{ expected_wins|floatformat:3 }}</p>
-
-
+{% if match.scoresheets.all|length > 0 %}
+<table class="table table-condensed table-responsive">
+    <thead>
+        <tr>
+            <th></th>
+            <th>{{ match.away_team }}</th>
+            <th>{{ match.home_team }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th>Expected</th>
+            <td>{{ expected_away_wins|floatformat:1 }}</td>
+            <td>{{ expected_home_wins|floatformat:1 }}</td>
+        </tr>
+        <tr>
+            <th>Actual</th>
+            <td>{{ match.scoresheets.last.away_wins }}</td>
+            <td>{{ match.scoresheets.last.home_wins }}</td>
+        </tr>
+    </tbody>
+</table>
+{% endif %}
 {% endblock %}

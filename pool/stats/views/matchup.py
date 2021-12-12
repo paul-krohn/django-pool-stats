@@ -4,6 +4,7 @@ from ..models import Match, PlayerSeasonSummary, ScoreSheet, Week
 from ..models.player_rating import trueskill_env
 
 from ..forms import MatchupForm
+from ..views.season import CheckSeason
 
 from trueskill import Rating
 
@@ -68,16 +69,20 @@ def get_match(kind, thing):
     return match
 
 
+@CheckSeason(do_redirect=False)
 def matchup(request):
 
     kind = request.GET.get('kind', 'scoresheet')
     thing = request.GET.get('thing')
-    week_id =  request.GET.get('week')
+    week_id = request.GET.get('week')
     assert kind in ['scoresheet', 'match']
     form = MatchupForm(request.GET)
 
     match_ups = []
-    expected_wins = 0.0
+    expected_wins = {
+        'away': 0.0,
+        'home': 0.0,
+    }
 
     weeks = Week.objects.filter(season_id=request.session['season_id'])
     context = {
@@ -93,14 +98,16 @@ def matchup(request):
                 m['away'].rating,
                 m['home'].rating,
             )
-            expected_wins += away_pct
+            expected_wins['away'] += away_pct
+            expected_wins['home'] += 1 - away_pct
             match_ups.append({
                 'away': m['away'], 'home': m['home'], 'pct': away_pct * 100
             })
         context.update({
             'match': get_match(kind, thing),
             'match_ups': match_ups,
-            'expected_wins': 0 if not len(match_ups) else expected_wins / (len(match_ups) / 16.0)
+            'expected_away_wins': 0 if not len(match_ups) else expected_wins['away'] / (len(match_ups) / 16.0),
+            'expected_home_wins': 0 if not len(match_ups) else expected_wins['home'] / (len(match_ups) / 16.0),
         })
 
     if week_id:

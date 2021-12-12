@@ -9,7 +9,7 @@
 <table style="width: auto;" class="table table-condensed table-responsive">
   <thead>
     <tr>
-        <th>Opponent</th><th>Result</th><th>New rating</th><th>Variability</th><th>Date</th>
+      <th>Opponent (Current rating)</th><th>Result</th><th>Rating</th><th>Variability</th><th>Date</th>
     </tr>
   </thead>
   <tbody class="searchable">
@@ -17,8 +17,10 @@
         <tr>
             <td>{% if rating.game.away_player.id == player.id %}
                     <a href="{% url 'rating' rating.game.home_player.id %}">{{ rating.game.home_player }}</a>
+                ({{ rating.game.home_player.playerseasonsummary_set.last.rating.mu | floatformat:0 }})
                 {% else %}
                     <a href="{% url 'rating' rating.game.away_player.id %}">{{ rating.game.away_player }}</a>
+                ({{ rating.game.away_player.playerseasonsummary_set.last.rating.mu | floatformat:0 }})
                 {% endif %}
             </td>
             <td>
@@ -31,7 +33,7 @@
                 {% endif %}</td>
             <td>{{ rating.mu | floatformat:0 }}</td>
             <td>{{ rating.sigma | floatformat:0 }}</td>
-            <td><a href="{% url 'score_sheet' rating.game.scoresheet_set.all.0.id %}">{{ rating.game.scoresheet_set.all.0.match.week.date | date:'Y-m-d' }}</a></td>
+            <td><a href="{% url 'score_sheet' rating.game.scoresheet_set.all.0.id %}">{{ rating.game.scoresheet_set.all.0.match }}</a></td>
         </tr>
     {% endfor %}
   </tbody>
