@@ -53,13 +53,13 @@ def get_initial_game():
 
 
 def check_bookmark_initialized():
-    if not len(PlayerRatingBookmark.objects.all()):
+    if not PlayerRatingBookmark.load():
         PlayerRatingBookmark(game=get_initial_game()).save()
 
 
 def get_unrated_games():
 
-    last_rated_game = PlayerRatingBookmark.objects.all()[0].game
+    last_rated_game = PlayerRatingBookmark.load().game
     games = Game.objects.filter(
         models.Q(scoresheet__official=True)
     ).filter(
@@ -104,7 +104,7 @@ def rate_games():
 
 
 def update_bookmark(game):
-    bookmark = PlayerRatingBookmark.objects.get(id=1)
+    bookmark = PlayerRatingBookmark.load()
     bookmark.game = game
     bookmark.save()
 
