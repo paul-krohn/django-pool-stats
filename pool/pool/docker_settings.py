@@ -2,7 +2,7 @@ from .settings import *
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.101', 'carnegie.local']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '192.168.1.101', 'boxer.local']
 
 LEAGUE['name'] = "SFPA"
 LEAGUE['logo'] = '/static/stats/SFPAIncLongLogo4C.png'
