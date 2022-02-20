@@ -37,7 +37,7 @@ def team(request, team_id, after=None):
     _team = get_object_or_404(Team, id=team_id)
 
     rating = request.session.get('rating', False)
-    players_table_cache_key = '.'.join(['players_table', 'team', str(team_id)])
+    players_table_cache_key = '.'.join(['players_table', 'team', str(team_id), str(rating)])
     players_table = cache.get(players_table_cache_key)
 
     if not players_table:
