@@ -1,4 +1,4 @@
-Django==3.2.12
+Django==3.2.13
 django-redis==4.12.1
 
 # mysql client on OS X needs an install from source with:
