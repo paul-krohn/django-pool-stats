@@ -141,7 +141,7 @@ class ScoreSheetTests(BasePoolStatsTestCase):
         forfeit_game = random.randint(0, self.game_count)
         # same for a table run, not the same as the forfeit ...
         table_run_game = random.randint(0, self.game_count)
-        while table_run_game != forfeit_game:
+        while table_run_game == forfeit_game:
             table_run_game = random.randint(0, self.game_count)
 
         away_wins = 0
@@ -170,8 +170,8 @@ class ScoreSheetTests(BasePoolStatsTestCase):
         score_sheet.match.home_team.count_games()
 
         # forfeit wins count for teams, _count_games does not omit them.
-        self.assertEqual(score_sheet.match.away_team.wins(), away_wins)
-        self.assertEqual(score_sheet.match.home_team.wins(), home_wins)
+        self.assertEqual(score_sheet.match.away_team.wins, away_wins)
+        self.assertEqual(score_sheet.match.home_team.wins, home_wins)
 
         # there should be zero summaries now
         summaries = PlayerSeasonSummary.objects.all()
