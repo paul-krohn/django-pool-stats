@@ -12,6 +12,6 @@ from .scoresheet import ScoreSheet
 from .season import Season
 from .sponsor import Sponsor
 from .table import Table
-from .team import Team, AwayTeam, HomeTeam, Tie, TieBreakerResult
+from .team import Team, AwayTeam, HomeTeam, ScoreAdjustment, Tie, TieBreakerResult
 from .tournament import Bracket, Participant, Round, Tournament, TournamentMatchup
 from .week import Week

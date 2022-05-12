@@ -9,8 +9,8 @@ from django.shortcuts import redirect
 
 from .utils import update_season_stats, expire_caches
 from .models import Division, GameOrder, Match, Player, PlayPosition, WeekDivisionMatchup
-from .models import ScoreSheet, Season, Sponsor, Table, Team, Week
-from .forms import TeamForm, MatchForm
+from .models import ScoreAdjustment, ScoreSheet, Season, Sponsor, Table, Team, Week
+from .forms import MatchForm, TeamForm, ScoreAdjustmentAdminForm
 from .views.season import get_default_season
 
 admin.AdminSite.site_header = "{} stats admin".format(settings.LEAGUE['name'])
@@ -452,6 +452,15 @@ class TeamAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Team, TeamAdmin)
+
+
+class ScoreAdjustmentAdmin(admin.ModelAdmin):
+
+    fields = ['team', 'wins', 'losses', 'description']
+    form = ScoreAdjustmentAdminForm
+
+
+admin.site.register(ScoreAdjustment, ScoreAdjustmentAdmin)
 
 
 class PlayPositionAdmin(admin.ModelAdmin):

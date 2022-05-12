@@ -175,7 +175,6 @@ class TeamPlayerFormSet(django.forms.BaseModelFormSet):
             )))
 
 
-
 class SubstitutionFormSet(django.forms.BaseModelFormSet):
     def clean(self):
         super(SubstitutionFormSet, self).clean()
@@ -194,6 +193,7 @@ class SubstitutionFormSet(django.forms.BaseModelFormSet):
         if len(player_values) > len(set(player_values)):
             raise ValidationError('You may not substitute in the same player twice',
                                   code='lineup_duplicate_player')
+
 
 class AwaySubstitutionFormSet(SubstitutionFormSet):
     def __init__(self, *args, **kwargs):
@@ -246,6 +246,12 @@ class MatchupForm(django.forms.Form):
 
 def get_dupes_from_dict(dictionary):
     return ['{}'.format(p) for p in {k: v for k, v in dictionary.items() if v > 1}]
+
+
+class ScoreAdjustmentAdminForm(django.forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['team'].queryset = Team.objects.filter(season__is_default=True)
 
 
 class TournamentParticipantFormSet(django.forms.BaseModelFormSet):

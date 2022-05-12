@@ -25,10 +25,8 @@ class Team(models.Model):
         Player, null=True, blank=True, on_delete=models.CASCADE,
         related_name='captain',
     )
-    away_wins = models.IntegerField(verbose_name='Away Wins', default=0)
-    away_losses = models.IntegerField(verbose_name='Away Losses', default=0)
-    home_wins = models.IntegerField(verbose_name='Home Wins', default=0)
-    home_losses = models.IntegerField(verbose_name='Home Losses', default=0)
+    wins = models.IntegerField(verbose_name='Wins', default=0)
+    losses = models.IntegerField(verbose_name='Losses', default=0)
     win_percentage = models.FloatField(verbose_name='Win Percentage', default=0.0)
     ranking = models.IntegerField(null=True, blank=True)
     division_ranking = models.IntegerField(null=True, blank=True)
@@ -51,21 +49,23 @@ class Team(models.Model):
     def sponsor(self):
         return self.table.venue
 
-    def wins(self):
-        return self.away_wins + self.home_wins
-
-    def losses(self):
-        return self.away_losses + self.home_losses
+    def adjustments(self):
+        a = {
+            'wins': 0,
+            'losses': 0,
+        }
+        for adjustment in self.scoreadjustment_set.all():
+            a['wins'] += adjustment.wins
+            a['losses'] += adjustment.losses
+        return a
 
     def count_games(self):
         """
         Count the summary stats for a team
         :return:
         """
-        self.away_wins = 0
-        self.away_losses = 0
-        self.home_wins = 0
-        self.home_losses = 0
+        self.wins = 0
+        self.losses = 0
         self.win_percentage = 0.0
 
         # first, matches involving the team as away team
@@ -73,18 +73,19 @@ class Team(models.Model):
             match__away_team__exact=self, official__exact=True, match__playoff=False
         )
         for away_score_sheet in away_score_sheets:
-            self.away_wins += len(away_score_sheet.games.filter(winner='away'))
-            self.away_losses += len(away_score_sheet.games.filter(winner='home'))
+            self.wins += len(away_score_sheet.games.filter(winner='away'))
+            self.losses += len(away_score_sheet.games.filter(winner='home'))
         home_score_sheets = ScoreSheet.objects.filter(
             match__home_team__exact=self, official__exact=True, match__playoff=False
         )
         for home_score_sheet in home_score_sheets:
-            self.home_wins += len(home_score_sheet.games.filter(winner='home'))
-            self.home_losses += len(home_score_sheet.games.filter(winner='away'))
-        denominator = self.home_losses + self.home_wins + self.away_losses + self.away_wins
-        if denominator > 0:
-            self.win_percentage = (self.home_wins + self.away_wins) / denominator
-
+            self.wins += len(home_score_sheet.games.filter(winner='home'))
+            self.losses += len(home_score_sheet.games.filter(winner='away'))
+        if self.losses + self.wins > 0:
+            self.win_percentage = self.wins / (self.losses + self.wins)
+        adjustments = self.adjustments()
+        self.wins += adjustments['wins']
+        self.losses += adjustments['losses']
         self.save()
 
     def forfeit_wins(self):
@@ -210,6 +211,16 @@ class Team(models.Model):
         for a_tie in the_ties:
             a_tie.break_it('rank_tie_breaker', divisional)
 
+    @property
+    def score_adjustment(self):
+
+        adjustments = {'wins': 0, 'losses': 0}
+
+        for adjustment in self.scoreadjustment_set.all():
+            adjustments['wins'] += adjustment.wins
+            adjustments['losses'] += adjustment.losses
+        return adjustments
+
     @classmethod
     def update_teams_stats(cls, season_id):
         teams = cls.objects.filter(season=season_id)
@@ -297,3 +308,18 @@ class TieBreakerResult(models.Model):
     rank_change = models.IntegerField()
     attribute = models.CharField(max_length=64)
     summary = models.TextField(max_length=1024, default=None)
+
+
+class ScoreAdjustment(models.Model):
+
+    # there is an SPFA rule saying that when a team forfeits the whole match, the other
+    # team gets 16 wins, and the forfeiting team gets 12 (forfeit) losses; this class
+    # exists to implement that.
+
+    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    wins = models.IntegerField(default=0)
+    losses = models.IntegerField(default=0)
+    description = models.TextField(max_length=1024, default=None, null=True)
+
+    def __str__(self):
+        return "{}/{}/w/{}/l".format(self.team.season, self.team, self.wins, self.losses)

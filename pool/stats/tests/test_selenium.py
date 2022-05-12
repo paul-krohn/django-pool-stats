@@ -126,7 +126,7 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         self.set_substitution('away', game_index=12, substitution_index=1)  # this creates a duplicate substitution
         self.assertEqual(self.selenium.current_url, '{}score_sheet_substitutions/{}/away'.format(
             self.base_url, score_sheet_id, )
-        )
+                         )
 
     def test_match_scoresheet_mark_winners(self):
         score_sheet_id = self.score_sheet_create(match_id=self.PLAYOFF_TEST_MATCH_ID, week_id=self.PLAYOFF_TEST_WEEK_ID)
@@ -174,7 +174,6 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
             # check there are 5 players listed
             self.assertEqual(len(score_sheet_summary['teams'][location_name]['players']), 4)
 
-
     def test_team_win_totals(self):
         score_sheet_id = self.score_sheet_create()
         self.populate_lineup()
@@ -190,6 +189,6 @@ class ScoreSheetTestCase(BaseSeleniumPoolStatsTestCase):
         teams = Team.objects.filter(season_id=self.default_season)
         list_of_outcomes = []
         for team in teams:
-            list_of_outcomes.append([team.wins(), team.losses()])
+            list_of_outcomes.append([team.wins, team.losses])
 
         self.assertTrue(list(win_counts.values()) in list_of_outcomes)
