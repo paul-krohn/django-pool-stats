@@ -55,5 +55,5 @@ class PlayerViewTests(BasePoolStatsTestCase):
             })
         )
         self.assertQuerysetEqual(
-            response.context['summaries'], ['<PlayerSeasonSummary: George Smith Fall 2010>']
+            response.context['summaries'], [summary]
         )

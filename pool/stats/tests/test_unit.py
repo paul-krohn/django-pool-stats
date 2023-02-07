@@ -39,7 +39,7 @@ def populate_lineup_entries(score_sheet, count=None):
 
 def add_session_to_request(request):
     """Annotate a request object with a session"""
-    middleware = SessionMiddleware()
+    middleware = SessionMiddleware(request)
     middleware.process_request(request)
     request.session.save()
 

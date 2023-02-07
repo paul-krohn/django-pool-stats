@@ -1,38 +1,39 @@
-Django==3.2.14
+Django==4.1.6
 django-redis==4.12.1
 
 # mysql client on OS X needs an install from source with:
 # CFLAGS = -isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform
-mysqlclient==2.0.3
-redis==3.5.3
+mysqlclient==2.1.1
+redis==4.4.2
 trueskill==0.4.5
-uWSGI==2.0.19.1
+uWSGI==2.0.21
 
 # indirect dependencies
-asgiref==3.3.4
-asn1crypto==1.4.0
-cryptography==3.4.7
+asgiref==3.6.0
+asn1crypto==1.5.1
+cryptography==39.0.0
 docopt==0.6.2
-flake8==3.9.2
-idna==3.1
-importlib-metadata==4.3.1
-keyring==23.0.1
-keyrings.alt==4.0.2
-mccabe==0.6.1
-mock==4.0.3
-pbr==5.6.0
-pycodestyle==2.7.0
+flake8==6.0.0
+idna==3.4
+importlib-metadata==6.0.0
+keyring==23.13.1
+keyrings.alt==4.2.0
+mccabe==0.7.0
+mock==5.0.1
+pbr==5.11.1
+fw
+pycodestyle==2.10.0
 pycrypto==2.6.1
-pyxdg==0.27 # for some reason, needs to match what is in ubuntu:bionic
-pyflakes==2.3.1
+pyxdg==0.28 # for some reason, needs to match what is in ubuntu:bionic
+pyflakes==3.0.1
 # pygobject==3.26.1 # this is what we get from ubunt:bionic
-pytz==2021.1
-SecretStorage==3.3.1
-setuptools-rust==0.12.1
+pytz==2022.7.1
+SecretStorage==3.3.3
+setuptools-rust==1.5.2
 six==1.16.0
 str2bool==1.1
-sqlparse==0.4.2
-typing-extensions==3.10.0.0
-urllib3==1.26.5
+sqlparse==0.4.3
+typing-extensions==4.4.0
+urllib3==1.26.14
 xvfbwrapper==0.2.9
-zipp==3.4.1
+zipp==3.12.1
