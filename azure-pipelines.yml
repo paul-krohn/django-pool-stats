@@ -9,7 +9,7 @@ trigger:
 pool:
   vmImage: ubuntu-latest
 strategy:
-  matrix:
+  parallel:
     Python38:
       PYTHON_VERSION: '3.8'
   maxParallel: 1
