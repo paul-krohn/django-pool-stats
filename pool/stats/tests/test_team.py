@@ -11,10 +11,15 @@ class TeamTests(BasePoolStatsTestCase):
         t.save()
         sa = ScoreAdjustment(team=t)
         sa.wins = 4
+        sa.losses = 6
         sa.save()
         self.assertEqual(
             t.score_adjustment['wins'], 4
         )
         self.assertEqual(
-            t.score_adjustment['losses'], 0
+            t.score_adjustment['losses'], 6
         )
+        t.count_games()
+        self.assertEqual(t.wins, 4)
+        self.assertEqual(t.losses, 6)
+        self.assertEqual(t.win_percentage, 0.4)

@@ -81,11 +81,11 @@ class Team(models.Model):
         for home_score_sheet in home_score_sheets:
             self.wins += len(home_score_sheet.games.filter(winner='home'))
             self.losses += len(home_score_sheet.games.filter(winner='away'))
-        if self.losses + self.wins > 0:
-            self.win_percentage = self.wins / (self.losses + self.wins)
         adjustments = self.adjustments()
         self.wins += adjustments['wins']
         self.losses += adjustments['losses']
+        if self.losses + self.wins > 0:
+            self.win_percentage = self.wins / (self.losses + self.wins)
         self.save()
 
     def forfeit_wins(self):
